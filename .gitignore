@@ -27,3 +27,4 @@ build/
 # Sensitive files
 *.pem
 *.key
+.vercel
