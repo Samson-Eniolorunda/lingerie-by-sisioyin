@@ -1,0 +1,918 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Wishlist | Lingerie by Sisioyin</title>
+    <meta
+      name="description"
+      content="View your saved items and wishlist. Lingerie by Sisioyin - Premium lingerie."
+    />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#be185d" />
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body class="lbs-page wishlist-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- Header -->
+    <header class="lbs-header" id="siteHeader">
+      <div class="header-container">
+        <a href="index.html" class="header-brand">
+          <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
+          <span class="brand-name">Lingerie by Sisioyin</span>
+        </a>
+
+        <nav class="header-nav" id="headerNav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="shop.html" class="nav-link">Shop</a>
+          <a href="shop.html?category=Lingerie" class="nav-link">Lingerie</a>
+          <a href="shop.html?category=Loungewear" class="nav-link"
+            >Loungewear</a
+          >
+        </nav>
+
+        <div class="header-actions">
+          <button
+            type="button"
+            class="header-btn"
+            id="searchToggle"
+            aria-label="Search"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="loginBtn"
+            aria-label="Sign in"
+            title="Sign In"
+          >
+            <i class="fa-solid fa-user"></i>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="userMenuBtn"
+            aria-label="Account"
+            title="My Account"
+            hidden
+          >
+            <span class="user-avatar">U</span>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="logoutBtn"
+            aria-label="Sign out"
+            title="Sign Out"
+            hidden
+          >
+            <i class="fa-solid fa-sign-out-alt"></i>
+          </button>
+          <a
+            href="wishlist.html"
+            class="header-btn active"
+            aria-label="Wishlist"
+          >
+            <i class="fa-solid fa-heart"></i>
+          </a>
+          <a
+            href="cart.html"
+            class="header-btn cart-btn"
+            aria-label="Shopping cart"
+          >
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="cart-count" data-cart-count>0</span>
+          </a>
+          <button
+            type="button"
+            class="header-btn mobile-toggle"
+            id="mobileToggle"
+            aria-label="Menu"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <nav class="mobile-nav" id="mobileNav">
+        <a href="index.html" class="mobile-nav-link">Home</a>
+        <a href="shop.html" class="mobile-nav-link">Shop All</a>
+        <a href="shop.html?category=Lingerie" class="mobile-nav-link"
+          >Lingerie</a
+        >
+        <a href="shop.html?category=Loungewear" class="mobile-nav-link"
+          >Loungewear</a
+        >
+        <a href="wishlist.html" class="mobile-nav-link active">Wishlist</a>
+        <a href="cart.html" class="mobile-nav-link">Cart</a>
+      </nav>
+    </header>
+
+    <!-- Wishlist Hero -->
+    <section class="cart-hero">
+      <div class="section-container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html">Home</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span>Wishlist</span>
+        </nav>
+        <h1 class="cart-hero-title">
+          <i class="fa-solid fa-heart"></i> My Wishlist
+        </h1>
+      </div>
+    </section>
+
+    <!-- Main Wishlist Content -->
+    <main class="wishlist-main" id="main">
+      <div class="section-container">
+        <!-- Empty State -->
+        <div class="wishlist-empty" id="wishlistEmpty">
+          <div class="empty-icon">
+            <i class="fa-regular fa-heart"></i>
+          </div>
+          <h3 class="empty-title">Your wishlist is empty</h3>
+          <p class="empty-text">
+            Save items you love by clicking the heart icon on any product.
+          </p>
+          <a href="shop.html" class="btn btn-primary">
+            <i class="fa-solid fa-arrow-left"></i>
+            Browse Products
+          </a>
+        </div>
+
+        <!-- Wishlist Items Grid -->
+        <div class="wishlist-grid" id="wishlistGrid" hidden></div>
+      </div>
+    </main>
+
+    <!-- Quick View Modal -->
+    <div class="modal-overlay" id="variantModal" aria-hidden="true">
+      <div class="modal-container">
+        <button
+          type="button"
+          class="modal-close"
+          id="modalCloseBtn"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="modal-body">
+          <div class="modal-gallery">
+            <div class="modal-gallery-main">
+              <img id="modalImg" src="" alt="Product" />
+              <span class="modal-badge" id="modalBadge" hidden>New</span>
+              <button
+                type="button"
+                class="gallery-nav prev"
+                id="galleryPrev"
+                aria-label="Previous image"
+              >
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <button
+                type="button"
+                class="gallery-nav next"
+                id="galleryNext"
+                aria-label="Next image"
+              >
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+            <div class="modal-gallery-thumbs" id="modalThumbs"></div>
+          </div>
+          <div class="modal-details">
+            <h2 class="modal-title" id="modalTitle">Product Name</h2>
+            <p class="modal-price" id="modalPrice">₦0</p>
+            <p class="modal-desc" id="modalDesc">Product description</p>
+
+            <div class="modal-field">
+              <label class="modal-label">Select Size</label>
+              <div class="size-options" id="modalSizes"></div>
+            </div>
+
+            <div class="modal-field" id="quantityField">
+              <label class="modal-label">Quantity</label>
+              <div class="quantity-controls">
+                <button type="button" class="quantity-btn" id="qtyDecrease">
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <span class="quantity-value" id="qtyValue">1</span>
+                <button type="button" class="quantity-btn" id="qtyIncrease">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary btn-lg full-width modal-add-btn"
+              id="modalAddToCart"
+            >
+              <i class="fa-solid fa-bag-shopping"></i>
+              <span>Add to Cart</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" data-toast hidden></div>
+
+    <!-- Overlay -->
+    <div class="page-overlay" id="pageOverlay"></div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-main">
+          <div class="footer-brand">
+            <a href="index.html" class="footer-logo">
+              <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
+              <span class="brand-name">Lingerie by Sisioyin</span>
+            </a>
+            <p class="footer-tagline">
+              Luxe essentials defined by comfort and confidence.
+            </p>
+            <div class="footer-social">
+              <a href="#" class="social-link" aria-label="Instagram"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a href="#" class="social-link" aria-label="TikTok"
+                ><i class="fa-brands fa-tiktok"></i
+              ></a>
+              <a href="#" class="social-link" aria-label="WhatsApp"
+                ><i class="fa-brands fa-whatsapp"></i
+              ></a>
+            </div>
+          </div>
+
+          <div class="footer-links-group">
+            <h4 class="footer-heading">Shop</h4>
+            <nav class="footer-links">
+              <a href="shop.html">All Products</a>
+              <a href="shop.html?category=Lingerie">Lingerie</a>
+              <a href="shop.html?category=Loungewear">Loungewear</a>
+              <a href="shop.html?category=Underwear">Underwear</a>
+              <a href="shop.html?is_new=true">New Arrivals</a>
+            </nav>
+          </div>
+
+          <div class="footer-links-group">
+            <h4 class="footer-heading">Help</h4>
+            <nav class="footer-links">
+              <a href="dashboard.html">My Account</a>
+              <a href="faq.html">FAQs</a>
+              <a href="#" id="openSizeGuide" data-open-size-guide>Size Guide</a>
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+              <a href="https://wa.me/2349033344860" target="_blank"
+                >Contact Us</a
+              >
+            </nav>
+          </div>
+
+          <div class="footer-links-group">
+            <h4 class="footer-heading">Newsletter</h4>
+            <p class="footer-newsletter-text">
+              Subscribe for exclusive offers and updates.
+            </p>
+            <form class="newsletter-form" id="newsletterForm">
+              <input type="email" placeholder="Enter your email" required />
+              <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <div class="footer-bottom-left">
+            <p>
+              &copy; <span id="currentYear"></span> Lingerie by Sisioyin. All
+              rights reserved.
+            </p>
+          </div>
+          <div class="theme-toggle" id="themeToggle">
+            <button
+              type="button"
+              class="theme-btn"
+              data-theme="light"
+              aria-label="Light mode"
+              title="Light Mode"
+            >
+              <i class="fa-solid fa-sun"></i>
+            </button>
+            <button
+              type="button"
+              class="theme-btn"
+              data-theme="dark"
+              aria-label="Dark mode"
+              title="Dark Mode"
+            >
+              <i class="fa-solid fa-moon"></i>
+            </button>
+            <button
+              type="button"
+              class="theme-btn"
+              data-theme="system"
+              aria-label="System theme"
+              title="System Default"
+            >
+              <i class="fa-solid fa-desktop"></i>
+            </button>
+          </div>
+          <div class="footer-bottom-right">
+            <a href="terms.html">Terms</a>
+            <a href="privacy.html">Privacy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- WhatsApp Live Chat Widget -->
+    <div class="whatsapp-widget" id="whatsappWidget">
+      <div class="whatsapp-popup">
+        <button
+          type="button"
+          class="whatsapp-popup-close"
+          id="whatsappClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="whatsapp-popup-header">
+          <div class="whatsapp-popup-avatar">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div class="whatsapp-popup-info">
+            <h4>Lingerie by Sisioyin</h4>
+            <p>Typically replies within minutes</p>
+          </div>
+        </div>
+        <div class="whatsapp-popup-body">
+          <p>
+            👋 Hi there! Need help finding the perfect lingerie? Chat with us on
+            WhatsApp!
+          </p>
+        </div>
+        <a
+          href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
+          target="_blank"
+          class="whatsapp-popup-btn"
+        >
+          <i class="fa-brands fa-whatsapp"></i>
+          Start Chat
+        </a>
+      </div>
+      <button
+        type="button"
+        class="whatsapp-fab"
+        id="whatsappFab"
+        aria-label="Chat on WhatsApp"
+      >
+        <i class="fa-brands fa-whatsapp"></i>
+      </button>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="auth-modal" id="authModal">
+      <div class="auth-modal-content">
+        <button type="button" class="auth-close" id="authClose">
+          <i class="fa-solid fa-times"></i>
+        </button>
+
+        <div class="auth-header">
+          <div class="auth-logo">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <h2 class="auth-title">Welcome Back</h2>
+          <p class="auth-subtitle">
+            Sign in to your account or create a new one
+          </p>
+        </div>
+
+        <div class="auth-body">
+          <div class="auth-tabs">
+            <button type="button" class="auth-tab active" data-tab="login">
+              Sign In
+            </button>
+            <button type="button" class="auth-tab" data-tab="signup">
+              Create Account
+            </button>
+          </div>
+
+          <form class="auth-form active" id="loginForm">
+            <div class="auth-field">
+              <label for="loginEmail">Email</label>
+              <input
+                type="email"
+                id="loginEmail"
+                name="email"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <div class="auth-field">
+              <label for="loginPassword">Password</label>
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            <div class="auth-field recaptcha-field">
+              <div
+                class="g-recaptcha"
+                id="loginRecaptcha"
+                data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              ></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              Sign In
+            </button>
+            <div class="auth-divider"><span>or continue with</span></div>
+            <button
+              type="button"
+              class="btn btn-outline btn-block google-login-btn"
+            >
+              <i class="fa-brands fa-google"></i> <span>Google</span>
+            </button>
+          </form>
+
+          <form class="auth-form" id="signupForm">
+            <div class="auth-field">
+              <label for="signupName">Full Name</label>
+              <input
+                type="text"
+                id="signupName"
+                name="fullName"
+                placeholder="Jane Doe"
+                required
+              />
+            </div>
+            <div class="auth-field">
+              <label for="signupEmail">Email</label>
+              <input
+                type="email"
+                id="signupEmail"
+                name="email"
+                placeholder="your@email.com"
+                required
+              />
+            </div>
+            <div class="auth-field">
+              <label for="signupPassword">Password</label>
+              <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                placeholder="••••••••"
+                required
+                minlength="6"
+              />
+            </div>
+            <div class="auth-field">
+              <label for="signupConfirm">Confirm Password</label>
+              <input
+                type="password"
+                id="signupConfirm"
+                name="confirmPassword"
+                placeholder="••••••••"
+                required
+                minlength="6"
+              />
+            </div>
+            <div class="auth-field recaptcha-field">
+              <div
+                class="g-recaptcha"
+                id="signupRecaptcha"
+                data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              ></div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">
+              Create Account
+            </button>
+            <div class="auth-divider"><span>or continue with</span></div>
+            <button
+              type="button"
+              class="btn btn-outline btn-block google-login-btn"
+            >
+              <i class="fa-brands fa-google"></i> <span>Google</span>
+            </button>
+          </form>
+        </div>
+
+        <p class="auth-footer-text">
+          By continuing, you agree to our <a href="terms.html">Terms</a> and
+          <a href="privacy.html">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Search Overlay -->
+    <div class="search-overlay" id="searchOverlay">
+      <div class="search-container">
+        <div class="search-header">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search for lingerie..."
+              autocomplete="off"
+            />
+            <span class="search-shortcut">Esc</span>
+          </div>
+          <button
+            type="button"
+            class="search-close"
+            id="searchClose"
+            aria-label="Close search"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="search-results" id="searchResults">
+          <div class="search-empty">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <p>Start typing to search products...</p>
+            <span class="search-tip">Try "bra", "panty", or "bodysuit"</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Size Guide Modal -->
+    <div class="modal-overlay" id="sizeGuideModal" style="display: none">
+      <div class="modal-content size-guide-modal">
+        <button type="button" class="modal-close" id="closeSizeGuide">
+          <i class="fa-solid fa-times"></i>
+        </button>
+
+        <div class="modal-header">
+          <h2 class="modal-title">Size Guide</h2>
+          <p class="modal-subtitle">Find your perfect fit</p>
+        </div>
+
+        <div class="size-guide-content">
+          <!-- Size Guide Tabs -->
+          <div class="size-guide-tabs">
+            <button
+              type="button"
+              class="size-guide-tab active"
+              data-tab="women"
+            >
+              <i class="fa-solid fa-venus"></i> Women
+            </button>
+            <button type="button" class="size-guide-tab" data-tab="men">
+              <i class="fa-solid fa-mars"></i> Men
+            </button>
+            <button type="button" class="size-guide-tab" data-tab="kids">
+              <i class="fa-solid fa-child"></i> Kids
+            </button>
+          </div>
+
+          <!-- Women's Sizing -->
+          <div class="size-guide-panel active" data-panel="women">
+            <h3 class="size-section-title">Women's Lingerie & Underwear</h3>
+            <table class="size-chart">
+              <thead>
+                <tr>
+                  <th>Size</th>
+                  <th>UK</th>
+                  <th>US</th>
+                  <th>Bust (cm)</th>
+                  <th>Waist (cm)</th>
+                  <th>Hips (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XS</td>
+                  <td>6</td>
+                  <td>2</td>
+                  <td>78-82</td>
+                  <td>60-64</td>
+                  <td>84-88</td>
+                </tr>
+                <tr>
+                  <td>S</td>
+                  <td>8</td>
+                  <td>4</td>
+                  <td>82-86</td>
+                  <td>64-68</td>
+                  <td>88-92</td>
+                </tr>
+                <tr>
+                  <td>M</td>
+                  <td>10</td>
+                  <td>6</td>
+                  <td>86-90</td>
+                  <td>68-72</td>
+                  <td>92-96</td>
+                </tr>
+                <tr>
+                  <td>L</td>
+                  <td>12</td>
+                  <td>8</td>
+                  <td>90-94</td>
+                  <td>72-76</td>
+                  <td>96-100</td>
+                </tr>
+                <tr>
+                  <td>XL</td>
+                  <td>14</td>
+                  <td>10</td>
+                  <td>94-98</td>
+                  <td>76-80</td>
+                  <td>100-104</td>
+                </tr>
+                <tr>
+                  <td>XXL</td>
+                  <td>16</td>
+                  <td>12</td>
+                  <td>98-102</td>
+                  <td>80-84</td>
+                  <td>104-108</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <h4 class="size-subsection">Bra Sizing</h4>
+            <table class="size-chart">
+              <thead>
+                <tr>
+                  <th>Band Size</th>
+                  <th>Underbust (cm)</th>
+                  <th>Cup A</th>
+                  <th>Cup B</th>
+                  <th>Cup C</th>
+                  <th>Cup D</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>32</td>
+                  <td>68-72</td>
+                  <td>78-80</td>
+                  <td>80-82</td>
+                  <td>82-84</td>
+                  <td>84-86</td>
+                </tr>
+                <tr>
+                  <td>34</td>
+                  <td>73-77</td>
+                  <td>83-85</td>
+                  <td>85-87</td>
+                  <td>87-89</td>
+                  <td>89-91</td>
+                </tr>
+                <tr>
+                  <td>36</td>
+                  <td>78-82</td>
+                  <td>88-90</td>
+                  <td>90-92</td>
+                  <td>92-94</td>
+                  <td>94-96</td>
+                </tr>
+                <tr>
+                  <td>38</td>
+                  <td>83-87</td>
+                  <td>93-95</td>
+                  <td>95-97</td>
+                  <td>97-99</td>
+                  <td>99-101</td>
+                </tr>
+                <tr>
+                  <td>40</td>
+                  <td>88-92</td>
+                  <td>98-100</td>
+                  <td>100-102</td>
+                  <td>102-104</td>
+                  <td>104-106</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Men's Sizing -->
+          <div class="size-guide-panel" data-panel="men">
+            <h3 class="size-section-title">Men's Underwear & Loungewear</h3>
+            <table class="size-chart">
+              <thead>
+                <tr>
+                  <th>Size</th>
+                  <th>UK/US</th>
+                  <th>EU</th>
+                  <th>Chest (cm)</th>
+                  <th>Waist (cm)</th>
+                  <th>Hips (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>S</td>
+                  <td>34-36</td>
+                  <td>44-46</td>
+                  <td>86-91</td>
+                  <td>71-76</td>
+                  <td>86-91</td>
+                </tr>
+                <tr>
+                  <td>M</td>
+                  <td>38-40</td>
+                  <td>48-50</td>
+                  <td>96-101</td>
+                  <td>81-86</td>
+                  <td>96-101</td>
+                </tr>
+                <tr>
+                  <td>L</td>
+                  <td>42-44</td>
+                  <td>52-54</td>
+                  <td>106-111</td>
+                  <td>91-96</td>
+                  <td>106-111</td>
+                </tr>
+                <tr>
+                  <td>XL</td>
+                  <td>46-48</td>
+                  <td>56-58</td>
+                  <td>116-121</td>
+                  <td>101-106</td>
+                  <td>116-121</td>
+                </tr>
+                <tr>
+                  <td>XXL</td>
+                  <td>50-52</td>
+                  <td>60-62</td>
+                  <td>126-131</td>
+                  <td>111-116</td>
+                  <td>126-131</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Kids' Sizing -->
+          <div class="size-guide-panel" data-panel="kids">
+            <h3 class="size-section-title">Kids' Underwear</h3>
+            <table class="size-chart">
+              <thead>
+                <tr>
+                  <th>Age</th>
+                  <th>Size</th>
+                  <th>Height (cm)</th>
+                  <th>Chest (cm)</th>
+                  <th>Waist (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2-3 yrs</td>
+                  <td>2-3</td>
+                  <td>92-98</td>
+                  <td>52-54</td>
+                  <td>50-51</td>
+                </tr>
+                <tr>
+                  <td>3-4 yrs</td>
+                  <td>3-4</td>
+                  <td>98-104</td>
+                  <td>54-56</td>
+                  <td>51-52</td>
+                </tr>
+                <tr>
+                  <td>4-5 yrs</td>
+                  <td>4-5</td>
+                  <td>104-110</td>
+                  <td>56-58</td>
+                  <td>52-53</td>
+                </tr>
+                <tr>
+                  <td>5-6 yrs</td>
+                  <td>5-6</td>
+                  <td>110-116</td>
+                  <td>58-60</td>
+                  <td>53-54</td>
+                </tr>
+                <tr>
+                  <td>6-7 yrs</td>
+                  <td>6-7</td>
+                  <td>116-122</td>
+                  <td>60-62</td>
+                  <td>54-55</td>
+                </tr>
+                <tr>
+                  <td>7-8 yrs</td>
+                  <td>7-8</td>
+                  <td>122-128</td>
+                  <td>62-65</td>
+                  <td>55-57</td>
+                </tr>
+                <tr>
+                  <td>8-9 yrs</td>
+                  <td>8-9</td>
+                  <td>128-134</td>
+                  <td>65-68</td>
+                  <td>57-59</td>
+                </tr>
+                <tr>
+                  <td>9-10 yrs</td>
+                  <td>9-10</td>
+                  <td>134-140</td>
+                  <td>68-71</td>
+                  <td>59-61</td>
+                </tr>
+                <tr>
+                  <td>10-11 yrs</td>
+                  <td>10-11</td>
+                  <td>140-146</td>
+                  <td>71-74</td>
+                  <td>61-63</td>
+                </tr>
+                <tr>
+                  <td>11-12 yrs</td>
+                  <td>11-12</td>
+                  <td>146-152</td>
+                  <td>74-78</td>
+                  <td>63-65</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="size-guide-tips">
+            <h4><i class="fa-solid fa-lightbulb"></i> Measuring Tips</h4>
+            <ul>
+              <li>Measure over your undergarments for accuracy</li>
+              <li>Keep the tape measure snug but not tight</li>
+              <li>For bust/chest, measure at the fullest part</li>
+              <li>For waist, measure at the narrowest point</li>
+              <li>For hips, measure at the widest point</li>
+              <li>If between sizes, we recommend sizing up</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script
+      src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
+      async
+      defer
+    ></script>
+    <script>
+      // reCAPTCHA initialization callback
+      function onRecaptchaLoad() {
+        const loginRecaptcha = document.getElementById("loginRecaptcha");
+        const signupRecaptcha = document.getElementById("signupRecaptcha");
+
+        if (loginRecaptcha) {
+          window.loginRecaptchaWidgetId = grecaptcha.render("loginRecaptcha", {
+            sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+          });
+        }
+
+        if (signupRecaptcha) {
+          window.signupRecaptchaWidgetId = grecaptcha.render(
+            "signupRecaptcha",
+            {
+              sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+            },
+          );
+        }
+      }
+    </script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+    <script defer src="assets/js/config.js"></script>
+    <script defer src="assets/js/utils.js"></script>
+    <script defer src="assets/js/supabase.js"></script>
+    <script defer src="assets/js/app.js"></script>
+    <script defer src="assets/js/auth.js"></script>
+    <script defer src="assets/js/analytics.js"></script>
+    <script defer src="assets/js/wishlist.js"></script>
+  </body>
+</html>
