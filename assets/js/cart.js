@@ -539,9 +539,9 @@
         status: "confirmed",
       };
 
-      const { error } = await window.supabase
-        .from("orders")
-        .insert([orderData]);
+      const { error } = await window.DB?.client
+        ?.from("orders")
+        ?.insert([orderData]);
 
       if (error) {
         console.error("Error saving order:", error);

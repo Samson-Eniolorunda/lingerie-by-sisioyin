@@ -43,6 +43,13 @@
   let orders = [];
 
   /* ─────────────────────────────────────────────
+   * Helper to get Supabase client
+   * ───────────────────────────────────────────── */
+  function getClient() {
+    return window.DB?.client || null;
+  }
+
+  /* ─────────────────────────────────────────────
    * Section Navigation
    * ───────────────────────────────────────────── */
   function switchSection(sectionId) {
@@ -63,7 +70,7 @@
    * Data Loading
    * ───────────────────────────────────────────── */
   async function loadOrders() {
-    const client = window.supabase;
+    const client = getClient();
     if (!client || !currentUser) return;
 
     try {
@@ -224,7 +231,7 @@
   }
 
   async function saveProfile(formData) {
-    const client = window.supabase;
+    const client = getClient();
     if (!client || !currentUser) return;
 
     try {
@@ -376,7 +383,7 @@
     setupEventListeners();
 
     // Check current session
-    const client = window.supabase;
+    const client = getClient();
     if (client) {
       try {
         const {

@@ -60,11 +60,18 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Helper to get Supabase client
+   * ───────────────────────────────────────────── */
+  function getClient() {
+    return window.DB?.client || null;
+  }
+
+  /* ─────────────────────────────────────────────
    * Authentication Functions
    * ───────────────────────────────────────────── */
   async function handleLogin(email, password) {
     console.log("🔐 AUTH: Attempting login for", email);
-    const client = window.supabase;
+    const client = getClient();
     if (!client) {
       window.UTILS?.toast?.("Authentication service unavailable", "error");
       return;
@@ -90,7 +97,7 @@
 
   async function handleSignup(email, password, fullName) {
     console.log("🔐 AUTH: Attempting signup for", email);
-    const client = window.supabase;
+    const client = getClient();
     if (!client) {
       window.UTILS?.toast?.("Authentication service unavailable", "error");
       return;
@@ -123,7 +130,7 @@
 
   async function handleLogout() {
     console.log("🔐 AUTH: Logging out");
-    const client = window.supabase;
+    const client = getClient();
     if (!client) return;
 
     try {
@@ -137,7 +144,7 @@
 
   async function handleGoogleLogin() {
     console.log("🔐 AUTH: Attempting Google login");
-    const client = window.supabase;
+    const client = getClient();
     if (!client) {
       window.UTILS?.toast?.("Authentication service unavailable", "error");
       return;
@@ -325,7 +332,7 @@
     setupEventListeners();
 
     // Check current session
-    const client = window.supabase;
+    const client = getClient();
     if (client) {
       try {
         const {

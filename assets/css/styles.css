@@ -195,6 +195,12 @@ button {
   cursor: pointer;
   border: none;
   background: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+a {
+  -webkit-tap-highlight-color: transparent;
 }
 
 ul,
@@ -3977,6 +3983,7 @@ textarea {
   transition: all var(--transition);
 }
 
+.page-overlay.active,
 .page-overlay.open {
   opacity: 1;
   visibility: visible;
