@@ -62,26 +62,20 @@
           >
             <i class="fa-solid fa-user"></i>
           </button>
-          <button
-            type="button"
+          <a
+            href="dashboard.html"
             class="header-btn"
             id="userMenuBtn"
-            aria-label="Account"
+            aria-label="My Account"
             title="My Account"
             hidden
           >
-            <span class="user-avatar">U</span>
-          </button>
-          <button
-            type="button"
-            class="header-btn"
-            id="logoutBtn"
-            aria-label="Sign out"
-            title="Sign Out"
-            hidden
-          >
-            <i class="fa-solid fa-sign-out-alt"></i>
-          </button>
+            <i class="fa-solid fa-user-check"></i>
+          </a>
+          <a href="wishlist.html" class="header-btn" aria-label="Wishlist">
+            <i class="fa-solid fa-heart"></i>
+            <span class="wishlist-count" id="wishlistCount">0</span>
+          </a>
           <a href="cart.html" class="header-btn cart-btn" aria-label="Cart">
             <i class="fa-solid fa-bag-shopping"></i>
             <span class="cart-count" data-cart-count>0</span>
@@ -332,10 +326,10 @@
               <div class="faq-answer">
                 <p>
                   Use our
-                  <a href="#" id="openSizeGuideFromFaq">Size Guide</a> to find
-                  your perfect fit. Measure yourself following our instructions,
-                  then compare with our sizing chart. If you're between sizes,
-                  we recommend sizing up for comfort.
+                  <a href="size.html">Size Guide</a> to find your perfect fit.
+                  Measure yourself following our instructions, then compare with
+                  our sizing chart. If you're between sizes, we recommend sizing
+                  up for comfort.
                 </p>
               </div>
             </div>
@@ -609,141 +603,175 @@
 
     <!-- Auth Modal -->
     <div class="auth-modal" id="authModal">
-      <div class="auth-modal-content">
+      <div class="auth-modal-content auth-box">
         <button type="button" class="auth-close" id="authClose">
           <i class="fa-solid fa-times"></i>
         </button>
 
-        <div class="auth-header">
-          <div class="auth-logo">
-            <i class="fa-solid fa-heart"></i>
-          </div>
-          <h2 class="auth-title">Welcome Back</h2>
-          <p class="auth-subtitle">
-            Sign in to your account or create a new one
-          </p>
+        <div class="auth-brand">
+          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> LBS</h1>
         </div>
 
-        <div class="auth-body">
-          <div class="auth-tabs">
-            <button type="button" class="auth-tab active" data-tab="login">
-              Sign In
-            </button>
-            <button type="button" class="auth-tab" data-tab="signup">
-              Create Account
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="tab-btn active" data-tab="login">
+            Sign In
+          </button>
+          <button type="button" class="tab-btn" data-tab="signup">
+            Sign Up
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth-form active" id="loginForm" novalidate>
+          <div class="field float has-icon">
+            <i class="fa-regular fa-envelope icon"></i>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              placeholder=" "
+              autocomplete="email"
+              required
+            />
+            <label for="loginEmail">Email Address</label>
+          </div>
+
+          <div class="field float has-icon has-trailing">
+            <i class="fa-solid fa-lock icon"></i>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              placeholder=" "
+              autocomplete="current-password"
+              required
+            />
+            <label for="loginPassword">Password</label>
+            <button
+              type="button"
+              class="pw-toggle"
+              data-target="#loginPassword"
+              aria-label="Toggle password"
+            >
+              <i class="fa-regular fa-eye"></i>
             </button>
           </div>
 
-          <!-- Login Form -->
-          <form class="auth-form active" id="loginForm">
-            <div class="auth-field">
-              <label for="loginEmail">Email</label>
-              <input
-                type="email"
-                id="loginEmail"
-                name="email"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-            <div class="auth-field">
-              <label for="loginPassword">Password</label>
-              <input
-                type="password"
-                id="loginPassword"
-                name="password"
-                placeholder="••••••••"
-                required
-              />
-            </div>
-            <div class="auth-field recaptcha-field">
-              <div
-                class="g-recaptcha"
-                id="loginRecaptcha"
-                data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-              ></div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">
-              Sign In
-            </button>
-            <div class="auth-divider">
-              <span>or continue with</span>
-            </div>
-            <button
-              type="button"
-              class="btn btn-outline btn-block google-login-btn"
-            >
-              <i class="fa-brands fa-google"></i>
-              <span>Google</span>
-            </button>
-          </form>
+          <div class="auth-field recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
 
-          <!-- Signup Form -->
-          <form class="auth-form" id="signupForm">
-            <div class="auth-field">
-              <label for="signupName">Full Name</label>
-              <input
-                type="text"
-                id="signupName"
-                name="fullName"
-                placeholder="Jane Doe"
-                required
-              />
-            </div>
-            <div class="auth-field">
-              <label for="signupEmail">Email</label>
-              <input
-                type="email"
-                id="signupEmail"
-                name="email"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-            <div class="auth-field">
-              <label for="signupPassword">Password</label>
-              <input
-                type="password"
-                id="signupPassword"
-                name="password"
-                placeholder="••••••••"
-                required
-                minlength="6"
-              />
-            </div>
-            <div class="auth-field">
-              <label for="signupConfirm">Confirm Password</label>
-              <input
-                type="password"
-                id="signupConfirm"
-                name="confirmPassword"
-                placeholder="••••••••"
-                required
-                minlength="6"
-              />
-            </div>
-            <div class="auth-field recaptcha-field">
-              <div
-                class="g-recaptcha"
-                id="signupRecaptcha"
-                data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-              ></div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">
-              Create Account
-            </button>
-            <div class="auth-divider">
-              <span>or continue with</span>
-            </div>
+          <button type="submit" class="btn btn-primary btn-block">
+            Sign In
+          </button>
+
+          <div class="auth-divider"><span>or continue with</span></div>
+
+          <button
+            type="button"
+            class="btn btn-outline btn-block google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <!-- Signup Form -->
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="field float has-icon">
+            <i class="fa-regular fa-user icon"></i>
+            <input
+              type="text"
+              id="signupName"
+              name="fullName"
+              placeholder=" "
+              autocomplete="name"
+              required
+            />
+            <label for="signupName">Full Name</label>
+          </div>
+
+          <div class="field float has-icon">
+            <i class="fa-regular fa-envelope icon"></i>
+            <input
+              type="email"
+              id="signupEmail"
+              name="email"
+              placeholder=" "
+              autocomplete="email"
+              required
+            />
+            <label for="signupEmail">Email Address</label>
+          </div>
+
+          <div class="field float has-icon has-trailing">
+            <i class="fa-solid fa-lock icon"></i>
+            <input
+              type="password"
+              id="signupPassword"
+              name="password"
+              placeholder=" "
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+            <label for="signupPassword">Password</label>
             <button
               type="button"
-              class="btn btn-outline btn-block google-login-btn"
+              class="pw-toggle"
+              data-target="#signupPassword"
+              aria-label="Toggle password"
             >
-              <i class="fa-brands fa-google"></i>
-              <span>Google</span>
+              <i class="fa-regular fa-eye"></i>
             </button>
-          </form>
-        </div>
+          </div>
+
+          <div class="field float has-icon has-trailing">
+            <i class="fa-solid fa-lock icon"></i>
+            <input
+              type="password"
+              id="signupConfirm"
+              name="confirmPassword"
+              placeholder=" "
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+            <label for="signupConfirm">Confirm Password</label>
+            <button
+              type="button"
+              class="pw-toggle"
+              data-target="#signupConfirm"
+              aria-label="Toggle password"
+            >
+              <i class="fa-regular fa-eye"></i>
+            </button>
+          </div>
+
+          <div class="auth-field recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            Create Account
+          </button>
+
+          <div class="auth-divider"><span>or continue with</span></div>
+
+          <button
+            type="button"
+            class="btn btn-outline btn-block google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
 
         <p class="auth-footer-text">
           By continuing, you agree to our

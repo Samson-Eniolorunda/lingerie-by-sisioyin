@@ -16,11 +16,10 @@
    * ───────────────────────────────────────────── */
   const authModal = $("#authModal");
   const authClose = $("#authClose");
-  const authTabs = $$(".auth-tab");
+  const authTabs = $$(".tab-btn[data-tab]");
   const loginForm = $("#loginForm");
   const signupForm = $("#signupForm");
   const loginBtn = $("#loginBtn");
-  const logoutBtn = $("#logoutBtn");
   const userMenuBtn = $("#userMenuBtn");
   const userDropdown = $("#userDropdown");
 
@@ -196,16 +195,8 @@
       loginBtn.hidden = !!user;
     }
 
-    if (logoutBtn) {
-      logoutBtn.hidden = !user;
-    }
-
     if (userMenuBtn) {
       userMenuBtn.hidden = !user;
-      if (user) {
-        const initial = (user.email || "U")[0].toUpperCase();
-        userMenuBtn.innerHTML = `<span class="user-avatar">${initial}</span>`;
-      }
     }
 
     // Dispatch event for other modules
@@ -327,21 +318,28 @@
       loginBtn.addEventListener("click", () => openAuthModal("login"));
     }
 
-    // User menu button - go to dashboard
-    if (userMenuBtn) {
-      userMenuBtn.addEventListener("click", () => {
-        window.location.href = "dashboard.html";
-      });
-    }
-
-    // Logout button
-    if (logoutBtn) {
-      logoutBtn.addEventListener("click", handleLogout);
-    }
-
     // Google login buttons
     $$(".google-login-btn").forEach((btn) => {
       btn.addEventListener("click", handleGoogleLogin);
+    });
+
+    // Password toggle buttons
+    $$(".pw-toggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const targetSel = btn.dataset.target;
+        const input = targetSel
+          ? $(targetSel)
+          : btn.previousElementSibling?.previousElementSibling;
+        if (input && input.tagName === "INPUT") {
+          const isPassword = input.type === "password";
+          input.type = isPassword ? "text" : "password";
+          const icon = btn.querySelector("i");
+          if (icon) {
+            icon.classList.toggle("fa-eye", !isPassword);
+            icon.classList.toggle("fa-eye-slash", isPassword);
+          }
+        }
+      });
     });
   }
 

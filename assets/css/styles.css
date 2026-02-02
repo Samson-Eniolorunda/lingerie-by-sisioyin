@@ -8139,6 +8139,491 @@ html[data-theme="dark"] .promo-input {
 }
 
 /* =========================
+   SIZE GUIDE PAGE
+========================= */
+.size-guide-page {
+  padding: 3rem 0 5rem;
+  min-height: 70vh;
+}
+
+.size-guide-page .page-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.size-guide-page .page-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+}
+
+.size-guide-page .page-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-muted);
+}
+
+.size-guide-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.size-guide-tabs {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.size-guide-tab {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  background: var(--bg-card);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-guide-tab:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.size-guide-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.size-guide-panel {
+  display: none;
+  animation: fadeInUp 0.4s ease;
+}
+
+.size-guide-panel.active {
+  display: block;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.size-section-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.size-subsection {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 2rem 0 1rem;
+  text-align: center;
+}
+
+.size-chart-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  box-shadow: var(--shadow);
+}
+
+.size-chart {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 500px;
+}
+
+.size-chart th,
+.size-chart td {
+  padding: 1rem 0.75rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.size-chart th {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.size-chart tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.size-chart tbody tr:hover {
+  background: var(--bg-soft);
+}
+
+.size-chart td {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.size-guide-tips {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 2rem;
+  margin-top: 3rem;
+  box-shadow: var(--shadow);
+}
+
+.size-guide-tips h4 {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.size-guide-tips h4 i {
+  color: var(--primary);
+}
+
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.tip-card {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: var(--bg-soft);
+  border-radius: var(--radius);
+}
+
+.tip-icon {
+  width: 50px;
+  height: 50px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+}
+
+.tip-icon i {
+  font-size: 1.25rem;
+  color: #fff;
+}
+
+.tip-card h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.tip-card p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.tips-note {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(199, 121, 136, 0.1);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--primary);
+}
+
+.tips-note i {
+  color: var(--primary);
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.tips-note p {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.size-help-cta {
+  text-align: center;
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, var(--primary) 0%, #d68d9c 100%);
+  border-radius: var(--radius);
+  margin-top: 3rem;
+}
+
+.size-help-cta h3 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.size-help-cta p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1.5rem;
+}
+
+.size-help-cta .btn {
+  background: #fff;
+  color: var(--primary);
+}
+
+.size-help-cta .btn:hover {
+  background: var(--bg-soft);
+  transform: translateY(-2px);
+}
+
+/* =========================
+   AUTH MODAL - FLOATING LABELS (Admin Style)
+========================= */
+.auth-box {
+  padding: 2rem;
+}
+
+.auth-brand {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-brand .brand-logo {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.auth-brand .brand-logo i {
+  margin-right: 0.5rem;
+}
+
+/* Redesigned Tabs */
+.auth-box .auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 1.5rem;
+  background: var(--bg-soft);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.auth-box .tab-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.auth-box .tab-btn:hover:not(.active) {
+  color: var(--text);
+}
+
+.auth-box .tab-btn.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(199, 121, 136, 0.35);
+}
+
+/* Floating Label Field */
+.field {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.field.float input {
+  width: 100%;
+  padding: 1rem 1rem 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--bg);
+  color: var(--text);
+  transition: all 0.25s ease;
+}
+
+.field.float.has-icon input {
+  padding-left: 2.75rem;
+}
+
+.field.float.has-trailing input {
+  padding-right: 3rem;
+}
+
+.field.float label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: all 0.25s ease;
+  background: transparent;
+}
+
+.field.float.has-icon label {
+  left: 2.75rem;
+}
+
+.field.float .icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: var(--text-muted);
+  transition: color 0.25s ease;
+}
+
+/* Floating effect when focused or has value */
+.field.float input:focus + label,
+.field.float input:not(:placeholder-shown) + label {
+  top: 0.5rem;
+  transform: translateY(0);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.field.float input:focus {
+  border-color: var(--primary);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 4px rgba(199, 121, 136, 0.15);
+}
+
+.field.float input:focus ~ .icon {
+  color: var(--primary);
+}
+
+/* Password Toggle Button */
+.pw-toggle {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.pw-toggle:hover {
+  color: var(--primary);
+}
+
+/* Auth Form Styles */
+.auth-box .auth-form {
+  display: none;
+}
+
+.auth-box .auth-form.active {
+  display: block;
+  animation: authFadeIn 0.3s ease;
+}
+
+/* Auth Divider */
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.25rem 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Google Button */
+.google-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-card);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.google-login-btn:hover {
+  border-color: var(--primary);
+  background: var(--bg-soft);
+}
+
+.google-login-btn i {
+  font-size: 1.1rem;
+}
+
+/* Auth Footer Text */
+.auth-footer-text {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 1.25rem;
+}
+
+.auth-footer-text a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* Btn Block */
+.btn-block {
+  width: 100%;
+  display: block;
+}
+
+/* =========================
    PRINT STYLES
 ========================= */
 @media print {
