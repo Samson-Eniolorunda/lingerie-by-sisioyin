@@ -63,18 +63,12 @@
             <i class="fa-solid fa-user"></i>
           </button>
           <a
-            href="dashboard.html"
+            href="wishlist.html"
             class="header-btn"
-            id="userMenuBtn"
-            aria-label="My Account"
-            title="My Account"
-            hidden
+            aria-label="Wishlist"
+            title="Wishlist"
           >
-            <i class="fa-solid fa-user-check"></i>
-          </a>
-          <a href="wishlist.html" class="header-btn" aria-label="Wishlist">
             <i class="fa-solid fa-heart"></i>
-            <span class="wishlist-count" id="wishlistCount">0</span>
           </a>
           <a href="cart.html" class="header-btn cart-btn" aria-label="Cart">
             <i class="fa-solid fa-bag-shopping"></i>
@@ -491,6 +485,7 @@
             <nav class="footer-links">
               <a href="dashboard.html">My Account</a>
               <a href="faq.html">FAQs</a>
+              <a href="size.html">Size Guide</a>
               <a href="terms.html">Terms of Service</a>
               <a href="privacy.html">Privacy Policy</a>
               <a href="https://wa.me/2349033344860" target="_blank"
@@ -584,6 +579,51 @@
     <div class="page-overlay" id="pageOverlay"></div>
     <div class="toast-notification" data-toast hidden></div>
 
+    <!-- WhatsApp Live Chat Widget -->
+    <div class="whatsapp-widget" id="whatsappWidget">
+      <div class="whatsapp-popup">
+        <button
+          type="button"
+          class="whatsapp-popup-close"
+          id="whatsappClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="whatsapp-popup-header">
+          <div class="whatsapp-popup-avatar">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div class="whatsapp-popup-info">
+            <h4>Lingerie by Sisioyin</h4>
+            <p>Typically replies within minutes</p>
+          </div>
+        </div>
+        <div class="whatsapp-popup-body">
+          <p>
+            👋 Hi there! Need help finding the perfect lingerie? Chat with us on
+            WhatsApp!
+          </p>
+        </div>
+        <a
+          href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
+          target="_blank"
+          class="whatsapp-popup-btn"
+        >
+          <i class="fa-brands fa-whatsapp"></i>
+          Start Chat
+        </a>
+      </div>
+      <button
+        type="button"
+        class="whatsapp-fab"
+        id="whatsappFab"
+        aria-label="Chat on WhatsApp"
+      >
+        <i class="fa-brands fa-whatsapp"></i>
+      </button>
+    </div>
+
     <!-- Auth Modal -->
     <div class="auth-modal" id="authModal">
       <div class="auth-modal-content auth-box">
@@ -592,15 +632,15 @@
         </button>
 
         <div class="auth-brand">
-          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> LBS</h1>
+          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> Welcome</h1>
         </div>
 
         <div class="auth-tabs" id="authTabs">
           <button type="button" class="tab-btn active" data-tab="login">
-            Sign In
+            Login
           </button>
           <button type="button" class="tab-btn" data-tab="signup">
-            Sign Up
+            Register
           </button>
         </div>
 

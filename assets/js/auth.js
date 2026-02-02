@@ -20,8 +20,6 @@
   const loginForm = $("#loginForm");
   const signupForm = $("#signupForm");
   const loginBtn = $("#loginBtn");
-  const userMenuBtn = $("#userMenuBtn");
-  const userDropdown = $("#userDropdown");
 
   // If no auth modal, don't proceed
   if (!authModal) {
@@ -193,10 +191,6 @@
 
     if (loginBtn) {
       loginBtn.hidden = !!user;
-    }
-
-    if (userMenuBtn) {
-      userMenuBtn.hidden = !user;
     }
 
     // Dispatch event for other modules

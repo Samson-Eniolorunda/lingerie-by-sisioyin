@@ -7374,9 +7374,11 @@ html[data-theme="dark"] .promo-input {
 
 .auth-modal-content {
   background: var(--bg-card);
-  border-radius: 20px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
+  max-height: 90vh;
+  overflow-y: auto;
   position: relative;
   transform: scale(0.9) translateY(20px);
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -8405,42 +8407,42 @@ html[data-theme="dark"] .promo-input {
    AUTH MODAL - FLOATING LABELS (Admin Style)
 ========================= */
 .auth-box {
-  padding: 2rem;
+  padding: 1.5rem;
 }
 
 .auth-brand {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .auth-brand .brand-logo {
   font-family: var(--font-display);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: var(--primary);
 }
 
 .auth-brand .brand-logo i {
-  margin-right: 0.5rem;
+  margin-right: 0.4rem;
 }
 
 /* Redesigned Tabs */
 .auth-box .auth-tabs {
   display: flex;
   gap: 0;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   background: var(--bg-soft);
-  border-radius: 12px;
-  padding: 4px;
+  border-radius: 10px;
+  padding: 3px;
 }
 
 .auth-box .tab-btn {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.75rem;
   background: transparent;
   border: none;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
@@ -8460,34 +8462,34 @@ html[data-theme="dark"] .promo-input {
 /* Floating Label Field */
 .field {
   position: relative;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 .field.float input {
   width: 100%;
-  padding: 1rem 1rem 0.5rem;
+  padding: 0.85rem 0.85rem 0.4rem;
   border: 2px solid var(--border);
-  border-radius: 12px;
-  font-size: 1rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
   background: var(--bg);
   color: var(--text);
   transition: all 0.25s ease;
 }
 
 .field.float.has-icon input {
-  padding-left: 2.75rem;
+  padding-left: 2.5rem;
 }
 
 .field.float.has-trailing input {
-  padding-right: 3rem;
+  padding-right: 2.75rem;
 }
 
 .field.float label {
   position: absolute;
-  left: 1rem;
+  left: 0.85rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
   pointer-events: none;
   transition: all 0.25s ease;
@@ -8495,15 +8497,15 @@ html[data-theme="dark"] .promo-input {
 }
 
 .field.float.has-icon label {
-  left: 2.75rem;
+  left: 2.5rem;
 }
 
 .field.float .icon {
   position: absolute;
-  left: 1rem;
+  left: 0.85rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
   transition: color 0.25s ease;
 }
@@ -8563,10 +8565,10 @@ html[data-theme="dark"] .promo-input {
 .auth-divider {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin: 1.25rem 0;
+  gap: 0.75rem;
+  margin: 1rem 0;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .auth-divider::before,
@@ -8582,13 +8584,13 @@ html[data-theme="dark"] .promo-input {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   width: 100%;
-  padding: 0.875rem 1rem;
+  padding: 0.7rem 0.85rem;
   border: 2px solid var(--border);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--bg-card);
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text);
   cursor: pointer;
@@ -8607,9 +8609,9 @@ html[data-theme="dark"] .promo-input {
 /* Auth Footer Text */
 .auth-footer-text {
   text-align: center;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 1.25rem;
+  margin-top: 1rem;
 }
 
 .auth-footer-text a {
