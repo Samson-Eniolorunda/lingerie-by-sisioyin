@@ -948,33 +948,12 @@
     <!-- Paystack -->
     <script src="https://js.paystack.co/v1/inline.js"></script>
 
+    <script src="assets/js/recaptcha.js"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
       defer
     ></script>
-    <script>
-      // reCAPTCHA initialization callback
-      function onRecaptchaLoad() {
-        const loginRecaptcha = document.getElementById("loginRecaptcha");
-        const signupRecaptcha = document.getElementById("signupRecaptcha");
-
-        if (loginRecaptcha) {
-          window.loginRecaptchaWidgetId = grecaptcha.render("loginRecaptcha", {
-            sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
-          });
-        }
-
-        if (signupRecaptcha) {
-          window.signupRecaptchaWidgetId = grecaptcha.render(
-            "signupRecaptcha",
-            {
-              sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
-            },
-          );
-        }
-      }
-    </script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"

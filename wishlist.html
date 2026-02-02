@@ -881,28 +881,7 @@
       async
       defer
     ></script>
-    <script>
-      // reCAPTCHA initialization callback
-      function onRecaptchaLoad() {
-        const loginRecaptcha = document.getElementById("loginRecaptcha");
-        const signupRecaptcha = document.getElementById("signupRecaptcha");
-
-        if (loginRecaptcha) {
-          window.loginRecaptchaWidgetId = grecaptcha.render("loginRecaptcha", {
-            sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
-          });
-        }
-
-        if (signupRecaptcha) {
-          window.signupRecaptchaWidgetId = grecaptcha.render(
-            "signupRecaptcha",
-            {
-              sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
-            },
-          );
-        }
-      }
-    </script>
+    <script src="assets/js/recaptcha.js"></script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"

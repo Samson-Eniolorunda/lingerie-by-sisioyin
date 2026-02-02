@@ -85,6 +85,27 @@
 
       if (error) throw error;
 
+      // Check if user is an admin - admins should use admin.html
+      const { data: profile } = await client
+        .from("profiles")
+        .select("is_admin")
+        .eq("id", data.user.id)
+        .single();
+
+      if (profile?.is_admin) {
+        // Sign out and redirect admin to admin page
+        await client.auth.signOut();
+        window.UTILS?.toast?.(
+          "Admin accounts should login through the admin portal",
+          "warning",
+        );
+        closeAuthModal();
+        setTimeout(() => {
+          window.location.href = "admin.html";
+        }, 1500);
+        return;
+      }
+
       console.log("🔐 AUTH: Login successful");
       window.UTILS?.toast?.("Welcome back!", "success");
       closeAuthModal();
