@@ -14524,3 +14524,66 @@ html[data-theme="dark"] {
   opacity: 1;
   visibility: visible;
 }
+
+/* =============================================
+   UTILITIES
+   ============================================= */
+
+/* Theme Toggle Utilities */
+.theme-toggle-container {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+}
+
+/* Common Utilities */
+.text-primary-color {
+  color: var(--clr-primary);
+}
+
+.mb-4 {
+  margin-bottom: var(--space-4);
+}
+
+.mb-12 {
+  margin-bottom: var(--space-12);
+}
+
+.text-2xl-mb-2 {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-2);
+}
+
+.d-inline {
+  display: inline;
+}
+
+.d-block {
+  display: block;
+}
+
+.text-center-full {
+  text-align: center;
+  width: 100%;
+}
+
+.grid-col-full {
+  grid-column: 1 / -1;
+}
+
+.cursor-default {
+  cursor: default;
+}
+
+.border-white-text-white {
+  border-color: white;
+  color: white;
+}
+
+.mt-6 {
+  margin-top: var(--space-6);
+}
