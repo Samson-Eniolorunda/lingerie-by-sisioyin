@@ -10410,11 +10410,10 @@ html[data-theme="dark"] {
 
 /* Search Results */
 .search-results {
-  margin-top: var(--space-3);
   background: var(--bg-surface);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-2xl);
-  max-height: 60vh;
+  margin-top: var(--space-4);
+  max-height: 400px;
   overflow-y: auto;
 }
 
@@ -14586,4 +14585,24 @@ html[data-theme="dark"] {
 
 .mt-6 {
   margin-top: var(--space-6);
+}
+
+/* Newsletter Terms Text */
+.newsletter-terms {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: var(--space-4);
+}
+
+/* Section Heading */
+.section-heading {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+}
+
+/* Card Icon Success Gradient */
+.card-icon-success {
+  background: linear-gradient(135deg, var(--clr-success), #059669);
 }
