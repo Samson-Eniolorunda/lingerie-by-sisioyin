@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   role TEXT NOT NULL DEFAULT 'editor',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   
-  CONSTRAINT profiles_role_check CHECK (role IN ('super_admin', 'editor'))
+  CONSTRAINT profiles_role_check CHECK (role IN ('super_admin', 'editor', 'developer'))
 );
 
 -- Add missing columns if they don't exist (for existing tables)
@@ -84,7 +84,7 @@ BEGIN
     SELECT 1 FROM information_schema.constraint_column_usage 
     WHERE constraint_name = 'profiles_role_check'
   ) THEN
-    ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('super_admin', 'editor'));
+    ALTER TABLE public.profiles ADD CONSTRAINT profiles_role_check CHECK (role IN ('super_admin', 'editor', 'developer'));
   END IF;
 EXCEPTION WHEN duplicate_object THEN
   NULL;
@@ -218,8 +218,9 @@ CREATE TABLE IF NOT EXISTS public.products (
   price_ngn INTEGER NOT NULL DEFAULT 0,
   qty INTEGER NOT NULL DEFAULT 0,
   
-  sizes TEXT[] NOT NULL DEFAULT '{}',
-  colors TEXT[] NOT NULL DEFAULT '{}',
+  sizes JSONB NOT NULL DEFAULT '[]',
+  colors JSONB NOT NULL DEFAULT '[]',
+  variant_stock JSONB NOT NULL DEFAULT '[]',
   
   description TEXT NOT NULL DEFAULT '',
   images TEXT[] NOT NULL DEFAULT '{}',
@@ -277,6 +278,53 @@ BEGIN
       AND column_name = 'updated_by'
   ) THEN
     ALTER TABLE public.products ADD COLUMN updated_by UUID REFERENCES auth.users(id);
+  END IF;
+END $$;
+
+-- Migration: Convert sizes from TEXT[] to JSONB if needed
+DO $$
+BEGIN
+  -- Check if sizes column is TEXT[] and convert to JSONB
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'products' 
+      AND column_name = 'sizes'
+      AND data_type = 'ARRAY'
+  ) THEN
+    -- Add temporary column
+    ALTER TABLE public.products ADD COLUMN sizes_jsonb JSONB DEFAULT '[]';
+    
+    -- Convert existing TEXT[] sizes to JSONB [{name, qty}] format
+    UPDATE public.products 
+    SET sizes_jsonb = (
+      SELECT COALESCE(
+        jsonb_agg(jsonb_build_object('name', size_name, 'qty', 0)),
+        '[]'::jsonb
+      )
+      FROM unnest(sizes) AS size_name
+    );
+    
+    -- Drop old column and rename new one
+    ALTER TABLE public.products DROP COLUMN sizes;
+    ALTER TABLE public.products RENAME COLUMN sizes_jsonb TO sizes;
+    
+    -- Set NOT NULL and default
+    ALTER TABLE public.products ALTER COLUMN sizes SET NOT NULL;
+    ALTER TABLE public.products ALTER COLUMN sizes SET DEFAULT '[]'::jsonb;
+  END IF;
+END $$;
+
+-- Add variant_stock column if missing (for size-color combinations)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_schema = 'public' 
+      AND table_name = 'products' 
+      AND column_name = 'variant_stock'
+  ) THEN
+    ALTER TABLE public.products ADD COLUMN variant_stock JSONB NOT NULL DEFAULT '[]';
   END IF;
 END $$;
 
@@ -399,7 +447,7 @@ CREATE INDEX IF NOT EXISTS idx_activity_logs_admin_id ON public.admin_activity_l
 
 ALTER TABLE public.admin_activity_logs ENABLE ROW LEVEL SECURITY;
 
--- Only super_admin can read activity logs (editors cannot see logs)
+-- Super_admin and developer can read activity logs (editors cannot see logs)
 DROP POLICY IF EXISTS "activity_logs: super_admin read" ON public.admin_activity_logs;
 CREATE POLICY "activity_logs: super_admin read"
 ON public.admin_activity_logs
@@ -408,7 +456,7 @@ TO authenticated
 USING (
   EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'super_admin'
+    WHERE id = auth.uid() AND role IN ('super_admin', 'developer')
   )
 );
 
@@ -430,8 +478,12 @@ SECURITY DEFINER
 AS $$
 DECLARE
   admin_name TEXT;
+  admin_role TEXT;
 BEGIN
-  SELECT CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')) INTO admin_name
+  SELECT 
+    CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')),
+    role
+  INTO admin_name, admin_role
   FROM public.profiles
   WHERE id = NEW.admin_id;
   
@@ -440,7 +492,7 @@ BEGIN
     admin_name := 'Admin';
   END IF;
   
-  NEW.metadata = NEW.metadata || jsonb_build_object('admin_name', admin_name);
+  NEW.metadata = NEW.metadata || jsonb_build_object('admin_name', admin_name, 'admin_role', admin_role);
   RETURN NEW;
 END;
 $$;
@@ -575,6 +627,43 @@ ON storage.objects
 FOR DELETE
 TO authenticated
 USING (bucket_id = 'product-images' AND public.is_admin());
+
+-- ============================================================================
+-- 12b) STORAGE BUCKET FOR SITE IMAGES (hero, categories, etc.)
+-- ============================================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('site-images', 'site-images', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+-- Storage policies for site-images bucket
+DROP POLICY IF EXISTS "storage: public read site images" ON storage.objects;
+CREATE POLICY "storage: public read site images"
+ON storage.objects
+FOR SELECT
+TO anon, authenticated
+USING (bucket_id = 'site-images');
+
+DROP POLICY IF EXISTS "storage: admin upload site images" ON storage.objects;
+CREATE POLICY "storage: admin upload site images"
+ON storage.objects
+FOR INSERT
+TO authenticated
+WITH CHECK (bucket_id = 'site-images' AND public.is_admin());
+
+DROP POLICY IF EXISTS "storage: admin update site images" ON storage.objects;
+CREATE POLICY "storage: admin update site images"
+ON storage.objects
+FOR UPDATE
+TO authenticated
+USING (bucket_id = 'site-images' AND public.is_admin())
+WITH CHECK (bucket_id = 'site-images' AND public.is_admin());
+
+DROP POLICY IF EXISTS "storage: admin delete site images" ON storage.objects;
+CREATE POLICY "storage: admin delete site images"
+ON storage.objects
+FOR DELETE
+TO authenticated
+USING (bucket_id = 'site-images' AND public.is_admin());
 
 -- ============================================================================
 -- 13) PERMISSIONS
@@ -919,17 +1008,55 @@ CREATE TRIGGER trigger_set_order_number
   FOR EACH ROW
   EXECUTE FUNCTION public.set_order_number();
 
+-- ============================================================================
+-- 12) SITE SETTINGS TABLE (for hero images, category images, etc.)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.site_settings (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  key TEXT NOT NULL UNIQUE,
+  value JSONB NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by UUID REFERENCES auth.users(id)
+);
+
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can read site settings (for the public site)
+DROP POLICY IF EXISTS "Anyone can read site settings" ON public.site_settings;
+CREATE POLICY "Anyone can read site settings"
+  ON public.site_settings FOR SELECT
+  USING (true);
+
+-- Only admins can update site settings
+DROP POLICY IF EXISTS "Admins can update site settings" ON public.site_settings;
+CREATE POLICY "Admins can update site settings"
+  ON public.site_settings FOR UPDATE
+  USING (public.is_admin());
+
+DROP POLICY IF EXISTS "Admins can insert site settings" ON public.site_settings;
+CREATE POLICY "Admins can insert site settings"
+  ON public.site_settings FOR INSERT
+  WITH CHECK (public.is_admin());
+
+-- Insert default settings if they don't exist
+INSERT INTO public.site_settings (key, value) VALUES 
+  ('hero_image', '{"url": "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=800&auto=format&fit=crop", "alt": "Premium lingerie collection"}'),
+  ('category_lingerie', '{"url": "https://images.unsplash.com/photo-1616677743926-23b6ecb2c79e?w=600&auto=format&fit=crop", "alt": "Lingerie"}'),
+  ('category_loungewear', '{"url": "https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=600&auto=format&fit=crop", "alt": "Loungewear"}'),
+  ('category_underwear', '{"url": "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&auto=format&fit=crop", "alt": "Underwear"}')
+ON CONFLICT (key) DO NOTHING;
+
 COMMIT;
 
 -- ============================================================================
 -- DONE! Your e-commerce platform is ready.
 -- 
 -- Summary:
---   ✓ Profiles table with super_admin/editor roles
+--   ✓ Profiles table with super_admin/editor/developer roles
 --   ✓ Admin invites (super_admin only)
 --   ✓ Products with soft delete (is_deleted column)
 --   ✓ Activity logging with auto admin names
---   ✓ Storage bucket for images
+--   ✓ Storage buckets for product-images and site-images
 --   ✓ Reviews table for product reviews
 --   ✓ Testimonials table for site testimonials
 --   ✓ Auto-update product rating stats

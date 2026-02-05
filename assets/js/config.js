@@ -10,7 +10,15 @@ window.APP_CONFIG = {
   // WhatsApp number for checkout (international format, no +)
   WHATSAPP_NUMBER: "2349033344860",
 
-  // Paystack Public Key (Replace with your live key in production)
+  // Monnify Payment Gateway Configuration
+  // Get your keys from: https://app.monnify.com/
+  MONNIFY: {
+    apiKey: "MK_TEST_XXXXXXXXXX", // Replace with your Monnify API Key
+    contractCode: "XXXXXXXXXX", // Replace with your Monnify Contract Code
+    isTestMode: true, // Set to false for production
+  },
+
+  // Paystack Public Key (Legacy - kept for backwards compatibility)
   PAYSTACK_PUBLIC_KEY: "pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
 
   // Brand Name

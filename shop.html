@@ -10,6 +10,8 @@
     />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#be185d" />
+
+    <!-- Open Graph -->
     <meta property="og:title" content="Shop | Lingerie by Sisioyin" />
     <meta
       property="og:description"
@@ -17,6 +19,8 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="assets/img/og-image.png" />
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Shop | Lingerie by Sisioyin" />
     <meta
@@ -24,41 +28,55 @@
       content="Shop premium lingerie and loungewear."
     />
     <meta name="twitter:image" content="assets/img/og-image.png" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
   </head>
-  <body class="lbs-page shop-page">
+
+  <body>
+    <!-- Skip Link -->
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- Header -->
-    <header class="lbs-header" id="siteHeader">
-      <div class="header-container">
-        <a href="index.html" class="header-brand">
-          <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-          <span class="brand-name">Lingerie by Sisioyin</span>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
-        <nav class="header-nav" id="headerNav">
+        <!-- Desktop Navigation -->
+        <nav class="nav" id="mainNav">
           <a href="index.html" class="nav-link">Home</a>
           <a href="shop.html" class="nav-link active">Shop</a>
-          <a href="shop.html?category=Lingerie" class="nav-link">Lingerie</a>
-          <a href="shop.html?category=Loungewear" class="nav-link"
-            >Loungewear</a
-          >
+          <a href="shop.html?gender=Women" class="nav-link">Women</a>
+          <a href="shop.html?gender=Men" class="nav-link">Men</a>
+          <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
         </nav>
 
+        <!-- Header Actions -->
         <div class="header-actions">
           <button
             type="button"
@@ -73,30 +91,22 @@
             class="header-btn"
             id="loginBtn"
             aria-label="Sign in"
-            title="Sign In"
           >
             <i class="fa-solid fa-user"></i>
           </button>
-          <a
-            href="wishlist.html"
-            class="header-btn"
-            aria-label="Wishlist"
-            title="Wishlist"
-          >
-            <i class="fa-solid fa-heart"></i>
-          </a>
           <button
             type="button"
-            class="header-btn cart-btn"
+            class="header-btn"
+            id="cartToggle"
             data-cart-drawer
             aria-label="Shopping cart"
           >
             <i class="fa-solid fa-bag-shopping"></i>
-            <span class="cart-count" data-cart-count>0</span>
+            <span class="badge" data-cart-count>0</span>
           </button>
           <button
             type="button"
-            class="header-btn mobile-toggle"
+            class="header-btn menu-toggle"
             id="mobileToggle"
             aria-label="Menu"
           >
@@ -104,650 +114,820 @@
           </button>
         </div>
       </div>
-
-      <!-- Mobile Navigation -->
-      <nav class="mobile-nav" id="mobileNav">
-        <a href="index.html" class="mobile-nav-link">Home</a>
-        <a href="shop.html" class="mobile-nav-link active">Shop All</a>
-        <a href="shop.html?category=Lingerie" class="mobile-nav-link"
-          >Lingerie</a
-        >
-        <a href="shop.html?category=Loungewear" class="mobile-nav-link"
-          >Loungewear</a
-        >
-        <a href="wishlist.html" class="mobile-nav-link">Wishlist</a>
-        <a href="cart.html" class="mobile-nav-link">Cart</a>
-      </nav>
-
-      <!-- Search Bar -->
-      <div class="search-bar" id="searchBar" hidden>
-        <div class="section-container">
-          <div class="search-input-wrap">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search products..."
-              autocomplete="off"
-            />
-            <button
-              type="button"
-              class="search-close"
-              id="searchClose"
-              aria-label="Close search"
-            >
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-        </div>
-      </div>
     </header>
 
-    <!-- Shop Hero -->
-    <section class="shop-hero">
-      <div class="section-container">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="index.html">Home</a>
-          <i class="fa-solid fa-chevron-right"></i>
-          <span>Shop</span>
-        </nav>
-        <h1 class="shop-hero-title">Shop Collection</h1>
-        <p class="shop-hero-text">
-          Discover premium lingerie and loungewear curated for comfort and
-          confidence
-        </p>
-      </div>
-      <div class="shop-hero-decor"></div>
-    </section>
-
-    <!-- Main Shop -->
-    <main class="shop-main" id="main">
-      <div class="section-container">
-        <!-- Mobile Controls Bar (Filter Toggle + View Toggle) -->
-        <div class="mobile-controls-bar">
-          <button type="button" class="filter-toggle" id="filterToggle">
-            <i class="fa-solid fa-sliders"></i>
-            <span>Filters</span>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       NEW MOBILE NAVIGATION DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="mobile-drawer" id="mobileNav">
+      <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
+      <div class="mobile-drawer-panel">
+        <!-- Drawer Header -->
+        <div class="drawer-header">
+          <a href="index.html" class="drawer-logo">
+            <span class="drawer-logo-icon"
+              ><i class="fa-solid fa-heart"></i
+            ></span>
+            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+          </a>
+          <button
+            type="button"
+            class="drawer-close"
+            id="mobileNavClose"
+            aria-label="Close menu"
+          >
+            <i class="fa-solid fa-xmark"></i>
           </button>
-          <div class="view-toggle mobile-view-toggle">
-            <button
-              type="button"
-              class="view-btn active"
-              data-view="grid"
-              aria-label="Grid view"
-            >
-              <i class="fa-solid fa-grip"></i>
-            </button>
-            <button
-              type="button"
-              class="view-btn"
-              data-view="list"
-              aria-label="List view"
-            >
-              <i class="fa-solid fa-list"></i>
-            </button>
+        </div>
+
+        <!-- Drawer Content -->
+        <div class="drawer-content">
+          <!-- User Section -->
+          <a href="dashboard.html" class="drawer-user">
+            <span class="drawer-user-avatar"
+              ><i class="fa-solid fa-user"></i
+            ></span>
+            <span class="drawer-user-info">
+              <span class="drawer-user-name">My Account</span>
+              <span class="drawer-user-email">Sign in for best experience</span>
+            </span>
+            <i class="fa-solid fa-chevron-right drawer-user-arrow"></i>
+          </a>
+
+          <!-- Main Navigation -->
+          <nav class="drawer-nav">
+            <span class="drawer-nav-title">Menu</span>
+            <div class="drawer-nav-list">
+              <a href="index.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-home"></i
+                ></span>
+                Home
+              </a>
+              <a href="shop.html" class="drawer-nav-link active">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-store"></i
+                ></span>
+                Shop All
+              </a>
+              <a href="shop.html?is_new=true" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-wand-magic-sparkles"></i
+                ></span>
+                New Arrivals
+                <span class="drawer-nav-badge">New</span>
+              </a>
+              <a href="cart.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-bag-shopping"></i
+                ></span>
+                Cart
+                <span class="drawer-nav-badge" data-cart-count>0</span>
+              </a>
+              <a href="wishlist.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-heart"></i
+                ></span>
+                Wishlist
+              </a>
+            </div>
+          </nav>
+
+          <!-- Categories -->
+          <div class="drawer-categories">
+            <span class="drawer-nav-title">Categories</span>
+            <div class="drawer-categories-grid">
+              <a href="shop.html?gender=Women" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-venus"></i
+                ></span>
+                <span class="drawer-category-label">Women</span>
+              </a>
+              <a href="shop.html?gender=Men" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-mars"></i
+                ></span>
+                <span class="drawer-category-label">Men</span>
+              </a>
+              <a href="shop.html?gender=Kids" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-child"></i
+                ></span>
+                <span class="drawer-category-label">Kids</span>
+              </a>
+              <a href="shop.html?category=Lingerie" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-gem"></i
+                ></span>
+                <span class="drawer-category-label">Lingerie</span>
+              </a>
+              <a href="shop.html?category=Loungewear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-couch"></i
+                ></span>
+                <span class="drawer-category-label">Lounge</span>
+              </a>
+              <a href="shop.html?category=Underwear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-shirt"></i
+                ></span>
+                <span class="drawer-category-label">Underwear</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Support Links -->
+          <div class="drawer-support">
+            <span class="drawer-nav-title">Support</span>
+            <div class="drawer-support-links">
+              <a href="faq.html" class="drawer-support-link">FAQs</a>
+              <a href="size.html" class="drawer-support-link">Size Guide</a>
+              <a href="contact.html" class="drawer-support-link">Contact</a>
+              <a href="terms.html" class="drawer-support-link">Terms</a>
+              <a href="privacy.html" class="drawer-support-link">Privacy</a>
+            </div>
           </div>
         </div>
 
-        <div class="shop-layout">
-          <!-- Sidebar Filters -->
-          <aside class="shop-sidebar" id="shopSidebar">
-            <div class="sidebar-header">
-              <h3 class="sidebar-title">
-                <i class="fa-solid fa-filter"></i> Filters
-              </h3>
-              <button
-                type="button"
-                class="sidebar-close"
-                id="sidebarClose"
-                aria-label="Close filters"
-              >
-                <i class="fa-solid fa-xmark"></i>
-              </button>
+        <!-- Drawer Footer -->
+        <div class="drawer-footer">
+          <div class="drawer-theme" id="mobileThemeToggle">
+            <i class="fa-solid fa-sun"></i>
+            <button
+              type="button"
+              class="drawer-theme-toggle theme-btn"
+              id="themeSlider"
+              role="switch"
+              aria-label="Toggle dark mode"
+              data-theme="toggle"
+            ></button>
+            <i class="fa-solid fa-moon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+
+    <!-- Page Header -->
+    <section class="page-header">
+      <div class="container">
+        <h1 class="page-title">Explore Our Collection</h1>
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+          <span class="breadcrumb-separator">/</span>
+          <span>Shop</span>
+        </nav>
+      </div>
+    </section>
+
+    <main id="main" class="shop-main">
+      <div class="shop-layout">
+        <!-- Sidebar Filter Panel (Desktop) -->
+        <aside class="shop-sidebar" id="shopSidebar" autocomplete="off">
+          <div class="sidebar-header">
+            <h3><i class="fa-solid fa-sliders"></i> Filters</h3>
+            <button type="button" class="sidebar-reset" id="resetAllFilters">
+              <i class="fa-solid fa-rotate-left"></i> Reset
+            </button>
+          </div>
+
+          <div class="sidebar-body">
+            <!-- Categories -->
+            <div class="filter-section">
+              <h4 class="filter-section-title">
+                <i class="fa-solid fa-tags"></i> Category
+              </h4>
+              <div class="filter-checkboxes" data-filter-key="category">
+                <label class="filter-checkbox">
+                  <input
+                    type="checkbox"
+                    name="noRestore1"
+                    value="Lingerie"
+                    autocomplete="off"
+                  />
+                  <span class="checkmark"></span>
+                  <span>Lingerie</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input
+                    type="checkbox"
+                    name="noRestore2"
+                    value="Loungewear"
+                    autocomplete="off"
+                  />
+                  <span class="checkmark"></span>
+                  <span>Loungewear</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input
+                    type="checkbox"
+                    name="noRestore3"
+                    value="Underwear"
+                    autocomplete="off"
+                  />
+                  <span class="checkmark"></span>
+                  <span>Underwear</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input
+                    type="checkbox"
+                    name="noRestore4"
+                    value="Accessories"
+                    autocomplete="off"
+                  />
+                  <span class="checkmark"></span>
+                  <span>Accessories</span>
+                </label>
+              </div>
             </div>
 
-            <form id="filterForm" class="filter-form">
-              <!-- Category Filter -->
-              <div class="filter-group">
-                <h4 class="filter-label">Category</h4>
-                <select
-                  name="category"
-                  id="categorySelect"
-                  class="filter-select"
-                >
-                  <option value="">All Categories</option>
-                  <option value="Accessories">Accessories</option>
-                  <option value="Lingerie">Lingerie</option>
-                  <option value="Loungewear">Loungewear</option>
-                  <option value="Underwear">Underwear</option>
-                </select>
+            <!-- Gender -->
+            <div class="filter-section">
+              <h4 class="filter-section-title">
+                <i class="fa-solid fa-venus-mars"></i> Gender
+              </h4>
+              <div class="filter-checkboxes" data-filter-key="gender">
+                <label class="filter-checkbox">
+                  <input type="checkbox" value="Women" autocomplete="off" />
+                  <span class="checkmark"></span>
+                  <span>Women</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" value="Men" autocomplete="off" />
+                  <span class="checkmark"></span>
+                  <span>Men</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" value="Kids" autocomplete="off" />
+                  <span class="checkmark"></span>
+                  <span>Kids</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" value="Unisex" autocomplete="off" />
+                  <span class="checkmark"></span>
+                  <span>Unisex</span>
+                </label>
               </div>
+            </div>
 
-              <!-- Gender Filter -->
-              <div class="filter-group">
-                <h4 class="filter-label">Gender</h4>
-                <select name="gender" id="genderSelect" class="filter-select">
-                  <option value="">All</option>
-                  <option value="Kids">Kids</option>
-                  <option value="Men">Men</option>
-                  <option value="Unisex">Unisex</option>
-                  <option value="Women">Women</option>
-                </select>
-              </div>
-
-              <!-- Size Filter -->
-              <div class="filter-group">
-                <h4 class="filter-label">Size</h4>
-                <div class="size-chips" id="sizeChips">
-                  <button type="button" class="size-chip" data-size="XS">
-                    XS
-                  </button>
-                  <button type="button" class="size-chip" data-size="S">
-                    S
-                  </button>
-                  <button type="button" class="size-chip" data-size="M">
-                    M
-                  </button>
-                  <button type="button" class="size-chip" data-size="L">
-                    L
-                  </button>
-                  <button type="button" class="size-chip" data-size="XL">
-                    XL
-                  </button>
-                  <button type="button" class="size-chip" data-size="XXL">
-                    XXL
-                  </button>
+            <!-- Price Range -->
+            <div class="filter-section">
+              <h4 class="filter-section-title">
+                <i class="fa-solid fa-naira-sign"></i> Price Range
+              </h4>
+              <div class="price-slider-wrap">
+                <div class="price-slider-values">
+                  <span id="priceMinDisplay">₦0</span>
+                  <span id="priceMaxDisplay">₦500,000</span>
                 </div>
-              </div>
-
-              <!-- Price Range -->
-              <div class="filter-group">
-                <h4 class="filter-label">Max Price</h4>
-                <div class="price-range">
+                <div class="price-slider-track">
                   <input
                     type="range"
-                    id="priceRange"
-                    name="price"
+                    id="priceMinSlider"
                     min="0"
-                    max="100000"
-                    step="1000"
-                    value="100000"
+                    max="500000"
+                    step="5000"
+                    value="0"
                   />
-                  <div class="price-labels">
-                    <span>₦0</span>
-                    <span id="priceValue">₦100,000</span>
+                  <input
+                    type="range"
+                    id="priceMaxSlider"
+                    min="0"
+                    max="500000"
+                    step="5000"
+                    value="500000"
+                  />
+                </div>
+                <div class="price-inputs">
+                  <div class="price-input-group">
+                    <span class="price-input-prefix">₦</span>
+                    <input
+                      type="number"
+                      id="priceMinInput"
+                      min="0"
+                      max="500000"
+                      step="1000"
+                      value="0"
+                      placeholder="Min"
+                    />
+                  </div>
+                  <span class="price-input-sep">—</span>
+                  <div class="price-input-group">
+                    <span class="price-input-prefix">₦</span>
+                    <input
+                      type="number"
+                      id="priceMaxInput"
+                      min="0"
+                      max="500000"
+                      step="1000"
+                      value="500000"
+                      placeholder="Max"
+                    />
                   </div>
                 </div>
-              </div>
-
-              <!-- Sort -->
-              <div class="filter-group">
-                <h4 class="filter-label">Sort By</h4>
-                <select id="sortSelect" name="sort" class="filter-select">
-                  <option value="newest">Newest First</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="name">Name: A-Z</option>
-                </select>
-              </div>
-
-              <!-- Reset -->
-              <button
-                type="button"
-                class="btn btn-ghost full-width"
-                id="resetFilters"
-              >
-                <i class="fa-solid fa-rotate-left"></i>
-                Reset Filters
-              </button>
-            </form>
-          </aside>
-
-          <!-- Products Section -->
-          <section class="shop-products">
-            <div class="shop-toolbar">
-              <div class="results-count">
-                <span id="resultsCount">0</span> products found
-              </div>
-              <div class="view-toggle">
-                <button
-                  type="button"
-                  class="view-btn active"
-                  data-view="grid"
-                  aria-label="Grid view"
-                >
-                  <i class="fa-solid fa-grip"></i>
-                </button>
-                <button
-                  type="button"
-                  class="view-btn"
-                  data-view="list"
-                  aria-label="List view"
-                >
-                  <i class="fa-solid fa-list"></i>
-                </button>
               </div>
             </div>
 
-            <!-- Loading State with Skeletons -->
-            <div class="loading-state" id="productsLoading">
-              <div class="products-skeleton-grid">
-                <div class="skeleton-card">
-                  <div class="skeleton skeleton-img"></div>
-                  <div class="skeleton-content">
-                    <div class="skeleton skeleton-title"></div>
-                    <div class="skeleton skeleton-price"></div>
-                    <div class="skeleton skeleton-rating"></div>
-                  </div>
+            <!-- Delivery Type -->
+            <div class="filter-section">
+              <h4 class="filter-section-title">
+                <i class="fa-solid fa-truck-fast"></i> Delivery
+              </h4>
+              <div class="filter-checkboxes" data-filter-key="deliveryType">
+                <label class="filter-checkbox">
+                  <input type="checkbox" value="express" autocomplete="off" />
+                  <span class="checkmark"></span>
+                  <span><i class="fa-solid fa-bolt"></i> Same-day</span>
+                </label>
+                <label class="filter-checkbox">
+                  <input type="checkbox" value="standard" autocomplete="off" />
+                  <span class="checkmark"></span>
+                  <span><i class="fa-solid fa-truck"></i> Standard</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Stock & Availability -->
+            <div class="filter-section">
+              <h4 class="filter-section-title">
+                <i class="fa-solid fa-box"></i> Availability
+              </h4>
+              <div class="filter-toggles">
+                <label class="filter-toggle">
+                  <input
+                    type="checkbox"
+                    id="filterInStock"
+                    autocomplete="off"
+                  />
+                  <span class="toggle-switch"></span>
+                  <span>In Stock Only</span>
+                </label>
+                <label class="filter-toggle">
+                  <input
+                    type="checkbox"
+                    id="filterNewArrivals"
+                    autocomplete="off"
+                  />
+                  <span class="toggle-switch"></span>
+                  <span>New Arrivals</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="shop-content">
+          <!-- Top Filter Bar -->
+          <div class="filter-bar" id="filterBar">
+            <div class="filter-bar-left">
+              <button
+                type="button"
+                class="filter-toggle-btn"
+                id="filterToggleBtn"
+              >
+                <i class="fa-solid fa-sliders"></i>
+                <span>Filters</span>
+                <span class="filter-count" id="activeFilterCount" hidden
+                  >0</span
+                >
+              </button>
+              <div class="search-box">
+                <i class="fa-solid fa-search"></i>
+                <input
+                  type="text"
+                  id="shopSearchInput"
+                  placeholder="Search products..."
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+            <div class="filter-bar-right">
+              <span class="results-count" id="resultsCount">0 products</span>
+              <select id="sortSelect" class="sort-dropdown">
+                <option value="newest">Newest</option>
+                <option value="popular">Popular</option>
+                <option value="price-low">Price: Low → High</option>
+                <option value="price-high">Price: High → Low</option>
+                <option value="name">Name: A → Z</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Active Filters Chips -->
+          <div class="active-filters" id="activeFiltersBar" hidden>
+            <div class="active-chips" id="activeChips"></div>
+            <button type="button" class="clear-all-btn" id="clearAllFilters">
+              <i class="fa-solid fa-xmark"></i> Clear All
+            </button>
+          </div>
+
+          <!-- Products Grid Section -->
+          <section class="shop-grid-section">
+            <!-- Skeleton Loading -->
+            <div class="products-grid" id="skeletonGrid">
+              <div class="product-skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-80"></div>
+                  <div class="skeleton-line w-60"></div>
                 </div>
-                <div class="skeleton-card">
-                  <div class="skeleton skeleton-img"></div>
-                  <div class="skeleton-content">
-                    <div class="skeleton skeleton-title"></div>
-                    <div class="skeleton skeleton-price"></div>
-                    <div class="skeleton skeleton-rating"></div>
-                  </div>
+              </div>
+              <div class="product-skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-80"></div>
+                  <div class="skeleton-line w-60"></div>
                 </div>
-                <div class="skeleton-card">
-                  <div class="skeleton skeleton-img"></div>
-                  <div class="skeleton-content">
-                    <div class="skeleton skeleton-title"></div>
-                    <div class="skeleton skeleton-price"></div>
-                    <div class="skeleton skeleton-rating"></div>
-                  </div>
+              </div>
+              <div class="product-skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-80"></div>
+                  <div class="skeleton-line w-60"></div>
                 </div>
-                <div class="skeleton-card">
-                  <div class="skeleton skeleton-img"></div>
-                  <div class="skeleton-content">
-                    <div class="skeleton skeleton-title"></div>
-                    <div class="skeleton skeleton-price"></div>
-                    <div class="skeleton skeleton-rating"></div>
-                  </div>
+              </div>
+              <div class="product-skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-80"></div>
+                  <div class="skeleton-line w-60"></div>
+                </div>
+              </div>
+              <div class="product-skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-80"></div>
+                  <div class="skeleton-line w-60"></div>
+                </div>
+              </div>
+              <div class="product-skeleton">
+                <div class="skeleton-img"></div>
+                <div class="skeleton-body">
+                  <div class="skeleton-line w-40"></div>
+                  <div class="skeleton-line w-80"></div>
+                  <div class="skeleton-line w-60"></div>
                 </div>
               </div>
             </div>
 
             <!-- Products Grid -->
-            <div
-              class="products-grid"
-              id="productsGrid"
-              data-products-grid
-            ></div>
+            <div class="products-grid" id="productsGrid" hidden></div>
 
-            <!-- Empty State -->
-            <div class="empty-state" id="noResults" hidden>
-              <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+            <!-- Modern Empty State -->
+            <div class="empty-state-modern" id="noResults" hidden>
+              <div class="empty-illustration">
+                <svg
+                  width="160"
+                  height="160"
+                  viewBox="0 0 160 160"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <!-- Shopping bag outline -->
+                  <path
+                    d="M40 55C40 51.6863 42.6863 49 46 49H114C117.314 49 120 51.6863 120 55V130C120 133.314 117.314 136 114 136H46C42.6863 136 40 133.314 40 130V55Z"
+                    fill="var(--clr-primary-light)"
+                    stroke="var(--clr-primary)"
+                    stroke-width="2"
+                  />
+                  <!-- Bag handles -->
+                  <path
+                    d="M60 49V35C60 27.268 66.268 21 74 21H86C93.732 21 100 27.268 100 35V49"
+                    stroke="var(--clr-primary)"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+                  <!-- Sad face -->
+                  <circle cx="70" cy="82" r="4" fill="var(--clr-primary)" />
+                  <circle cx="90" cy="82" r="4" fill="var(--clr-primary)" />
+                  <path
+                    d="M65 105C65 105 72 98 80 98C88 98 95 105 95 105"
+                    stroke="var(--clr-primary)"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                  />
+                  <!-- Decorative sparkles -->
+                  <circle
+                    cx="30"
+                    cy="40"
+                    r="3"
+                    fill="var(--clr-gold)"
+                    opacity="0.6"
+                  />
+                  <circle
+                    cx="130"
+                    cy="45"
+                    r="4"
+                    fill="var(--clr-primary)"
+                    opacity="0.4"
+                  />
+                  <circle
+                    cx="135"
+                    cy="120"
+                    r="2"
+                    fill="var(--clr-gold)"
+                    opacity="0.5"
+                  />
+                  <circle
+                    cx="25"
+                    cy="100"
+                    r="2.5"
+                    fill="var(--clr-primary)"
+                    opacity="0.3"
+                  />
+                </svg>
+              </div>
               <h3 class="empty-title">No products found</h3>
               <p class="empty-text">
-                Try adjusting your filters or search criteria
+                We couldn't find what you're looking for. Try adjusting your
+                filters or browse our full collection.
               </p>
-              <button
-                type="button"
-                class="btn btn-primary"
-                id="clearFiltersBtn"
-              >
-                Clear All Filters
-              </button>
+              <div class="empty-actions">
+                <button
+                  type="button"
+                  class="empty-btn-primary"
+                  id="clearFiltersBtn"
+                >
+                  <i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters
+                </button>
+                <a href="shop.html" class="empty-btn-secondary">
+                  <i class="fa-solid fa-store"></i> View All Products
+                </a>
+              </div>
             </div>
           </section>
         </div>
+        <!-- /.shop-content -->
       </div>
-
-      <!-- Recently Viewed Section -->
-      <section
-        class="recently-viewed-section"
-        id="recentlyViewedSection"
-        hidden
-      >
-        <div class="section-container">
-          <div class="section-header">
-            <h2 class="section-title">Recently Viewed</h2>
-          </div>
-          <div class="recently-viewed-grid" id="recentlyViewedGrid"></div>
-        </div>
-      </section>
+      <!-- /.shop-layout -->
     </main>
 
-    <!-- Quick View Modal -->
-    <div class="modal-overlay" id="variantModal" aria-hidden="true">
-      <div class="modal-container">
-        <button
-          type="button"
-          class="modal-close"
-          id="modalCloseBtn"
-          aria-label="Close"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="modal-body">
-          <div class="modal-gallery">
-            <div class="modal-gallery-main">
-              <img id="modalImg" src="" alt="Product" />
-              <span class="modal-badge" id="modalBadge" hidden>New</span>
-              <button
-                type="button"
-                class="gallery-nav prev"
-                id="galleryPrev"
-                aria-label="Previous image"
-              >
-                <i class="fa-solid fa-chevron-left"></i>
-              </button>
-              <button
-                type="button"
-                class="gallery-nav next"
-                id="galleryNext"
-                aria-label="Next image"
-              >
-                <i class="fa-solid fa-chevron-right"></i>
-              </button>
-            </div>
-            <div class="modal-gallery-thumbs" id="modalThumbs"></div>
-          </div>
-          <div class="modal-details">
-            <h2 class="modal-title" id="modalTitle">Product Name</h2>
-            <p class="modal-price" id="modalPrice">₦0</p>
-            <p class="modal-desc" id="modalDesc">Product description</p>
+    <!-- Filter Sidebar Overlay (Mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-            <div class="modal-field">
-              <label class="modal-label">Select Size</label>
-              <div class="size-options" id="modalSizes"></div>
-            </div>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       QUICK VIEW MODAL - Content is dynamically generated by shop.js
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="productModal" hidden></div>
 
-            <div class="modal-field" id="quantityField">
-              <label class="modal-label">Quantity</label>
-              <div class="quantity-controls">
-                <button type="button" class="quantity-btn" id="qtyDecrease">
-                  <i class="fa-solid fa-minus"></i>
-                </button>
-                <span class="quantity-value" id="qtyValue">1</span>
-                <button type="button" class="quantity-btn" id="qtyIncrease">
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="btn btn-primary btn-lg full-width modal-add-btn"
-              id="modalAddToCart"
-            >
+    <!-- Cart Drawer -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true">
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
               <i class="fa-solid fa-bag-shopping"></i>
-              <span>Add to Cart</span>
-            </button>
-
-            <!-- Social Share Buttons -->
-            <div id="modalShareButtons"></div>
-
-            <!-- Product Reviews -->
-            <div id="modalReviews"></div>
-
-            <!-- Related Products -->
-            <div id="modalRelated"></div>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="shop.html" class="btn btn-primary">Start Shopping</a>
           </div>
+        </div>
+        <div class="cd-footer" id="cartDrawerFooter" style="display: none">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="checkout.html" class="cd-checkout-btn">
+            <i class="fa-solid fa-lock"></i> Proceed to Checkout
+          </a>
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Cart Drawer -->
-    <aside class="cart-drawer" id="cartDrawer" aria-hidden="true">
-      <div class="drawer-header">
-        <h3 class="drawer-title">
-          <i class="fa-solid fa-bag-shopping"></i> Shopping Cart
-        </h3>
-        <button
-          type="button"
-          class="drawer-close"
-          id="drawerCloseBtn"
-          aria-label="Close cart"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="drawer-body" data-drawer-list></div>
-      <div class="drawer-footer">
-        <div class="drawer-subtotal">
-          <span>Subtotal</span>
-          <strong data-drawer-subtotal>₦0</strong>
-        </div>
-        <a href="cart.html" class="drawer-checkout">
-          <i class="fa-solid fa-arrow-right"></i>
-          Proceed to Checkout
-        </a>
-      </div>
-    </aside>
+    <!-- Page Overlay -->
 
-    <!-- Overlay -->
-    <div class="page-overlay" id="pageOverlay"></div>
+    <!-- Toast Notification -->
+    <div class="toast" data-toast></div>
 
-    <!-- Toast -->
-    <div class="toast-notification" data-toast hidden></div>
-
-    <!-- Footer -->
-    <footer class="site-footer">
-      <div class="footer-container">
-        <div class="footer-main">
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <!-- Brand -->
           <div class="footer-brand">
-            <a href="index.html" class="footer-logo">
-              <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-              <span class="brand-name">Lingerie by Sisioyin</span>
+            <a
+              href="index.html"
+              class="logo"
+              style="margin-bottom: var(--space-4)"
+            >
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline"
+                >Lingerie by Sisioyin</span
+              >
             </a>
-            <p class="footer-tagline">
-              Luxe essentials defined by comfort and confidence.
+            <p>
+              Luxe essentials defined by comfort and confidence. Premium
+              lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" class="social-link" aria-label="Instagram"
+              <a href="#" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" class="social-link" aria-label="TikTok"
+              <a href="#" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
-              <a href="#" class="social-link" aria-label="WhatsApp"
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                aria-label="WhatsApp"
                 ><i class="fa-brands fa-whatsapp"></i
               ></a>
             </div>
           </div>
 
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Shop</h4>
+          <!-- Shop Links -->
+          <div>
+            <h4 class="footer-title">Shop</h4>
             <nav class="footer-links">
               <a href="shop.html">All Products</a>
               <a href="shop.html?category=Lingerie">Lingerie</a>
               <a href="shop.html?category=Loungewear">Loungewear</a>
-              <a href="shop.html?category=Underwear">Underwear</a>
               <a href="shop.html?is_new=true">New Arrivals</a>
             </nav>
           </div>
 
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Help</h4>
+          <!-- Help Links -->
+          <div>
+            <h4 class="footer-title">Help</h4>
             <nav class="footer-links">
               <a href="dashboard.html">My Account</a>
               <a href="faq.html">FAQs</a>
               <a href="size.html">Size Guide</a>
-              <a href="terms.html">Terms of Service</a>
-              <a href="privacy.html">Privacy Policy</a>
-              <a href="https://wa.me/2349033344860" target="_blank"
-                >Contact Us</a
-              >
+              <a href="contact.html">Contact Us</a>
             </nav>
           </div>
 
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Newsletter</h4>
-            <p class="footer-newsletter-text">
-              Subscribe for exclusive offers and updates.
-            </p>
-            <form class="newsletter-form" id="newsletterForm">
-              <input type="email" placeholder="Enter your email" required />
-              <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-paper-plane"></i>
-              </button>
-            </form>
+          <!-- Legal Links -->
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+            </nav>
           </div>
         </div>
 
         <div class="footer-bottom">
-          <div class="footer-bottom-left">
-            <p>
-              &copy; <span id="currentYear"></span> Lingerie by Sisioyin. All
-              rights reserved.
-            </p>
-          </div>
-          <div class="theme-toggle" id="themeToggle">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2025</span> Lingerie by Sisioyin. All
+            rights reserved.
+          </p>
+
+          <!-- Theme Toggle -->
+          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              title="Light Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              title="System Default"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              title="Dark Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
-          </div>
-          <div class="footer-bottom-right">
-            <a href="terms.html">Terms</a>
-            <a href="privacy.html">Privacy</a>
           </div>
         </div>
       </div>
     </footer>
 
-    <!-- WhatsApp Live Chat Widget -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       WHATSAPP WIDGET
+       ═══════════════════════════════════════════════════════════════════════ -->
     <div class="whatsapp-widget" id="whatsappWidget">
-      <div class="whatsapp-popup">
+      <a
+        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
+        target="_blank"
+        class="whatsapp-btn"
+        aria-label="Chat on WhatsApp"
+      >
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       AUTH MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="authBackdrop"></div>
+    <div class="modal auth-modal" id="authModal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-heart" style="color: var(--clr-primary)"></i>
+          Welcome
+        </h3>
         <button
           type="button"
-          class="whatsapp-popup-close"
-          id="whatsappClose"
+          class="modal-close"
+          id="authClose"
           aria-label="Close"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
-        <div class="whatsapp-popup-header">
-          <div class="whatsapp-popup-avatar">
-            <i class="fa-brands fa-whatsapp"></i>
-          </div>
-          <div class="whatsapp-popup-info">
-            <h4>Lingerie by Sisioyin</h4>
-            <p>Typically replies within minutes</p>
-          </div>
-        </div>
-        <div class="whatsapp-popup-body">
-          <p>
-            👋 Hi there! Need help finding the perfect lingerie? Chat with us on
-            WhatsApp!
-          </p>
-        </div>
-        <a
-          href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-          target="_blank"
-          class="whatsapp-popup-btn"
-        >
-          <i class="fa-brands fa-whatsapp"></i>
-          Start Chat
-        </a>
       </div>
-      <button
-        type="button"
-        class="whatsapp-fab"
-        id="whatsappFab"
-        aria-label="Chat on WhatsApp"
-      >
-        <i class="fa-brands fa-whatsapp"></i>
-      </button>
-    </div>
-
-    <!-- Auth Modal -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-modal-content auth-box">
-        <button type="button" class="auth-close" id="authClose">
-          <i class="fa-solid fa-times"></i>
-        </button>
-
-        <div class="auth-brand">
-          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> Welcome</h1>
-        </div>
-
+      <div class="modal-body">
+        <!-- Auth Tabs -->
         <div class="auth-tabs" id="authTabs">
-          <button type="button" class="tab-btn active" data-tab="login">
+          <button type="button" class="auth-tab active" data-tab="login">
             Login
           </button>
-          <button type="button" class="tab-btn" data-tab="signup">
+          <button type="button" class="auth-tab" data-tab="signup">
             Register
           </button>
         </div>
 
         <!-- Login Form -->
         <form class="auth-form active" id="loginForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
             <input
               type="email"
               id="loginEmail"
               name="email"
-              placeholder=" "
+              class="form-input"
+              placeholder="Enter your email"
               autocomplete="email"
               required
             />
-            <label for="loginEmail">Email Address</label>
           </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
             <input
               type="password"
               id="loginPassword"
               name="password"
-              placeholder=" "
+              class="form-input"
+              placeholder="Enter your password"
               autocomplete="current-password"
               required
             />
-            <label for="loginPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#loginPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
           </div>
-
-          <div class="auth-field recaptcha-field">
+          <div class="form-group recaptcha-field">
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
               data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
             ></div>
           </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
             Sign In
           </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
+          <div class="auth-divider">or continue with</div>
           <button
             type="button"
-            class="btn btn-outline btn-block google-login-btn"
+            class="btn btn-secondary w-full google-login-btn"
           >
             <i class="fa-brands fa-google"></i> Google
           </button>
@@ -755,131 +935,151 @@
 
         <!-- Signup Form -->
         <form class="auth-form" id="signupForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-user icon"></i>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full Name</label>
             <input
               type="text"
               id="signupName"
               name="fullName"
-              placeholder=" "
+              class="form-input"
+              placeholder="Enter your full name"
               autocomplete="name"
               required
             />
-            <label for="signupName">Full Name</label>
           </div>
-
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email Address</label>
             <input
               type="email"
               id="signupEmail"
               name="email"
-              placeholder=" "
+              class="form-input"
+              placeholder="Enter your email"
               autocomplete="email"
               required
             />
-            <label for="signupEmail">Email Address</label>
           </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
             <input
               type="password"
               id="signupPassword"
               name="password"
-              placeholder=" "
+              class="form-input"
+              placeholder="Create a password"
               autocomplete="new-password"
               required
               minlength="6"
             />
-            <label for="signupPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
           </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
+          <div class="form-group">
+            <label class="form-label" for="signupConfirm"
+              >Confirm Password</label
+            >
             <input
               type="password"
               id="signupConfirm"
               name="confirmPassword"
-              placeholder=" "
+              class="form-input"
+              placeholder="Confirm your password"
               autocomplete="new-password"
               required
               minlength="6"
             />
-            <label for="signupConfirm">Confirm Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupConfirm"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
           </div>
-
-          <div class="auth-field recaptcha-field">
+          <div class="form-group recaptcha-field">
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
               data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
             ></div>
           </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
             Create Account
           </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
+          <div class="auth-divider">or continue with</div>
           <button
             type="button"
-            class="btn btn-outline btn-block google-login-btn"
+            class="btn btn-secondary w-full google-login-btn"
           >
             <i class="fa-brands fa-google"></i> Google
           </button>
         </form>
 
-        <p class="auth-footer-text">
+        <p
+          style="
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: var(--space-4);
+          "
+        >
           By continuing, you agree to our
-          <a href="terms.html">Terms of Service</a> and
-          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html" style="color: var(--clr-primary)">Terms</a> and
+          <a href="privacy.html" style="color: var(--clr-primary)"
+            >Privacy Policy</a
+          >
         </p>
       </div>
     </div>
 
-    <!-- Search Overlay -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SEARCH OVERLAY
+       ═══════════════════════════════════════════════════════════════════════ -->
     <div class="search-overlay" id="searchOverlay">
       <div class="search-container">
-        <div class="search-header">
+        <div class="search-input-wrapper">
           <i class="fa-solid fa-magnifying-glass"></i>
           <input
             type="text"
-            class="search-input"
             id="searchInput"
             placeholder="Search for products..."
             autocomplete="off"
           />
-          <button type="button" class="search-close" id="searchClose">
+          <button
+            type="button"
+            class="search-close"
+            id="searchClose"
+            aria-label="Close search"
+          >
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div class="search-results" id="searchResults">
-          <div class="search-empty">
-            <i class="fa-solid fa-magnifying-glass"></i>
+        <div
+          class="search-results"
+          id="searchResults"
+          style="
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-4);
+            max-height: 400px;
+            overflow-y: auto;
+          "
+        >
+          <div
+            style="
+              padding: var(--space-8);
+              text-align: center;
+              color: var(--text-muted);
+            "
+          >
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="font-size: var(--text-2xl); margin-bottom: var(--space-2)"
+            ></i>
             <p>Start typing to search products...</p>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════════════════ -->
     <script src="assets/js/recaptcha.js"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
@@ -887,15 +1087,14 @@
       defer
     ></script>
     <script
-      defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      defer
     ></script>
-    <script defer src="assets/js/config.js"></script>
-    <script defer src="assets/js/utils.js"></script>
-    <script defer src="assets/js/supabase.js"></script>
-    <script defer src="assets/js/app.js"></script>
-    <script defer src="assets/js/auth.js"></script>
-    <script defer src="assets/js/analytics.js"></script>
-    <script defer src="assets/js/shop.js"></script>
+    <script src="assets/js/config.js" defer></script>
+    <script src="assets/js/utils.js" defer></script>
+    <script src="assets/js/supabase.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/shop.js" defer></script>
   </body>
 </html>

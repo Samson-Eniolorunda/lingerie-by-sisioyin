@@ -6,43 +6,518 @@
     <title>My Wishlist | Lingerie by Sisioyin</title>
     <meta
       name="description"
-      content="View your saved items and wishlist. Lingerie by Sisioyin - Premium lingerie."
+      content="Your saved items at Lingerie by Sisioyin. View and shop your wishlist."
     />
     <meta name="robots" content="noindex, follow" />
     <meta name="theme-color" content="#be185d" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Icons -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <style>
+      /* Wishlist Page Styles */
+      .wishlist-page {
+        min-height: 100vh;
+        background: var(--bg-muted);
+      }
+
+      /* Page Header */
+      .wishlist-hero {
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-primary-dark, #9d174d)
+        );
+        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-10);
+        text-align: center;
+        color: white;
+      }
+
+      .wishlist-hero-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        font-size: 2rem;
+      }
+
+      .wishlist-hero-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-3xl);
+        font-weight: 700;
+        margin-bottom: var(--space-2);
+      }
+
+      .wishlist-hero-subtitle {
+        font-size: var(--fs-lg);
+        opacity: 0.9;
+      }
+
+      /* Wishlist Main */
+      .wishlist-main {
+        padding: var(--space-8) 0 var(--space-16);
+      }
+
+      /* Wishlist Actions Bar */
+      .wishlist-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-6);
+        flex-wrap: wrap;
+        gap: var(--space-4);
+      }
+
+      .wishlist-count {
+        font-size: var(--fs-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .wishlist-count span {
+        color: var(--clr-primary);
+      }
+
+      /* Wishlist Grid */
+      .wishlist-grid {
+        display: grid;
+        gap: var(--space-6);
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      }
+
+      /* Wishlist Card */
+      .wishlist-card {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        overflow: hidden;
+        transition:
+          transform 0.3s,
+          box-shadow 0.3s;
+      }
+
+      .wishlist-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .wishlist-card-image {
+        position: relative;
+        aspect-ratio: 3/4;
+        overflow: hidden;
+        background: var(--bg-muted);
+      }
+
+      .wishlist-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s;
+      }
+
+      .wishlist-card:hover .wishlist-card-image img {
+        transform: scale(1.05);
+      }
+
+      .wishlist-card-badges {
+        position: absolute;
+        top: var(--space-3);
+        left: var(--space-3);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .wishlist-badge {
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-full);
+        font-size: var(--fs-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .wishlist-badge.new {
+        background: var(--clr-accent);
+        color: white;
+      }
+
+      .wishlist-badge.sale {
+        background: var(--clr-error);
+        color: white;
+      }
+
+      .wishlist-badge.low-stock {
+        background: var(--clr-warning);
+        color: #000;
+      }
+
+      .wishlist-remove-btn {
+        position: absolute;
+        top: var(--space-3);
+        right: var(--space-3);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--bg-surface);
+        border: none;
+        color: var(--clr-error);
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-md);
+      }
+
+      .wishlist-remove-btn:hover {
+        background: var(--clr-error);
+        color: white;
+        transform: scale(1.1);
+      }
+
+      .wishlist-card-content {
+        padding: var(--space-5);
+      }
+
+      .wishlist-card-category {
+        font-size: var(--fs-xs);
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--space-2);
+      }
+
+      .wishlist-card-name {
+        font-size: var(--fs-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--space-2);
+        line-height: 1.3;
+      }
+
+      .wishlist-card-name a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .wishlist-card-name a:hover {
+        color: var(--clr-primary);
+      }
+
+      .wishlist-card-price {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-bottom: var(--space-4);
+      }
+
+      .wishlist-price-current {
+        font-size: var(--fs-xl);
+        font-weight: 700;
+        color: var(--clr-primary);
+      }
+
+      .wishlist-price-original {
+        font-size: var(--fs-sm);
+        color: var(--text-muted);
+        text-decoration: line-through;
+      }
+
+      .wishlist-card-meta {
+        display: flex;
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+        font-size: var(--fs-sm);
+        color: var(--text-secondary);
+      }
+
+      .wishlist-card-meta span {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+      }
+
+      .wishlist-card-actions {
+        display: flex;
+        gap: var(--space-2);
+      }
+
+      .wishlist-card-actions .btn {
+        flex: 1;
+      }
+
+      /* Empty Wishlist */
+      .wishlist-empty {
+        text-align: center;
+        padding: var(--space-16) var(--space-6);
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+      }
+
+      .wishlist-empty-icon {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          rgba(236, 72, 153, 0.1),
+          rgba(190, 24, 93, 0.1)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-6);
+        font-size: 3rem;
+        color: var(--clr-primary);
+      }
+
+      .wishlist-empty-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-3);
+      }
+
+      .wishlist-empty-text {
+        color: var(--text-secondary);
+        max-width: 400px;
+        margin: 0 auto var(--space-8);
+        line-height: 1.6;
+      }
+
+      /* Quick Actions */
+      .wishlist-quick-actions {
+        display: flex;
+        gap: var(--space-4);
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: var(--space-8);
+        padding-top: var(--space-8);
+        border-top: 1px solid var(--border-light);
+      }
+
+      .quick-action-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-4);
+        background: var(--bg-muted);
+        border-radius: var(--radius-xl);
+        text-decoration: none;
+        color: var(--text-primary);
+        transition: all 0.2s;
+        min-width: 140px;
+      }
+
+      .quick-action-card:hover {
+        background: var(--clr-primary);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      .quick-action-card i {
+        font-size: 1.5rem;
+      }
+
+      .quick-action-card span {
+        font-size: var(--fs-sm);
+        font-weight: 500;
+      }
+
+      /* Fix hero padding for fixed header */
+      .wishlist-hero {
+        padding-top: calc(80px + var(--space-16));
+      }
+
+      /* WhatsApp Widget Modern Styles */
+      .whatsapp-float {
+        position: fixed;
+        bottom: var(--space-6);
+        right: var(--space-6);
+        z-index: 1000;
+      }
+
+      .whatsapp-float-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.75rem;
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        position: relative;
+      }
+
+      .whatsapp-float-btn:hover {
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
+        color: white;
+      }
+
+      .whatsapp-float-btn::before {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        z-index: -1;
+        opacity: 0.3;
+        animation: whatsapp-pulse 2s infinite;
+      }
+
+      @keyframes whatsapp-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 0;
+        }
+      }
+
+      .whatsapp-tooltip {
+        position: absolute;
+        right: 70px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-lg);
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .whatsapp-float:hover .whatsapp-tooltip {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .whatsapp-tooltip::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 6px solid transparent;
+        border-left-color: var(--bg-surface);
+      }
+
+      /* Mobile Nav Theme Toggle Slider */
+      .mobile-theme-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        background: var(--bg-surface-alt);
+        border-radius: var(--radius-xl);
+        margin: var(--space-4);
+      }
+
+      .mobile-theme-toggle i {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        transition: color 0.2s;
+      }
+
+      .mobile-theme-toggle i.active {
+        color: var(--clr-primary);
+      }
+
+      .theme-slider {
+        position: relative;
+        width: 50px;
+        height: 26px;
+        background: var(--bg-muted);
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .theme-slider::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s;
+      }
+
+      [data-theme="dark"] .theme-slider::before,
+      .dark .theme-slider::before {
+        transform: translateX(24px);
+      }
+
+      [data-theme="dark"] .theme-slider,
+      .dark .theme-slider {
+        background: var(--clr-primary);
+      }
+    </style>
   </head>
-  <body class="lbs-page wishlist-page">
+
+  <body class="wishlist-page">
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <!-- Header -->
-    <header class="lbs-header" id="siteHeader">
-      <div class="header-container">
-        <a href="index.html" class="header-brand">
-          <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-          <span class="brand-name">Lingerie by Sisioyin</span>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
-        <nav class="header-nav" id="headerNav">
+        <nav class="nav" id="mainNav">
           <a href="index.html" class="nav-link">Home</a>
           <a href="shop.html" class="nav-link">Shop</a>
-          <a href="shop.html?category=Lingerie" class="nav-link">Lingerie</a>
-          <a href="shop.html?category=Loungewear" class="nav-link"
-            >Loungewear</a
-          >
+          <a href="shop.html?gender=Women" class="nav-link">Women</a>
+          <a href="shop.html?gender=Men" class="nav-link">Men</a>
+          <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
         </nav>
 
         <div class="header-actions">
@@ -59,29 +534,22 @@
             class="header-btn"
             id="loginBtn"
             aria-label="Sign in"
-            title="Sign In"
           >
             <i class="fa-solid fa-user"></i>
           </button>
-          <a
-            href="wishlist.html"
-            class="header-btn active"
-            aria-label="Wishlist"
-            title="Wishlist"
-          >
-            <i class="fa-solid fa-heart"></i>
-          </a>
-          <a
-            href="cart.html"
-            class="header-btn cart-btn"
+          <button
+            type="button"
+            class="header-btn"
+            id="cartToggle"
+            data-cart-drawer
             aria-label="Shopping cart"
           >
             <i class="fa-solid fa-bag-shopping"></i>
-            <span class="cart-count" data-cart-count>0</span>
-          </a>
+            <span class="badge" data-cart-count>0</span>
+          </button>
           <button
             type="button"
-            class="header-btn mobile-toggle"
+            class="header-btn menu-toggle"
             id="mobileToggle"
             aria-label="Menu"
           >
@@ -89,483 +557,413 @@
           </button>
         </div>
       </div>
-
-      <!-- Mobile Navigation -->
-      <nav class="mobile-nav" id="mobileNav">
-        <a href="index.html" class="mobile-nav-link">Home</a>
-        <a href="shop.html" class="mobile-nav-link">Shop All</a>
-        <a href="shop.html?category=Lingerie" class="mobile-nav-link"
-          >Lingerie</a
-        >
-        <a href="shop.html?category=Loungewear" class="mobile-nav-link"
-          >Loungewear</a
-        >
-        <a href="wishlist.html" class="mobile-nav-link active">Wishlist</a>
-        <a href="cart.html" class="mobile-nav-link">Cart</a>
-      </nav>
     </header>
 
-    <!-- Wishlist Hero -->
-    <section class="cart-hero">
-      <div class="section-container">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="index.html">Home</a>
-          <i class="fa-solid fa-chevron-right"></i>
-          <span>Wishlist</span>
-        </nav>
-        <h1 class="cart-hero-title">
-          <i class="fa-solid fa-heart"></i> My Wishlist
-        </h1>
-      </div>
-    </section>
-
-    <!-- Main Wishlist Content -->
-    <main class="wishlist-main" id="main">
-      <div class="section-container">
-        <!-- Empty State -->
-        <div class="wishlist-empty" id="wishlistEmpty">
-          <div class="empty-icon">
-            <i class="fa-regular fa-heart"></i>
-          </div>
-          <h3 class="empty-title">Your wishlist is empty</h3>
-          <p class="empty-text">
-            Save items you love by clicking the heart icon on any product.
-          </p>
-          <a href="shop.html" class="btn btn-primary">
-            <i class="fa-solid fa-arrow-left"></i>
-            Browse Products
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       NEW MOBILE NAVIGATION DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="mobile-drawer" id="mobileNav">
+      <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
+      <div class="mobile-drawer-panel">
+        <div class="drawer-header">
+          <a href="index.html" class="drawer-logo">
+            <span class="drawer-logo-icon"
+              ><i class="fa-solid fa-heart"></i
+            ></span>
+            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
+          <button
+            type="button"
+            class="drawer-close"
+            id="mobileNavClose"
+            aria-label="Close menu"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-
-        <!-- Wishlist Items Grid -->
-        <div class="wishlist-grid" id="wishlistGrid" hidden></div>
-      </div>
-    </main>
-
-    <!-- Quick View Modal -->
-    <div class="modal-overlay" id="variantModal" aria-hidden="true">
-      <div class="modal-container">
-        <button
-          type="button"
-          class="modal-close"
-          id="modalCloseBtn"
-          aria-label="Close"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="modal-body">
-          <div class="modal-gallery">
-            <div class="modal-gallery-main">
-              <img id="modalImg" src="" alt="Product" />
-              <span class="modal-badge" id="modalBadge" hidden>New</span>
-              <button
-                type="button"
-                class="gallery-nav prev"
-                id="galleryPrev"
-                aria-label="Previous image"
-              >
-                <i class="fa-solid fa-chevron-left"></i>
-              </button>
-              <button
-                type="button"
-                class="gallery-nav next"
-                id="galleryNext"
-                aria-label="Next image"
-              >
-                <i class="fa-solid fa-chevron-right"></i>
-              </button>
+        <div class="drawer-content">
+          <a href="dashboard.html" class="drawer-user">
+            <span class="drawer-user-avatar"
+              ><i class="fa-solid fa-user"></i
+            ></span>
+            <span class="drawer-user-info">
+              <span class="drawer-user-name">My Account</span>
+              <span class="drawer-user-email">Sign in for best experience</span>
+            </span>
+            <i class="fa-solid fa-chevron-right drawer-user-arrow"></i>
+          </a>
+          <nav class="drawer-nav">
+            <span class="drawer-nav-title">Menu</span>
+            <div class="drawer-nav-list">
+              <a href="index.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-home"></i
+                ></span>
+                Home
+              </a>
+              <a href="shop.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-store"></i
+                ></span>
+                Shop All
+              </a>
+              <a href="shop.html?is_new=true" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-wand-magic-sparkles"></i
+                ></span>
+                New Arrivals
+                <span class="drawer-nav-badge">New</span>
+              </a>
+              <a href="cart.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-bag-shopping"></i
+                ></span>
+                Cart
+                <span class="drawer-nav-badge" data-cart-count>0</span>
+              </a>
+              <a href="wishlist.html" class="drawer-nav-link active">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-heart"></i
+                ></span>
+                Wishlist
+              </a>
             </div>
-            <div class="modal-gallery-thumbs" id="modalThumbs"></div>
+          </nav>
+          <div class="drawer-categories">
+            <span class="drawer-nav-title">Categories</span>
+            <div class="drawer-categories-grid">
+              <a href="shop.html?gender=Women" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-venus"></i
+                ></span>
+                <span class="drawer-category-label">Women</span>
+              </a>
+              <a href="shop.html?gender=Men" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-mars"></i
+                ></span>
+                <span class="drawer-category-label">Men</span>
+              </a>
+              <a href="shop.html?gender=Kids" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-child"></i
+                ></span>
+                <span class="drawer-category-label">Kids</span>
+              </a>
+              <a href="shop.html?category=Lingerie" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-gem"></i
+                ></span>
+                <span class="drawer-category-label">Lingerie</span>
+              </a>
+              <a href="shop.html?category=Loungewear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-couch"></i
+                ></span>
+                <span class="drawer-category-label">Lounge</span>
+              </a>
+              <a href="shop.html?category=Underwear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-shirt"></i
+                ></span>
+                <span class="drawer-category-label">Underwear</span>
+              </a>
+            </div>
           </div>
-          <div class="modal-details">
-            <h2 class="modal-title" id="modalTitle">Product Name</h2>
-            <p class="modal-price" id="modalPrice">₦0</p>
-            <p class="modal-desc" id="modalDesc">Product description</p>
-
-            <div class="modal-field">
-              <label class="modal-label">Select Size</label>
-              <div class="size-options" id="modalSizes"></div>
+          <div class="drawer-support">
+            <span class="drawer-nav-title">Support</span>
+            <div class="drawer-support-links">
+              <a href="faq.html" class="drawer-support-link">FAQs</a>
+              <a href="size.html" class="drawer-support-link">Size Guide</a>
+              <a href="contact.html" class="drawer-support-link">Contact</a>
+              <a href="terms.html" class="drawer-support-link">Terms</a>
+              <a href="privacy.html" class="drawer-support-link">Privacy</a>
             </div>
-
-            <div class="modal-field" id="quantityField">
-              <label class="modal-label">Quantity</label>
-              <div class="quantity-controls">
-                <button type="button" class="quantity-btn" id="qtyDecrease">
-                  <i class="fa-solid fa-minus"></i>
-                </button>
-                <span class="quantity-value" id="qtyValue">1</span>
-                <button type="button" class="quantity-btn" id="qtyIncrease">
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-              </div>
-            </div>
-
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <div class="drawer-theme" id="mobileThemeToggle">
+            <i class="fa-solid fa-sun"></i>
             <button
               type="button"
-              class="btn btn-primary btn-lg full-width modal-add-btn"
-              id="modalAddToCart"
-            >
-              <i class="fa-solid fa-bag-shopping"></i>
-              <span>Add to Cart</span>
-            </button>
+              class="drawer-theme-toggle theme-btn"
+              id="themeSlider"
+              role="switch"
+              aria-label="Toggle dark mode"
+              data-theme="toggle"
+            ></button>
+            <i class="fa-solid fa-moon"></i>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div class="toast-notification" data-toast hidden></div>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HERO
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <section class="wishlist-hero">
+      <div class="container">
+        <div class="wishlist-hero-icon">
+          <i class="fa-solid fa-heart"></i>
+        </div>
+        <h1 class="wishlist-hero-title">My Wishlist</h1>
+        <p class="wishlist-hero-subtitle">Items you've saved for later</p>
+      </div>
+    </section>
 
-    <!-- Overlay -->
-    <div class="page-overlay" id="pageOverlay"></div>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <main class="wishlist-main" id="main">
+      <div class="container">
+        <!-- Wishlist Actions -->
+        <div
+          class="wishlist-actions"
+          id="wishlistActions"
+          style="display: none"
+        >
+          <p class="wishlist-count">
+            <span id="wishlistItemCount">0</span> items in your wishlist
+          </p>
+          <div style="display: flex; gap: var(--space-2)">
+            <button
+              type="button"
+              class="btn btn-outline btn-sm"
+              id="clearWishlistBtn"
+            >
+              <i class="fa-solid fa-trash-can"></i>
+              Clear All
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              id="addAllToCartBtn"
+            >
+              <i class="fa-solid fa-bag-shopping"></i>
+              Add All to Cart
+            </button>
+          </div>
+        </div>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-      <div class="footer-container">
-        <div class="footer-main">
-          <div class="footer-brand">
-            <a href="index.html" class="footer-logo">
-              <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-              <span class="brand-name">Lingerie by Sisioyin</span>
+        <!-- Wishlist Grid -->
+        <div class="wishlist-grid" id="wishlistGrid">
+          <!-- Items will be rendered by JS -->
+        </div>
+
+        <!-- Empty Wishlist -->
+        <div class="wishlist-empty" id="wishlistEmpty">
+          <div class="wishlist-empty-icon">
+            <i class="fa-solid fa-heart-crack"></i>
+          </div>
+          <h2 class="wishlist-empty-title">Your wishlist is empty</h2>
+          <p class="wishlist-empty-text">
+            Save items you love by clicking the heart icon on any product.
+            They'll appear here so you can easily find them later.
+          </p>
+          <a href="shop.html" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-bag-shopping"></i>
+            Start Shopping
+          </a>
+
+          <!-- Quick Actions -->
+          <div class="wishlist-quick-actions">
+            <a href="shop.html?is_new=true" class="quick-action-card">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>New Arrivals</span>
             </a>
-            <p class="footer-tagline">
-              Luxe essentials defined by comfort and confidence.
+            <a href="shop.html?category=Lingerie" class="quick-action-card">
+              <i class="fa-solid fa-gem"></i>
+              <span>Lingerie</span>
+            </a>
+            <a href="shop.html?category=Loungewear" class="quick-action-card">
+              <i class="fa-solid fa-cloud"></i>
+              <span>Loungewear</span>
+            </a>
+            <a href="shop.html?on_sale=true" class="quick-action-card">
+              <i class="fa-solid fa-tags"></i>
+              <span>On Sale</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a
+              href="index.html"
+              class="logo"
+              style="margin-bottom: var(--space-4)"
+            >
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline"
+                >Lingerie by Sisioyin</span
+              >
+            </a>
+            <p>
+              Luxe essentials defined by comfort and confidence. Premium
+              lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" class="social-link" aria-label="Instagram"
+              <a href="#" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" class="social-link" aria-label="TikTok"
+              <a href="#" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
-              <a href="#" class="social-link" aria-label="WhatsApp"
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                aria-label="WhatsApp"
                 ><i class="fa-brands fa-whatsapp"></i
               ></a>
             </div>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Shop</h4>
+          <div>
+            <h4 class="footer-title">Shop</h4>
             <nav class="footer-links">
               <a href="shop.html">All Products</a>
               <a href="shop.html?category=Lingerie">Lingerie</a>
               <a href="shop.html?category=Loungewear">Loungewear</a>
-              <a href="shop.html?category=Underwear">Underwear</a>
               <a href="shop.html?is_new=true">New Arrivals</a>
             </nav>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Help</h4>
+          <div>
+            <h4 class="footer-title">Help</h4>
             <nav class="footer-links">
               <a href="dashboard.html">My Account</a>
               <a href="faq.html">FAQs</a>
               <a href="size.html">Size Guide</a>
-              <a href="terms.html">Terms of Service</a>
-              <a href="privacy.html">Privacy Policy</a>
-              <a href="https://wa.me/2349033344860" target="_blank"
-                >Contact Us</a
-              >
+              <a href="contact.html">Contact Us</a>
             </nav>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Newsletter</h4>
-            <p class="footer-newsletter-text">
-              Subscribe for exclusive offers and updates.
-            </p>
-            <form class="newsletter-form" id="newsletterForm">
-              <input type="email" placeholder="Enter your email" required />
-              <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-paper-plane"></i>
-              </button>
-            </form>
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+            </nav>
           </div>
         </div>
-
         <div class="footer-bottom">
-          <div class="footer-bottom-left">
-            <p>
-              &copy; <span id="currentYear"></span> Lingerie by Sisioyin. All
-              rights reserved.
-            </p>
-          </div>
-          <div class="theme-toggle" id="themeToggle">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            rights reserved.
+          </p>
+          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              title="Light Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
-              data-theme="dark"
-              aria-label="Dark mode"
-              title="Dark Mode"
-            >
-              <i class="fa-solid fa-moon"></i>
-            </button>
-            <button
-              type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              title="System Default"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
-          </div>
-          <div class="footer-bottom-right">
-            <a href="terms.html">Terms</a>
-            <a href="privacy.html">Privacy</a>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="dark"
+              aria-label="Dark mode"
+              style="width: 36px; height: 36px"
+            >
+              <i class="fa-solid fa-moon"></i>
+            </button>
           </div>
         </div>
       </div>
     </footer>
 
-    <!-- WhatsApp Live Chat Widget -->
-    <div class="whatsapp-widget" id="whatsappWidget">
-      <div class="whatsapp-popup">
-        <button
-          type="button"
-          class="whatsapp-popup-close"
-          id="whatsappClose"
-          aria-label="Close"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="whatsapp-popup-header">
-          <div class="whatsapp-popup-avatar">
-            <i class="fa-brands fa-whatsapp"></i>
-          </div>
-          <div class="whatsapp-popup-info">
-            <h4>Lingerie by Sisioyin</h4>
-            <p>Typically replies within minutes</p>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       CART DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="shop.html" class="btn btn-primary">Start Shopping</a>
           </div>
         </div>
-        <div class="whatsapp-popup-body">
-          <p>
-            👋 Hi there! Need help finding the perfect lingerie? Chat with us on
-            WhatsApp!
-          </p>
+        <div class="cd-footer" id="cartDrawerFooter" style="display: none">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="checkout.html" class="cd-checkout-btn"
+            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
+          >
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
         </div>
-        <a
-          href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-          target="_blank"
-          class="whatsapp-popup-btn"
-        >
-          <i class="fa-brands fa-whatsapp"></i>
-          Start Chat
-        </a>
       </div>
-      <button
-        type="button"
-        class="whatsapp-fab"
-        id="whatsappFab"
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       WHATSAPP WIDGET
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="whatsapp-float">
+      <span class="whatsapp-tooltip">Chat with us!</span>
+      <a
+        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
+        target="_blank"
+        class="whatsapp-float-btn"
         aria-label="Chat on WhatsApp"
       >
         <i class="fa-brands fa-whatsapp"></i>
-      </button>
+      </a>
     </div>
 
-    <!-- Auth Modal -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-modal-content auth-box">
-        <button type="button" class="auth-close" id="authClose">
-          <i class="fa-solid fa-times"></i>
-        </button>
-
-        <div class="auth-brand">
-          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> Welcome</h1>
-        </div>
-
-        <div class="auth-tabs" id="authTabs">
-          <button type="button" class="tab-btn active" data-tab="login">
-            Login
-          </button>
-          <button type="button" class="tab-btn" data-tab="signup">
-            Register
-          </button>
-        </div>
-
-        <!-- Login Form -->
-        <form class="auth-form active" id="loginForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              type="email"
-              id="loginEmail"
-              name="email"
-              placeholder=" "
-              autocomplete="email"
-              required
-            />
-            <label for="loginEmail">Email Address</label>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="loginPassword"
-              name="password"
-              placeholder=" "
-              autocomplete="current-password"
-              required
-            />
-            <label for="loginPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#loginPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="auth-field recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-            ></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
-            Sign In
-          </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <button
-            type="button"
-            class="btn btn-outline btn-block google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
-          </button>
-        </form>
-
-        <!-- Signup Form -->
-        <form class="auth-form" id="signupForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-user icon"></i>
-            <input
-              type="text"
-              id="signupName"
-              name="fullName"
-              placeholder=" "
-              autocomplete="name"
-              required
-            />
-            <label for="signupName">Full Name</label>
-          </div>
-
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              type="email"
-              id="signupEmail"
-              name="email"
-              placeholder=" "
-              autocomplete="email"
-              required
-            />
-            <label for="signupEmail">Email Address</label>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="signupPassword"
-              name="password"
-              placeholder=" "
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
-            <label for="signupPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="signupConfirm"
-              name="confirmPassword"
-              placeholder=" "
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
-            <label for="signupConfirm">Confirm Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupConfirm"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="auth-field recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-            ></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
-            Create Account
-          </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <button
-            type="button"
-            class="btn btn-outline btn-block google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
-          </button>
-        </form>
-
-        <p class="auth-footer-text">
-          By continuing, you agree to our
-          <a href="terms.html">Terms of Service</a> and
-          <a href="privacy.html">Privacy Policy</a>
-        </p>
-      </div>
-    </div>
-
-    <!-- Search Overlay -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SEARCH OVERLAY
+       ═══════════════════════════════════════════════════════════════════════ -->
     <div class="search-overlay" id="searchOverlay">
       <div class="search-container">
-        <div class="search-header">
-          <div class="search-input-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search for lingerie..."
-              autocomplete="off"
-            />
-            <span class="search-shortcut">Esc</span>
-          </div>
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for products..."
+            autocomplete="off"
+          />
           <button
             type="button"
             class="search-close"
@@ -575,22 +973,211 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div class="search-results" id="searchResults">
-          <div class="search-empty">
-            <i class="fa-solid fa-magnifying-glass"></i>
+        <div
+          class="search-results"
+          id="searchResults"
+          style="
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-4);
+            max-height: 400px;
+            overflow-y: auto;
+          "
+        >
+          <div
+            style="
+              padding: var(--space-8);
+              text-align: center;
+              color: var(--text-muted);
+            "
+          >
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="font-size: var(--text-2xl); margin-bottom: var(--space-2)"
+            ></i>
             <p>Start typing to search products...</p>
-            <span class="search-tip">Try "bra", "panty", or "bodysuit"</span>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       AUTH MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="authBackdrop"></div>
+    <div class="modal auth-modal" id="authModal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-heart" style="color: var(--clr-primary)"></i>
+          Welcome
+        </h3>
+        <button
+          type="button"
+          class="modal-close"
+          id="authClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="auth-tab active" data-tab="login">
+            Login
+          </button>
+          <button type="button" class="auth-tab" data-tab="signup">
+            Register
+          </button>
+        </div>
+
+        <form class="auth-form active" id="loginForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Sign In
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full Name</label>
+            <input
+              type="text"
+              id="signupName"
+              name="fullName"
+              class="form-input"
+              placeholder="Enter your full name"
+              autocomplete="name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email Address</label>
+            <input
+              type="email"
+              id="signupEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
+            <input
+              type="password"
+              id="signupPassword"
+              name="password"
+              class="form-input"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupConfirm"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              id="signupConfirm"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Create Account
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <p
+          style="
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: var(--space-4);
+          "
+        >
+          By continuing, you agree to our
+          <a href="terms.html" style="color: var(--clr-primary)">Terms</a> and
+          <a href="privacy.html" style="color: var(--clr-primary)"
+            >Privacy Policy</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/recaptcha.js"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
       defer
     ></script>
-    <script src="assets/js/recaptcha.js"></script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
@@ -600,7 +1187,6 @@
     <script defer src="assets/js/supabase.js"></script>
     <script defer src="assets/js/app.js"></script>
     <script defer src="assets/js/auth.js"></script>
-    <script defer src="assets/js/analytics.js"></script>
     <script defer src="assets/js/wishlist.js"></script>
   </body>
 </html>

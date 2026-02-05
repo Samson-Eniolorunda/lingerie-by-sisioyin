@@ -2,7 +2,7 @@
   ADMIN JS (CLEAN)
   - Theme (system default)
   - Auth + Admin gate (RPC is_admin)
-  - Role-based access (super_admin / editor)
+  - Role-based access (super_admin / editor / developer)
   - Soft delete for products
   - Activity logging
   - Inventory render + viewer slider (with swipe)
@@ -22,12 +22,23 @@
   const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
   const on = (el, evt, fn) => el && el.addEventListener(evt, fn);
 
+  // Escape HTML to prevent XSS
+  const escapeHtml = (str) => {
+    if (!str) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  };
+
   const AUTH_REDIRECT_URL = window.location.origin + window.location.pathname;
 
   /* =========================
     Current user state
   ========================= */
-  let currentUserRole = null; // "super_admin" | "editor" | null
+  let currentUserRole = null; // "super_admin" | "editor" | "developer" | null
   let currentUserId = null;
 
   /* =========================
@@ -76,6 +87,7 @@
     localStorage.setItem(THEME_KEY, pref);
     applyTheme();
     updateThemeToggleUI();
+    updateSidebarThemeToggleUI();
   }
 
   function updateThemeToggleUI() {
@@ -138,6 +150,23 @@
       });
     });
     updateThemeToggleUI();
+
+    // Sidebar theme toggle (checkbox slider for mobile)
+    const themeCheckbox = $("#themeCheckbox");
+    if (themeCheckbox) {
+      on(themeCheckbox, "change", () => {
+        setThemePref(themeCheckbox.checked ? "dark" : "light");
+      });
+      updateSidebarThemeToggleUI();
+    }
+  }
+
+  function updateSidebarThemeToggleUI() {
+    const themeCheckbox = $("#themeCheckbox");
+    if (!themeCheckbox) return;
+
+    const isDark = getEffectiveTheme() === "dark";
+    themeCheckbox.checked = isDark;
   }
 
   /* =========================
@@ -151,10 +180,11 @@
       confirmResolve = resolve;
 
       const modal = $("#confirmModal");
-      const icon = $("#confirmIcon");
+      const iconWrapper = $("#confirmIcon");
       const title = $("#confirmTitle");
       const message = $("#confirmMessage");
       const okBtn = $("#confirmOkBtn");
+      const cancelBtn = $("#confirmCancelBtn");
 
       if (!modal) {
         resolve(window.confirm(options.message || "Are you sure?"));
@@ -167,21 +197,24 @@
         options.message || "Are you sure you want to proceed?";
 
       // Set icon type
-      icon.className = "confirm-modal-icon " + (options.type || "danger");
+      const iconType = options.type || "danger";
       const iconClass = {
         danger: "fa-trash",
         warning: "fa-triangle-exclamation",
         info: "fa-circle-info",
-      }[options.type || "danger"];
-      icon.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+      }[iconType];
+      iconWrapper.innerHTML = `<div class="confirm-icon ${iconType}"><i class="fa-solid ${iconClass}"></i></div>`;
 
-      // Set button style
-      okBtn.className =
-        options.type === "danger"
-          ? "btn-confirm-danger"
-          : "btn-confirm-primary";
-      okBtn.textContent = options.confirmText || "Confirm";
+      // Set button styles based on type
+      if (iconType === "danger") {
+        okBtn.className = "confirm-btn danger";
+        okBtn.innerHTML = `<i class="fa-solid fa-trash"></i> ${options.confirmText || "Delete"}`;
+      } else {
+        okBtn.className = "confirm-btn primary";
+        okBtn.innerHTML = `<i class="fa-solid fa-check"></i> ${options.confirmText || "Confirm"}`;
+      }
 
+      modal.removeAttribute("hidden");
       modal.classList.add("active");
     });
   }
@@ -189,7 +222,10 @@
   function closeConfirmModal(result = false) {
     console.log("[closeConfirmModal] Closing with result:", result);
     const modal = $("#confirmModal");
-    if (modal) modal.classList.remove("active");
+    if (modal) {
+      modal.classList.remove("active");
+      modal.setAttribute("hidden", "");
+    }
     if (confirmResolve) {
       confirmResolve(result);
       confirmResolve = null;
@@ -200,6 +236,7 @@
     console.log("[bindConfirmModal] Binding confirmation modal");
     on($("#confirmCancelBtn"), "click", () => closeConfirmModal(false));
     on($("#confirmOkBtn"), "click", () => closeConfirmModal(true));
+    on($("#confirmCloseX"), "click", () => closeConfirmModal(false));
     on($("#confirmModal"), "click", (e) => {
       if (e.target.id === "confirmModal") closeConfirmModal(false);
     });
@@ -651,9 +688,63 @@
     const switcher = $("#authSwitch");
     if (switcher) switcher.hidden = !(name === "login" || name === "signup");
 
-    $$(".tab-btn").forEach((t) => t.classList.remove("active"));
+    $$(".auth-tab").forEach((t) => t.classList.remove("active"));
     const tab = $(`[data-auth-tab='${name}']`);
     if (tab) tab.classList.add("active");
+
+    // Hide email confirmation if showing other view
+    const confirmView = $("#emailConfirmationView");
+    if (confirmView && name !== "confirm") confirmView.hidden = true;
+  }
+
+  function showEmailConfirmationView(email) {
+    console.log("[showEmailConfirmationView] Showing confirmation for:", email);
+
+    // Hide all auth forms
+    $$("[data-auth-view-name]").forEach((v) => (v.hidden = true));
+    const switcher = $("#authSwitch");
+    if (switcher) switcher.hidden = true;
+
+    // Show or create the confirmation view
+    let confirmView = $("#emailConfirmationView");
+    if (!confirmView) {
+      confirmView = document.createElement("div");
+      confirmView.id = "emailConfirmationView";
+      confirmView.className = "email-confirmation-view";
+      confirmView.innerHTML = `
+        <div class="confirmation-icon">
+          <i class="fa-solid fa-envelope-circle-check"></i>
+        </div>
+        <h2>Check Your Email</h2>
+        <p class="confirmation-email"></p>
+        <p class="confirmation-text">
+          We've sent a confirmation link to your email address. 
+          Click the link to verify your account and access the dashboard.
+        </p>
+        <div class="confirmation-loading">
+          <div class="spinner"></div>
+          <span>Waiting for confirmation...</span>
+        </div>
+        <button type="button" class="btn btn-outline btn-block" id="backToLoginBtn">
+          <i class="fa-solid fa-arrow-left"></i>
+          Back to Login
+        </button>
+      `;
+      const authPanel = $(".auth-panel");
+      if (authPanel) authPanel.appendChild(confirmView);
+
+      // Bind back button
+      on($("#backToLoginBtn"), "click", () => {
+        confirmView.hidden = true;
+        showAuthView("login");
+      });
+    }
+
+    // Update email display
+    const emailEl = confirmView.querySelector(".confirmation-email");
+    if (emailEl) emailEl.textContent = email;
+
+    confirmView.hidden = false;
   }
 
   /* =========================
@@ -661,10 +752,15 @@
   ========================= */
   function bindPasswordToggles() {
     console.log("[bindPasswordToggles] Binding password toggle buttons");
-    $$(".pw-toggle").forEach((btn) => {
+    $$("[data-toggle-password]").forEach((btn) => {
       on(btn, "click", () => {
-        const sel = btn.getAttribute("data-target");
-        const input = sel ? $(sel) : null;
+        // Find the sibling input within the same .input-icon container
+        const container = btn.closest(".input-icon");
+        const input = container
+          ? container.querySelector(
+              "input[type='password'], input[type='text']",
+            )
+          : null;
         if (!input) return;
 
         const reveal = input.type === "password";
@@ -718,10 +814,16 @@
     const statusText = $("#adminStatusText");
 
     const isSuperAdmin = currentUserRole === "super_admin";
+    const isDeveloper = currentUserRole === "developer";
     const isEditor = currentUserRole === "editor";
+    // Developer has same privileges as super_admin
+    const hasFullAccess = isSuperAdmin || isDeveloper;
+
     console.log(
       "[applyRoleBasedUI] isSuperAdmin:",
       isSuperAdmin,
+      "isDeveloper:",
+      isDeveloper,
       "isEditor:",
       isEditor,
     );
@@ -731,29 +833,31 @@
       const currentText = statusText.textContent;
       if (isSuperAdmin && !currentText.includes("Super Admin")) {
         statusText.innerHTML = `${currentText} <span style="color: var(--primary); font-weight: 800; white-space: nowrap;">• Super Admin</span>`;
+      } else if (isDeveloper && !currentText.includes("Developer")) {
+        statusText.innerHTML = `${currentText} <span style="color: #10b981; font-weight: 800; white-space: nowrap;">• Developer</span>`;
       } else if (isEditor && !currentText.includes("Editor")) {
         statusText.innerHTML = `${currentText} <span style="color: var(--text-muted); font-weight: 800; white-space: nowrap;">• Editor</span>`;
       }
     }
 
-    // Only super_admin can invite other admins
+    // Super_admin and developer can invite other admins
     if (inviteBtn) {
-      inviteBtn.style.display = isSuperAdmin ? "" : "none";
+      inviteBtn.style.display = hasFullAccess ? "" : "none";
     }
 
-    // Only super_admin can see activity logs
+    // Super_admin and developer can see activity logs
     if (activityNav) {
-      activityNav.style.display = isSuperAdmin ? "" : "none";
+      activityNav.style.display = hasFullAccess ? "" : "none";
     }
 
-    // Only super_admin can manage admins
+    // Super_admin and developer can manage admins
     if (adminsNav) {
-      adminsNav.style.display = isSuperAdmin ? "" : "none";
+      adminsNav.style.display = hasFullAccess ? "" : "none";
     }
 
-    // Only super_admin can see trash
+    // Super_admin and developer can see trash
     if (trashNav) {
-      trashNav.style.display = isSuperAdmin ? "" : "none";
+      trashNav.style.display = hasFullAccess ? "" : "none";
     }
   }
 
@@ -769,6 +873,34 @@
     const displayName = full || u.email || "Welcome back";
     console.log("[getSessionDisplayName] Display name:", displayName);
     return displayName;
+  }
+
+  function updateSidebarUserInfo(session) {
+    const nameEl = document.getElementById("adminName");
+    const roleEl = document.getElementById("adminRole");
+
+    if (nameEl) {
+      nameEl.textContent = getSessionDisplayName(session);
+    }
+
+    if (roleEl && currentUserRole) {
+      const roleLabels = {
+        developer: "Developer",
+        super_admin: "Super Admin",
+        editor: "Editor",
+      };
+      roleEl.textContent = roleLabels[currentUserRole] || "Admin";
+
+      // Update role badge color
+      roleEl.className = "admin-role";
+      if (currentUserRole === "developer") {
+        roleEl.style.color = "#10b981";
+      } else if (currentUserRole === "super_admin") {
+        roleEl.style.color = "var(--clr-primary)";
+      } else {
+        roleEl.style.color = "#3b82f6";
+      }
+    }
   }
 
   function getMissingProfileFields(session) {
@@ -956,12 +1088,14 @@
     const title = $("#pageTitleDisplay");
     if (title) {
       const titles = {
+        dashboard: "Dashboard",
         inventory: "Inventory",
         orders: "Orders",
         studio: "Product Studio",
         activity: "Activity Logs",
         admins: "Manage Admins",
         trash: "Trash",
+        siteImages: "Site Images",
       };
       title.textContent = titles[viewId] || viewId;
     }
@@ -989,6 +1123,11 @@
     // Load trash when switching to that view
     if (viewId === "trash") {
       loadTrash();
+    }
+
+    // Load site images when switching to that view
+    if (viewId === "siteImages") {
+      loadSiteImages();
     }
   }
 
@@ -1066,6 +1205,34 @@
     const meta = log.metadata || {};
     const name = meta.name || meta.email || log.entity_id || "Unknown";
     const adminName = meta.admin_name || "Admin";
+    const adminRole = meta.admin_role || "editor";
+
+    // Get role badge for activity log
+    const getRoleBadgeSmall = (role) => {
+      if (role === "developer") {
+        return '<span class="role-badge-sm developer">Dev</span>';
+      }
+      if (role === "super_admin") {
+        return '<span class="role-badge-sm super">SA</span>';
+      }
+      return '<span class="role-badge-sm editor">Ed</span>';
+    };
+
+    // Build action text
+    const actionMap = {
+      create: "created",
+      update: "updated",
+      delete: "deleted",
+      restore: "restored",
+      login: "logged in",
+      logout: "logged out",
+      invite: "invited",
+    };
+    const actionText = actionMap[log.action] || log.action;
+
+    // Build entity display
+    const entityType = log.entity_type || log.entity || "";
+    const entityDisplay = entityType ? ` a ${entityType}` : "";
 
     return `
       <article class="activity-card">
@@ -1074,11 +1241,11 @@
         </div>
         <div class="activity-info">
           <p class="activity-title">
-            <strong>${adminName}</strong> ${log.action}d ${log.entity}
+            <strong>${adminName}</strong> ${getRoleBadgeSmall(adminRole)} ${actionText}${entityDisplay}
           </p>
-          <p class="activity-detail text-muted">${name}</p>
+          <p class="activity-detail">${name !== "Unknown" ? name : ""}</p>
         </div>
-        <time class="activity-time text-muted">${formatRelativeTime(log.created_at)}</time>
+        <time class="activity-time">${formatRelativeTime(log.created_at)}</time>
       </article>
     `;
   }
@@ -1124,15 +1291,21 @@
     if (role === "super_admin") {
       return '<span class="role-badge super">Super Admin</span>';
     }
+    if (role === "developer") {
+      return '<span class="role-badge developer">Developer</span>';
+    }
     return '<span class="role-badge editor">Editor</span>';
   }
 
   function getAdminCard(admin) {
     const name =
       `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || "No name";
-    const canManage =
-      admin.id !== currentUserId && currentUserRole === "super_admin";
+    // Developer and super_admin can manage other admins
+    const hasFullAccess =
+      currentUserRole === "super_admin" || currentUserRole === "developer";
+    const canManage = admin.id !== currentUserId && hasFullAccess;
     const isSuperAdmin = admin.role === "super_admin";
+    const isDeveloper = admin.role === "developer";
 
     return `
       <article class="admin-card" data-admin-id="${admin.id}">
@@ -1148,7 +1321,7 @@
         </div>
         <div class="admin-actions">
           ${
-            canManage
+            canManage && !isDeveloper
               ? `
             ${
               !isSuperAdmin
@@ -1171,7 +1344,9 @@
           `
               : admin.id === currentUserId
                 ? '<span class="text-muted" style="font-size: 0.9rem;">You</span>'
-                : ""
+                : isDeveloper
+                  ? '<span class="text-muted" style="font-size: 0.9rem;">Protected</span>'
+                  : ""
           }
         </div>
       </article>
@@ -1202,9 +1377,23 @@
     adminsCache = data || [];
 
     if (!adminsCache.length) {
-      list.innerHTML = '<p class="text-muted text-center">No admins found</p>';
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-users"></i>
+          <p>No admins found</p>
+        </div>`;
       return;
     }
+
+    // Sort: developers first, then super_admin, then editors
+    const roleOrder = { developer: 0, super_admin: 1, editor: 2 };
+    adminsCache.sort((a, b) => {
+      const orderA = roleOrder[a.role] ?? 3;
+      const orderB = roleOrder[b.role] ?? 3;
+      if (orderA !== orderB) return orderA - orderB;
+      // Same role: sort by created_at
+      return new Date(a.created_at) - new Date(b.created_at);
+    });
 
     list.innerHTML = adminsCache.map(getAdminCard).join("");
   }
@@ -1322,6 +1511,250 @@
   }
 
   /* =========================
+    Site Images Management
+  ========================= */
+  let siteSettingsCache = {};
+
+  async function loadSiteImages() {
+    console.log("[loadSiteImages] Loading site images settings");
+
+    const { data, error } = await supabase.from("site_settings").select("*");
+
+    if (error) {
+      console.error("[loadSiteImages] Error:", error);
+      showToast("Failed to load site images");
+      return;
+    }
+
+    // Convert to object keyed by setting key
+    siteSettingsCache = {};
+    (data || []).forEach((setting) => {
+      siteSettingsCache[setting.key] = setting.value;
+    });
+
+    // Update UI
+    updateSiteImagePreviews();
+  }
+
+  function updateSiteImagePreviews() {
+    // Hero image
+    const heroUrl = siteSettingsCache.hero_image?.url || "";
+    const heroPreview = $("#heroImagePreview img");
+    const heroInput = $("#heroImageUrl");
+    if (heroPreview) heroPreview.src = heroUrl || "assets/img/placeholder.jpg";
+    if (heroInput) heroInput.value = heroUrl;
+
+    // Lingerie
+    const lingerieUrl = siteSettingsCache.category_lingerie?.url || "";
+    const lingeriePreview = $("#lingerieImagePreview img");
+    const lingerieInput = $("#lingerieImageUrl");
+    if (lingeriePreview)
+      lingeriePreview.src = lingerieUrl || "assets/img/placeholder.jpg";
+    if (lingerieInput) lingerieInput.value = lingerieUrl;
+
+    // Loungewear
+    const loungewearUrl = siteSettingsCache.category_loungewear?.url || "";
+    const loungewearPreview = $("#loungewearImagePreview img");
+    const loungewearInput = $("#loungewearImageUrl");
+    if (loungewearPreview)
+      loungewearPreview.src = loungewearUrl || "assets/img/placeholder.jpg";
+    if (loungewearInput) loungewearInput.value = loungewearUrl;
+
+    // Underwear
+    const underwearUrl = siteSettingsCache.category_underwear?.url || "";
+    const underwearPreview = $("#underwearImagePreview img");
+    const underwearInput = $("#underwearImageUrl");
+    if (underwearPreview)
+      underwearPreview.src = underwearUrl || "assets/img/placeholder.jpg";
+    if (underwearInput) underwearInput.value = underwearUrl;
+  }
+
+  async function saveSiteImages() {
+    console.log("[saveSiteImages] Saving site images");
+
+    const updates = [
+      {
+        key: "hero_image",
+        value: { url: $("#heroImageUrl")?.value || "", alt: "Hero image" },
+      },
+      {
+        key: "category_lingerie",
+        value: { url: $("#lingerieImageUrl")?.value || "", alt: "Lingerie" },
+      },
+      {
+        key: "category_loungewear",
+        value: {
+          url: $("#loungewearImageUrl")?.value || "",
+          alt: "Loungewear",
+        },
+      },
+      {
+        key: "category_underwear",
+        value: { url: $("#underwearImageUrl")?.value || "", alt: "Underwear" },
+      },
+    ];
+
+    const btn = $("#saveSiteImagesBtn");
+    setBtnLoading(btn, true, "Saving...");
+
+    try {
+      for (const update of updates) {
+        const { error } = await supabase.from("site_settings").upsert(
+          {
+            key: update.key,
+            value: update.value,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "key" },
+        );
+
+        if (error) {
+          console.error("[saveSiteImages] Error saving", update.key, error);
+          throw error;
+        }
+      }
+
+      showToast("Site images saved successfully!");
+      await logActivity("update", "site_settings", null, {
+        action: "Updated site images",
+      });
+
+      // Refresh cache
+      await loadSiteImages();
+
+      // Signal home page to refresh (if open in another tab)
+      localStorage.setItem("lbs_site_images_updated", Date.now().toString());
+    } catch (err) {
+      console.error("[saveSiteImages] Error:", err);
+      showToast("Failed to save site images");
+    } finally {
+      setBtnLoading(btn, false);
+    }
+  }
+
+  function bindSiteImagesActions() {
+    console.log("[bindSiteImagesActions] Binding site images actions");
+
+    // Save button
+    on($("#saveSiteImagesBtn"), "click", saveSiteImages);
+
+    // URL input change -> update preview
+    on($("#heroImageUrl"), "input", (e) => {
+      const preview = $("#heroImagePreview img");
+      if (preview) preview.src = e.target.value || "assets/img/placeholder.jpg";
+    });
+
+    on($("#lingerieImageUrl"), "input", (e) => {
+      const preview = $("#lingerieImagePreview img");
+      if (preview) preview.src = e.target.value || "assets/img/placeholder.jpg";
+    });
+
+    on($("#loungewearImageUrl"), "input", (e) => {
+      const preview = $("#loungewearImagePreview img");
+      if (preview) preview.src = e.target.value || "assets/img/placeholder.jpg";
+    });
+
+    on($("#underwearImageUrl"), "input", (e) => {
+      const preview = $("#underwearImagePreview img");
+      if (preview) preview.src = e.target.value || "assets/img/placeholder.jpg";
+    });
+
+    // Upload buttons - trigger file input
+    $$(".btn-upload").forEach((btn) => {
+      on(btn, "click", () => {
+        const fileInputId = btn.dataset.uploadFor;
+        const fileInput = $("#" + fileInputId);
+        if (fileInput) fileInput.click();
+      });
+    });
+
+    // File input change - upload to storage and update preview
+    $$(".image-file-input").forEach((input) => {
+      on(input, "change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const card = input.closest(".image-upload-card");
+        const previewImg = card?.querySelector(".image-preview img");
+        const urlInput = card?.querySelector(".image-url-input");
+
+        // Show loading state
+        if (previewImg) previewImg.style.opacity = "0.5";
+
+        try {
+          // Upload to Supabase Storage - bucket name should be 'site-images'
+          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+          const { data, error } = await supabase.storage
+            .from("site-images")
+            .upload(fileName, file, { cacheControl: "3600", upsert: true });
+
+          if (error) {
+            console.error("[uploadSiteImage] Storage error:", error);
+            // Check specific error types
+            if (error.message?.includes("bucket") || error.statusCode === 400) {
+              showToast(
+                "Storage bucket 'site-images' not found. Create it in Supabase Dashboard → Storage.",
+              );
+            } else if (
+              error.message?.includes("policy") ||
+              error.statusCode === 403
+            ) {
+              showToast("Upload not allowed. Check storage bucket policies.");
+            } else {
+              showToast("Upload failed: " + (error.message || "Unknown error"));
+            }
+            if (previewImg) previewImg.style.opacity = "1";
+            return;
+          }
+
+          // Get public URL
+          const { data: urlData } = supabase.storage
+            .from("site-images")
+            .getPublicUrl(fileName);
+
+          const publicUrl = urlData?.publicUrl;
+
+          // Update UI
+          if (previewImg) {
+            previewImg.src = publicUrl;
+            previewImg.style.opacity = "1";
+          }
+          if (urlInput) urlInput.value = publicUrl;
+
+          showToast("Image uploaded successfully!");
+        } catch (err) {
+          console.error("[uploadSiteImage] Error:", err);
+          showToast("Upload failed. Check console for details.");
+          if (previewImg) previewImg.style.opacity = "1";
+        }
+      });
+    });
+
+    // Tab switching between URL and Upload - both methods work together
+    $$(".input-tab").forEach((tab) => {
+      on(tab, "click", () => {
+        const group = tab.closest(".image-input-group");
+        const tabs = group?.querySelectorAll(".input-tab");
+        const fileInput = group?.querySelector(".image-file-input");
+
+        // Update active state for visual feedback
+        tabs?.forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        // Upload tab opens file picker
+        if (tab.dataset.tab === "upload" && fileInput) {
+          fileInput.click();
+        }
+        // URL tab focuses on URL input
+        if (tab.dataset.tab === "url") {
+          const urlInput = group?.querySelector(".image-url-input");
+          if (urlInput) urlInput.focus();
+        }
+      });
+    });
+  }
+
+  /* =========================
     Trash (Deleted Products)
   ========================= */
   let trashCache = [];
@@ -1381,7 +1814,12 @@
     trashCache = data || [];
 
     if (!trashCache.length) {
-      list.innerHTML = '<p class="text-muted text-center">Trash is empty</p>';
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-trash-can"></i>
+          <p>Trash is empty</p>
+          <span class="text-muted" style="font-size: 0.75rem;">Deleted products will appear here</span>
+        </div>`;
       return;
     }
 
@@ -1585,18 +2023,17 @@
 
         return `
         <tr>
-          <td><span class="order-id">#${order.id.slice(0, 8)}</span></td>
-          <td>${date}</td>
-          <td>
+          <td data-label="Order ID"><span class="order-id">#${order.id.slice(0, 8)}</span></td>
+          <td data-label="Date">${date}</td>
+          <td data-label="Customer">
             <div class="order-customer">
               <span class="name">${order.customer_name || "Guest"}</span>
-              <span class="email">${order.customer_email || "-"}</span>
             </div>
           </td>
-          <td><span class="order-items-count">${itemCount} item${itemCount !== 1 ? "s" : ""}</span></td>
-          <td><span class="order-total">₦${(order.total || 0).toLocaleString()}</span></td>
-          <td><span class="order-status ${order.status}">${order.status}</span></td>
-          <td>
+          <td data-label="Items"><span class="order-items-count">${itemCount} item${itemCount !== 1 ? "s" : ""}</span></td>
+          <td data-label="Total"><span class="order-total">₦${(order.total || 0).toLocaleString()}</span></td>
+          <td data-label="Status"><span class="order-status ${order.status}">${order.status}</span></td>
+          <td data-label="Action">
             <div class="order-actions">
               <button type="button" data-view-order="${order.id}" title="View Details">
                 <i class="fa-solid fa-eye"></i>
@@ -1779,6 +2216,7 @@
 
     // Refresh button
     on($("#refreshOrdersBtn"), "click", loadOrders);
+    on($("#refreshActivityBtn"), "click", loadActivityLogs);
 
     // View order details
     on($("#ordersTableBody"), "click", (e) => {
@@ -2304,7 +2742,7 @@
 
   function bindViewerModal() {
     console.log("[bindViewerModal] Binding image viewer modal");
-    on($("[data-close-imgviewer]"), "click", closeImgViewer);
+    on($("[data-close-viewer]"), "click", closeImgViewer);
     on($("#imgViewerModal"), "click", (e) => {
       if (e.target && e.target.id === "imgViewerModal") closeImgViewer();
     });
@@ -2348,7 +2786,7 @@
     const label = $("#msLabel");
     if (!label) return;
 
-    const count = $$(".chip input:checked").length;
+    const count = $$("#sizeChips .size-chip input:checked").length;
     console.log("[updateSizeLabel] Selected count:", count);
     if (count) {
       label.textContent = `${count} Selected`;
@@ -2401,18 +2839,24 @@
 
     on(dd, "change", (e) => {
       if (e.target && e.target.hasAttribute("data-ms-all")) {
-        $$(".chip input").forEach((c) => (c.checked = e.target.checked));
+        $$("#sizeChips .size-chip input").forEach(
+          (c) => (c.checked = e.target.checked),
+        );
       }
 
-      const selected = $$(".chip input:checked").map((cb) => cb.value);
+      const selected = $$("#sizeChips .size-chip input:checked").map(
+        (cb) => cb.value,
+      );
       const hidden = $("#pSizes");
       if (hidden) hidden.value = JSON.stringify(selected);
       updateSizeLabel();
     });
 
-    $$(".chip input").forEach((cb) =>
+    $$("#sizeChips .size-chip input").forEach((cb) =>
       on(cb, "change", () => {
-        const selected = $$(".chip input:checked").map((x) => x.value);
+        const selected = $$("#sizeChips .size-chip input:checked").map(
+          (x) => x.value,
+        );
         const hidden = $("#pSizes");
         if (hidden) hidden.value = JSON.stringify(selected);
         updateSizeLabel();
@@ -2493,14 +2937,34 @@
   // Helper to update a form dropdown value and label (for edit mode)
   function setFormDropdownValue(fieldId, value) {
     console.log("[setFormDropdownValue] Setting:", fieldId, "=", value);
-    const hiddenInput = $(`#${fieldId}`);
-    const wrap = $(`.ms-wrapper--form[data-field="${fieldId}"]`);
-    if (!hiddenInput || !wrap) {
+    const selectEl = $(`#${fieldId}`);
+
+    if (!selectEl) {
       console.log("[setFormDropdownValue] Element not found for:", fieldId);
       return;
     }
 
-    hiddenInput.value = value;
+    // Handle native <select> elements
+    if (selectEl.tagName === "SELECT") {
+      selectEl.value = value;
+      console.log(
+        "[setFormDropdownValue] Native select set to:",
+        selectEl.value,
+      );
+      return;
+    }
+
+    // Handle custom dropdown (ms-wrapper--form)
+    const wrap = $(`.ms-wrapper--form[data-field="${fieldId}"]`);
+    if (!wrap) {
+      console.log(
+        "[setFormDropdownValue] Custom wrapper not found for:",
+        fieldId,
+      );
+      return;
+    }
+
+    selectEl.value = value;
     const label = wrap.querySelector(".ms-label");
     const item = wrap.querySelector(`.ms-item[data-value="${value}"]`);
 
@@ -2529,6 +2993,879 @@
     console.log("[toggleColorUI] Mode:", mode);
     if (pack) pack.hidden = mode !== "assorted";
     if (openWrap) openWrap.hidden = mode === "assorted";
+  }
+
+  /* =========================
+    Color Stock Management
+  ========================= */
+  function getColorStockData() {
+    try {
+      return JSON.parse($("#pColors")?.value || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function setColorStockData(data) {
+    console.log("[setColorStockData] Setting data:", data);
+    const input = $("#pColors");
+    console.log("[setColorStockData] Hidden input found:", !!input);
+    if (input) {
+      input.value = JSON.stringify(data);
+      console.log("[setColorStockData] Input value set to:", input.value);
+    }
+    renderColorStockList();
+    updateColorCounter();
+    rebuildVariantMatrix();
+  }
+
+  function renderColorStockList() {
+    const list = $("#colorStockList");
+    console.log("[renderColorStockList] List element found:", !!list);
+    if (!list) return;
+
+    const colors = getColorStockData();
+    console.log("[renderColorStockList] Colors to render:", colors);
+
+    if (!colors.length) {
+      list.innerHTML =
+        '<span class="color-stock-empty">No colors added yet</span>';
+      return;
+    }
+
+    list.innerHTML = colors
+      .map(
+        (c, i) => `
+      <div class="color-stock-item" data-index="${i}">
+        <span class="color-name">${escapeHtml(c.name)}</span>
+        <span class="color-qty ${c.qty <= 0 ? "out-of-stock" : ""}">${c.qty}</span>
+        <span class="remove-color" title="Remove"><i class="fa-solid fa-times"></i></span>
+      </div>
+    `,
+      )
+      .join("");
+    console.log(
+      "[renderColorStockList] Rendered HTML:",
+      list.innerHTML.substring(0, 100),
+    );
+  }
+
+  function addColorStock() {
+    console.log("[addColorStock] Function called");
+    const nameInput = $("#pColorName");
+    const qtyInput = $("#pColorQty");
+
+    console.log("[addColorStock] Inputs:", {
+      nameInput: !!nameInput,
+      qtyInput: !!qtyInput,
+      nameValue: nameInput?.value,
+      qtyValue: qtyInput?.value,
+    });
+
+    if (!nameInput || !qtyInput) {
+      console.error("[addColorStock] Inputs not found!");
+      return;
+    }
+
+    const name = nameInput.value.trim();
+    const qty = parseInt(qtyInput.value) || 0;
+
+    if (!name) {
+      showToast("Please enter a color name");
+      nameInput.focus();
+      return;
+    }
+
+    const colors = getColorStockData();
+    console.log("[addColorStock] Current colors:", colors);
+
+    // Check for duplicate
+    const existingIndex = colors.findIndex(
+      (c) => c.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (existingIndex >= 0) {
+      // Update existing
+      colors[existingIndex].qty = qty;
+      showToast(`Updated ${name} quantity`);
+    } else {
+      // Add new
+      colors.push({ name, qty });
+      console.log("[addColorStock] Added new color:", { name, qty });
+    }
+
+    setColorStockData(colors);
+    console.log("[addColorStock] Colors after save:", getColorStockData());
+
+    nameInput.value = "";
+    qtyInput.value = "0";
+    nameInput.focus();
+  }
+
+  function removeColorStock(index) {
+    const colors = getColorStockData();
+    if (index >= 0 && index < colors.length) {
+      colors.splice(index, 1);
+      setColorStockData(colors);
+    }
+  }
+
+  function setupColorStockEvents() {
+    console.log("[setupColorStockEvents] Setting up color stock events");
+    const addBtn = $("#addColorBtn");
+    const nameInput = $("#pColorName");
+    const qtyInput = $("#pColorQty");
+    const colorList = $("#colorStockList");
+
+    console.log("[setupColorStockEvents] Elements found:", {
+      addBtn: !!addBtn,
+      nameInput: !!nameInput,
+      qtyInput: !!qtyInput,
+      colorList: !!colorList,
+    });
+
+    // Add color button
+    if (addBtn) {
+      addBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        console.log("[setupColorStockEvents] Add button clicked");
+        addColorStock();
+      });
+    }
+
+    // Enter key in inputs
+    if (nameInput) {
+      nameInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          console.log("[setupColorStockEvents] Enter in name input");
+          addColorStock();
+        }
+      });
+    }
+
+    if (qtyInput) {
+      qtyInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          console.log("[setupColorStockEvents] Enter in qty input");
+          addColorStock();
+        }
+      });
+    }
+
+    // Remove color click
+    if (colorList) {
+      colorList.addEventListener("click", (e) => {
+        const removeBtn = e.target.closest(".remove-color");
+        if (!removeBtn) return;
+        console.log("[setupColorStockEvents] Remove color clicked");
+        const item = removeBtn.closest(".color-stock-item");
+        const index = parseInt(item?.dataset.index);
+        if (!isNaN(index)) removeColorStock(index);
+      });
+    }
+  }
+
+  /* =========================
+    Size Stock Management (like colors)
+  ========================= */
+  function getSizeStockData() {
+    const input = $("#pSizes");
+    if (!input) return [];
+    try {
+      const data = JSON.parse(input.value || "[]");
+      // Handle both old format (array of strings) and new format (array of objects)
+      return data.map((item) => {
+        if (typeof item === "string") {
+          return { name: item, qty: 0 };
+        }
+        return item;
+      });
+    } catch {
+      return [];
+    }
+  }
+
+  function setSizeStockData(data) {
+    const input = $("#pSizes");
+    if (input) {
+      input.value = JSON.stringify(data);
+    }
+    renderSizeStockList();
+    updateSizeCounter();
+    rebuildVariantMatrix();
+  }
+
+  function updateSizeCounter() {
+    const counter = $("#sizeCounter");
+    if (!counter) return;
+    const count = getSizeStockData().length;
+    counter.textContent = count;
+    counter.classList.toggle("has-items", count > 0);
+  }
+
+  function updateColorCounter() {
+    const counter = $("#colorCounter");
+    if (!counter) return;
+    const count = getColorStockData().length;
+    counter.textContent = count;
+    counter.classList.toggle("has-items", count > 0);
+  }
+
+  function renderSizeStockList() {
+    const list = $("#sizeStockList");
+    if (!list) return;
+
+    const sizes = getSizeStockData();
+
+    if (!sizes.length) {
+      list.innerHTML =
+        '<span class="size-stock-empty">No sizes added yet</span>';
+      return;
+    }
+
+    list.innerHTML = sizes
+      .map(
+        (s, i) => `
+      <div class="size-stock-item" data-index="${i}">
+        <span class="size-name">${escapeHtml(s.name)}</span>
+        <span class="size-qty ${s.qty <= 0 ? "out-of-stock" : ""}">${s.qty}</span>
+        <span class="remove-size" title="Remove"><i class="fa-solid fa-times"></i></span>
+      </div>
+    `,
+      )
+      .join("");
+  }
+
+  function addSizeStock() {
+    const nameSelect = $("#pSizeName");
+    const qtyInput = $("#pSizeQty");
+
+    if (!nameSelect || !qtyInput) return;
+
+    const name = nameSelect.value.trim();
+    const qty = parseInt(qtyInput.value) || 0;
+
+    if (!name) {
+      showToast("Please select a size");
+      nameSelect.focus();
+      return;
+    }
+
+    const sizes = getSizeStockData();
+
+    // Check for duplicate
+    const existingIndex = sizes.findIndex(
+      (s) => s.name.toLowerCase() === name.toLowerCase(),
+    );
+    if (existingIndex >= 0) {
+      // Update existing
+      sizes[existingIndex].qty = qty;
+      showToast(`Updated ${name} quantity`);
+    } else {
+      // Add new
+      sizes.push({ name, qty });
+      showToast(`Added ${name}`);
+    }
+
+    setSizeStockData(sizes);
+
+    nameSelect.value = "";
+    qtyInput.value = "0";
+    nameSelect.focus();
+  }
+
+  function removeSizeStock(index) {
+    const sizes = getSizeStockData();
+    if (index >= 0 && index < sizes.length) {
+      sizes.splice(index, 1);
+      setSizeStockData(sizes);
+    }
+  }
+
+  function setupSizeStockEvents() {
+    // Setup unified variant input instead of separate size/color inputs
+    setupUnifiedVariantEvents();
+
+    // Initial render
+    renderVariantList();
+  }
+
+  /* =========================
+    Variant Stock Matrix (Size + Color combinations)
+  ========================= */
+  function getVariantStockData() {
+    const input = $("#pVariantStock");
+    if (!input) return [];
+    try {
+      return JSON.parse(input.value || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  function setVariantStockData(data) {
+    const input = $("#pVariantStock");
+    if (input) {
+      input.value = JSON.stringify(data);
+    }
+    updateVariantCounter();
+  }
+
+  function updateVariantCounter() {
+    const counter = $("#variantCounter");
+    if (!counter) return;
+    const data = getVariantStockData();
+    const totalStock = data.reduce((sum, v) => sum + (v.qty || 0), 0);
+    counter.textContent = totalStock;
+    counter.classList.toggle("has-items", totalStock > 0);
+  }
+
+  function updateVariantMatrix() {
+    const wrapper = $("#variantMatrixWrap");
+    const matrixEl = $("#variantMatrix");
+    if (!wrapper || !matrixEl) return;
+
+    const sizes = getSizeStockData();
+    const colors = getColorStockData();
+    const colorMode = $("#pColorMode")?.value || "";
+
+    // Only show matrix if both sizes and colors exist AND color mode is "open"
+    const shouldShow =
+      sizes.length > 0 && colors.length > 0 && colorMode === "open";
+    wrapper.hidden = !shouldShow;
+
+    if (!shouldShow) {
+      matrixEl.innerHTML = "";
+      return;
+    }
+
+    // Get existing variant data
+    const existingData = getVariantStockData();
+    const dataMap = {};
+    existingData.forEach((v) => {
+      dataMap[`${v.size}-${v.color}`] = v.qty || 0;
+    });
+
+    // Build the matrix table
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Size / Color</th>
+            ${colors.map((c) => `<th>${escapeHtml(c.name)}</th>`).join("")}
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    sizes.forEach((size) => {
+      html += `<tr><td>${escapeHtml(size.name)}</td>`;
+      colors.forEach((color) => {
+        const key = `${size.name}-${color.name}`;
+        const qty = dataMap[key] ?? 0;
+        html += `
+          <td>
+            <input type="number" 
+              class="variant-qty-input ${qty <= 0 ? "out-of-stock" : ""}"
+              data-size="${escapeHtml(size.name)}"
+              data-color="${escapeHtml(color.name)}"
+              value="${qty}"
+              min="0"
+            />
+          </td>
+        `;
+      });
+      html += `</tr>`;
+    });
+
+    html += `</tbody></table>`;
+    matrixEl.innerHTML = html;
+
+    // Bind input change events
+    matrixEl.querySelectorAll(".variant-qty-input").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        onVariantQtyChange(e);
+        renderVariantSummary();
+      });
+      input.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value) || 0;
+        e.target.classList.toggle("out-of-stock", val <= 0);
+      });
+    });
+
+    // Render summary
+    renderVariantSummary();
+  }
+
+  // Color name to hex mapping for summary display
+  const adminColorMap = {
+    blue: "#2563eb",
+    red: "#dc2626",
+    green: "#16a34a",
+    yellow: "#eab308",
+    orange: "#f97316",
+    purple: "#9333ea",
+    pink: "#ec4899",
+    black: "#1f2937",
+    white: "#ffffff",
+    grey: "#6b7280",
+    gray: "#6b7280",
+    brown: "#92400e",
+    navy: "#1e3a8a",
+    beige: "#d4a574",
+    maroon: "#7f1d1d",
+    teal: "#0d9488",
+    gold: "#ca8a04",
+    silver: "#94a3b8",
+    cream: "#fef3c7",
+    coral: "#f87171",
+    lavender: "#c4b5fd",
+    peach: "#fdba74",
+    nude: "#e8d4c4",
+    ivory: "#fffff0",
+    burgundy: "#881337",
+    mint: "#86efac",
+    rose: "#fda4af",
+    wine: "#7c2d12",
+    chocolate: "#78350f",
+    tan: "#d97706",
+    camel: "#b45309",
+  };
+
+  function getAdminColorHex(colorName) {
+    const lower = String(colorName || "")
+      .toLowerCase()
+      .trim();
+    return adminColorMap[lower] || colorName || "#ccc";
+  }
+
+  function renderVariantSummary() {
+    const summaryEl = $("#variantSummary");
+    if (!summaryEl) return;
+
+    const data = getVariantStockData();
+
+    // Filter only items with qty > 0 for the summary, or show all if none have stock
+    const itemsWithStock = data.filter((v) => v.qty > 0);
+    const displayData = itemsWithStock.length > 0 ? itemsWithStock : data;
+
+    if (!displayData.length) {
+      summaryEl.innerHTML = "";
+      return;
+    }
+
+    // Sort by size order, then color
+    const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "One Size"];
+    displayData.sort((a, b) => {
+      const aIdx = sizeOrder.indexOf(a.size);
+      const bIdx = sizeOrder.indexOf(b.size);
+      if (aIdx !== bIdx) return aIdx - bIdx;
+      return a.color.localeCompare(b.color);
+    });
+
+    let html = `<span class="variant-summary-title">Stock Summary</span>`;
+
+    displayData.forEach((v) => {
+      const qtyClass =
+        v.qty <= 0 ? "out-of-stock" : v.qty <= 5 ? "low-stock" : "";
+      const colorHex = getAdminColorHex(v.color);
+
+      html += `
+        <div class="variant-chip">
+          <span class="chip-size">${escapeHtml(v.size)}</span>
+          <span class="chip-color">
+            <span class="chip-color-dot" style="background:${colorHex}"></span>
+            ${escapeHtml(v.color)}
+          </span>
+          <span class="chip-qty ${qtyClass}">${v.qty}</span>
+        </div>
+      `;
+    });
+
+    summaryEl.innerHTML = html;
+  }
+
+  function onVariantQtyChange(e) {
+    const input = e.target;
+    const size = input.dataset.size;
+    const color = input.dataset.color;
+    const qty = parseInt(input.value) || 0;
+
+    const data = getVariantStockData();
+    const key = `${size}-${color}`;
+
+    // Find or create entry
+    const existingIndex = data.findIndex(
+      (v) => v.size === size && v.color === color,
+    );
+    if (existingIndex >= 0) {
+      data[existingIndex].qty = qty;
+    } else {
+      data.push({ size, color, qty });
+    }
+
+    setVariantStockData(data);
+  }
+
+  function rebuildVariantMatrix() {
+    // Called when sizes or colors change - rebuild matrix preserving existing values
+    const sizes = getSizeStockData();
+    const colors = getColorStockData();
+    const oldData = getVariantStockData();
+
+    // Create new data array with only valid size-color combinations
+    const newData = [];
+    sizes.forEach((size) => {
+      colors.forEach((color) => {
+        const existing = oldData.find(
+          (v) => v.size === size.name && v.color === color.name,
+        );
+        newData.push({
+          size: size.name,
+          color: color.name,
+          qty: existing?.qty || 0,
+        });
+      });
+    });
+
+    setVariantStockData(newData);
+    renderVariantList();
+  }
+
+  /* =========================
+    Unified Variant Input System
+  ========================= */
+  function addVariant() {
+    const sizeSelect = $("#pVariantSize");
+    const colorInput = $("#pVariantColor");
+    const qtyInput = $("#pVariantQty");
+
+    if (!sizeSelect || !colorInput || !qtyInput) return;
+
+    const size = sizeSelect.value.trim();
+    const color = colorInput.value.trim();
+    const qty = parseInt(qtyInput.value) || 0;
+
+    if (!size) {
+      showToast("Please select a size", "error");
+      sizeSelect.focus();
+      return;
+    }
+
+    if (!color) {
+      showToast("Please enter a color", "error");
+      colorInput.focus();
+      return;
+    }
+
+    if (qty < 0) {
+      showToast("Quantity must be 0 or more", "error");
+      qtyInput.focus();
+      return;
+    }
+
+    const variants = getVariantStockData();
+
+    // Check for duplicate
+    const existingIndex = variants.findIndex(
+      (v) =>
+        v.size.toLowerCase() === size.toLowerCase() &&
+        v.color.toLowerCase() === color.toLowerCase(),
+    );
+
+    if (existingIndex >= 0) {
+      // Update existing
+      variants[existingIndex].qty = qty;
+      showToast(`Updated ${size} ${color} to ${qty} units`);
+    } else {
+      // Add new
+      variants.push({ size, color, qty });
+      showToast(`Added ${qty} × ${size} ${color}`);
+    }
+
+    setVariantStockData(variants);
+    updateSizesFromVariants();
+    updateColorsFromVariants();
+    renderVariantList();
+
+    // Clear inputs for next entry
+    colorInput.value = "";
+    qtyInput.value = "";
+    colorInput.focus();
+  }
+
+  function removeVariant(index) {
+    const variants = getVariantStockData();
+    if (index >= 0 && index < variants.length) {
+      const removed = variants[index];
+      variants.splice(index, 1);
+      setVariantStockData(variants);
+      updateSizesFromVariants();
+      updateColorsFromVariants();
+      renderVariantList();
+      showToast(`Removed ${removed.size} ${removed.color}`);
+    }
+  }
+
+  function updateVariantQty(index, newQty) {
+    const variants = getVariantStockData();
+    if (index >= 0 && index < variants.length) {
+      variants[index].qty = Math.max(0, parseInt(newQty) || 0);
+      setVariantStockData(variants);
+      renderVariantList();
+    }
+  }
+
+  // Extract unique sizes from variants and update pSizes
+  function updateSizesFromVariants() {
+    const variants = getVariantStockData();
+    const sizeMap = {};
+
+    variants.forEach((v) => {
+      if (!sizeMap[v.size]) {
+        sizeMap[v.size] = 0;
+      }
+      sizeMap[v.size] += v.qty || 0;
+    });
+
+    const sizes = Object.entries(sizeMap).map(([name, qty]) => ({ name, qty }));
+
+    const input = $("#pSizes");
+    if (input) {
+      input.value = JSON.stringify(sizes);
+    }
+  }
+
+  // Extract unique colors from variants and update pColors
+  function updateColorsFromVariants() {
+    const variants = getVariantStockData();
+    const colorMap = {};
+
+    variants.forEach((v) => {
+      if (!colorMap[v.color]) {
+        colorMap[v.color] = 0;
+      }
+      colorMap[v.color] += v.qty || 0;
+    });
+
+    const colors = Object.entries(colorMap).map(([name, qty]) => ({
+      name,
+      qty,
+    }));
+
+    const input = $("#pColors");
+    if (input) {
+      input.value = JSON.stringify(colors);
+    }
+  }
+
+  function renderVariantList() {
+    const list = $("#variantList");
+    if (!list) return;
+
+    const variants = getVariantStockData();
+    updateVariantCounter();
+
+    if (!variants.length) {
+      list.innerHTML = `
+        <div class="variant-list-empty">
+          <i class="fa-solid fa-box-open"></i>
+          <p>No variants added yet</p>
+          <span>Add size, color and quantity above</span>
+        </div>
+      `;
+      return;
+    }
+
+    // Group by size for better display
+    const sizeGroups = {};
+    variants.forEach((v, i) => {
+      if (!sizeGroups[v.size]) {
+        sizeGroups[v.size] = [];
+      }
+      sizeGroups[v.size].push({ ...v, index: i });
+    });
+
+    const sizeOrder = ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "One Size"];
+    const sortedSizes = Object.keys(sizeGroups).sort((a, b) => {
+      const aIdx = sizeOrder.indexOf(a);
+      const bIdx = sizeOrder.indexOf(b);
+      if (aIdx === -1 && bIdx === -1) return a.localeCompare(b);
+      if (aIdx === -1) return 1;
+      if (bIdx === -1) return -1;
+      return aIdx - bIdx;
+    });
+
+    let html = "";
+    sortedSizes.forEach((size) => {
+      html += `<div class="variant-group">
+        <div class="variant-group-header">
+          <span class="variant-group-size">${escapeHtml(size)}</span>
+          <span class="variant-group-count">${sizeGroups[size].length} color${sizeGroups[size].length > 1 ? "s" : ""}</span>
+        </div>
+        <div class="variant-group-items">`;
+
+      sizeGroups[size].forEach((v) => {
+        const colorHex = getAdminColorHex(v.color);
+        const isLowStock = v.qty > 0 && v.qty <= 5;
+        const isOutOfStock = v.qty <= 0;
+
+        html += `
+          <div class="variant-item ${isOutOfStock ? "out-of-stock" : ""} ${isLowStock ? "low-stock" : ""}" data-index="${v.index}">
+            <span class="variant-color-dot" style="background: ${colorHex}"></span>
+            <span class="variant-color-name">${escapeHtml(v.color)}</span>
+            <div class="variant-qty-control">
+              <button type="button" class="qty-btn" data-action="dec">−</button>
+              <input type="number" class="variant-qty-input" value="${v.qty}" min="0" />
+              <button type="button" class="qty-btn" data-action="inc">+</button>
+            </div>
+            <button type="button" class="variant-remove" title="Remove">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        `;
+      });
+
+      html += `</div></div>`;
+    });
+
+    // Add total summary
+    const totalQty = variants.reduce((sum, v) => sum + (v.qty || 0), 0);
+    const totalVariants = variants.length;
+    html += `
+      <div class="variant-summary-bar">
+        <span><strong>${totalVariants}</strong> variant${totalVariants > 1 ? "s" : ""}</span>
+        <span><strong>${totalQty}</strong> total units</span>
+      </div>
+    `;
+
+    list.innerHTML = html;
+  }
+
+  function setupUnifiedVariantEvents() {
+    const addBtn = $("#addVariantBtn");
+    const sizeSelect = $("#pVariantSize");
+    const colorInput = $("#pVariantColor");
+    const qtyInput = $("#pVariantQty");
+    const variantList = $("#variantList");
+    const quickBtns = document.querySelectorAll(".quick-size-btn");
+
+    // Add variant button
+    if (addBtn) {
+      addBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        addVariant();
+      });
+    }
+
+    // Enter key in inputs
+    [colorInput, qtyInput].forEach((input) => {
+      if (input) {
+        input.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addVariant();
+          }
+        });
+      }
+    });
+
+    // Quick size buttons
+    quickBtns.forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const size = btn.dataset.size;
+        if (sizeSelect) {
+          sizeSelect.value = size;
+          colorInput?.focus();
+        }
+      });
+    });
+
+    // Variant list actions (remove, qty change)
+    if (variantList) {
+      variantList.addEventListener("click", (e) => {
+        const item = e.target.closest(".variant-item");
+        if (!item) return;
+        const index = parseInt(item.dataset.index);
+
+        // Remove button
+        if (e.target.closest(".variant-remove")) {
+          removeVariant(index);
+          return;
+        }
+
+        // Qty buttons
+        const qtyBtn = e.target.closest(".qty-btn");
+        if (qtyBtn) {
+          const input = item.querySelector(".variant-qty-input");
+          const currentQty = parseInt(input?.value) || 0;
+          const delta = qtyBtn.dataset.action === "inc" ? 1 : -1;
+          updateVariantQty(index, currentQty + delta);
+        }
+      });
+
+      // Qty input change
+      variantList.addEventListener("change", (e) => {
+        if (e.target.classList.contains("variant-qty-input")) {
+          const item = e.target.closest(".variant-item");
+          if (item) {
+            const index = parseInt(item.dataset.index);
+            updateVariantQty(index, e.target.value);
+          }
+        }
+      });
+    }
+
+    // Initial render
+    renderVariantList();
+  }
+
+  /* =========================
+    Image Preview Modal
+  ========================= */
+  function openImagePreviewModal(src) {
+    // Check if modal exists, create if not
+    let modal = $("#imagePreviewModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "imagePreviewModal";
+      modal.className = "image-preview-modal";
+      modal.innerHTML = `
+        <div class="image-preview-backdrop"></div>
+        <div class="image-preview-content">
+          <button type="button" class="image-preview-close" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <img src="" alt="Preview" class="image-preview-img" />
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      // Bind close events
+      modal
+        .querySelector(".image-preview-backdrop")
+        .addEventListener("click", closeImagePreviewModal);
+      modal
+        .querySelector(".image-preview-close")
+        .addEventListener("click", closeImagePreviewModal);
+      modal.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeImagePreviewModal();
+      });
+    }
+
+    modal.querySelector(".image-preview-img").src = src;
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeImagePreviewModal() {
+    const modal = $("#imagePreviewModal");
+    if (modal) {
+      modal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
   }
 
   /* =========================
@@ -2670,6 +4007,13 @@
       renderStudioSlider();
     });
 
+    // Double-click to preview image in full screen
+    on($("#studioImgTrack"), "dblclick", (e) => {
+      const img = e.target?.closest("img");
+      if (!img) return;
+      openImagePreviewModal(img.src);
+    });
+
     // Swipe / drag for studio
     const studioViewport = $("#studioImgSlider .slider-viewport");
     bindSwipeArea(
@@ -2716,32 +4060,32 @@
     const delBtn = $("#deleteBtn");
     if (delBtn) delBtn.hidden = true;
 
-    $$(".chip input").forEach((c) => (c.checked = false));
-    $("#pSizes").value = "[]";
-    updateSizeLabel();
+    // Reset sizes (now using stock list like colors)
+    setSizeStockData([]);
 
-    // Reset all custom form dropdowns
+    // Reset all form select dropdowns (native selects)
     [
       "pCategory",
       "pGender",
       "pDeliveryType",
       "pColorMode",
       "pPackType",
+      "pSizeName",
     ].forEach((fieldId) => {
-      const hiddenInput = $(`#${fieldId}`);
-      const wrap = $(`.ms-wrapper--form[data-field="${fieldId}"]`);
-      if (hiddenInput) hiddenInput.value = "";
-      if (wrap) {
-        const label = wrap.querySelector(".ms-label");
-        if (label) {
-          label.textContent = "Select...";
-          label.classList.add("is-idle");
-          label.classList.remove("is-selected");
-        }
+      const selectEl = $(`#${fieldId}`);
+      if (selectEl) {
+        selectEl.value = "";
       }
     });
 
     toggleColorUI();
+
+    // Reset color stock
+    setColorStockData([]);
+
+    // Reset variant stock
+    setVariantStockData([]);
+    renderVariantList();
 
     studioExisting = [];
     studioAdded.forEach((x) => x?.url && URL.revokeObjectURL(x.url));
@@ -2790,10 +4134,27 @@
     setFormDropdownValue("pGender", data.gender || "");
     setFormDropdownValue("pDeliveryType", data.delivery_type || "standard");
 
-    const sizes = data.sizes || [];
-    $$(".chip input").forEach((cb) => (cb.checked = sizes.includes(cb.value)));
-    $("#pSizes").value = JSON.stringify(sizes);
-    updateSizeLabel();
+    // Handle sizes - support both old format (string array) and new format (object array)
+    const sizesRaw = data.sizes || [];
+    console.log(
+      "[startEdit] Raw sizes from DB:",
+      sizesRaw,
+      "Type:",
+      typeof sizesRaw,
+    );
+    let sizesData = [];
+    if (sizesRaw.length > 0) {
+      if (typeof sizesRaw[0] === "string") {
+        // Old format: ["S", "M", "L"] -> convert to new format
+        sizesData = sizesRaw.map((name) => ({ name, qty: 0 }));
+        console.log("[startEdit] Converted sizes from old format:", sizesData);
+      } else {
+        // New format: [{name: "M", qty: 10}]
+        sizesData = sizesRaw;
+        console.log("[startEdit] Using new sizes format:", sizesData);
+      }
+    }
+    setSizeStockData(sizesData);
 
     // Color mode and pack type with custom dropdowns
     const colorModeValue = data.allow_color_selection ? "open" : "assorted";
@@ -2801,7 +4162,34 @@
     toggleColorUI();
 
     setFormDropdownValue("pPackType", data.pack_type || "2-in-1");
-    setVal("#pColors", (data.colors || []).join(", "));
+
+    // Handle colors - support both old format (string array) and new format (object array)
+    const colorsRaw = data.colors || [];
+    console.log(
+      "[startEdit] Raw colors from DB:",
+      colorsRaw,
+      "Type:",
+      typeof colorsRaw,
+    );
+    let colorsData = [];
+    if (colorsRaw.length > 0) {
+      if (typeof colorsRaw[0] === "string") {
+        // Old format: ["Red", "Blue"] -> convert to new format
+        colorsData = colorsRaw.map((name) => ({ name, qty: 1 }));
+        console.log("[startEdit] Converted from old format:", colorsData);
+      } else {
+        // New format: [{name: "Red", qty: 10}]
+        colorsData = colorsRaw;
+        console.log("[startEdit] Using new format:", colorsData);
+      }
+    }
+    console.log("[startEdit] Setting colors:", colorsData);
+    setColorStockData(colorsData);
+
+    // Load variant stock data
+    const variantStockData = data.variant_stock || [];
+    setVariantStockData(variantStockData);
+    renderVariantList();
 
     $("#pIsActive").checked = !!data.is_active;
     $("#pIsNew").checked = !!data.is_new;
@@ -2900,6 +4288,230 @@
   }
 
   /* =========================
+    Dashboard Stats & Widgets
+  ========================= */
+  async function loadDashboardStats() {
+    console.log("[loadDashboardStats] Loading dashboard stats");
+
+    // Load products count
+    const { count: productsCount, error: productsErr } = await supabase
+      .from("products")
+      .select("*", { count: "exact", head: true })
+      .eq("is_deleted", false);
+
+    if (!productsErr) {
+      const el = $("#totalProductsCount");
+      if (el) el.textContent = productsCount || 0;
+    }
+
+    // Load orders data
+    const { data: orders, error: ordersErr } = await supabase
+      .from("orders")
+      .select("*");
+
+    if (!ordersErr && orders) {
+      const totalOrders = orders.length;
+      const pendingOrders = orders.filter((o) => o.status === "pending").length;
+      const totalRevenue = orders
+        .filter((o) => o.status === "delivered")
+        .reduce((sum, o) => sum + (o.total || 0), 0);
+
+      const ordersEl = $("#totalOrdersCount");
+      const pendingEl = $("#pendingOrdersCount");
+      const revenueEl = $("#totalRevenueAmount");
+
+      if (ordersEl) ordersEl.textContent = totalOrders;
+      if (pendingEl) pendingEl.textContent = pendingOrders;
+      if (revenueEl)
+        revenueEl.textContent = "₦" + totalRevenue.toLocaleString("en-NG");
+
+      // Update pending orders badge in nav
+      const badge = $("#pendingOrdersBadge");
+      if (badge) {
+        badge.textContent = pendingOrders;
+        badge.hidden = pendingOrders === 0;
+      }
+    }
+
+    // Load recent orders for widget
+    await loadRecentOrdersWidget();
+
+    // Load low stock for widget
+    await loadLowStockWidget();
+  }
+
+  async function loadRecentOrdersWidget() {
+    const list = $("#recentOrdersList");
+    if (!list) return;
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <p>Failed to load orders</p>
+        </div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-shopping-bag"></i>
+          <p>No orders yet</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = data
+      .map((order) => {
+        const date = new Date(order.created_at).toLocaleDateString("en-NG", {
+          day: "numeric",
+          month: "short",
+        });
+        const statusClass =
+          {
+            pending: "warning",
+            processing: "info",
+            shipped: "primary",
+            delivered: "success",
+            cancelled: "danger",
+          }[order.status] || "muted";
+
+        return `
+        <div class="widget-item">
+          <div class="widget-item-icon">
+            <i class="fa-solid fa-shopping-bag"></i>
+          </div>
+          <div class="widget-item-info">
+            <span class="widget-item-title">#${order.id.slice(0, 8)}</span>
+            <span class="widget-item-meta">${date} • ${order.customer_name || "Customer"}</span>
+          </div>
+          <span class="status-badge ${statusClass}">${order.status}</span>
+        </div>`;
+      })
+      .join("");
+  }
+
+  async function loadLowStockWidget() {
+    const list = $("#lowStockList");
+    if (!list) return;
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("is_deleted", false)
+      .lt("stock", 10)
+      .order("stock", { ascending: true })
+      .limit(5);
+
+    if (error) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <p>Failed to load stock data</p>
+        </div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-box-open"></i>
+          <p>All products in stock</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = data
+      .map((product) => {
+        const stockClass =
+          product.stock <= 0
+            ? "danger"
+            : product.stock < 5
+              ? "warning"
+              : "info";
+        return `
+        <div class="widget-item">
+          <div class="widget-item-icon ${stockClass}">
+            <i class="fa-solid fa-cube"></i>
+          </div>
+          <div class="widget-item-info">
+            <span class="widget-item-title">${product.name}</span>
+            <span class="widget-item-meta">SKU: ${product.sku || "N/A"}</span>
+          </div>
+          <span class="stock-count ${stockClass}">${product.stock} left</span>
+        </div>`;
+      })
+      .join("");
+  }
+
+  async function loadRecentActivityWidget() {
+    const list = $("#recentActivityList");
+    if (!list) return;
+
+    const { data, error } = await supabase
+      .from("admin_activity_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(5);
+
+    if (error) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <p>Failed to load activity</p>
+        </div>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <p>No recent activity</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = data
+      .map((log) => {
+        const date = new Date(log.created_at).toLocaleDateString("en-NG", {
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const icon =
+          {
+            create: "fa-plus",
+            update: "fa-pen",
+            delete: "fa-trash",
+            login: "fa-right-to-bracket",
+            logout: "fa-right-from-bracket",
+            restore: "fa-rotate-left",
+          }[log.action] || "fa-circle";
+
+        return `
+        <div class="widget-item">
+          <div class="widget-item-icon">
+            <i class="fa-solid ${icon}"></i>
+          </div>
+          <div class="widget-item-info">
+            <span class="widget-item-title">${log.action} ${log.entity_type || ""}</span>
+            <span class="widget-item-meta">${date}</span>
+          </div>
+        </div>`;
+      })
+      .join("");
+  }
+
+  /* =========================
     Enter dashboard
   ========================= */
   async function enterDashboard(session) {
@@ -2924,6 +4536,9 @@
     }
     applyRoleBasedUI();
 
+    // Update sidebar user info with actual name and role
+    updateSidebarUserInfo(session);
+
     // Start session timeout timer
     resetSessionTimer();
 
@@ -2935,6 +4550,7 @@
     await ensureProfileComplete(session);
     ensureDefaultDashboardView();
     await loadInventory();
+    await loadDashboardStats();
   }
 
   async function gateWithSession(session, source) {
@@ -2962,6 +4578,12 @@
         return;
       }
       console.log("[gateWithSession] Access granted, entering dashboard");
+
+      // Show welcome screen for login (not auto-restore)
+      if (source === "login") {
+        await showWelcomeScreen(session);
+      }
+
       await enterDashboard(session);
     } catch (err) {
       console.error("[gateWithSession] Exception:", err);
@@ -2969,6 +4591,59 @@
       showAuthView("login");
       showToast("Session expired. Please login again.");
     }
+  }
+
+  // Show welcome animation after successful login
+  async function showWelcomeScreen(session) {
+    const overlay = $("#welcomeOverlay");
+    const nameEl = $("#welcomeName");
+    const avatarEl = $("#welcomeAvatar");
+
+    if (!overlay) return;
+
+    // Get user display name
+    let displayName = "Admin";
+    try {
+      const { data } = await supabase
+        .from("profiles")
+        .select("display_name")
+        .eq("id", session.user.id)
+        .single();
+      if (data?.display_name) {
+        displayName = data.display_name;
+      }
+    } catch (e) {
+      console.log("Could not fetch display name");
+    }
+
+    // Set the name
+    if (nameEl) {
+      nameEl.textContent = displayName;
+    }
+
+    // Set avatar initials
+    if (avatarEl) {
+      const initials = displayName
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase();
+      avatarEl.textContent = initials || "A";
+    }
+
+    // Show the welcome overlay
+    overlay.hidden = false;
+
+    // Wait for animation to complete then fade out
+    await new Promise((resolve) => setTimeout(resolve, 1800));
+
+    overlay.classList.add("fade-out");
+
+    // Remove after fade out
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    overlay.hidden = true;
+    overlay.classList.remove("fade-out");
   }
 
   async function autoGateOnce() {
@@ -3166,7 +4841,14 @@
 
     on($("[data-refresh]"), "click", loadInventory);
     on($("[data-clear-form]"), "click", resetForm);
-    on($("#pColorMode"), "change", toggleColorUI);
+    on($("#pColorMode"), "change", () => {
+      toggleColorUI();
+      updateVariantMatrix();
+    });
+
+    // Color and Size stock management
+    setupColorStockEvents();
+    setupSizeStockEvents();
 
     on($("#deleteBtn"), "click", async () => {
       const id = $("#productId")?.value;
@@ -3245,6 +4927,12 @@
 
         const finalImages = [...studioExisting, ...uploaded];
 
+        // Get colors - now stored as JSON array of {name, qty} objects
+        const colorsData = getColorStockData();
+
+        // Get variant stock (size-color combinations)
+        const variantStock = getVariantStockData();
+
         const payload = {
           name: $("#pName")?.value || "",
           description: $("#pDescription")?.value || "",
@@ -3256,12 +4944,11 @@
           sizes,
           allow_color_selection: isOpen,
           pack_type: $("#pPackType")?.value || "2-in-1",
-          colors: isOpen
-            ? String($("#pColors")?.value || "")
-                .split(",")
-                .map((s) => s.trim())
-                .filter(Boolean)
-            : [],
+          colors: isOpen ? colorsData : [],
+          variant_stock:
+            isOpen && sizes.length > 0 && colorsData.length > 0
+              ? variantStock
+              : [],
           is_active: !!$("#pIsActive")?.checked,
           is_new: !!$("#pIsNew")?.checked,
           images: finalImages,
@@ -3315,10 +5002,12 @@
     bindViewerModal();
     bindInviteModal();
     bindCompleteProfileModal();
+    bindConfirmModal();
     bindSearchAndFilter();
     bindTrashActions();
     bindAdminsActions();
     bindOrdersActions();
+    bindSiteImagesActions();
     await bindProductActions();
 
     // Enhanced features
@@ -3383,7 +5072,7 @@
       if (msg) return setAuthMsg(msg);
 
       const btn = $("#signupForm button[type='submit']");
-      setBtnLoading(btn, true, "Creating...");
+      setBtnLoading(btn, true, "Creating account...");
 
       try {
         const firstName = $("#firstName").value.trim();
@@ -3394,14 +5083,26 @@
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { data: { first_name: firstName, last_name: lastName } },
+          options: {
+            data: { first_name: firstName, last_name: lastName },
+            emailRedirectTo: window.location.origin + "/admin.html",
+          },
         });
 
         if (error) return setAuthMsg(explainError(error));
 
-        showToast("Account created.");
-        if (data?.session) await gateWithSession(data.session, "login");
-        else showAuthView("login");
+        // Check if email confirmation is required
+        if (data?.user && !data?.session) {
+          // Email confirmation required - show confirmation view
+          showEmailConfirmationView(email);
+        } else if (data?.session) {
+          // Auto-confirmed (disabled confirmation) - go to dashboard
+          showToast("Account created successfully!");
+          await gateWithSession(data.session, "login");
+        } else {
+          showToast("Account created. Please check your email.");
+          showAuthView("login");
+        }
       } catch (err) {
         console.error("Signup exception:", err);
         setAuthMsg("Network error. Please try again.");
@@ -3474,9 +5175,22 @@
       window.location.reload();
     });
 
-    // Recovery event
-    supabase.auth.onAuthStateChange((evt) => {
-      if (evt === "PASSWORD_RECOVERY") showAuthView("setpw");
+    // Auth state change listener - handles email confirmation redirect
+    supabase.auth.onAuthStateChange(async (evt, session) => {
+      console.log("[onAuthStateChange] Event:", evt);
+
+      if (evt === "PASSWORD_RECOVERY") {
+        showAuthView("setpw");
+      } else if (evt === "SIGNED_IN" && session) {
+        // User just confirmed email or signed in - redirect to dashboard
+        const confirmView = $("#emailConfirmationView");
+        if (confirmView && !confirmView.hidden) {
+          showToast("Email confirmed! Redirecting to dashboard...");
+          setTimeout(async () => {
+            await gateWithSession(session, "login");
+          }, 1000);
+        }
+      }
     });
 
     // init UI state

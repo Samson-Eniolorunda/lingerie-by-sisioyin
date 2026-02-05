@@ -37,16 +37,27 @@
     window.dispatchEvent(new CustomEvent(eventName, { detail }));
   }
 
-  function buildVariantId(productId, size) {
-    return `${productId}-${String(size || "One Size").trim()}`;
+  function buildVariantId(productId, size, color = "") {
+    const sizeStr = String(size || "One Size").trim();
+    const colorStr = color ? `-${String(color).trim()}` : "";
+    return `${productId}-${sizeStr}${colorStr}`;
   }
 
   function normalizeSizes(product) {
     const raw = Array.isArray(product?.sizes)
       ? product.sizes
       : UTILS.parseCSV(product?.sizes);
-    const clean = raw.map((s) => String(s).trim()).filter(Boolean);
-    return clean.length ? clean : ["One Size"];
+    const clean = raw
+      .map((s) => {
+        // Handle object format {name: "S", qty: 10}
+        if (typeof s === "object" && s !== null) {
+          return { name: String(s.name || "").trim(), qty: s.qty || 0 };
+        }
+        // Handle string format
+        return { name: String(s).trim(), qty: 1 };
+      })
+      .filter((s) => s.name);
+    return clean.length ? clean : [{ name: "One Size", qty: 1 }];
   }
 
   function getFirstImage(images) {
@@ -182,62 +193,172 @@
   }
 
   /* ─────────────────────────────────────────────
-   * Cart Drawer
+   * Cart Drawer (Modern Design)
    * ───────────────────────────────────────────── */
+
+  // Color hex helper
+  function getColorHex(colorName) {
+    const colorMap = {
+      Black: "#000000",
+      White: "#FFFFFF",
+      Red: "#EF4444",
+      Pink: "#EC4899",
+      Blue: "#3B82F6",
+      Navy: "#1E3A5F",
+      Green: "#22C55E",
+      Purple: "#A855F7",
+      Orange: "#F97316",
+      Yellow: "#EAB308",
+      Brown: "#92400E",
+      Beige: "#D4B896",
+      Gray: "#6B7280",
+      Grey: "#6B7280",
+      Cream: "#FFFDD0",
+      Gold: "#FFD700",
+      Silver: "#C0C0C0",
+      Nude: "#E3BC9A",
+      Burgundy: "#800020",
+      Maroon: "#800000",
+      Coral: "#FF7F50",
+      Teal: "#008080",
+      Lavender: "#E6E6FA",
+      Mint: "#98FF98",
+      Peach: "#FFCBA4",
+    };
+    return colorMap[colorName] || "#CBD5E1";
+  }
+
   function openDrawer() {
     console.log("📂 APP: openDrawer()");
     const drawer = $("#cartDrawer");
-    const overlay = $("#pageOverlay");
-    if (!drawer) return;
+    const overlay = $("#cartDrawerOverlay");
+    if (!drawer) {
+      console.log("⚠️ APP: Cart drawer not found");
+      return;
+    }
 
-    drawer.classList.add("open");
+    // Remove inert/aria-hidden BEFORE rendering so focus can work
+    drawer.removeAttribute("inert");
     drawer.setAttribute("aria-hidden", "false");
-    overlay?.classList.add("active");
+
+    renderCartDrawer();
+    drawer.classList.add("open");
+    overlay?.classList.add("open");
     document.body.style.overflow = "hidden";
+    document.body.classList.add("drawer-open");
+
+    // Focus the close button for keyboard accessibility
+    const closeBtn = drawer.querySelector("#closeCartDrawer");
+    closeBtn?.focus();
   }
 
   function closeDrawer() {
     console.log("📁 APP: closeDrawer()");
     const drawer = $("#cartDrawer");
-    const overlay = $("#pageOverlay");
+    const overlay = $("#cartDrawerOverlay");
     if (!drawer) return;
 
     drawer.classList.remove("open");
-    drawer.setAttribute("aria-hidden", "true");
-    overlay?.classList.remove("active");
+    overlay?.classList.remove("open");
     document.body.style.overflow = "";
+    document.body.classList.remove("drawer-open");
+
+    // Set inert/aria-hidden AFTER removing focus
+    drawer.setAttribute("aria-hidden", "true");
+    drawer.setAttribute("inert", "");
   }
 
   function renderCartDrawer() {
     console.log("🎨 APP: renderCartDrawer()");
-    const list = $("[data-drawer-list]");
-    const subtotalEl = $("[data-drawer-subtotal]");
-    if (!list) return;
+
+    // Modern cart drawer elements
+    const cartDrawerBody = $("#cartDrawerBody");
+    const cartDrawerFooter = $("#cartDrawerFooter");
+    const cartEmpty = $("#cartEmpty");
+    const subtotalEl = $("#cartSubtotal");
+
+    // Fallback to old drawer elements
+    const oldList = $("[data-drawer-list]") || $(".drawer-items");
+    const oldSubtotal = $("[data-drawer-subtotal]") || $(".drawer-subtotal");
 
     const cart = getCart();
     let subtotal = 0;
 
+    // Handle modern cart drawer (cd-* classes)
+    if (cartDrawerBody) {
+      // Remove existing items
+      cartDrawerBody.querySelectorAll(".cd-item").forEach((el) => el.remove());
+
+      if (!cart.length) {
+        if (cartEmpty) cartEmpty.style.display = "flex";
+        if (cartDrawerFooter) cartDrawerFooter.style.display = "none";
+        return;
+      }
+
+      if (cartEmpty) cartEmpty.style.display = "none";
+      if (cartDrawerFooter) cartDrawerFooter.style.display = "block";
+
+      cart.forEach((item, idx) => {
+        const qty = Number(item.qty || 1);
+        const price = Number(item.price_ngn || 0);
+        subtotal += price * qty;
+
+        const colorName = item.selectedColor || "";
+        const colorHex = getColorHex(colorName);
+
+        const itemEl = document.createElement("div");
+        itemEl.className = "cd-item";
+        itemEl.dataset.idx = idx;
+        itemEl.innerHTML = `
+          <img src="${item.image || "https://placehold.co/72x90/f8fafc/be185d?text=No+Image"}" alt="${UTILS.safeText(item.name)}" class="cd-item-img">
+          <div class="cd-item-info">
+            <h4 class="cd-item-name">${UTILS.safeText(item.name)}</h4>
+            <div class="cd-item-variant">
+              ${item.selectedSize ? `<span class="cd-variant-tag">${item.selectedSize}</span>` : ""}
+              ${colorName ? `<span class="cd-variant-tag"><span class="cd-color-dot" style="background:${colorHex}"></span>${colorName}</span>` : ""}
+            </div>
+            <div class="cd-item-bottom">
+              <p class="cd-item-price">${UTILS.formatNaira(price)}</p>
+              <div class="cd-item-qty">
+                <button type="button" class="cd-qty-btn cd-qty-minus" data-idx="${idx}"><i class="fa-solid fa-minus"></i></button>
+                <span class="cd-qty-value">${qty}</span>
+                <button type="button" class="cd-qty-btn cd-qty-plus" data-idx="${idx}"><i class="fa-solid fa-plus"></i></button>
+              </div>
+            </div>
+          </div>
+          <button type="button" class="cd-item-remove" data-idx="${idx}" aria-label="Remove item"><i class="fa-solid fa-trash-can"></i></button>
+        `;
+        cartDrawerBody.appendChild(itemEl);
+      });
+
+      if (subtotalEl) subtotalEl.textContent = UTILS.formatNaira(subtotal);
+      return;
+    }
+
+    // Fallback to old drawer structure
+    if (!oldList) return;
+
     if (!cart.length) {
-      list.innerHTML = `
+      oldList.innerHTML = `
         <div class="drawer-empty">
           <i class="fa-solid fa-bag-shopping"></i>
           <p>Your cart is empty</p>
           <a href="shop.html" class="btn btn-primary btn-sm">Start Shopping</a>
         </div>
       `;
-      if (subtotalEl) subtotalEl.textContent = UTILS.formatNaira(0);
+      if (oldSubtotal) oldSubtotal.textContent = UTILS.formatNaira(0);
       return;
     }
 
-    list.innerHTML = cart
-      .map((item) => {
+    oldList.innerHTML = cart
+      .map((item, idx) => {
         const qty = Number(item.qty || 1);
         const price = Number(item.price_ngn || 0);
         const lineTotal = price * qty;
         subtotal += lineTotal;
 
         return `
-        <div class="drawer-item" data-variant-id="${UTILS.safeText(item.variantId)}">
+        <div class="drawer-item" data-variant-id="${UTILS.safeText(item.variantId)}" data-idx="${idx}">
           <img src="${UTILS.safeText(item.image)}" alt="${UTILS.safeText(item.name)}" class="drawer-item-img" loading="lazy" />
           <div class="drawer-item-info">
             <h4 class="drawer-item-name">${UTILS.safeText(item.name)}</h4>
@@ -263,7 +384,27 @@
       })
       .join("");
 
-    if (subtotalEl) subtotalEl.textContent = UTILS.formatNaira(subtotal);
+    if (oldSubtotal) oldSubtotal.textContent = UTILS.formatNaira(subtotal);
+  }
+
+  // Cart drawer item quantity/remove handlers
+  function updateCartItemQty(idx, delta) {
+    const cart = getCart();
+    if (!cart[idx]) return;
+
+    cart[idx].qty = Math.max(1, Math.min(99, (cart[idx].qty || 1) + delta));
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartBadge();
+    renderCartDrawer();
+  }
+
+  function removeCartItemByIndex(idx) {
+    const cart = getCart();
+    cart.splice(idx, 1);
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+    updateCartBadge();
+    renderCartDrawer();
+    showToast("Item removed", "info");
   }
 
   /* ─────────────────────────────────────────────
@@ -295,49 +436,148 @@
     if (nextBtn) nextBtn.hidden = modalImages.length <= 1;
   }
 
+  /* ─────────────────────────────────────────────
+   * Image Lightbox Preview
+   * ───────────────────────────────────────────── */
+  function openImagePreview(startIdx = 0) {
+    let idx = startIdx;
+    const overlay = document.createElement("div");
+    overlay.className = "img-lightbox";
+
+    const render = () => {
+      overlay.innerHTML = `
+        <button class="lb-close"><i class="fa-solid fa-xmark"></i></button>
+        <div class="lb-content">
+          ${modalImages.length > 1 ? '<button class="lb-nav lb-prev"><i class="fa-solid fa-chevron-left"></i></button>' : ""}
+          <img src="${modalImages[idx]}" alt="Preview" />
+          ${modalImages.length > 1 ? '<button class="lb-nav lb-next"><i class="fa-solid fa-chevron-right"></i></button>' : ""}
+        </div>
+        <div class="lb-counter">${idx + 1} / ${modalImages.length}</div>
+        <div class="lb-actions">
+          <button class="lb-download"><i class="fa-solid fa-download"></i> Download</button>
+        </div>
+      `;
+    };
+
+    render();
+    document.body.appendChild(overlay);
+
+    overlay.addEventListener("click", async (e) => {
+      if (e.target === overlay || e.target.closest(".lb-close")) {
+        overlay.remove();
+        return;
+      }
+      if (e.target.closest(".lb-prev")) {
+        idx = (idx - 1 + modalImages.length) % modalImages.length;
+        render();
+      }
+      if (e.target.closest(".lb-next")) {
+        idx = (idx + 1) % modalImages.length;
+        render();
+      }
+      if (e.target.closest(".lb-download")) {
+        try {
+          const res = await fetch(modalImages[idx]);
+          const blob = await res.blob();
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `image-${idx + 1}.jpg`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+        } catch {
+          showToast("Failed to download image", "error");
+        }
+      }
+    });
+  }
+
+  let modalSelectedColor = "";
+
+  // Color name to hex mapping
+  const colorMap = {
+    black: "#000000",
+    white: "#ffffff",
+    red: "#ef4444",
+    pink: "#ec4899",
+    rose: "#f43f5e",
+    blue: "#3b82f6",
+    navy: "#1e3a5a",
+    green: "#22c55e",
+    purple: "#a855f7",
+    yellow: "#eab308",
+    orange: "#f97316",
+    brown: "#92400e",
+    beige: "#d4a373",
+    nude: "#e8cebf",
+    cream: "#fffdd0",
+    gray: "#6b7280",
+    grey: "#6b7280",
+    gold: "#d4af37",
+    silver: "#c0c0c0",
+    burgundy: "#800020",
+    maroon: "#800000",
+    coral: "#ff7f50",
+    peach: "#ffcba4",
+    lavender: "#e6e6fa",
+    teal: "#008080",
+    mint: "#98ff98",
+    champagne: "#f7e7ce",
+  };
+
+  function getColorValue(name) {
+    const key = (name || "").toLowerCase().trim();
+    return colorMap[key] || key || "#cccccc";
+  }
+
   function openModal(productOrId) {
     console.log("🔍 APP: openModal()", productOrId);
-    const modal = $("#variantModal");
-    if (!modal) return;
+    // Try new overlay or old modal
+    const overlay = $("#quickViewOverlay");
+    const modal = $("#variantModal") || $("#quickViewModal");
+    if (!overlay && !modal) {
+      console.log("⚠️ APP: Modal not found");
+      return;
+    }
 
     const populate = (product) => {
       console.log("🔍 APP: Populating modal with:", product?.name);
       modalProduct = product;
       modalSelectedSize = "";
+      modalSelectedColor = "";
       modalQuantity = 1;
       currentImageIndex = 0;
 
+      // Get modal elements
       const imgEl = $("#modalImg");
       const titleEl = $("#modalTitle");
       const priceEl = $("#modalPrice");
       const descEl = $("#modalDesc");
       const sizesEl = $("#modalSizes");
+      const colorsEl = $("#modalColors");
+      const colorsSection = $("#qvColorsSection");
+      const sizesSection = $("#qvSizesSection");
       const badgeEl = $("#modalBadge");
       const qtyEl = $("#qtyValue");
       const thumbsEl = $("#modalThumbs");
       const prevBtn = $("#galleryPrev");
       const nextBtn = $("#galleryNext");
+      const wishlistBtn = $("#modalWishlist");
 
-      // Parse images array - handle different formats
+      // Parse images
       modalImages = [];
-      console.log(
-        "🖼️ APP: Raw product images:",
-        product?.images,
-        typeof product?.images,
-      );
-
       if (product?.images) {
         if (Array.isArray(product.images)) {
           modalImages = product.images.filter(Boolean);
         } else if (typeof product.images === "string") {
-          // Try JSON parse first
           try {
             const parsed = JSON.parse(product.images);
             modalImages = Array.isArray(parsed)
               ? parsed.filter(Boolean)
               : [product.images];
           } catch {
-            // Try comma-separated
             if (product.images.includes(",")) {
               modalImages = product.images
                 .split(",")
@@ -349,21 +589,11 @@
           }
         }
       }
+      if (!modalImages.length) modalImages = ["assets/img/placeholder.png"];
 
-      console.log(
-        "🖼️ APP: Parsed modalImages:",
-        modalImages.length,
-        modalImages,
-      );
-
-      if (!modalImages.length) {
-        modalImages = ["assets/img/placeholder.png"];
-      }
-
-      const imageUrl = modalImages[0];
-
+      // Set main image
       if (imgEl) {
-        imgEl.src = imageUrl;
+        imgEl.src = modalImages[0];
         imgEl.alt = product?.name || "Product";
       }
 
@@ -373,10 +603,10 @@
           thumbsEl.innerHTML = modalImages
             .map(
               (img, idx) => `
-              <button type="button" class="gallery-thumb${idx === 0 ? " active" : ""}" data-index="${idx}">
-                <img src="${img}" alt="Thumbnail ${idx + 1}">
-              </button>
-            `,
+            <button type="button" class="gallery-thumb${idx === 0 ? " active" : ""}" data-index="${idx}">
+              <img src="${img}" alt="Thumbnail ${idx + 1}">
+            </button>
+          `,
             )
             .join("");
           thumbsEl.hidden = false;
@@ -390,36 +620,80 @@
       if (prevBtn) prevBtn.hidden = modalImages.length <= 1;
       if (nextBtn) nextBtn.hidden = modalImages.length <= 1;
 
+      // Populate text
       if (titleEl) titleEl.textContent = product?.name || "Product";
       if (priceEl)
         priceEl.textContent = UTILS.formatNaira(product?.price_ngn || 0);
       if (descEl) descEl.textContent = product?.description || "";
       if (qtyEl) qtyEl.textContent = "1";
-
       if (badgeEl) {
         badgeEl.hidden = !product?.is_new;
         badgeEl.textContent = "New";
       }
 
+      // Colors
+      const colors = product?.colors || [];
+      const showColors = product?.allow_color_selection && colors.length > 0;
+      if (colorsSection) colorsSection.hidden = !showColors;
+      if (colorsEl && showColors) {
+        colorsEl.innerHTML = colors
+          .map((c, i) => {
+            const colorName = typeof c === "string" ? c : c.name;
+            const colorValue = getColorValue(colorName);
+            const colorQty = typeof c === "object" ? c.qty || 1 : 1;
+            const isInStock = colorQty > 0;
+            const isActive = i === 0;
+            if (isActive) modalSelectedColor = colorName;
+            return `<button class="qv-color${isActive ? " active" : ""}${!isInStock ? " out-of-stock" : ""}" 
+            data-color="${UTILS.safeText(colorName)}" 
+            data-qty="${colorQty}" 
+            title="${UTILS.safeText(colorName)}${!isInStock ? " (Out of Stock)" : ""}"
+            style="background:${colorValue}" 
+            ${!isInStock ? "disabled" : ""}></button>`;
+          })
+          .join("");
+      }
+
+      // Sizes - normalizeSizes now returns array of {name, qty} objects
       const sizes = normalizeSizes(product);
+      if (sizesSection) sizesSection.hidden = sizes.length === 0;
       if (sizesEl) {
         sizesEl.innerHTML = sizes
           .map((size) => {
-            const label = UTILS.safeText(size);
-            return `<button type="button" class="size-btn size-option" data-size="${label}">${label}</button>`;
+            const label = UTILS.safeText(size.name);
+            const sizeQty = size.qty || 0;
+            const isInStock = sizeQty > 0;
+            return `<button type="button" class="qv-size${!isInStock ? " out-of-stock" : ""}" 
+            data-size="${label}" data-qty="${sizeQty}" ${!isInStock ? "disabled" : ""}>${label}</button>`;
           })
           .join("");
 
         if (sizes.length === 1) {
-          modalSelectedSize = sizes[0];
-          const firstBtn = sizesEl.querySelector(".size-btn");
+          modalSelectedSize = sizes[0].name;
+          const firstBtn = sizesEl.querySelector(".qv-size");
           firstBtn?.classList.add("active");
         }
       }
 
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
+      // Wishlist state
+      if (wishlistBtn) {
+        const wishlist = JSON.parse(
+          localStorage.getItem("LBS_WISHLIST") || "[]",
+        );
+        const isWishlisted = wishlist.includes(String(product?.id));
+        wishlistBtn.classList.toggle("is-active", isWishlisted);
+        wishlistBtn.innerHTML = `<i class="${isWishlisted ? "fa-solid" : "fa-regular"} fa-heart"></i>`;
+      }
+
+      // Show modal
+      if (overlay) {
+        overlay.classList.add("active");
+      }
+      if (modal) {
+        modal.setAttribute("aria-hidden", "false");
+      }
       document.body.style.overflow = "hidden";
+      console.log("🔍 APP: Modal opened");
     };
 
     if (typeof productOrId === "object" && productOrId) {
@@ -441,14 +715,25 @@
 
   function closeModal() {
     console.log("❌ APP: closeModal()");
-    const modal = $("#variantModal");
-    if (!modal) return;
+    const overlay = $("#quickViewOverlay");
+    const modal = $("#variantModal") || $("#quickViewModal");
 
-    modal.classList.remove("open");
-    modal.setAttribute("aria-hidden", "true");
+    if (overlay) {
+      overlay.classList.remove("active");
+    }
+    if (modal) {
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+    }
+
+    // Also hide old backdrop if exists
+    const backdrop = $("#modalBackdrop");
+    if (backdrop) backdrop.classList.remove("active");
+
     document.body.style.overflow = "";
     modalProduct = null;
     modalSelectedSize = "";
+    modalSelectedColor = "";
     modalQuantity = 1;
   }
 
@@ -477,6 +762,7 @@
     UTILS.saveJSON(THEME_KEY, mode);
     applyTheme(mode);
     updateThemeToggleUI(mode);
+    updateMobileThemeToggleUI(mode);
   }
 
   function updateThemeToggleUI(mode) {
@@ -532,17 +818,15 @@
   }
 
   /* ─────────────────────────────────────────────
-   * Mobile Navigation
+   * Mobile Navigation (New Drawer Design)
    * ───────────────────────────────────────────── */
   function openMobileNav() {
     console.log("📱 APP: openMobileNav()");
     const nav = $("#mobileNav");
-    const overlay = $("#pageOverlay");
     const toggle = $("#mobileToggle");
     if (!nav) return;
 
-    nav.classList.add("open");
-    overlay?.classList.add("active");
+    nav.classList.add("active");
     toggle?.setAttribute("aria-expanded", "true");
     document.body.style.overflow = "hidden";
   }
@@ -550,12 +834,10 @@
   function closeMobileNav() {
     console.log("📱 APP: closeMobileNav()");
     const nav = $("#mobileNav");
-    const overlay = $("#pageOverlay");
     const toggle = $("#mobileToggle");
     if (!nav) return;
 
-    nav.classList.remove("open");
-    overlay?.classList.remove("active");
+    nav.classList.remove("active");
     toggle?.setAttribute("aria-expanded", "false");
     document.body.style.overflow = "";
   }
@@ -563,7 +845,7 @@
   function toggleMobileNav() {
     console.log("📱 APP: toggleMobileNav()");
     const nav = $("#mobileNav");
-    if (nav?.classList.contains("open")) {
+    if (nav?.classList.contains("active")) {
       closeMobileNav();
     } else {
       openMobileNav();
@@ -580,10 +862,38 @@
       btn.addEventListener("click", openDrawer);
     });
 
-    // Close drawer
+    // Modern cart drawer close button
+    $("#closeCartDrawer")?.addEventListener("click", closeDrawer);
+
+    // Legacy close button
     $("#drawerCloseBtn")?.addEventListener("click", closeDrawer);
 
-    // Drawer item actions
+    // Cart drawer overlay click to close
+    const overlay = $("#cartDrawerOverlay");
+    overlay?.addEventListener("click", (e) => {
+      if (e.target === overlay) closeDrawer();
+    });
+
+    // Continue shopping button
+    $("#continueShoppingBtn")?.addEventListener("click", closeDrawer);
+
+    // Modern cart drawer body - handle qty/remove actions
+    const cartDrawerBody = $("#cartDrawerBody");
+    cartDrawerBody?.addEventListener("click", (e) => {
+      const minusBtn = e.target.closest(".cd-qty-minus");
+      const plusBtn = e.target.closest(".cd-qty-plus");
+      const removeBtn = e.target.closest(".cd-item-remove");
+
+      if (minusBtn) {
+        updateCartItemQty(parseInt(minusBtn.dataset.idx, 10), -1);
+      } else if (plusBtn) {
+        updateCartItemQty(parseInt(plusBtn.dataset.idx, 10), 1);
+      } else if (removeBtn) {
+        removeCartItemByIndex(parseInt(removeBtn.dataset.idx, 10));
+      }
+    });
+
+    // Legacy drawer item actions
     $("[data-drawer-list]")?.addEventListener("click", (e) => {
       const target = e.target.closest("[data-action]");
       if (!target) return;
@@ -591,29 +901,41 @@
       const action = target.dataset.action;
       const row = target.closest("[data-variant-id]");
       const variantId = row?.dataset.variantId;
-      if (!variantId) return;
+      const idx = row?.dataset.idx;
 
-      console.log(`🎛️ APP: Drawer action - ${action} on ${variantId}`);
+      console.log(`🎛️ APP: Drawer action - ${action} on ${variantId || idx}`);
 
-      if (action === "inc") changeQty(variantId, 1);
-      if (action === "dec") changeQty(variantId, -1);
-      if (action === "remove") removeFromCart(variantId);
+      if (idx !== undefined) {
+        if (action === "inc") updateCartItemQty(parseInt(idx, 10), 1);
+        if (action === "dec") updateCartItemQty(parseInt(idx, 10), -1);
+        if (action === "remove") removeCartItemByIndex(parseInt(idx, 10));
+      } else if (variantId) {
+        if (action === "inc") changeQty(variantId, 1);
+        if (action === "dec") changeQty(variantId, -1);
+        if (action === "remove") removeFromCart(variantId);
+      }
     });
   }
 
   function initModal() {
     console.log("🎛️ APP: initModal()");
-    const modal = $("#variantModal");
-    if (!modal) return;
+    const overlay = $("#quickViewOverlay");
+    const modal = $("#variantModal") || $("#quickViewModal");
+    if (!overlay && !modal) {
+      console.log("⚠️ APP: Modal not found for init");
+      return;
+    }
 
-    // Close buttons
-    $("#modalClose")?.addEventListener("click", closeModal);
+    // Close button
     $("#modalCloseBtn")?.addEventListener("click", closeModal);
 
-    // Click outside
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) closeModal();
+    // Click overlay to close
+    overlay?.addEventListener("click", (e) => {
+      if (e.target === overlay) closeModal();
     });
+
+    // Legacy backdrop click
+    $("#modalBackdrop")?.addEventListener("click", closeModal);
 
     // Gallery navigation - Previous
     $("#galleryPrev")?.addEventListener("click", () => {
@@ -643,16 +965,35 @@
       if (!isNaN(index)) updateGalleryImage(index);
     });
 
-    // Size selection
-    $("#modalSizes")?.addEventListener("click", (e) => {
-      const btn = e.target.closest(".size-btn");
-      if (!btn) return;
+    // Double-click main image to open lightbox preview
+    $("#qvMainWrap")?.addEventListener("dblclick", () => {
+      if (modalImages.length > 0) {
+        openImagePreview(currentImageIndex);
+      }
+    });
 
-      $$("#modalSizes .size-btn").forEach((el) =>
+    // Size selection (support both old .size-btn and new .qv-size)
+    $("#modalSizes")?.addEventListener("click", (e) => {
+      const btn = e.target.closest(".qv-size, .size-btn");
+      if (!btn || btn.disabled) return;
+
+      $$("#modalSizes .qv-size, #modalSizes .size-btn").forEach((el) =>
         el.classList.remove("active"),
       );
       btn.classList.add("active");
       modalSelectedSize = btn.dataset.size || "";
+    });
+
+    // Color selection
+    $("#modalColors")?.addEventListener("click", (e) => {
+      const btn = e.target.closest(".qv-color");
+      if (!btn || btn.disabled) return;
+
+      $$("#modalColors .qv-color").forEach((el) =>
+        el.classList.remove("active"),
+      );
+      btn.classList.add("active");
+      modalSelectedColor = btn.dataset.color || "";
     });
 
     // Quantity controls
@@ -672,20 +1013,26 @@
       }
     });
 
-    // Legacy quantity controls (fallback)
-    $("#qtyMinus")?.addEventListener("click", () => {
-      if (modalQuantity > 1) {
-        modalQuantity--;
-        const el = $("#qtyValue");
-        if (el) el.textContent = String(modalQuantity);
-      }
-    });
+    // Wishlist button
+    $("#modalWishlist")?.addEventListener("click", () => {
+      if (!modalProduct) return;
+      const wishlist = JSON.parse(localStorage.getItem("LBS_WISHLIST") || "[]");
+      const id = String(modalProduct.id);
+      const idx = wishlist.indexOf(id);
 
-    $("#qtyPlus")?.addEventListener("click", () => {
-      if (modalQuantity < 99) {
-        modalQuantity++;
-        const el = $("#qtyValue");
-        if (el) el.textContent = String(modalQuantity);
+      if (idx > -1) {
+        wishlist.splice(idx, 1);
+        UTILS.toast("Removed from wishlist", "info");
+      } else {
+        wishlist.push(id);
+        UTILS.toast("Added to wishlist", "success");
+      }
+
+      localStorage.setItem("LBS_WISHLIST", JSON.stringify(wishlist));
+      const btn = $("#modalWishlist");
+      if (btn) {
+        btn.classList.toggle("is-active", idx === -1);
+        btn.innerHTML = `<i class="${idx === -1 ? "fa-solid" : "fa-regular"} fa-heart"></i>`;
       }
     });
 
@@ -699,37 +1046,116 @@
         return;
       }
 
-      const chosenSize = modalSelectedSize || sizes[0] || "One Size";
+      const colors = modalProduct.colors || [];
+      if (
+        modalProduct.allow_color_selection &&
+        colors.length > 1 &&
+        !modalSelectedColor
+      ) {
+        UTILS.toast("Please select a color", "warning");
+        return;
+      }
+
+      const chosenSize =
+        modalSelectedSize || sizes[0]?.name || sizes[0] || "One Size";
+      const chosenColor = modalSelectedColor || "";
       const imageUrl = getFirstImage(modalProduct.images);
 
       addToCart({
         id: modalProduct.id,
-        variantId: buildVariantId(modalProduct.id, chosenSize),
+        variantId: buildVariantId(modalProduct.id, chosenSize, chosenColor),
         name: modalProduct.name,
         price_ngn: Number(modalProduct.price_ngn || 0),
         image: imageUrl,
         selectedSize: chosenSize,
+        selectedColor: chosenColor,
         qty: modalQuantity,
       });
 
       closeModal();
     });
+
+    // Escape key to close
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        const overlay = $("#quickViewOverlay");
+        if (overlay?.classList.contains("active")) {
+          closeModal();
+        }
+      }
+    });
   }
 
   function initMobileNav() {
     console.log("🎛️ APP: initMobileNav()");
+
+    // Toggle button
     const toggle = $("#mobileToggle");
     toggle?.addEventListener("click", toggleMobileNav);
 
-    // Close on outside click
-    $("#pageOverlay")?.addEventListener("click", () => {
-      console.log("📱 APP: Page overlay clicked");
-      closeDrawer();
-      closeMobileNav();
-      closeModal();
-    });
+    // Close button in drawer
+    const closeBtn = $("#mobileNavClose");
+    closeBtn?.addEventListener("click", closeMobileNav);
 
-    // Close on resize
+    // Backdrop click to close
+    const backdrop = $("#mobileNavBackdrop");
+    backdrop?.addEventListener("click", closeMobileNav);
+
+    // Mobile theme toggle (new drawer design with slider)
+    // Direct handler for #themeSlider (most reliable)
+    const themeSliderById = $("#themeSlider");
+    if (themeSliderById) {
+      themeSliderById.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") || "light";
+        const newMode = currentTheme === "dark" ? "light" : "dark";
+        console.log(
+          `🎨 APP: Theme slider (#themeSlider) clicked - switching to ${newMode}`,
+        );
+        setTheme(newMode);
+      });
+      console.log("🎨 APP: Theme slider #themeSlider listener attached");
+    }
+
+    const mobileThemeToggle = $("#mobileThemeToggle");
+    if (mobileThemeToggle) {
+      // Handle click on drawer theme toggle (sun/moon slider)
+      const drawerThemeToggle = mobileThemeToggle.querySelector(
+        ".drawer-theme-toggle",
+      );
+      if (drawerThemeToggle && drawerThemeToggle !== themeSliderById) {
+        drawerThemeToggle.addEventListener("click", (e) => {
+          e.preventDefault();
+          const currentTheme =
+            document.documentElement.getAttribute("data-theme") || "light";
+          const newMode = currentTheme === "dark" ? "light" : "dark";
+          console.log(`🎨 APP: Drawer theme toggle clicked - ${newMode}`);
+          setTheme(newMode);
+        });
+      }
+
+      // Also support old slider class for backwards compatibility
+      const themeSlider = mobileThemeToggle.querySelector(".theme-slider");
+      if (themeSlider && themeSlider !== themeSliderById) {
+        themeSlider.addEventListener("click", (e) => {
+          e.preventDefault();
+          const currentTheme =
+            document.documentElement.getAttribute("data-theme") || "light";
+          const newMode = currentTheme === "dark" ? "light" : "dark";
+          console.log(`🎨 APP: Theme slider toggled - ${newMode}`);
+          setTheme(newMode);
+        });
+      }
+
+      // Initialize mobile theme toggle UI
+      const saved = UTILS.loadJSON(THEME_KEY, null);
+      const mode = saved || "system";
+      updateMobileThemeToggleUI(mode);
+    }
+
+    // Close on resize (desktop breakpoint)
     window.addEventListener(
       "resize",
       UTILS.throttle(() => {
@@ -738,6 +1164,16 @@
         }
       }, 200),
     );
+  }
+
+  function updateMobileThemeToggleUI(mode) {
+    const mobileToggle = $("#mobileThemeToggle");
+    if (!mobileToggle) return;
+    const buttons = mobileToggle.querySelectorAll(".theme-btn");
+    buttons.forEach((btn) => {
+      const btnTheme = btn.getAttribute("data-theme");
+      btn.classList.toggle("active", btnTheme === mode);
+    });
   }
 
   function initKeyboardNav() {
@@ -842,36 +1278,104 @@
   function initScrollReveal() {
     console.log("✨ APP: initScrollReveal()");
 
-    const revealElements = $$(
-      "[data-reveal], .feature-card, .category-card, .product-card, .section-header",
-    );
+    // Elements that should animate on scroll
+    const revealSelectors = [
+      "[data-reveal]",
+      ".scroll-reveal",
+      ".scroll-fade-up",
+      ".scroll-fade-left",
+      ".scroll-fade-right",
+      ".scroll-scale",
+      ".scroll-stagger",
+      ".feature-card",
+      ".category-card",
+      ".trust-item",
+      ".category-new-card",
+      ".section-header",
+      ".products-section .products-grid",
+      ".categories-new .categories-grid",
+      ".trust-section .trust-grid",
+      ".faq-item",
+      ".newsletter-section",
+    ];
 
-    if (!revealElements.length) return;
+    const revealElements = $$(revealSelectors.join(", "));
 
-    // Add initial hidden state
-    revealElements.forEach((el, index) => {
-      el.style.opacity = "0";
-      el.style.transform = "translateY(30px)";
-      el.style.transition = `opacity 0.6s ease ${(index % 4) * 0.1}s, transform 0.6s ease ${(index % 4) * 0.1}s`;
-    });
+    if (!revealElements.length) {
+      console.log("✨ APP: No reveal elements found");
+      return;
+    }
 
-    const revealOnScroll = () => {
-      revealElements.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight - 100;
+    console.log(`✨ APP: Found ${revealElements.length} elements to reveal`);
 
-        if (isVisible && el.style.opacity === "0") {
-          el.style.opacity = "1";
-          el.style.transform = "translateY(0)";
+    // Use IntersectionObserver for better performance
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px 0px -80px 0px",
+      threshold: 0.1,
+    };
+
+    const revealCallback = (entries, observer) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+
+          // Add revealed class for CSS-based animations
+          el.classList.add("revealed");
+
+          // Also handle inline style animations for backwards compatibility
+          if (el.style.opacity === "0") {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          }
+
+          // Stop observing once revealed
+          observer.unobserve(el);
         }
       });
     };
 
-    // Initial check
-    setTimeout(revealOnScroll, 100);
+    const observer = new IntersectionObserver(revealCallback, observerOptions);
 
-    // On scroll
-    window.addEventListener("scroll", revealOnScroll, { passive: true });
+    // Set initial state and observe
+    revealElements.forEach((el, index) => {
+      // Skip if element already has CSS animation class
+      const hasCSSAnimation =
+        el.classList.contains("scroll-reveal") ||
+        el.classList.contains("scroll-fade-up") ||
+        el.classList.contains("scroll-fade-left") ||
+        el.classList.contains("scroll-fade-right") ||
+        el.classList.contains("scroll-scale") ||
+        el.classList.contains("scroll-stagger");
+
+      if (!hasCSSAnimation) {
+        // Apply inline styles for elements without CSS classes
+        el.style.opacity = "0";
+        el.style.transform = "translateY(30px)";
+        el.style.transition = `opacity 0.6s ease ${(index % 6) * 0.08}s, transform 0.6s ease ${(index % 6) * 0.08}s`;
+      }
+
+      observer.observe(el);
+    });
+
+    // Fallback: Check on scroll for older browsers
+    const fallbackReveal = () => {
+      revealElements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight - 80;
+
+        if (isVisible && !el.classList.contains("revealed")) {
+          el.classList.add("revealed");
+          if (el.style.opacity === "0") {
+            el.style.opacity = "1";
+            el.style.transform = "translateY(0)";
+          }
+        }
+      });
+    };
+
+    // Initial check after a small delay
+    setTimeout(fallbackReveal, 200);
   }
 
   /* ─────────────────────────────────────────────
@@ -1057,30 +1561,61 @@
       `;
 
       try {
+        // First, try exact/partial match
         const { data, error } = await client
           .from("products")
           .select("id, name, price_ngn, images, category")
           .eq("is_active", true)
+          .eq("is_deleted", false)
           .or(
             `name.ilike.%${query}%,category.ilike.%${query}%,description.ilike.%${query}%`,
           )
-          .limit(10);
+          .limit(8);
 
         if (error) throw error;
 
+        // If no results, fetch suggested products
         if (!data || data.length === 0) {
+          const { data: suggestions } = await client
+            .from("products")
+            .select("id, name, price_ngn, images, category")
+            .eq("is_active", true)
+            .eq("is_deleted", false)
+            .order("created_at", { ascending: false })
+            .limit(6);
+
           searchResults.innerHTML = `
-            <div class="search-empty">
-              <i class="fa-solid fa-face-sad-tear"></i>
-              <p>No products found for "${UTILS.safeText(query)}"</p>
+            <div class="search-no-match">
+              <p>No exact matches for "<strong>${UTILS.safeText(query)}</strong>"</p>
             </div>
+            <div class="search-suggestions-label">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> You might like
+            </div>
+            ${(suggestions || [])
+              .map(
+                (product) => `
+              <a href="shop.html?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
+                <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" />
+                <div class="search-result-info">
+                  <div class="search-result-name">${UTILS.safeText(product.name)}</div>
+                  <div class="search-result-price">${UTILS.formatNaira(product.price_ngn)}</div>
+                </div>
+              </a>
+            `,
+              )
+              .join("")}
+            <a href="shop.html" class="search-view-all">
+              <i class="fa-solid fa-store"></i> Browse all products
+            </a>
           `;
           return;
         }
 
-        searchResults.innerHTML = data
-          .map(
-            (product) => `
+        // Show results with "View all" link
+        searchResults.innerHTML =
+          data
+            .map(
+              (product) => `
           <a href="shop.html?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
             <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" />
             <div class="search-result-info">
@@ -1089,8 +1624,13 @@
             </div>
           </a>
         `,
-          )
-          .join("");
+            )
+            .join("") +
+          `
+          <a href="shop.html?search=${encodeURIComponent(query)}" class="search-view-all">
+            <i class="fa-solid fa-arrow-right"></i> View all results for "${UTILS.safeText(query)}"
+          </a>
+        `;
       } catch (err) {
         console.error("Search error:", err);
         searchResults.innerHTML = `
@@ -1361,8 +1901,15 @@
   function registerServiceWorker() {
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
+        // Get the base path dynamically
+        const basePath = window.location.pathname.substring(
+          0,
+          window.location.pathname.lastIndexOf("/") + 1,
+        );
+        const swPath = basePath + "sw.js";
+
         navigator.serviceWorker
-          .register("/sw.js")
+          .register(swPath)
           .then((registration) => {
             console.log("📦 SW: Registered, scope:", registration.scope);
           })
@@ -1374,12 +1921,53 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Navigation Active State
+   * ───────────────────────────────────────────── */
+  function initNavActiveState() {
+    console.log("🔗 APP: initNavActiveState()");
+    const currentPage =
+      window.location.pathname.split("/").pop() || "index.html";
+    const currentSearch = window.location.search;
+
+    // Remove all existing active classes
+    $$(".nav-link.active").forEach((el) => el.classList.remove("active"));
+    $$(".mobile-nav-tile.active").forEach((el) =>
+      el.classList.remove("active"),
+    );
+
+    // Set active state for desktop nav
+    $$(".nav-link").forEach((link) => {
+      const href = link.getAttribute("href");
+      if (href === currentPage || href === currentPage + currentSearch) {
+        link.classList.add("active");
+      } else if (currentPage === "index.html" && href === "index.html") {
+        link.classList.add("active");
+      } else if (
+        currentPage.startsWith("shop") &&
+        href === "shop.html" &&
+        !currentSearch
+      ) {
+        link.classList.add("active");
+      }
+    });
+
+    // Set active state for mobile nav tiles
+    $$(".mobile-nav-tile").forEach((tile) => {
+      const href = tile.getAttribute("href");
+      if (href === currentPage) {
+        tile.classList.add("active");
+      }
+    });
+  }
+
+  /* ─────────────────────────────────────────────
    * Bootstrap
    * ───────────────────────────────────────────── */
   console.log("🚀 APP: Bootstrap started");
   initTheme();
   initHeader();
   initMobileNav();
+  initNavActiveState();
   initDrawer();
   initModal();
   initKeyboardNav();

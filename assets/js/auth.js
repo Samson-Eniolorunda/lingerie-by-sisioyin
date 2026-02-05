@@ -16,7 +16,7 @@
    * ───────────────────────────────────────────── */
   const authModal = $("#authModal");
   const authClose = $("#authClose");
-  const authTabs = $$(".tab-btn[data-tab]");
+  const authTabs = $$(".auth-tab[data-tab]");
   const loginForm = $("#loginForm");
   const signupForm = $("#signupForm");
   const loginBtn = $("#loginBtn");
@@ -40,6 +40,54 @@
     authModal.classList.add("active");
     document.body.style.overflow = "hidden";
     switchTab(tab);
+
+    // Disable submit buttons initially
+    const loginBtn = document.querySelector('#loginForm button[type="submit"]');
+    const signupBtn = document.querySelector(
+      '#signupForm button[type="submit"]',
+    );
+    if (loginBtn) {
+      loginBtn.disabled = true;
+      loginBtn.classList.add("btn-disabled");
+    }
+    if (signupBtn) {
+      signupBtn.disabled = true;
+      signupBtn.classList.add("btn-disabled");
+    }
+
+    // Re-render reCAPTCHA after modal is visible
+    setTimeout(() => {
+      if (window.grecaptcha) {
+        try {
+          const loginRecaptcha = document.getElementById("loginRecaptcha");
+          const signupRecaptcha = document.getElementById("signupRecaptcha");
+
+          // Only render if not already rendered
+          if (loginRecaptcha && !loginRecaptcha.hasChildNodes()) {
+            window.loginRecaptchaWidgetId = grecaptcha.render(
+              "loginRecaptcha",
+              {
+                sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+                callback: window.onLoginRecaptchaSuccess,
+                "expired-callback": window.onLoginRecaptchaExpired,
+              },
+            );
+          }
+          if (signupRecaptcha && !signupRecaptcha.hasChildNodes()) {
+            window.signupRecaptchaWidgetId = grecaptcha.render(
+              "signupRecaptcha",
+              {
+                sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+                callback: window.onSignupRecaptchaSuccess,
+                "expired-callback": window.onSignupRecaptchaExpired,
+              },
+            );
+          }
+        } catch (e) {
+          console.log("🔐 AUTH: reCAPTCHA render error:", e);
+        }
+      }
+    }, 100);
   }
 
   function closeAuthModal() {
@@ -82,27 +130,7 @@
 
       if (error) throw error;
 
-      // Check if user is an admin - admins should use admin.html
-      const { data: profile } = await client
-        .from("profiles")
-        .select("is_admin")
-        .eq("id", data.user.id)
-        .single();
-
-      if (profile?.is_admin) {
-        // Sign out and redirect admin to admin page
-        await client.auth.signOut();
-        window.UTILS?.toast?.(
-          "Admin accounts should login through the admin portal",
-          "warning",
-        );
-        closeAuthModal();
-        setTimeout(() => {
-          window.location.href = "admin.html";
-        }, 1500);
-        return;
-      }
-
+      // Admin accounts can now login to shop as well
       console.log("🔐 AUTH: Login successful");
       window.UTILS?.toast?.("Welcome back!", "success");
       closeAuthModal();
@@ -184,6 +212,21 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Developer Account Detection
+   * ───────────────────────────────────────────── */
+  const DEV_EMAILS = [
+    "dev@lingerie.com",
+    "admin@lingerie.com",
+    "test@test.com",
+  ];
+
+  function isDevEmail(email) {
+    return DEV_EMAILS.some(
+      (devEmail) => email?.toLowerCase().trim() === devEmail,
+    );
+  }
+
+  /* ─────────────────────────────────────────────
    * UI Updates
    * ───────────────────────────────────────────── */
   function updateAuthUI(user) {
@@ -198,9 +241,51 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Password Toggle Setup
+   * ───────────────────────────────────────────── */
+  function setupPasswordToggles() {
+    // Find all password inputs in auth modal
+    const passwordInputs =
+      authModal?.querySelectorAll('input[type="password"]') || [];
+
+    passwordInputs.forEach((input) => {
+      // Skip if already wrapped
+      if (input.parentElement.classList.contains("password-wrapper")) return;
+
+      // Create wrapper
+      const wrapper = document.createElement("div");
+      wrapper.className = "password-wrapper";
+
+      // Insert wrapper before input, then move input into wrapper
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+
+      // Create toggle button
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "password-toggle";
+      toggle.setAttribute("aria-label", "Toggle password visibility");
+      toggle.innerHTML = '<i class="fa-regular fa-eye"></i>';
+      wrapper.appendChild(toggle);
+
+      // Add click handler
+      toggle.addEventListener("click", () => {
+        const isPassword = input.type === "password";
+        input.type = isPassword ? "text" : "password";
+        toggle.innerHTML = isPassword
+          ? '<i class="fa-regular fa-eye-slash"></i>'
+          : '<i class="fa-regular fa-eye"></i>';
+      });
+    });
+  }
+
+  /* ─────────────────────────────────────────────
    * Event Listeners
    * ───────────────────────────────────────────── */
   function setupEventListeners() {
+    // Setup password toggles
+    setupPasswordToggles();
+
     // Close modal
     if (authClose) {
       authClose.addEventListener("click", closeAuthModal);
@@ -218,6 +303,18 @@
       }
     });
 
+    // Email field change - enable button for dev accounts
+    const loginEmailInput = loginForm?.querySelector('[name="email"]');
+    if (loginEmailInput) {
+      loginEmailInput.addEventListener("input", (e) => {
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        if (isDevEmail(e.target.value)) {
+          submitBtn.disabled = false;
+          submitBtn.classList.remove("btn-disabled");
+        }
+      });
+    }
+
     // Tab switching
     authTabs.forEach((tab) => {
       tab.addEventListener("click", () => switchTab(tab.dataset.tab));
@@ -228,20 +325,24 @@
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // Verify reCAPTCHA
-        const recaptchaResponse = window.grecaptcha?.getResponse(
-          window.loginRecaptchaWidgetId,
-        );
-        if (!recaptchaResponse) {
-          window.UTILS?.toast?.(
-            "Please complete the reCAPTCHA verification",
-            "error",
-          );
-          return;
-        }
-
         const email = loginForm.querySelector('[name="email"]')?.value;
         const password = loginForm.querySelector('[name="password"]')?.value;
+
+        // Developer bypass - skip recaptcha for specific accounts
+        if (!isDevEmail(email)) {
+          // Verify reCAPTCHA for non-dev accounts
+          const recaptchaResponse = window.grecaptcha?.getResponse(
+            window.loginRecaptchaWidgetId,
+          );
+          if (!recaptchaResponse) {
+            window.UTILS?.toast?.(
+              "Please complete the reCAPTCHA verification",
+              "error",
+            );
+            return;
+          }
+        }
+
         if (email && password) {
           const btn = loginForm.querySelector('button[type="submit"]');
           btn.disabled = true;

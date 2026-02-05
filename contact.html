@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Terms of Service | Lingerie by Sisioyin</title>
+    <title>Contact Us | Lingerie by Sisioyin</title>
     <meta
       name="description"
-      content="Read our terms and conditions for using Lingerie by Sisioyin website and services."
+      content="Get in touch with Lingerie by Sisioyin. We're here to help with orders, sizing questions, or any inquiries."
     />
     <meta name="theme-color" content="#be185d" />
 
@@ -33,141 +33,174 @@
     <link rel="stylesheet" href="assets/css/styles.css" />
 
     <style>
-      .legal-page {
-        min-height: 100vh;
-        background: var(--bg-muted);
-      }
-
-      .legal-hero {
+      /* Contact Page Styles */
+      .contact-hero {
         background: linear-gradient(
           135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
+          var(--clr-primary) 0%,
+          var(--clr-primary-dark, #9d174d) 100%
         );
         padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-10);
         text-align: center;
         color: white;
       }
 
-      .legal-hero-icon {
-        width: 80px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-4);
-        font-size: 2rem;
-      }
-
-      .legal-hero-title {
+      .contact-hero h1 {
         font-family: var(--ff-display);
-        font-size: var(--fs-3xl);
+        font-size: clamp(2rem, 5vw, 3.5rem);
         font-weight: 700;
-        margin-bottom: var(--space-2);
+        margin-bottom: var(--space-4);
       }
 
-      .legal-hero-updated {
-        font-size: var(--fs-sm);
+      .contact-hero p {
+        font-size: var(--fs-lg);
         opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
       }
 
-      .legal-main {
-        padding: var(--space-8) 0 var(--space-16);
+      .contact-main {
+        padding: var(--space-16) 0;
       }
 
-      .legal-layout {
+      .contact-grid {
         display: grid;
         gap: var(--space-8);
       }
 
       @media (min-width: 1024px) {
-        .legal-layout {
-          grid-template-columns: 280px 1fr;
-          align-items: start;
+        .contact-grid {
+          grid-template-columns: 1fr 400px;
         }
       }
 
-      .legal-toc {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-6);
-        position: sticky;
-        top: 100px;
-      }
-
-      .legal-toc-title {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-4);
-        padding-bottom: var(--space-3);
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .legal-toc-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .legal-toc-link {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-2) var(--space-3);
-        border-radius: var(--radius-md);
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-        text-decoration: none;
-        transition: all 0.2s;
-      }
-
-      .legal-toc-link:hover,
-      .legal-toc-link.active {
-        background: var(--bg-muted);
-        color: var(--clr-primary);
-      }
-
-      .legal-toc-link i {
-        width: 16px;
-        text-align: center;
-        font-size: var(--fs-xs);
-      }
-
-      .legal-content {
+      /* Contact Form Card */
+      .contact-form-card {
         background: var(--bg-surface);
         border-radius: var(--radius-2xl);
         border: 2px solid var(--border-light);
         padding: var(--space-8);
       }
 
-      .legal-intro {
-        padding-bottom: var(--space-6);
-        margin-bottom: var(--space-6);
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .legal-intro p {
-        color: var(--text-secondary);
-        line-height: 1.8;
-        margin-bottom: var(--space-3);
-      }
-
-      .legal-section {
-        margin-bottom: var(--space-10);
-        scroll-margin-top: 120px;
-      }
-
-      .legal-section:last-child {
-        margin-bottom: 0;
-      }
-
-      .legal-section-title {
+      .contact-form-card h2 {
         font-family: var(--ff-display);
-        font-size: var(--fs-xl);
+        font-size: var(--fs-2xl);
         font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-2);
+      }
+
+      .contact-form-card > p {
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
+      }
+
+      .contact-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+      }
+
+      .form-row {
+        display: grid;
+        gap: var(--space-5);
+      }
+
+      @media (min-width: 640px) {
+        .form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .form-group label {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: var(--fs-sm);
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        padding: var(--space-3) var(--space-4);
+        border: 2px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        font-size: var(--fs-base);
+        background: var(--bg-base);
+        color: var(--text-primary);
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: var(--clr-primary);
+        box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
+      }
+
+      .form-group textarea {
+        min-height: 150px;
+        resize: vertical;
+      }
+
+      .contact-submit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: var(--space-4) var(--space-8);
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-primary-dark, #9d174d)
+        );
+        color: white;
+        border: none;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        font-size: var(--fs-base);
+        cursor: pointer;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .contact-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(190, 24, 93, 0.3);
+      }
+
+      .contact-submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Contact Info Sidebar */
+      .contact-info {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+      }
+
+      .info-card {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        padding: var(--space-6);
+      }
+
+      .info-card h3 {
+        font-size: var(--fs-lg);
+        font-weight: 600;
         color: var(--text-primary);
         margin-bottom: var(--space-4);
         display: flex;
@@ -175,83 +208,201 @@
         gap: var(--space-3);
       }
 
-      .legal-section-title i {
-        color: var(--clr-primary);
-        font-size: var(--fs-lg);
-      }
-
-      .legal-section p {
-        color: var(--text-secondary);
-        line-height: 1.8;
-        margin-bottom: var(--space-4);
-      }
-
-      .legal-section ul,
-      .legal-section ol {
-        color: var(--text-secondary);
-        line-height: 1.8;
-        margin: var(--space-4) 0;
-        padding-left: var(--space-6);
-      }
-
-      .legal-section li {
-        margin-bottom: var(--space-2);
-      }
-
-      .legal-section a {
-        color: var(--clr-primary);
-        font-weight: 500;
-      }
-
-      .legal-highlight {
-        background: var(--bg-muted);
-        border-left: 4px solid var(--clr-primary);
-        padding: var(--space-4) var(--space-5);
-        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
-        margin: var(--space-4) 0;
-      }
-
-      .legal-highlight p {
-        margin: 0;
-        font-weight: 500;
-        color: var(--text-primary);
-      }
-
-      .legal-contact {
+      .info-card h3 i {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background: linear-gradient(
           135deg,
           var(--clr-primary),
           var(--clr-primary-dark, #9d174d)
         );
-        border-radius: var(--radius-xl);
-        padding: var(--space-6);
         color: white;
-        text-align: center;
-        margin-top: var(--space-8);
+        border-radius: var(--radius-lg);
+        font-size: 1rem;
       }
 
-      .legal-contact h3 {
-        font-size: var(--fs-lg);
-        font-weight: 600;
+      .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-3);
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .info-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .info-item i {
+        color: var(--clr-primary);
+        width: 20px;
+        text-align: center;
+        margin-top: 2px;
+      }
+
+      .info-item-content {
+        flex: 1;
+      }
+
+      .info-item-label {
+        font-size: var(--fs-sm);
+        color: var(--text-secondary);
+        margin-bottom: 2px;
+      }
+
+      .info-item-value {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      .info-item-value a {
+        color: var(--clr-primary);
+        text-decoration: none;
+      }
+
+      .info-item-value a:hover {
+        text-decoration: underline;
+      }
+
+      /* Social Links */
+      .social-links {
+        display: flex;
+        gap: var(--space-3);
+        margin-top: var(--space-4);
+      }
+
+      .social-link {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-muted);
+        border-radius: var(--radius-lg);
+        color: var(--text-secondary);
+        font-size: 1.25rem;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+
+      .social-link:hover {
+        background: var(--clr-primary);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      /* Business Hours */
+      .hours-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .hours-row {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-2) 0;
+        border-bottom: 1px dashed var(--border-light);
+      }
+
+      .hours-row:last-child {
+        border-bottom: none;
+      }
+
+      .hours-day {
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .hours-time {
+        color: var(--text-secondary);
+      }
+
+      .hours-time.closed {
+        color: var(--clr-error);
+      }
+
+      /* FAQ Quick Links */
+      .quick-links {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .quick-link {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: var(--bg-muted);
+        border-radius: var(--radius-lg);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      .quick-link:hover {
+        background: var(--clr-primary);
+        color: white;
+        transform: translateX(5px);
+      }
+
+      .quick-link i {
+        font-size: 0.875rem;
+      }
+
+      /* Form Success State */
+      .form-success {
+        text-align: center;
+        padding: var(--space-12);
+      }
+
+      .form-success-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--clr-success), #059669);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-6);
+      }
+
+      .form-success-icon i {
+        font-size: 2.5rem;
+        color: white;
+      }
+
+      .form-success h3 {
+        font-family: var(--ff-display);
+        font-size: var(--fs-2xl);
+        color: var(--text-primary);
         margin-bottom: var(--space-2);
       }
 
-      .legal-contact p {
-        opacity: 0.9;
-        margin-bottom: var(--space-4);
-        color: white;
-      }
-
-      @media (max-width: 1023px) {
-        .legal-toc {
-          position: relative;
-          top: 0;
-        }
+      .form-success p {
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
       }
 
       /* Fix hero padding for fixed header */
-      .legal-hero {
+      .contact-hero {
         padding-top: calc(80px + var(--space-16));
+      }
+
+      /* Fix dropdown arrow */
+      .form-group select {
+        padding-right: var(--space-10);
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right var(--space-3) center;
+        background-size: 20px;
       }
 
       /* WhatsApp Widget Modern Styles */
@@ -397,15 +548,19 @@
     </style>
   </head>
 
-  <body class="legal-page">
+  <body class="contact-page">
     <a class="skip-link" href="#main">Skip to content</a>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
     <header class="header" id="siteHeader">
       <div class="header-inner">
         <a href="index.html" class="logo">
           <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
+
         <nav class="nav" id="mainNav">
           <a href="index.html" class="nav-link">Home</a>
           <a href="shop.html" class="nav-link">Shop</a>
@@ -413,6 +568,7 @@
           <a href="shop.html?gender=Men" class="nav-link">Men</a>
           <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
         </nav>
+
         <div class="header-actions">
           <button
             type="button"
@@ -437,8 +593,8 @@
             data-cart-drawer
             aria-label="Shopping cart"
           >
-            <i class="fa-solid fa-bag-shopping"></i
-            ><span class="badge" data-cart-count>0</span>
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="badge" data-cart-count>0</span>
           </button>
           <button
             type="button"
@@ -591,308 +747,236 @@
       </div>
     </div>
 
-    <section class="legal-hero">
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HERO
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <section class="contact-hero">
       <div class="container">
-        <div class="legal-hero-icon">
-          <i class="fa-solid fa-file-contract"></i>
-        </div>
-        <h1 class="legal-hero-title">Terms of Service</h1>
-        <p class="legal-hero-updated">Last updated: January 1, 2026</p>
+        <h1>Get in Touch</h1>
+        <p>
+          Have a question or need assistance? We'd love to hear from you. Our
+          team is here to help!
+        </p>
       </div>
     </section>
 
-    <main class="legal-main" id="main">
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <main class="contact-main" id="main">
       <div class="container">
-        <div class="legal-layout">
-          <aside class="legal-toc">
-            <h2 class="legal-toc-title">Contents</h2>
-            <nav class="legal-toc-list">
-              <a href="#acceptance" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Acceptance of Terms</a
-              >
-              <a href="#eligibility" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Eligibility</a
-              >
-              <a href="#account" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Account
-                Registration</a
-              >
-              <a href="#orders" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Orders & Payment</a
-              >
-              <a href="#shipping" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Shipping & Delivery</a
-              >
-              <a href="#returns" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Returns & Refunds</a
-              >
-              <a href="#intellectual-property" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Intellectual
-                Property</a
-              >
-              <a href="#prohibited" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Prohibited
-                Activities</a
-              >
-              <a href="#limitation" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Limitation of
-                Liability</a
-              >
-              <a href="#contact" class="legal-toc-link"
-                ><i class="fa-solid fa-chevron-right"></i>Contact Us</a
-              >
-            </nav>
-          </aside>
+        <div class="contact-grid">
+          <!-- Contact Form -->
+          <div class="contact-form-card">
+            <h2>Send Us a Message</h2>
+            <p>
+              Fill out the form below and we'll get back to you within 24 hours.
+            </p>
 
-          <div class="legal-content">
-            <div class="legal-intro">
-              <p>
-                Welcome to Lingerie by Sisioyin. These Terms of Service
-                ("Terms") govern your use of our website and your purchase of
-                products from us. By accessing our website or placing an order,
-                you agree to be bound by these Terms.
-              </p>
-              <p>
-                Please read these terms carefully before using our services. If
-                you do not agree with any part of these terms, you may not use
-                our website or services.
-              </p>
-            </div>
-
-            <section class="legal-section" id="acceptance">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-check-circle"></i>Acceptance of Terms
-              </h2>
-              <p>
-                By accessing and using this website, you accept and agree to be
-                bound by these Terms and our Privacy Policy. We reserve the
-                right to modify these Terms at any time without prior notice.
-                Your continued use of the website following any changes
-                constitutes acceptance of those changes.
-              </p>
-              <div class="legal-highlight">
-                <p>
-                  We recommend reviewing these Terms periodically to stay
-                  informed of any updates.
-                </p>
+            <form class="contact-form" id="contactForm">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="contactName">Your Name *</label>
+                  <input
+                    type="text"
+                    id="contactName"
+                    name="name"
+                    required
+                    placeholder="Enter your name"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="contactEmail">Email Address *</label>
+                  <input
+                    type="email"
+                    id="contactEmail"
+                    name="email"
+                    required
+                    placeholder="your@email.com"
+                  />
+                </div>
               </div>
-            </section>
 
-            <section class="legal-section" id="eligibility">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-user-check"></i>Eligibility
-              </h2>
-              <p>To use our services and make purchases, you must:</p>
-              <ul>
-                <li>Be at least 18 years of age or have parental consent</li>
-                <li>Have the legal capacity to enter into binding contracts</li>
-                <li>
-                  Provide accurate and complete information during registration
-                  and checkout
-                </li>
-                <li>
-                  Not be prohibited from using our services under applicable
-                  laws
-                </li>
-              </ul>
-            </section>
-
-            <section class="legal-section" id="account">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-user-gear"></i>Account Registration
-              </h2>
-              <p>When creating an account, you agree to:</p>
-              <ul>
-                <li>Provide accurate, current, and complete information</li>
-                <li>Maintain the security of your account credentials</li>
-                <li>Notify us immediately of any unauthorized access</li>
-                <li>
-                  Accept responsibility for all activities under your account
-                </li>
-              </ul>
-              <p>
-                We reserve the right to suspend or terminate accounts that
-                violate these Terms or engage in fraudulent activity.
-              </p>
-            </section>
-
-            <section class="legal-section" id="orders">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-shopping-cart"></i>Orders & Payment
-              </h2>
-              <p>
-                <strong>Order Acceptance:</strong> Your order constitutes an
-                offer to purchase. We reserve the right to accept or reject any
-                order for any reason, including product availability, pricing
-                errors, or suspected fraud.
-              </p>
-              <p>
-                <strong>Pricing:</strong> All prices are displayed in Nigerian
-                Naira (₦) and include applicable taxes. We reserve the right to
-                change prices without notice. The price charged will be the
-                price in effect at the time of your order.
-              </p>
-              <p>
-                <strong>Payment:</strong> We accept various payment methods
-                through our secure payment processor. By providing payment
-                information, you represent that you are authorized to use the
-                payment method.
-              </p>
-              <p>
-                <strong>Order Cancellation:</strong> Orders may be cancelled
-                within 1 hour of placement. After this window, orders enter
-                processing and cannot be cancelled.
-              </p>
-            </section>
-
-            <section class="legal-section" id="shipping">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-truck"></i>Shipping & Delivery
-              </h2>
-              <p>
-                <strong>Delivery Areas:</strong> We currently ship within
-                Nigeria only. Delivery times vary based on location and selected
-                shipping method.
-              </p>
-              <p>
-                <strong>Shipping Costs:</strong> Shipping costs are calculated
-                at checkout based on your location and selected delivery speed.
-                Free shipping is available on orders over ₦50,000.
-              </p>
-              <p>
-                <strong>Risk of Loss:</strong> Risk of loss and title for
-                products pass to you upon delivery to the carrier. We are not
-                responsible for delays caused by carriers, customs, or other
-                factors outside our control.
-              </p>
-            </section>
-
-            <section class="legal-section" id="returns">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-rotate-left"></i>Returns & Refunds
-              </h2>
-              <p>
-                <strong>Return Policy:</strong> We accept returns within 14 days
-                of delivery for unworn items with original tags attached.
-              </p>
-              <p>
-                <strong>Non-Returnable Items:</strong> Due to hygiene reasons,
-                underwear, panties, and bodysuits cannot be returned unless they
-                arrive damaged or defective.
-              </p>
-              <p>
-                <strong>Refund Process:</strong> Approved refunds will be
-                processed within 7-10 business days. Refunds will be issued to
-                the original payment method.
-              </p>
-              <p>
-                <strong>Exchanges:</strong> We offer free exchanges for
-                different sizes within 14 days of delivery.
-              </p>
-              <p>
-                For more details, please visit our
-                <a href="faq.html">FAQs</a> page.
-              </p>
-            </section>
-
-            <section class="legal-section" id="intellectual-property">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-copyright"></i>Intellectual Property
-              </h2>
-              <p>
-                All content on this website, including text, graphics, logos,
-                images, product descriptions, and software, is the property of
-                Lingerie by Sisioyin and is protected by intellectual property
-                laws.
-              </p>
-              <p>You may not:</p>
-              <ul>
-                <li>
-                  Copy, reproduce, or distribute our content without permission
-                </li>
-                <li>Use our trademarks or branding for any purpose</li>
-                <li>Modify or create derivative works from our content</li>
-                <li>
-                  Use our content for commercial purposes without authorization
-                </li>
-              </ul>
-            </section>
-
-            <section class="legal-section" id="prohibited">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-ban"></i>Prohibited Activities
-              </h2>
-              <p>When using our website, you agree not to:</p>
-              <ul>
-                <li>Violate any applicable laws or regulations</li>
-                <li>Infringe on the rights of others</li>
-                <li>Submit false or misleading information</li>
-                <li>Attempt to gain unauthorized access to our systems</li>
-                <li>
-                  Use automated systems to access or collect data from our
-                  website
-                </li>
-                <li>Interfere with the proper functioning of our website</li>
-                <li>Engage in any fraudulent activity</li>
-              </ul>
-            </section>
-
-            <section class="legal-section" id="limitation">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-scale-balanced"></i>Limitation of
-                Liability
-              </h2>
-              <p>
-                To the maximum extent permitted by law, Lingerie by Sisioyin
-                shall not be liable for any indirect, incidental, special,
-                consequential, or punitive damages arising from your use of our
-                website or purchase of our products.
-              </p>
-              <p>
-                Our total liability for any claim shall not exceed the amount
-                you paid for the product giving rise to the claim.
-              </p>
-              <div class="legal-highlight">
-                <p>
-                  These limitations apply even if we have been advised of the
-                  possibility of such damages.
-                </p>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="contactPhone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="contactPhone"
+                    name="phone"
+                    placeholder="+234 800 000 0000"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="contactSubject">Subject *</label>
+                  <select id="contactSubject" name="subject" required>
+                    <option value="">Select a topic</option>
+                    <option value="order">Order Inquiry</option>
+                    <option value="product">Product Question</option>
+                    <option value="sizing">Sizing Help</option>
+                    <option value="returns">Returns & Exchanges</option>
+                    <option value="wholesale">Wholesale Inquiry</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
-            </section>
 
-            <section class="legal-section" id="contact">
-              <h2 class="legal-section-title">
-                <i class="fa-solid fa-envelope"></i>Contact Us
-              </h2>
-              <p>
-                If you have any questions about these Terms of Service, please
-                contact us:
-              </p>
-              <ul>
-                <li><strong>Email:</strong> legal@lingeriebysisioyin.com</li>
-                <li><strong>WhatsApp:</strong> +234 903 334 4860</li>
-                <li>
-                  <strong>Contact Form:</strong>
-                  <a href="contact.html">Contact Page</a>
-                </li>
-              </ul>
-            </section>
+              <div class="form-group">
+                <label for="contactOrderId">Order ID (if applicable)</label>
+                <input
+                  type="text"
+                  id="contactOrderId"
+                  name="orderId"
+                  placeholder="e.g., LBS_1234567890"
+                />
+              </div>
 
-            <div class="legal-contact">
-              <h3>Have Questions?</h3>
-              <p>Our team is ready to help clarify any terms or conditions.</p>
-              <a
-                href="contact.html"
-                class="btn btn-outline"
-                style="border-color: white; color: white"
-                ><i class="fa-solid fa-envelope"></i> Contact Us</a
+              <div class="form-group">
+                <label for="contactMessage">Your Message *</label>
+                <textarea
+                  id="contactMessage"
+                  name="message"
+                  required
+                  placeholder="Tell us how we can help you..."
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                class="contact-submit-btn"
+                id="contactSubmitBtn"
               >
+                <i class="fa-solid fa-paper-plane"></i>
+                Send Message
+              </button>
+            </form>
+
+            <!-- Success Message (hidden by default) -->
+            <div class="form-success" id="formSuccess" style="display: none">
+              <div class="form-success-icon">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <h3>Message Sent!</h3>
+              <p>
+                Thank you for reaching out. We'll get back to you within 24
+                hours.
+              </p>
+              <button
+                type="button"
+                class="btn btn-primary"
+                onclick="resetContactForm()"
+              >
+                Send Another Message
+              </button>
             </div>
           </div>
+
+          <!-- Contact Info Sidebar -->
+          <aside class="contact-info">
+            <!-- Contact Details -->
+            <div class="info-card">
+              <h3><i class="fa-solid fa-address-book"></i> Contact Details</h3>
+
+              <div class="info-item">
+                <i class="fa-solid fa-envelope"></i>
+                <div class="info-item-content">
+                  <div class="info-item-label">Email</div>
+                  <div class="info-item-value">
+                    <a href="mailto:hello@lingeriebysissioyin.com"
+                      >hello@lingeriebysissioyin.com</a
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="fa-solid fa-phone"></i>
+                <div class="info-item-content">
+                  <div class="info-item-label">Phone / WhatsApp</div>
+                  <div class="info-item-value">
+                    <a href="tel:+2349033344860">+234 903 334 4860</a>
+                  </div>
+                </div>
+              </div>
+
+              <div class="info-item">
+                <i class="fa-solid fa-location-dot"></i>
+                <div class="info-item-content">
+                  <div class="info-item-label">Location</div>
+                  <div class="info-item-value">Akure, Ondo State, Nigeria</div>
+                </div>
+              </div>
+
+              <div class="social-links">
+                <a href="#" class="social-link" aria-label="Instagram">
+                  <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="TikTok">
+                  <i class="fa-brands fa-tiktok"></i>
+                </a>
+                <a
+                  href="https://wa.me/2349033344860"
+                  target="_blank"
+                  class="social-link"
+                  aria-label="WhatsApp"
+                >
+                  <i class="fa-brands fa-whatsapp"></i>
+                </a>
+                <a href="#" class="social-link" aria-label="Facebook">
+                  <i class="fa-brands fa-facebook-f"></i>
+                </a>
+              </div>
+            </div>
+
+            <!-- Business Hours -->
+            <div class="info-card">
+              <h3><i class="fa-solid fa-clock"></i> Business Hours</h3>
+              <div class="hours-list">
+                <div class="hours-row">
+                  <span class="hours-day">Monday - Friday</span>
+                  <span class="hours-time">9:00 AM - 6:00 PM</span>
+                </div>
+                <div class="hours-row">
+                  <span class="hours-day">Saturday</span>
+                  <span class="hours-time">10:00 AM - 4:00 PM</span>
+                </div>
+                <div class="hours-row">
+                  <span class="hours-day">Sunday</span>
+                  <span class="hours-time closed">Closed</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="info-card">
+              <h3><i class="fa-solid fa-link"></i> Quick Links</h3>
+              <div class="quick-links">
+                <a href="faq.html" class="quick-link">
+                  <i class="fa-solid fa-circle-question"></i>
+                  Frequently Asked Questions
+                </a>
+                <a href="size.html" class="quick-link">
+                  <i class="fa-solid fa-ruler"></i>
+                  Size Guide
+                </a>
+                <a href="terms.html" class="quick-link">
+                  <i class="fa-solid fa-file-contract"></i>
+                  Terms of Service
+                </a>
+                <a href="privacy.html" class="quick-link">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  Privacy Policy
+                </a>
+              </div>
+            </div>
+          </aside>
         </div>
       </div>
     </main>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
     <footer class="footer">
       <div class="container">
         <div class="footer-grid">
@@ -901,11 +985,12 @@
               href="index.html"
               class="logo"
               style="margin-bottom: var(--space-4)"
-              ><span class="logo-icon"><i class="fa-solid fa-heart"></i></span
-              ><span class="logo-text" style="display: inline"
-                >Lingerie by Sisioyin</span
-              ></a
             >
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline"
+                >Lingerie by Sisioyin</span
+              >
+            </a>
             <p>
               Luxe essentials defined by comfort and confidence. Premium
               lingerie and loungewear for the modern woman.
@@ -925,6 +1010,7 @@
               ></a>
             </div>
           </div>
+
           <div>
             <h4 class="footer-title">Shop</h4>
             <nav class="footer-links">
@@ -934,6 +1020,7 @@
               <a href="shop.html?is_new=true">New Arrivals</a>
             </nav>
           </div>
+
           <div>
             <h4 class="footer-title">Help</h4>
             <nav class="footer-links">
@@ -943,6 +1030,7 @@
               <a href="contact.html">Contact Us</a>
             </nav>
           </div>
+
           <div>
             <h4 class="footer-title">Legal</h4>
             <nav class="footer-links">
@@ -951,6 +1039,7 @@
             </nav>
           </div>
         </div>
+
         <div class="footer-bottom">
           <p class="footer-copyright">
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
@@ -989,6 +1078,9 @@
       </div>
     </footer>
 
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       CART DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
       <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
         <div class="cd-header">
@@ -1016,13 +1108,14 @@
         </div>
         <div class="cd-footer" id="cartDrawerFooter" style="display: none">
           <div class="cd-subtotal">
-            <span class="cd-subtotal-label">Subtotal</span
-            ><span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
           </div>
           <p class="cd-note">Shipping calculated at checkout</p>
-          <a href="checkout.html" class="cd-checkout-btn"
-            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
-          ><button
+          <a href="checkout.html" class="cd-checkout-btn">
+            <i class="fa-solid fa-lock"></i> Proceed to Checkout
+          </a>
+          <button
             type="button"
             class="cd-continue-btn"
             id="continueShoppingBtn"
@@ -1268,6 +1361,7 @@
       </div>
     </div>
 
+    <!-- Scripts -->
     <script src="assets/js/recaptcha.js"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
@@ -1285,25 +1379,117 @@
     <script defer src="assets/js/auth.js"></script>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const tocLinks = document.querySelectorAll(".legal-toc-link");
-        const sections = document.querySelectorAll(".legal-section");
-        const observer = new IntersectionObserver(
-          (entries) => {
-            entries.forEach((entry) => {
-              if (entry.isIntersecting) {
-                tocLinks.forEach((link) => link.classList.remove("active"));
-                const activeLink = document.querySelector(
-                  `.legal-toc-link[href="#${entry.target.id}"]`,
-                );
-                if (activeLink) activeLink.classList.add("active");
+      // Contact Form Handler
+      (function () {
+        "use strict";
+
+        function init() {
+          const form = document.getElementById("contactForm");
+          const submitBtn = document.getElementById("contactSubmitBtn");
+          const formSuccess = document.getElementById("formSuccess");
+
+          if (!form) return;
+
+          form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            // Get form data
+            const formData = {
+              name: document.getElementById("contactName").value.trim(),
+              email: document.getElementById("contactEmail").value.trim(),
+              phone: document.getElementById("contactPhone").value.trim(),
+              subject: document.getElementById("contactSubject").value,
+              orderId: document.getElementById("contactOrderId").value.trim(),
+              message: document.getElementById("contactMessage").value.trim(),
+              timestamp: new Date().toISOString(),
+            };
+
+            // Validate
+            if (
+              !formData.name ||
+              !formData.email ||
+              !formData.subject ||
+              !formData.message
+            ) {
+              window.UTILS?.toast?.(
+                "Please fill in all required fields",
+                "error",
+              );
+              return;
+            }
+
+            // Show loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML =
+              '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+
+            try {
+              // Try to save to Supabase if available
+              if (window.DB?.client) {
+                const { error } = await window.DB.client
+                  .from("contact_messages")
+                  .insert([formData]);
+
+                if (error) {
+                  console.error("Supabase error:", error);
+                  // Fall through to WhatsApp fallback
+                }
               }
-            });
-          },
-          { threshold: 0.3, rootMargin: "-100px 0px -50% 0px" },
-        );
-        sections.forEach((section) => observer.observe(section));
-      });
+
+              // Show success
+              form.style.display = "none";
+              formSuccess.style.display = "block";
+              window.UTILS?.toast?.("Message sent successfully!", "success");
+            } catch (err) {
+              console.error("Contact form error:", err);
+
+              // Fallback: Open WhatsApp with message
+              const whatsappMsg = encodeURIComponent(
+                `*Contact Form Submission*\n\n` +
+                  `*Name:* ${formData.name}\n` +
+                  `*Email:* ${formData.email}\n` +
+                  `*Phone:* ${formData.phone || "Not provided"}\n` +
+                  `*Subject:* ${formData.subject}\n` +
+                  `*Order ID:* ${formData.orderId || "N/A"}\n\n` +
+                  `*Message:*\n${formData.message}`,
+              );
+
+              window.open(
+                `https://wa.me/2349033344860?text=${whatsappMsg}`,
+                "_blank",
+              );
+
+              // Show success anyway
+              form.style.display = "none";
+              formSuccess.style.display = "block";
+            }
+          });
+
+          // Set current year
+          const yearEl = document.getElementById("currentYear");
+          if (yearEl) yearEl.textContent = new Date().getFullYear();
+        }
+
+        // Reset form function
+        window.resetContactForm = function () {
+          const form = document.getElementById("contactForm");
+          const formSuccess = document.getElementById("formSuccess");
+          const submitBtn = document.getElementById("contactSubmitBtn");
+
+          form.reset();
+          form.style.display = "flex";
+          formSuccess.style.display = "none";
+          submitBtn.disabled = false;
+          submitBtn.innerHTML =
+            '<i class="fa-solid fa-paper-plane"></i> Send Message';
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+      })();
     </script>
   </body>
 </html>

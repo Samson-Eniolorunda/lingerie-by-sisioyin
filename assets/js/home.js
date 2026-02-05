@@ -34,11 +34,12 @@
       return { data: [], error: null };
     }
 
-    // Try with is_new filter first
+    // Try with is_new filter first - use fresh data (no cache)
     let res = await client
       .from("products")
-      .select("*")
+      .select("*", { head: false, count: null })
       .eq("is_active", true)
+      .eq("is_deleted", false)
       .eq("is_new", true)
       .order("created_at", { ascending: false })
       .limit(8);
@@ -49,13 +50,14 @@
       "items",
     );
 
-    // Fallback if is_new doesn't return results
+    // Fallback if is_new doesn't return results - show latest products
     if (!res.data?.length) {
       console.log("🏠 HOME: Fallback to latest products");
       res = await client
         .from("products")
-        .select("*")
+        .select("*", { head: false, count: null })
         .eq("is_active", true)
+        .eq("is_deleted", false)
         .order("created_at", { ascending: false })
         .limit(8);
     }
@@ -90,43 +92,33 @@
     const isWishlisted = wishlist.includes(String(product.id));
 
     return `
-      <article class="product-card" data-product-id="${product.id}">
-        <div class="product-image">
-          <img src="${imageUrl}" alt="${name}" loading="lazy" />
-          ${isNew ? '<span class="product-badge">New</span>' : ""}
-          <div class="product-overlay">
-            <div class="product-overlay-buttons">
-              <button type="button" class="overlay-btn" data-action="quick-view" aria-label="Quick view">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-              <button type="button" class="overlay-btn wishlist-btn ${isWishlisted ? "active" : ""}" data-action="wishlist" data-id="${product.id}" aria-label="Add to wishlist">
-                <i class="${isWishlisted ? "fa-solid" : "fa-regular"} fa-heart"></i>
-              </button>
-            </div>
-            <button type="button" class="quick-add-btn" data-action="quick-add">
-              <i class="fa-solid fa-bag-shopping"></i>
-              Add to Cart
+      <article class="arrival-card" data-product-id="${product.id}">
+        <div class="arrival-card__visual">
+          <img class="arrival-card__image" src="${imageUrl}" alt="${name}" loading="lazy" />
+          ${isNew ? '<span class="arrival-card__badge">New</span>' : ""}
+          <button type="button" class="arrival-card__wishlist ${isWishlisted ? "is-active" : ""}" data-action="wishlist" data-id="${product.id}" aria-label="${isWishlisted ? "Remove from" : "Add to"} wishlist">
+            <i class="${isWishlisted ? "fa-solid" : "fa-regular"} fa-heart"></i>
+          </button>
+          <div class="arrival-card__actions">
+            <button type="button" class="arrival-card__action-btn arrival-card__action-btn--primary" data-action="quick-view" aria-label="Quick view">
+              <i class="fa-solid fa-eye"></i>
+              <span>Quick View</span>
             </button>
           </div>
         </div>
-        <div class="product-info">
-          ${category ? `<span class="product-category">${category}</span>` : ""}
-          <h3 class="product-name">${name}</h3>
-          ${
-            hasReviews
-              ? `
-          <div class="product-rating">
-            <div class="stars">
-              ${generateStars(rating)}
+        <div class="arrival-card__content">
+          ${category ? `<span class="arrival-card__category">${category}</span>` : ""}
+          <h3 class="arrival-card__name">${name}</h3>
+          <div class="arrival-card__footer">
+            <div class="arrival-card__rating">
+              ${
+                hasReviews
+                  ? `<div class="arrival-card__stars">${generateStars(rating)}</div><span class="arrival-card__reviews">(${reviewCount})</span>`
+                  : `<span class="arrival-card__no-reviews">No reviews yet</span>`
+              }
             </div>
-            <span class="rating-count">(${reviewCount})</span>
-          </div>`
-              : `
-          <div class="product-rating no-reviews">
-            <span class="no-rating-text">No reviews yet</span>
-          </div>`
-          }
-          <p class="product-price">${price}</p>
+            <p class="arrival-card__price">${price}</p>
+          </div>
         </div>
       </article>
     `;
@@ -166,6 +158,15 @@
     }
 
     grid.innerHTML = products.map(createProductCard).join("");
+
+    // Trigger scroll reveal for product cards after they're added
+    setTimeout(() => {
+      const cards = grid.querySelectorAll(".arrival-card");
+      cards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.08}s`;
+      });
+      grid.classList.add("revealed");
+    }, 50);
   }
 
   /* ─────────────────────────────────────────────
@@ -173,13 +174,13 @@
    * ───────────────────────────────────────────── */
   function showLoading() {
     console.log("🏠 HOME: showLoading()");
-    if (loader) loader.hidden = false;
+    if (loader) loader.style.display = "flex";
     grid.innerHTML = "";
   }
 
   function hideLoading() {
     console.log("🏠 HOME: hideLoading()");
-    if (loader) loader.hidden = true;
+    if (loader) loader.style.display = "none";
   }
 
   /* ─────────────────────────────────────────────
@@ -441,21 +442,72 @@
    * Event Handlers
    * ───────────────────────────────────────────── */
 
-  // Quick Add button handler
+  // Product card click handler (Quick Add, Quick View, Wishlist)
   grid.addEventListener("click", (e) => {
+    console.log("🏠 HOME: Grid clicked", e.target);
+
     const quickAddBtn = e.target.closest('[data-action="quick-add"]');
     const quickViewBtn = e.target.closest('[data-action="quick-view"]');
+    const wishlistBtn = e.target.closest('[data-action="wishlist"]');
 
     const card = e.target.closest("[data-product-id]");
     const productId = card?.dataset.productId;
-    if (!productId) return;
 
+    console.log("🏠 HOME: Click analysis:", {
+      quickAddBtn: !!quickAddBtn,
+      quickViewBtn: !!quickViewBtn,
+      wishlistBtn: !!wishlistBtn,
+      card: !!card,
+      productId,
+    });
+
+    if (!productId) {
+      console.log("🏠 HOME: No product ID found, ignoring click");
+      return;
+    }
+
+    // Handle wishlist toggle
+    if (wishlistBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log("🏠 HOME: Wishlist clicked for product:", productId);
+
+      const added = window.APP?.toggleWishlist?.(productId);
+
+      // Update button state
+      if (added !== undefined) {
+        wishlistBtn.classList.toggle("is-active", added);
+        wishlistBtn.classList.toggle("active", added);
+        const icon = wishlistBtn.querySelector("i");
+        if (icon) {
+          icon.className = added ? "fa-solid fa-heart" : "fa-regular fa-heart";
+        }
+      }
+      return;
+    }
+
+    // Handle quick view / quick add
     if (quickAddBtn || quickViewBtn) {
       e.preventDefault();
+      e.stopPropagation();
       console.log("🏠 HOME: Quick action clicked for product:", productId);
-      // Open variant modal to pick options
-      window.APP?.openModal?.(productId) ||
-        window.APP?.openVariantModal?.(productId);
+      console.log("🏠 HOME: window.APP available:", !!window.APP);
+      console.log(
+        "🏠 HOME: window.APP.openModal available:",
+        !!window.APP?.openModal,
+      );
+
+      // Check if APP is available
+      if (window.APP?.openModal) {
+        console.log("🏠 HOME: Calling window.APP.openModal with:", productId);
+        window.APP.openModal(productId);
+      } else {
+        console.warn(
+          "🏠 HOME: window.APP.openModal not available, redirecting to shop",
+        );
+        // Fallback - redirect to shop with product
+        window.location.href = `shop.html?product=${productId}`;
+      }
     }
   });
 
@@ -466,9 +518,104 @@
   });
 
   /* ─────────────────────────────────────────────
+   * Load Site Images from Database
+   * ───────────────────────────────────────────── */
+  // Default placeholder images
+  const PLACEHOLDER_IMAGES = {
+    hero: "https://placehold.co/800x800/fdf2f8/be185d?text=Premium+Collection",
+    lingerie: "https://placehold.co/600x600/fdf2f8/be185d?text=Lingerie",
+    loungewear: "https://placehold.co/600x600/fdf2f8/be185d?text=Loungewear",
+    underwear: "https://placehold.co/600x600/fdf2f8/be185d?text=Underwear",
+  };
+
+  // Set placeholder images immediately
+  function setPlaceholderImages() {
+    const heroImg = document.getElementById("heroImage");
+    const lingerieImg = document.getElementById("categoryLingerieImage");
+    const loungewearImg = document.getElementById("categoryLoungewearImage");
+    const underwearImg = document.getElementById("categoryUnderwearImage");
+
+    if (heroImg && !heroImg.src) heroImg.src = PLACEHOLDER_IMAGES.hero;
+    if (lingerieImg && !lingerieImg.src)
+      lingerieImg.src = PLACEHOLDER_IMAGES.lingerie;
+    if (loungewearImg && !loungewearImg.src)
+      loungewearImg.src = PLACEHOLDER_IMAGES.loungewear;
+    if (underwearImg && !underwearImg.src)
+      underwearImg.src = PLACEHOLDER_IMAGES.underwear;
+  }
+
+  async function loadSiteImages() {
+    console.log("🏠 HOME: Loading site images from database");
+    const client = getClient();
+
+    // Set placeholders first
+    setPlaceholderImages();
+
+    if (!client) {
+      console.warn("🏠 HOME: No Supabase client for site images");
+      return;
+    }
+
+    try {
+      const { data, error } = await client
+        .from("site_settings")
+        .select("key, value");
+
+      if (error) {
+        console.error("🏠 HOME: Error loading site images:", error);
+        return;
+      }
+
+      // Apply images to DOM
+      (data || []).forEach((setting) => {
+        const url = setting.value?.url;
+        if (!url) return;
+
+        switch (setting.key) {
+          case "hero_image":
+            const heroImg = document.getElementById("heroImage");
+            if (heroImg) heroImg.src = url;
+            break;
+          case "category_lingerie":
+            const lingerieImg = document.getElementById(
+              "categoryLingerieImage",
+            );
+            if (lingerieImg) lingerieImg.src = url;
+            break;
+          case "category_loungewear":
+            const loungewearImg = document.getElementById(
+              "categoryLoungewearImage",
+            );
+            if (loungewearImg) loungewearImg.src = url;
+            break;
+          case "category_underwear":
+            const underwearImg = document.getElementById(
+              "categoryUnderwearImage",
+            );
+            if (underwearImg) underwearImg.src = url;
+            break;
+        }
+      });
+
+      console.log("🏠 HOME: Site images loaded successfully");
+    } catch (err) {
+      console.error("🏠 HOME: Failed to load site images:", err);
+    }
+  }
+
+  // Listen for site images updates from admin panel
+  window.addEventListener("storage", (e) => {
+    if (e.key === "lbs_site_images_updated") {
+      console.log("🏠 HOME: Site images updated, refreshing...");
+      loadSiteImages();
+    }
+  });
+
+  /* ─────────────────────────────────────────────
    * Initialize
    * ───────────────────────────────────────────── */
   console.log("🏠 HOME: Starting initial load");
   loadProducts();
   loadTestimonials();
+  loadSiteImages();
 })();

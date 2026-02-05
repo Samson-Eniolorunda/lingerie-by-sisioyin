@@ -2,46 +2,555 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FAQs | Lingerie by Sisioyin</title>
     <meta
       name="description"
-      content="Frequently Asked Questions about Lingerie by Sisioyin - Find answers about shipping, returns, sizing, payments and more."
+      content="Find answers to frequently asked questions about orders, shipping, returns, and more at Lingerie by Sisioyin."
     />
-    <title>FAQ | Lingerie by Sisioyin</title>
+    <meta name="theme-color" content="#be185d" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
-    <!-- Font Awesome -->
+    <!-- Icons -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
 
-    <!-- Custom CSS -->
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <style>
+      /* FAQ Page Styles */
+      .faq-page {
+        min-height: 100vh;
+        background: var(--bg-muted);
+      }
+
+      /* Hero */
+      .faq-hero {
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-primary-dark, #9d174d)
+        );
+        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-10);
+        text-align: center;
+        color: white;
+      }
+
+      .faq-hero-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        font-size: 2rem;
+      }
+
+      .faq-hero-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-3xl);
+        font-weight: 700;
+        margin-bottom: var(--space-2);
+      }
+
+      .faq-hero-subtitle {
+        font-size: var(--fs-lg);
+        opacity: 0.9;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      /* Search Bar */
+      .faq-search {
+        max-width: 600px;
+        margin: var(--space-8) auto 0;
+        position: relative;
+      }
+
+      .faq-search-input {
+        width: 100%;
+        padding: var(--space-4) var(--space-6);
+        padding-left: var(--space-12);
+        border: none;
+        border-radius: var(--radius-full);
+        font-size: var(--fs-base);
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-xl);
+      }
+
+      .faq-search-input::placeholder {
+        color: var(--text-muted);
+      }
+
+      .faq-search-input:focus {
+        outline: none;
+        box-shadow:
+          var(--shadow-xl),
+          0 0 0 3px rgba(255, 255, 255, 0.3);
+      }
+
+      .faq-search-icon {
+        position: absolute;
+        left: var(--space-5);
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
+      }
+
+      /* Main */
+      .faq-main {
+        padding: var(--space-8) 0 var(--space-16);
+      }
+
+      /* Category Tabs */
+      .faq-tabs {
+        display: flex;
+        gap: var(--space-2);
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: var(--space-8);
+        padding: var(--space-4);
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+      }
+
+      .faq-tab {
+        padding: var(--space-3) var(--space-5);
+        border: none;
+        background: transparent;
+        border-radius: var(--radius-lg);
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .faq-tab:hover {
+        background: var(--bg-muted);
+        color: var(--text-primary);
+      }
+
+      .faq-tab.active {
+        background: var(--clr-primary);
+        color: white;
+      }
+
+      /* FAQ Categories */
+      .faq-category {
+        margin-bottom: var(--space-10);
+        display: none;
+      }
+
+      .faq-category.active {
+        display: block;
+      }
+
+      .faq-category-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-4);
+      }
+
+      .faq-category-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+      }
+
+      .faq-category-icon.orders {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+      .faq-category-icon.shipping {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .faq-category-icon.returns {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+      .faq-category-icon.payment {
+        background: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+      }
+      .faq-category-icon.sizing {
+        background: rgba(236, 72, 153, 0.1);
+        color: #ec4899;
+      }
+      .faq-category-icon.account {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+      }
+
+      .faq-category-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      /* Accordion */
+      .faq-accordion {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+
+      .faq-item {
+        background: var(--bg-surface);
+        border-radius: var(--radius-xl);
+        border: 2px solid var(--border-light);
+        overflow: hidden;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .faq-item.open {
+        border-color: var(--clr-primary);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .faq-question {
+        width: 100%;
+        padding: var(--space-5) var(--space-6);
+        background: transparent;
+        border: none;
+        text-align: left;
+        font-size: var(--fs-base);
+        font-weight: 600;
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+        transition: background 0.2s;
+      }
+
+      .faq-question:hover {
+        background: var(--bg-muted);
+      }
+
+      .faq-question-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.3s;
+      }
+
+      .faq-item.open .faq-question-icon {
+        background: var(--clr-primary);
+        color: white;
+        transform: rotate(180deg);
+      }
+
+      .faq-answer {
+        padding: 0 var(--space-6);
+        max-height: 0;
+        overflow: hidden;
+        transition:
+          max-height 0.3s ease-out,
+          padding 0.3s;
+      }
+
+      .faq-item.open .faq-answer {
+        padding: 0 var(--space-6) var(--space-5);
+        max-height: 500px;
+      }
+
+      .faq-answer-content {
+        color: var(--text-secondary);
+        line-height: 1.7;
+      }
+
+      .faq-answer-content a {
+        color: var(--clr-primary);
+        font-weight: 500;
+      }
+
+      .faq-answer-content ul {
+        margin: var(--space-3) 0;
+        padding-left: var(--space-5);
+      }
+
+      .faq-answer-content li {
+        margin-bottom: var(--space-2);
+      }
+
+      /* No Results */
+      .faq-no-results {
+        text-align: center;
+        padding: var(--space-12);
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        display: none;
+      }
+
+      .faq-no-results.show {
+        display: block;
+      }
+
+      .faq-no-results-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        font-size: 2rem;
+        color: var(--text-muted);
+      }
+
+      .faq-no-results h3 {
+        font-size: var(--fs-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--space-2);
+      }
+
+      .faq-no-results p {
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
+      }
+
+      /* CTA Section */
+      .faq-cta {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        padding: var(--space-10);
+        text-align: center;
+        margin-top: var(--space-10);
+      }
+
+      .faq-cta-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-3);
+      }
+
+      .faq-cta-text {
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
+        max-width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .faq-cta-actions {
+        display: flex;
+        gap: var(--space-4);
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      /* Fix hero padding for fixed header */
+      .faq-hero {
+        padding-top: calc(80px + var(--space-16));
+      }
+
+      /* WhatsApp Widget Modern Styles */
+      .whatsapp-float {
+        position: fixed;
+        bottom: var(--space-6);
+        right: var(--space-6);
+        z-index: 1000;
+      }
+
+      .whatsapp-float-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.75rem;
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        position: relative;
+      }
+
+      .whatsapp-float-btn:hover {
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
+        color: white;
+      }
+
+      .whatsapp-float-btn::before {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        z-index: -1;
+        opacity: 0.3;
+        animation: whatsapp-pulse 2s infinite;
+      }
+
+      @keyframes whatsapp-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 0;
+        }
+      }
+
+      .whatsapp-tooltip {
+        position: absolute;
+        right: 70px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-lg);
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .whatsapp-float:hover .whatsapp-tooltip {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .whatsapp-tooltip::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 6px solid transparent;
+        border-left-color: var(--bg-surface);
+      }
+
+      /* Mobile Nav Theme Toggle Slider */
+      .mobile-theme-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        background: var(--bg-surface-alt);
+        border-radius: var(--radius-xl);
+        margin: var(--space-4);
+      }
+
+      .mobile-theme-toggle i {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        transition: color 0.2s;
+      }
+
+      .mobile-theme-toggle i.active {
+        color: var(--clr-primary);
+      }
+
+      .theme-slider {
+        position: relative;
+        width: 50px;
+        height: 26px;
+        background: var(--bg-muted);
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .theme-slider::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s;
+      }
+
+      [data-theme="dark"] .theme-slider::before,
+      .dark .theme-slider::before {
+        transform: translateX(24px);
+      }
+
+      [data-theme="dark"] .theme-slider,
+      .dark .theme-slider {
+        background: var(--clr-primary);
+      }
+    </style>
   </head>
-  <body>
-    <!-- Header -->
-    <header class="lbs-header" id="siteHeader">
-      <div class="header-container">
-        <a href="index.html" class="header-brand">
-          <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-          <span class="brand-name">Lingerie by Sisioyin</span>
+
+  <body class="faq-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
-        <nav class="header-nav" id="headerNav">
+        <nav class="nav" id="mainNav">
           <a href="index.html" class="nav-link">Home</a>
           <a href="shop.html" class="nav-link">Shop</a>
-          <a href="wishlist.html" class="nav-link">Wishlist</a>
+          <a href="shop.html?gender=Women" class="nav-link">Women</a>
+          <a href="shop.html?gender=Men" class="nav-link">Men</a>
+          <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
         </nav>
 
         <div class="header-actions">
@@ -58,25 +567,22 @@
             class="header-btn"
             id="loginBtn"
             aria-label="Sign in"
-            title="Sign In"
           >
             <i class="fa-solid fa-user"></i>
           </button>
-          <a
-            href="wishlist.html"
-            class="header-btn"
-            aria-label="Wishlist"
-            title="Wishlist"
-          >
-            <i class="fa-solid fa-heart"></i>
-          </a>
-          <a href="cart.html" class="header-btn cart-btn" aria-label="Cart">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span class="cart-count" data-cart-count>0</span>
-          </a>
           <button
             type="button"
-            class="header-btn mobile-toggle"
+            class="header-btn"
+            id="cartToggle"
+            data-cart-drawer
+            aria-label="Shopping cart"
+          >
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="badge" data-cart-count>0</span>
+          </button>
+          <button
+            type="button"
+            class="header-btn menu-toggle"
             id="mobileToggle"
             aria-label="Menu"
           >
@@ -84,760 +590,867 @@
           </button>
         </div>
       </div>
-
-      <!-- Mobile Menu -->
-      <div class="mobile-menu" id="mobileMenu">
-        <nav class="mobile-nav">
-          <a href="index.html"><i class="fa-solid fa-home"></i> Home</a>
-          <a href="shop.html"><i class="fa-solid fa-store"></i> Shop</a>
-          <a href="wishlist.html"><i class="fa-solid fa-heart"></i> Wishlist</a>
-          <a href="cart.html"><i class="fa-solid fa-bag-shopping"></i> Cart</a>
-        </nav>
-      </div>
     </header>
 
-    <!-- Page Hero -->
-    <section class="page-hero">
-      <div class="section-container">
-        <nav class="breadcrumb">
-          <a href="index.html">Home</a>
-          <span>/</span>
-          <span>FAQ</span>
-        </nav>
-        <h1 class="page-hero-title">Frequently Asked Questions</h1>
-        <p class="page-hero-subtitle">Find answers to common questions</p>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       NEW MOBILE NAVIGATION DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="mobile-drawer" id="mobileNav">
+      <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
+      <div class="mobile-drawer-panel">
+        <div class="drawer-header">
+          <a href="index.html" class="drawer-logo">
+            <span class="drawer-logo-icon"
+              ><i class="fa-solid fa-heart"></i
+            ></span>
+            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+          </a>
+          <button
+            type="button"
+            class="drawer-close"
+            id="mobileNavClose"
+            aria-label="Close menu"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="drawer-content">
+          <a href="dashboard.html" class="drawer-user">
+            <span class="drawer-user-avatar"
+              ><i class="fa-solid fa-user"></i
+            ></span>
+            <span class="drawer-user-info">
+              <span class="drawer-user-name">My Account</span>
+              <span class="drawer-user-email">Sign in for best experience</span>
+            </span>
+            <i class="fa-solid fa-chevron-right drawer-user-arrow"></i>
+          </a>
+          <nav class="drawer-nav">
+            <span class="drawer-nav-title">Menu</span>
+            <div class="drawer-nav-list">
+              <a href="index.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-home"></i
+                ></span>
+                Home
+              </a>
+              <a href="shop.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-store"></i
+                ></span>
+                Shop All
+              </a>
+              <a href="shop.html?is_new=true" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-wand-magic-sparkles"></i
+                ></span>
+                New Arrivals
+                <span class="drawer-nav-badge">New</span>
+              </a>
+              <a href="cart.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-bag-shopping"></i
+                ></span>
+                Cart
+                <span class="drawer-nav-badge" data-cart-count>0</span>
+              </a>
+              <a href="wishlist.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-heart"></i
+                ></span>
+                Wishlist
+              </a>
+            </div>
+          </nav>
+          <div class="drawer-categories">
+            <span class="drawer-nav-title">Categories</span>
+            <div class="drawer-categories-grid">
+              <a href="shop.html?gender=Women" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-venus"></i
+                ></span>
+                <span class="drawer-category-label">Women</span>
+              </a>
+              <a href="shop.html?gender=Men" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-mars"></i
+                ></span>
+                <span class="drawer-category-label">Men</span>
+              </a>
+              <a href="shop.html?gender=Kids" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-child"></i
+                ></span>
+                <span class="drawer-category-label">Kids</span>
+              </a>
+              <a href="shop.html?category=Lingerie" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-gem"></i
+                ></span>
+                <span class="drawer-category-label">Lingerie</span>
+              </a>
+              <a href="shop.html?category=Loungewear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-couch"></i
+                ></span>
+                <span class="drawer-category-label">Lounge</span>
+              </a>
+              <a href="shop.html?category=Underwear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-shirt"></i
+                ></span>
+                <span class="drawer-category-label">Underwear</span>
+              </a>
+            </div>
+          </div>
+          <div class="drawer-support">
+            <span class="drawer-nav-title">Support</span>
+            <div class="drawer-support-links">
+              <a href="faq.html" class="drawer-support-link">FAQs</a>
+              <a href="size.html" class="drawer-support-link">Size Guide</a>
+              <a href="contact.html" class="drawer-support-link">Contact</a>
+              <a href="terms.html" class="drawer-support-link">Terms</a>
+              <a href="privacy.html" class="drawer-support-link">Privacy</a>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <div class="drawer-theme" id="mobileThemeToggle">
+            <i class="fa-solid fa-sun"></i>
+            <button
+              type="button"
+              class="drawer-theme-toggle theme-btn"
+              id="themeSlider"
+              role="switch"
+              aria-label="Toggle dark mode"
+              data-theme="toggle"
+            ></button>
+            <i class="fa-solid fa-moon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HERO
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <section class="faq-hero">
+      <div class="container">
+        <div class="faq-hero-icon">
+          <i class="fa-solid fa-circle-question"></i>
+        </div>
+        <h1 class="faq-hero-title">Frequently Asked Questions</h1>
+        <p class="faq-hero-subtitle">
+          Find quick answers to common questions about orders, shipping,
+          returns, and more.
+        </p>
+
+        <!-- Search -->
+        <div class="faq-search">
+          <i class="fa-solid fa-magnifying-glass faq-search-icon"></i>
+          <input
+            type="search"
+            class="faq-search-input"
+            id="faqSearch"
+            placeholder="Search for answers..."
+            autocomplete="off"
+          />
+        </div>
       </div>
     </section>
 
-    <!-- FAQ Content -->
-    <main class="legal-main faq-main">
-      <div class="legal-container">
-        <div class="faq-categories">
-          <button class="faq-category-btn active" data-category="all">
-            All Questions
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <main class="faq-main" id="main">
+      <div class="container">
+        <!-- Category Tabs -->
+        <div class="faq-tabs">
+          <button type="button" class="faq-tab active" data-category="all">
+            <i class="fa-solid fa-grid-2"></i>
+            All
           </button>
-          <button class="faq-category-btn" data-category="orders">
-            <i class="fa-solid fa-shopping-bag"></i> Orders
+          <button type="button" class="faq-tab" data-category="orders">
+            <i class="fa-solid fa-box"></i>
+            Orders
           </button>
-          <button class="faq-category-btn" data-category="shipping">
-            <i class="fa-solid fa-truck"></i> Shipping
+          <button type="button" class="faq-tab" data-category="shipping">
+            <i class="fa-solid fa-truck-fast"></i>
+            Shipping
           </button>
-          <button class="faq-category-btn" data-category="returns">
-            <i class="fa-solid fa-rotate-left"></i> Returns
+          <button type="button" class="faq-tab" data-category="returns">
+            <i class="fa-solid fa-rotate-left"></i>
+            Returns
           </button>
-          <button class="faq-category-btn" data-category="sizing">
-            <i class="fa-solid fa-ruler"></i> Sizing
+          <button type="button" class="faq-tab" data-category="payment">
+            <i class="fa-solid fa-credit-card"></i>
+            Payment
           </button>
-          <button class="faq-category-btn" data-category="payments">
-            <i class="fa-solid fa-credit-card"></i> Payments
+          <button type="button" class="faq-tab" data-category="sizing">
+            <i class="fa-solid fa-ruler"></i>
+            Sizing
+          </button>
+          <button type="button" class="faq-tab" data-category="account">
+            <i class="fa-solid fa-user"></i>
+            Account
           </button>
         </div>
 
-        <div class="faq-content">
-          <!-- Orders -->
-          <div class="faq-section" data-section="orders">
-            <h2 class="faq-section-title">
-              <i class="fa-solid fa-shopping-bag"></i> Orders
-            </h2>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>How do I place an order?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Placing an order is easy! Simply browse our collection, select
-                  your desired items, choose your size, and add them to your
-                  cart. When you're ready, proceed to checkout where you can
-                  review your order and complete your purchase via WhatsApp or
-                  online payment.
-                </p>
+        <!-- FAQ Content -->
+        <div id="faqContent">
+          <!-- Orders Category -->
+          <div class="faq-category active" data-category="orders">
+            <div class="faq-category-header">
+              <div class="faq-category-icon orders">
+                <i class="fa-solid fa-box"></i>
               </div>
+              <h2 class="faq-category-title">Orders</h2>
             </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Can I modify or cancel my order?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  You can modify or cancel your order within 1 hour of placing
-                  it. After this window, orders enter processing and cannot be
-                  changed. Contact us immediately via WhatsApp at +234 903 334
-                  4860 if you need to make changes.
-                </p>
+            <div class="faq-accordion">
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How do I track my order?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Once your order ships, you'll receive an email with your
+                      tracking number. You can also track your order by:
+                    </p>
+                    <ul>
+                      <li>
+                        Logging into your
+                        <a href="dashboard.html">account dashboard</a>
+                      </li>
+                      <li>Clicking on the order in your order history</li>
+                      <li>Using the tracking link sent to your email</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>How do I track my order?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Once your order ships, you'll receive a WhatsApp message with
-                  tracking information. You can also contact us anytime for
-                  updates on your order status. If you have an account, you can
-                  view your order history in your profile.
-                </p>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Can I modify or cancel my order?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Orders can be modified or cancelled within 1 hour of
+                      placing them. After this window, the order enters
+                      processing and cannot be changed. Please
+                      <a href="contact.html">contact us</a> immediately if you
+                      need to make changes.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Shipping -->
-          <div class="faq-section" data-section="shipping">
-            <h2 class="faq-section-title">
-              <i class="fa-solid fa-truck"></i> Shipping
-            </h2>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Where do you deliver?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  We currently deliver nationwide across Nigeria. Lagos
-                  deliveries typically arrive within 1-3 business days, while
-                  other states may take 3-7 business days depending on location.
-                </p>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>How much does shipping cost?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>Shipping costs vary by location:</p>
-                <ul>
-                  <li><strong>Lagos (Mainland):</strong> ₦1,500</li>
-                  <li><strong>Lagos (Island):</strong> ₦2,000</li>
-                  <li><strong>Other States:</strong> ₦2,500 - ₦4,000</li>
-                  <li><strong>Free Shipping:</strong> Orders above ₦50,000</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Do you offer express delivery?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Yes! We offer same-day delivery within Lagos for orders placed
-                  before 12 PM (additional ₦1,500 fee). Express delivery to
-                  other states is available at an extra cost. Contact us for
-                  details.
-                </p>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>What happens if an item is out of stock?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      If an item becomes unavailable after you place your order,
+                      we'll contact you immediately to offer alternatives. You
+                      can choose to wait for restock, select a different item,
+                      or receive a full refund for that item.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Returns -->
-          <div class="faq-section" data-section="returns">
-            <h2 class="faq-section-title">
-              <i class="fa-solid fa-rotate-left"></i> Returns & Exchanges
-            </h2>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>What is your return policy?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  We accept returns within 7 days of delivery for unworn items
-                  with original tags attached. Due to hygiene reasons, underwear
-                  and intimate items are final sale and cannot be returned
-                  unless defective.
-                </p>
+          <!-- Shipping Category -->
+          <div class="faq-category" data-category="shipping">
+            <div class="faq-category-header">
+              <div class="faq-category-icon shipping">
+                <i class="fa-solid fa-truck-fast"></i>
               </div>
+              <h2 class="faq-category-title">Shipping</h2>
             </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>How do I initiate a return?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  To start a return, contact us via WhatsApp with your order
-                  number and reason for return. We'll provide instructions for
-                  sending the item back. Return shipping costs are the
-                  customer's responsibility unless the item is defective.
-                </p>
+            <div class="faq-accordion">
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>What are the shipping options?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      We offer the following shipping options within Nigeria:
+                    </p>
+                    <ul>
+                      <li>
+                        <strong>Standard Delivery:</strong> 3-5 business days -
+                        ₦2,500
+                      </li>
+                      <li>
+                        <strong>Express Delivery:</strong> 1-2 business days -
+                        ₦5,000
+                      </li>
+                      <li>
+                        <strong>Same Day Delivery:</strong> Available in Lagos -
+                        ₦7,500
+                      </li>
+                    </ul>
+                    <p>Free shipping on orders over ₦50,000!</p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Can I exchange for a different size?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Yes! We offer free size exchanges within 7 days of delivery.
-                  The item must be unworn with tags attached. Contact us via
-                  WhatsApp and we'll arrange the exchange once we receive the
-                  original item.
-                </p>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Do you ship internationally?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Currently, we only ship within Nigeria. We're working on
+                      expanding our delivery network. Sign up for our newsletter
+                      to be notified when international shipping becomes
+                      available.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>When will I receive my refund?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Refunds are processed within 3-5 business days after we
-                  receive and inspect the returned item. The refund will be
-                  credited to your original payment method or as store credit
-                  (your choice).
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Sizing -->
-          <div class="faq-section" data-section="sizing">
-            <h2 class="faq-section-title">
-              <i class="fa-solid fa-ruler"></i> Sizing
-            </h2>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>How do I find my correct size?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Use our
-                  <a href="size.html">Size Guide</a> to find your perfect fit.
-                  Measure yourself following our instructions, then compare with
-                  our sizing chart. If you're between sizes, we recommend sizing
-                  up for comfort.
-                </p>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>What sizes do you carry?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>We offer a wide range of sizes:</p>
-                <ul>
-                  <li><strong>Bras:</strong> 32A to 42DD</li>
-                  <li><strong>Panties:</strong> XS to 2XL</li>
-                  <li><strong>Bodysuits:</strong> XS to XL</li>
-                  <li><strong>Loungewear:</strong> S to 2XL</li>
-                </ul>
-                <p>
-                  Need a size not listed? Contact us - we may be able to special
-                  order!
-                </p>
-              </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Do your sizes run true to size?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Our lingerie generally runs true to size based on
-                  international sizing standards. However, some styles may fit
-                  differently. Check the product description for specific fit
-                  notes. When in doubt, refer to our Size Guide or contact us
-                  for personalized recommendations.
-                </p>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How is my order packaged?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      All orders are carefully packaged in discrete, unmarked
+                      boxes. Your items come wrapped in tissue paper and placed
+                      in our signature pink dust bags to ensure they arrive in
+                      perfect condition.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Payments -->
-          <div class="faq-section" data-section="payments">
-            <h2 class="faq-section-title">
-              <i class="fa-solid fa-credit-card"></i> Payments
-            </h2>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>What payment methods do you accept?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>We accept multiple payment options:</p>
-                <ul>
-                  <li>
-                    <strong>Online Payment:</strong> Debit/Credit Cards (Visa,
-                    Mastercard)
-                  </li>
-                  <li>
-                    <strong>Bank Transfer:</strong> Direct transfer to our
-                    account
-                  </li>
-                  <li><strong>USSD:</strong> *737#, *919#, *901# etc.</li>
-                  <li>
-                    <strong>Pay on Delivery:</strong> Available in Lagos only
-                  </li>
-                </ul>
+          <!-- Returns Category -->
+          <div class="faq-category" data-category="returns">
+            <div class="faq-category-header">
+              <div class="faq-category-icon returns">
+                <i class="fa-solid fa-rotate-left"></i>
               </div>
+              <h2 class="faq-category-title">Returns & Exchanges</h2>
             </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Is online payment secure?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Absolutely! We use Paystack, a leading payment processor
-                  trusted by thousands of businesses. Your card details are
-                  encrypted and never stored on our servers. Look for the
-                  padlock icon in your browser for additional security
-                  confirmation.
-                </p>
+            <div class="faq-accordion">
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>What is your return policy?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      We accept returns within 14 days of delivery for unworn
+                      items with original tags attached. Due to hygiene reasons,
+                      underwear and bodysuits cannot be returned unless they
+                      arrive damaged or defective.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Do you offer payment plans or installments?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Currently, we require full payment at checkout. However, we're
-                  working on integrating buy-now-pay-later options. Subscribe to
-                  our newsletter to be notified when this becomes available!
-                </p>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How do I initiate a return?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>To start a return:</p>
+                    <ul>
+                      <li>
+                        Log into your <a href="dashboard.html">account</a>
+                      </li>
+                      <li>Go to your order history</li>
+                      <li>Select the item(s) you want to return</li>
+                      <li>Choose your reason and submit the request</li>
+                    </ul>
+                    <p>
+                      Alternatively,
+                      <a href="contact.html">contact our support team</a> for
+                      assistance.
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            <div class="faq-item">
-              <button class="faq-question">
-                <span>Can I use discount codes?</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="faq-answer">
-                <p>
-                  Yes! Enter your discount code at checkout to apply savings.
-                  Only one code can be used per order. Subscribe to our
-                  newsletter and follow us on Instagram for exclusive promo
-                  codes and sales.
-                </p>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Can I exchange for a different size?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Yes! We offer free exchanges for different sizes within 14
+                      days. Simply return your original item and we'll ship the
+                      new size at no extra cost. Check our
+                      <a href="size.html">Size Guide</a> to find your perfect
+                      fit.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Contact CTA -->
-          <div class="faq-contact">
-            <div class="faq-contact-icon">
-              <i class="fa-solid fa-headset"></i>
+          <!-- Payment Category -->
+          <div class="faq-category" data-category="payment">
+            <div class="faq-category-header">
+              <div class="faq-category-icon payment">
+                <i class="fa-solid fa-credit-card"></i>
+              </div>
+              <h2 class="faq-category-title">Payment</h2>
             </div>
-            <h3>Still have questions?</h3>
-            <p>
-              Our customer support team is here to help! Reach out via WhatsApp
-              for quick responses.
-            </p>
+            <div class="faq-accordion">
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>What payment methods do you accept?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      We accept multiple payment methods for your convenience:
+                    </p>
+                    <ul>
+                      <li>Debit/Credit Cards (Visa, Mastercard)</li>
+                      <li>Bank Transfer</li>
+                      <li>USSD Banking</li>
+                      <li>Mobile Money</li>
+                    </ul>
+                    <p>
+                      All payments are securely processed through our payment
+                      partner.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Is my payment information secure?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Absolutely! We use industry-standard SSL encryption and
+                      partner with PCI-compliant payment processors. Your
+                      payment information is never stored on our servers. Read
+                      our <a href="privacy.html">Privacy Policy</a> for more
+                      details.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>When will I be charged?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      You'll be charged immediately when you place your order.
+                      If any items are unavailable, we'll process a refund for
+                      those items within 3-5 business days.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sizing Category -->
+          <div class="faq-category" data-category="sizing">
+            <div class="faq-category-header">
+              <div class="faq-category-icon sizing">
+                <i class="fa-solid fa-ruler"></i>
+              </div>
+              <h2 class="faq-category-title">Sizing</h2>
+            </div>
+            <div class="faq-accordion">
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How do I find my size?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Visit our comprehensive
+                      <a href="size.html">Size Guide</a> for detailed
+                      measurement instructions and size charts. You'll find:
+                    </p>
+                    <ul>
+                      <li>How to take accurate measurements</li>
+                      <li>Size charts for all product categories</li>
+                      <li>Fit tips for different body types</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>What if I'm between sizes?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      If you're between sizes, we generally recommend sizing up
+                      for comfort. For a more fitted look, size down. Each
+                      product page includes specific fit advice. You can also
+                      <a href="contact.html">contact us</a> for personalized
+                      sizing recommendations.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Do your sizes run true to size?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Our sizing is designed to be true to standard Nigerian/UK
+                      sizing. However, different styles may fit differently.
+                      Check the product description for any specific fit notes
+                      and refer to customer reviews for real-world feedback.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Category -->
+          <div class="faq-category" data-category="account">
+            <div class="faq-category-header">
+              <div class="faq-category-icon account">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <h2 class="faq-category-title">Account</h2>
+            </div>
+            <div class="faq-accordion">
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How do I create an account?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Creating an account is easy! Click the user icon in the
+                      header and select "Create Account". You'll need to provide
+                      your name, email, and create a password. Benefits include
+                      faster checkout, order tracking, and access to exclusive
+                      offers.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>I forgot my password. What do I do?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Click "Sign In" and then "Forgot Password". Enter your
+                      email address and we'll send you a link to reset your
+                      password. The link expires in 24 hours for security
+                      purposes.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Can I shop without creating an account?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Yes! You can checkout as a guest. However, we recommend
+                      creating an account to enjoy benefits like order history,
+                      saved addresses, wishlist, and exclusive member discounts.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- No Results -->
+        <div class="faq-no-results" id="faqNoResults">
+          <div class="faq-no-results-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </div>
+          <h3>No results found</h3>
+          <p>
+            We couldn't find any FAQs matching your search. Try different
+            keywords or browse by category.
+          </p>
+          <button type="button" class="btn btn-primary" id="clearFaqSearch">
+            Clear Search
+          </button>
+        </div>
+
+        <!-- CTA -->
+        <div class="faq-cta">
+          <h2 class="faq-cta-title">Still have questions?</h2>
+          <p class="faq-cta-text">
+            Can't find what you're looking for? Our friendly support team is
+            here to help!
+          </p>
+          <div class="faq-cta-actions">
+            <a href="contact.html" class="btn btn-primary btn-lg">
+              <i class="fa-solid fa-envelope"></i>
+              Contact Us
+            </a>
             <a
-              href="https://wa.me/2349033344860?text=Hi%2C%20I%20have%20a%20question"
+              href="https://wa.me/2349033344860"
               target="_blank"
-              class="btn btn-primary"
+              class="btn btn-outline btn-lg"
             >
               <i class="fa-brands fa-whatsapp"></i>
-              Chat with Us
+              WhatsApp
             </a>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-      <div class="footer-container">
-        <div class="footer-main">
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
           <div class="footer-brand">
-            <a href="index.html" class="footer-logo">
-              <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-              <span class="brand-name">Lingerie by Sisioyin</span>
+            <a
+              href="index.html"
+              class="logo"
+              style="margin-bottom: var(--space-4)"
+            >
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline"
+                >Lingerie by Sisioyin</span
+              >
             </a>
-            <p class="footer-tagline">
-              Luxe essentials defined by comfort and confidence.
+            <p>
+              Luxe essentials defined by comfort and confidence. Premium
+              lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" class="social-link" aria-label="Instagram"
+              <a href="#" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" class="social-link" aria-label="TikTok"
+              <a href="#" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
-              <a href="#" class="social-link" aria-label="WhatsApp"
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                aria-label="WhatsApp"
                 ><i class="fa-brands fa-whatsapp"></i
               ></a>
             </div>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Shop</h4>
+          <div>
+            <h4 class="footer-title">Shop</h4>
             <nav class="footer-links">
               <a href="shop.html">All Products</a>
               <a href="shop.html?category=Lingerie">Lingerie</a>
               <a href="shop.html?category=Loungewear">Loungewear</a>
-              <a href="shop.html?category=Underwear">Underwear</a>
               <a href="shop.html?is_new=true">New Arrivals</a>
             </nav>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Help</h4>
+          <div>
+            <h4 class="footer-title">Help</h4>
             <nav class="footer-links">
               <a href="dashboard.html">My Account</a>
               <a href="faq.html">FAQs</a>
               <a href="size.html">Size Guide</a>
-              <a href="terms.html">Terms of Service</a>
-              <a href="privacy.html">Privacy Policy</a>
-              <a href="https://wa.me/2349033344860" target="_blank"
-                >Contact Us</a
-              >
+              <a href="contact.html">Contact Us</a>
             </nav>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Newsletter</h4>
-            <p class="footer-newsletter-text">
-              Subscribe for exclusive offers and updates.
-            </p>
-            <form class="newsletter-form" id="newsletterForm">
-              <input type="email" placeholder="Enter your email" required />
-              <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-paper-plane"></i>
-              </button>
-            </form>
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+            </nav>
           </div>
         </div>
-
         <div class="footer-bottom">
-          <div class="footer-bottom-left">
-            <p>
-              &copy; <span id="currentYear"></span> Lingerie by Sisioyin. All
-              rights reserved.
-            </p>
-          </div>
-          <div class="theme-toggle" id="themeToggle">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            rights reserved.
+          </p>
+          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              title="Light Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              title="System Default"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              title="Dark Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
-          </div>
-          <div class="footer-bottom-right">
-            <a href="terms.html">Terms</a>
-            <a href="privacy.html">Privacy</a>
           </div>
         </div>
       </div>
     </footer>
 
-    <!-- Cart Drawer -->
-    <aside class="cart-drawer" id="cartDrawer">
-      <div class="drawer-header">
-        <h3 class="drawer-title">
-          <i class="fa-solid fa-bag-shopping"></i>
-          Your Cart
-        </h3>
-        <button type="button" class="drawer-close" data-drawer-close>
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="drawer-body" data-drawer-list></div>
-      <div class="drawer-footer">
-        <div class="drawer-subtotal">
-          <span>Subtotal</span>
-          <strong data-drawer-subtotal>₦0</strong>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       CART DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-        <a href="cart.html" class="drawer-checkout">
-          <i class="fa-solid fa-arrow-right"></i>
-          Proceed to Checkout
-        </a>
-      </div>
-    </aside>
-
-    <div class="page-overlay" id="pageOverlay"></div>
-    <div class="toast-notification" data-toast hidden></div>
-
-    <!-- WhatsApp Live Chat Widget -->
-    <div class="whatsapp-widget" id="whatsappWidget">
-      <div class="whatsapp-popup">
-        <button
-          type="button"
-          class="whatsapp-popup-close"
-          id="whatsappClose"
-          aria-label="Close"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="whatsapp-popup-header">
-          <div class="whatsapp-popup-avatar">
-            <i class="fa-brands fa-whatsapp"></i>
-          </div>
-          <div class="whatsapp-popup-info">
-            <h4>Lingerie by Sisioyin</h4>
-            <p>Typically replies within minutes</p>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="shop.html" class="btn btn-primary">Start Shopping</a>
           </div>
         </div>
-        <div class="whatsapp-popup-body">
-          <p>
-            👋 Hi there! Need help finding the perfect lingerie? Chat with us on
-            WhatsApp!
-          </p>
+        <div class="cd-footer" id="cartDrawerFooter" style="display: none">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="checkout.html" class="cd-checkout-btn"
+            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
+          >
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
         </div>
-        <a
-          href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-          target="_blank"
-          class="whatsapp-popup-btn"
-        >
-          <i class="fa-brands fa-whatsapp"></i>
-          Start Chat
-        </a>
       </div>
-      <button
-        type="button"
-        class="whatsapp-fab"
-        id="whatsappFab"
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       WHATSAPP WIDGET
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="whatsapp-float">
+      <span class="whatsapp-tooltip">Chat with us!</span>
+      <a
+        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
+        target="_blank"
+        class="whatsapp-float-btn"
         aria-label="Chat on WhatsApp"
       >
         <i class="fa-brands fa-whatsapp"></i>
-      </button>
+      </a>
     </div>
 
-    <!-- Auth Modal -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-modal-content auth-box">
-        <button type="button" class="auth-close" id="authClose">
-          <i class="fa-solid fa-times"></i>
-        </button>
-
-        <div class="auth-brand">
-          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> Welcome</h1>
-        </div>
-
-        <div class="auth-tabs" id="authTabs">
-          <button type="button" class="tab-btn active" data-tab="login">
-            Login
-          </button>
-          <button type="button" class="tab-btn" data-tab="signup">
-            Register
-          </button>
-        </div>
-
-        <!-- Login Form -->
-        <form class="auth-form active" id="loginForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              type="email"
-              id="loginEmail"
-              name="email"
-              placeholder=" "
-              autocomplete="email"
-              required
-            />
-            <label for="loginEmail">Email Address</label>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="loginPassword"
-              name="password"
-              placeholder=" "
-              autocomplete="current-password"
-              required
-            />
-            <label for="loginPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#loginPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="auth-field recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-            ></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
-            Sign In
-          </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <button
-            type="button"
-            class="btn btn-outline btn-block google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
-          </button>
-        </form>
-
-        <!-- Signup Form -->
-        <form class="auth-form" id="signupForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-user icon"></i>
-            <input
-              type="text"
-              id="signupName"
-              name="fullName"
-              placeholder=" "
-              autocomplete="name"
-              required
-            />
-            <label for="signupName">Full Name</label>
-          </div>
-
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              type="email"
-              id="signupEmail"
-              name="email"
-              placeholder=" "
-              autocomplete="email"
-              required
-            />
-            <label for="signupEmail">Email Address</label>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="signupPassword"
-              name="password"
-              placeholder=" "
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
-            <label for="signupPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="signupConfirm"
-              name="confirmPassword"
-              placeholder=" "
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
-            <label for="signupConfirm">Confirm Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupConfirm"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="auth-field recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-            ></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
-            Create Account
-          </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <button
-            type="button"
-            class="btn btn-outline btn-block google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
-          </button>
-        </form>
-
-        <p class="auth-footer-text">
-          By continuing, you agree to our
-          <a href="terms.html">Terms of Service</a> and
-          <a href="privacy.html">Privacy Policy</a>
-        </p>
-      </div>
-    </div>
-
-    <!-- Search Overlay -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SEARCH OVERLAY
+       ═══════════════════════════════════════════════════════════════════════ -->
     <div class="search-overlay" id="searchOverlay">
       <div class="search-container">
-        <div class="search-header">
-          <div class="search-input-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search for lingerie..."
-              autocomplete="off"
-            />
-            <span class="search-shortcut">Esc</span>
-          </div>
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for products..."
+            autocomplete="off"
+          />
           <button
             type="button"
             class="search-close"
@@ -847,13 +1460,201 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div class="search-results" id="searchResults">
-          <div class="search-empty">
-            <i class="fa-solid fa-magnifying-glass"></i>
+        <div
+          class="search-results"
+          id="searchResults"
+          style="
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-4);
+            max-height: 400px;
+            overflow-y: auto;
+          "
+        >
+          <div
+            style="
+              padding: var(--space-8);
+              text-align: center;
+              color: var(--text-muted);
+            "
+          >
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="font-size: var(--text-2xl); margin-bottom: var(--space-2)"
+            ></i>
             <p>Start typing to search products...</p>
-            <span class="search-tip">Try "bra", "panty", or "bodysuit"</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       AUTH MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="authBackdrop"></div>
+    <div class="modal auth-modal" id="authModal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-heart" style="color: var(--clr-primary)"></i>
+          Welcome
+        </h3>
+        <button
+          type="button"
+          class="modal-close"
+          id="authClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="auth-tab active" data-tab="login">
+            Login
+          </button>
+          <button type="button" class="auth-tab" data-tab="signup">
+            Register
+          </button>
+        </div>
+
+        <form class="auth-form active" id="loginForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Sign In
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full Name</label>
+            <input
+              type="text"
+              id="signupName"
+              name="fullName"
+              class="form-input"
+              placeholder="Enter your full name"
+              autocomplete="name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email Address</label>
+            <input
+              type="email"
+              id="signupEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
+            <input
+              type="password"
+              id="signupPassword"
+              name="password"
+              class="form-input"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupConfirm"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              id="signupConfirm"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Create Account
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <p
+          style="
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: var(--space-4);
+          "
+        >
+          By continuing, you agree to our
+          <a href="terms.html" style="color: var(--clr-primary)">Terms</a> and
+          <a href="privacy.html" style="color: var(--clr-primary)"
+            >Privacy Policy</a
+          >
+        </p>
       </div>
     </div>
 
@@ -864,51 +1665,127 @@
       async
       defer
     ></script>
-    <script src="assets/js/config.js"></script>
-    <script src="assets/js/supabase.js"></script>
-    <script src="assets/js/utils.js"></script>
-    <script src="assets/js/app.js"></script>
-    <script src="assets/js/auth.js"></script>
-    <script src="assets/js/analytics.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+    <script defer src="assets/js/config.js"></script>
+    <script defer src="assets/js/utils.js"></script>
+    <script defer src="assets/js/supabase.js"></script>
+    <script defer src="assets/js/app.js"></script>
+    <script defer src="assets/js/auth.js"></script>
+
     <script>
-      document.getElementById("currentYear").textContent =
-        new Date().getFullYear();
+      // FAQ Page JavaScript
+      document.addEventListener("DOMContentLoaded", function () {
+        const tabs = document.querySelectorAll(".faq-tab");
+        const categories = document.querySelectorAll(".faq-category");
+        const searchInput = document.getElementById("faqSearch");
+        const noResults = document.getElementById("faqNoResults");
+        const clearSearchBtn = document.getElementById("clearFaqSearch");
+        const faqContent = document.getElementById("faqContent");
 
-      // FAQ Accordion
-      document.querySelectorAll(".faq-question").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const item = btn.parentElement;
-          const isOpen = item.classList.contains("active");
+        // Tab switching
+        tabs.forEach((tab) => {
+          tab.addEventListener("click", () => {
+            const category = tab.dataset.category;
 
-          // Close all other items
-          document.querySelectorAll(".faq-item.active").forEach((i) => {
-            if (i !== item) i.classList.remove("active");
-          });
+            // Update active tab
+            tabs.forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
 
-          // Toggle current item
-          item.classList.toggle("active", !isOpen);
-        });
-      });
-
-      // FAQ Category Filter
-      document.querySelectorAll(".faq-category-btn").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const category = btn.dataset.category;
-
-          // Update active button
-          document
-            .querySelectorAll(".faq-category-btn")
-            .forEach((b) => b.classList.remove("active"));
-          btn.classList.add("active");
-
-          // Show/hide sections
-          document.querySelectorAll(".faq-section").forEach((section) => {
-            if (category === "all" || section.dataset.section === category) {
-              section.style.display = "block";
+            // Show/hide categories
+            if (category === "all") {
+              categories.forEach((cat) => cat.classList.add("active"));
             } else {
-              section.style.display = "none";
+              categories.forEach((cat) => {
+                cat.classList.toggle(
+                  "active",
+                  cat.dataset.category === category,
+                );
+              });
+            }
+
+            // Clear search
+            searchInput.value = "";
+            noResults.classList.remove("show");
+            faqContent.style.display = "block";
+          });
+        });
+
+        // Accordion functionality
+        document.querySelectorAll(".faq-question").forEach((question) => {
+          question.addEventListener("click", () => {
+            const item = question.closest(".faq-item");
+            const isOpen = item.classList.contains("open");
+
+            // Close all items
+            document
+              .querySelectorAll(".faq-item")
+              .forEach((i) => i.classList.remove("open"));
+
+            // Open clicked item if it was closed
+            if (!isOpen) {
+              item.classList.add("open");
             }
           });
+        });
+
+        // Search functionality
+        let searchTimeout;
+        searchInput.addEventListener("input", () => {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => {
+            const query = searchInput.value.toLowerCase().trim();
+
+            if (!query) {
+              // Show all categories when search is cleared
+              tabs.forEach((t) => t.classList.remove("active"));
+              tabs[0].classList.add("active");
+              categories.forEach((cat) => cat.classList.add("active"));
+              noResults.classList.remove("show");
+              faqContent.style.display = "block";
+              return;
+            }
+
+            // Search through all FAQ items
+            let hasResults = false;
+
+            document.querySelectorAll(".faq-item").forEach((item) => {
+              const question = item
+                .querySelector(".faq-question span:first-child")
+                .textContent.toLowerCase();
+              const answer = item
+                .querySelector(".faq-answer-content")
+                .textContent.toLowerCase();
+              const matches =
+                question.includes(query) || answer.includes(query);
+
+              item.style.display = matches ? "" : "none";
+              if (matches) hasResults = true;
+            });
+
+            // Show/hide categories based on visible items
+            categories.forEach((cat) => {
+              const visibleItems =
+                cat.querySelectorAll('.faq-item[style=""]').length +
+                cat.querySelectorAll(".faq-item:not([style])").length;
+              cat.classList.toggle("active", visibleItems > 0);
+            });
+
+            // Show no results message
+            faqContent.style.display = hasResults ? "block" : "none";
+            noResults.classList.toggle("show", !hasResults);
+
+            // Update tabs
+            tabs.forEach((t) => t.classList.remove("active"));
+          }, 300);
+        });
+
+        // Clear search
+        clearSearchBtn.addEventListener("click", () => {
+          searchInput.value = "";
+          searchInput.dispatchEvent(new Event("input"));
         });
       });
     </script>

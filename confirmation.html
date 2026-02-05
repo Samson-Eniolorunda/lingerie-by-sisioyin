@@ -1,0 +1,893 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Order Confirmed | Lingerie by Sisioyin</title>
+    <meta
+      name="description"
+      content="Your order has been confirmed. Thank you for shopping with Lingerie by Sisioyin."
+    />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#be185d" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <style>
+      .confirmation-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .confirmation-main {
+        flex: 1;
+        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-16);
+      }
+
+      .confirmation-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .confirmation-success {
+        text-align: center;
+        padding: var(--space-12) var(--space-6);
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        margin-bottom: var(--space-8);
+      }
+
+      .success-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--clr-success), #059669);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-6);
+        animation:
+          scaleIn 0.5s ease-out,
+          pulse 2s infinite 0.5s;
+      }
+
+      .success-icon i {
+        font-size: 3rem;
+        color: white;
+      }
+
+      @keyframes scaleIn {
+        from {
+          transform: scale(0);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
+        }
+      }
+
+      .confirmation-success h1 {
+        font-family: var(--ff-display);
+        font-size: var(--fs-3xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-2);
+      }
+
+      .confirmation-success p {
+        color: var(--text-secondary);
+        font-size: var(--fs-lg);
+        margin-bottom: var(--space-6);
+      }
+
+      .order-number {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        background: var(--bg-muted);
+        padding: var(--space-3) var(--space-6);
+        border-radius: var(--radius-full);
+        font-family: var(--ff-mono, monospace);
+        font-size: var(--fs-lg);
+        font-weight: 600;
+        color: var(--clr-primary);
+      }
+
+      .order-details-card {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        overflow: hidden;
+        margin-bottom: var(--space-6);
+      }
+
+      .order-details-header {
+        background: var(--bg-muted);
+        padding: var(--space-4) var(--space-6);
+        border-bottom: 1px solid var(--border-light);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      .order-details-header i {
+        color: var(--clr-primary);
+        font-size: 1.25rem;
+      }
+
+      .order-details-header h2 {
+        font-size: var(--fs-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+      }
+
+      .order-details-body {
+        padding: var(--space-6);
+      }
+
+      .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: var(--space-3) 0;
+        border-bottom: 1px solid var(--border-light);
+      }
+
+      .detail-row:last-child {
+        border-bottom: none;
+      }
+
+      .detail-label {
+        color: var(--text-secondary);
+        font-size: var(--fs-sm);
+      }
+
+      .detail-value {
+        font-weight: 500;
+        color: var(--text-primary);
+        text-align: right;
+      }
+
+      .detail-row.total {
+        padding-top: var(--space-4);
+        margin-top: var(--space-2);
+        border-top: 2px solid var(--border-light);
+        border-bottom: none;
+      }
+
+      .detail-row.total .detail-label,
+      .detail-row.total .detail-value {
+        font-size: var(--fs-lg);
+        font-weight: 700;
+        color: var(--clr-primary);
+      }
+
+      .order-items-list {
+        margin-top: var(--space-4);
+      }
+
+      .order-item {
+        display: flex;
+        gap: var(--space-4);
+        padding: var(--space-4);
+        background: var(--bg-muted);
+        border-radius: var(--radius-lg);
+        margin-bottom: var(--space-3);
+      }
+
+      .order-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .order-item-img {
+        width: 60px;
+        height: 75px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .order-item-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .order-item-info {
+        flex: 1;
+      }
+
+      .order-item-name {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--space-1);
+      }
+
+      .order-item-meta {
+        font-size: var(--fs-sm);
+        color: var(--text-secondary);
+      }
+
+      .order-item-price {
+        font-weight: 600;
+        color: var(--text-primary);
+        text-align: right;
+      }
+
+      .delivery-info {
+        display: grid;
+        gap: var(--space-4);
+      }
+
+      @media (min-width: 640px) {
+        .delivery-info {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .delivery-block h4 {
+        font-size: var(--fs-sm);
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: var(--space-2);
+      }
+
+      .delivery-block p {
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .confirmation-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        margin-top: var(--space-8);
+      }
+
+      @media (min-width: 480px) {
+        .confirmation-actions {
+          flex-direction: row;
+          justify-content: center;
+        }
+      }
+
+      .confirmation-actions .btn {
+        flex: 1;
+        max-width: 250px;
+      }
+
+      .email-notice {
+        text-align: center;
+        padding: var(--space-4);
+        background: rgba(var(--clr-info-rgb, 59, 130, 246), 0.1);
+        border-radius: var(--radius-lg);
+        margin-top: var(--space-6);
+      }
+
+      .email-notice i {
+        color: var(--clr-info, #3b82f6);
+        margin-right: var(--space-2);
+      }
+
+      .email-notice p {
+        color: var(--text-secondary);
+        font-size: var(--fs-sm);
+        margin: 0;
+      }
+
+      /* Progress bar showing completed */
+      .checkout-progress-step.completed .step-circle {
+        background: linear-gradient(135deg, var(--clr-success), #059669);
+      }
+    </style>
+  </head>
+
+  <body class="confirmation-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <!-- Logo -->
+        <a href="index.html" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="nav" id="mainNav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="shop.html" class="nav-link">Shop</a>
+          <a href="shop.html?gender=Women" class="nav-link">Women</a>
+          <a href="shop.html?gender=Men" class="nav-link">Men</a>
+          <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
+        </nav>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <button
+            type="button"
+            class="header-btn"
+            id="searchToggle"
+            aria-label="Search"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="loginBtn"
+            aria-label="Sign in"
+          >
+            <i class="fa-solid fa-user"></i>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="cartToggle"
+            data-cart-drawer
+            aria-label="Shopping cart"
+          >
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="badge" data-cart-count>0</span>
+          </button>
+          <button
+            type="button"
+            class="header-btn menu-toggle"
+            id="mobileToggle"
+            aria-label="Menu"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       NEW MOBILE NAVIGATION DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="mobile-drawer" id="mobileNav">
+      <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
+      <div class="mobile-drawer-panel">
+        <div class="drawer-header">
+          <a href="index.html" class="drawer-logo">
+            <span class="drawer-logo-icon"
+              ><i class="fa-solid fa-heart"></i
+            ></span>
+            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+          </a>
+          <button
+            type="button"
+            class="drawer-close"
+            id="mobileNavClose"
+            aria-label="Close menu"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="drawer-content">
+          <a href="dashboard.html" class="drawer-user">
+            <span class="drawer-user-avatar"
+              ><i class="fa-solid fa-user"></i
+            ></span>
+            <span class="drawer-user-info">
+              <span class="drawer-user-name">My Account</span>
+              <span class="drawer-user-email">Sign in for best experience</span>
+            </span>
+            <i class="fa-solid fa-chevron-right drawer-user-arrow"></i>
+          </a>
+          <nav class="drawer-nav">
+            <span class="drawer-nav-title">Menu</span>
+            <div class="drawer-nav-list">
+              <a href="index.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-home"></i
+                ></span>
+                Home
+              </a>
+              <a href="shop.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-store"></i
+                ></span>
+                Shop All
+              </a>
+              <a href="shop.html?is_new=true" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-wand-magic-sparkles"></i
+                ></span>
+                New Arrivals
+                <span class="drawer-nav-badge">New</span>
+              </a>
+              <a href="cart.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-bag-shopping"></i
+                ></span>
+                Cart
+                <span class="drawer-nav-badge" data-cart-count>0</span>
+              </a>
+              <a href="wishlist.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-heart"></i
+                ></span>
+                Wishlist
+              </a>
+            </div>
+          </nav>
+          <div class="drawer-categories">
+            <span class="drawer-nav-title">Categories</span>
+            <div class="drawer-categories-grid">
+              <a href="shop.html?gender=Women" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-venus"></i
+                ></span>
+                <span class="drawer-category-label">Women</span>
+              </a>
+              <a href="shop.html?gender=Men" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-mars"></i
+                ></span>
+                <span class="drawer-category-label">Men</span>
+              </a>
+              <a href="shop.html?gender=Kids" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-child"></i
+                ></span>
+                <span class="drawer-category-label">Kids</span>
+              </a>
+              <a href="shop.html?category=Lingerie" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-gem"></i
+                ></span>
+                <span class="drawer-category-label">Lingerie</span>
+              </a>
+              <a href="shop.html?category=Loungewear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-couch"></i
+                ></span>
+                <span class="drawer-category-label">Lounge</span>
+              </a>
+              <a href="shop.html?category=Underwear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-shirt"></i
+                ></span>
+                <span class="drawer-category-label">Underwear</span>
+              </a>
+            </div>
+          </div>
+          <div class="drawer-support">
+            <span class="drawer-nav-title">Support</span>
+            <div class="drawer-support-links">
+              <a href="faq.html" class="drawer-support-link">FAQs</a>
+              <a href="size.html" class="drawer-support-link">Size Guide</a>
+              <a href="contact.html" class="drawer-support-link">Contact</a>
+              <a href="terms.html" class="drawer-support-link">Terms</a>
+              <a href="privacy.html" class="drawer-support-link">Privacy</a>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <div class="drawer-theme" id="mobileThemeToggle">
+            <i class="fa-solid fa-sun"></i>
+            <button
+              type="button"
+              class="drawer-theme-toggle theme-btn"
+              id="themeSlider"
+              role="switch"
+              aria-label="Toggle dark mode"
+              data-theme="toggle"
+            ></button>
+            <i class="fa-solid fa-moon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       CHECKOUT PROGRESS
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <section class="checkout-progress-section">
+      <div class="container">
+        <div class="checkout-progress">
+          <div class="checkout-progress-step completed" data-step="1">
+            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+            <span class="step-label">Review Cart</span>
+          </div>
+          <div class="checkout-progress-connector completed"></div>
+          <div class="checkout-progress-step completed" data-step="2">
+            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+            <span class="step-label">Shipping</span>
+          </div>
+          <div class="checkout-progress-connector completed"></div>
+          <div class="checkout-progress-step completed" data-step="3">
+            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+            <span class="step-label">Payment</span>
+          </div>
+          <div class="checkout-progress-connector completed"></div>
+          <div class="checkout-progress-step completed" data-step="4">
+            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+            <span class="step-label">Complete Order</span>
+          </div>
+          <div class="checkout-progress-connector completed"></div>
+          <div class="checkout-progress-step active completed" data-step="5">
+            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
+            <span class="step-label">Confirmation</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <main class="confirmation-main" id="main">
+      <div class="container">
+        <div class="confirmation-content">
+          <!-- Success Message -->
+          <div class="confirmation-success">
+            <div class="success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h1>Order Confirmed!</h1>
+            <p>
+              Thank you for your purchase. Your order has been received and is
+              being processed.
+            </p>
+            <div class="order-number">
+              <i class="fa-solid fa-receipt"></i>
+              <span id="orderNumber">LBS_XXXXXXXX</span>
+            </div>
+          </div>
+
+          <!-- Order Details -->
+          <div class="order-details-card">
+            <div class="order-details-header">
+              <i class="fa-solid fa-box"></i>
+              <h2>Order Details</h2>
+            </div>
+            <div class="order-details-body">
+              <!-- Items List -->
+              <div class="order-items-list" id="orderItems">
+                <!-- Populated by JS -->
+              </div>
+
+              <!-- Totals -->
+              <div style="margin-top: var(--space-6)">
+                <div class="detail-row">
+                  <span class="detail-label">Subtotal</span>
+                  <span class="detail-value" id="orderSubtotal">₦0</span>
+                </div>
+                <div class="detail-row">
+                  <span class="detail-label">Delivery</span>
+                  <span class="detail-value" id="orderDelivery">₦0</span>
+                </div>
+                <div class="detail-row total">
+                  <span class="detail-label">Total Paid</span>
+                  <span class="detail-value" id="orderTotal">₦0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Delivery Information -->
+          <div class="order-details-card">
+            <div class="order-details-header">
+              <i class="fa-solid fa-truck"></i>
+              <h2>Delivery Information</h2>
+            </div>
+            <div class="order-details-body">
+              <div class="delivery-info">
+                <div class="delivery-block">
+                  <h4>Shipping Address</h4>
+                  <p id="deliveryAddress">Loading...</p>
+                </div>
+                <div class="delivery-block">
+                  <h4>Contact</h4>
+                  <p id="contactInfo">Loading...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Email Notice -->
+          <div class="email-notice">
+            <p>
+              <i class="fa-solid fa-envelope"></i>
+              A confirmation email has been sent to
+              <strong id="customerEmail">your email</strong>
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="confirmation-actions">
+            <a href="shop.html" class="btn btn-primary">
+              <i class="fa-solid fa-bag-shopping"></i>
+              Continue Shopping
+            </a>
+            <a href="dashboard.html" class="btn btn-outline">
+              <i class="fa-solid fa-user"></i>
+              View My Orders
+            </a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a
+              href="index.html"
+              class="logo"
+              style="margin-bottom: var(--space-4)"
+            >
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline"
+                >Lingerie by Sisioyin</span
+              >
+            </a>
+            <p>
+              Luxe essentials defined by comfort and confidence. Premium
+              lingerie and loungewear for the modern woman.
+            </p>
+          </div>
+
+          <div>
+            <h4 class="footer-title">Shop</h4>
+            <nav class="footer-links">
+              <a href="shop.html">All Products</a>
+              <a href="shop.html?gender=Women">Women</a>
+              <a href="shop.html?gender=Men">Men</a>
+              <a href="shop.html?gender=Kids">Kids</a>
+            </nav>
+          </div>
+
+          <div>
+            <h4 class="footer-title">Help</h4>
+            <nav class="footer-links">
+              <a href="dashboard.html">My Account</a>
+              <a href="faq.html">FAQs</a>
+              <a href="size.html">Size Guide</a>
+              <a href="contact.html">Contact Us</a>
+            </nav>
+          </div>
+
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+            </nav>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       CART DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+          </div>
+        </div>
+        <div class="cd-footer" id="cartDrawerFooter" style="display: none">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="checkout.html" class="cd-checkout-btn">
+            <i class="fa-solid fa-lock"></i> Proceed to Checkout
+          </a>
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SEARCH OVERLAY
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="search-overlay" id="searchOverlay" aria-hidden="true">
+      <div class="search-modal">
+        <button class="search-close" id="searchClose" aria-label="Close search">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search products..."
+            autocomplete="off"
+          />
+        </div>
+        <div class="search-results" id="searchResults"></div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+    ></script>
+    <script defer src="assets/js/config.js"></script>
+    <script defer src="assets/js/utils.js"></script>
+    <script defer src="assets/js/supabase.js"></script>
+    <script defer src="assets/js/app.js"></script>
+    <script defer src="assets/js/auth.js"></script>
+
+    <script>
+      // Confirmation page logic
+      (function () {
+        "use strict";
+
+        function formatNaira(amount) {
+          return "₦" + Number(amount || 0).toLocaleString("en-NG");
+        }
+
+        function init() {
+          // Get order data from sessionStorage
+          const orderDataStr = sessionStorage.getItem("LBS_CONFIRMED_ORDER");
+
+          if (!orderDataStr) {
+            // No order data, redirect to shop
+            window.location.href = "shop.html";
+            return;
+          }
+
+          try {
+            const order = JSON.parse(orderDataStr);
+
+            // Populate order number
+            document.getElementById("orderNumber").textContent =
+              order.reference;
+
+            // Populate items
+            const itemsHtml = order.items
+              .map(
+                (item) => `
+              <div class="order-item">
+                <div class="order-item-img">
+                  <img src="${item.image || "assets/img/placeholder.png"}" alt="${item.name}" loading="lazy">
+                </div>
+                <div class="order-item-info">
+                  <div class="order-item-name">${item.name}</div>
+                  <div class="order-item-meta">
+                    ${item.selectedSize || "One Size"}${item.selectedColor ? " • " + item.selectedColor : ""} × ${item.qty}
+                  </div>
+                </div>
+                <div class="order-item-price">${formatNaira(item.price_ngn * item.qty)}</div>
+              </div>
+            `,
+              )
+              .join("");
+            document.getElementById("orderItems").innerHTML = itemsHtml;
+
+            // Populate totals
+            document.getElementById("orderSubtotal").textContent = formatNaira(
+              order.subtotal,
+            );
+            document.getElementById("orderDelivery").textContent = formatNaira(
+              order.deliveryFee,
+            );
+            document.getElementById("orderTotal").textContent = formatNaira(
+              order.total,
+            );
+
+            // Populate delivery address
+            document.getElementById("deliveryAddress").innerHTML = `
+              ${order.delivery.address}<br>
+              ${order.delivery.city}, ${order.delivery.state}<br>
+              ${order.delivery.landmark ? order.delivery.landmark : ""}
+            `;
+
+            // Populate contact info
+            document.getElementById("contactInfo").innerHTML = `
+              ${order.customer.firstName} ${order.customer.lastName}<br>
+              ${order.customer.email}<br>
+              ${order.customer.phone}
+            `;
+
+            // Populate customer email
+            document.getElementById("customerEmail").textContent =
+              order.customer.email;
+
+            // Clear order data from session (one-time view)
+            // Uncomment below to clear after viewing:
+            // sessionStorage.removeItem('LBS_CONFIRMED_ORDER');
+            // sessionStorage.removeItem('LBS_PENDING_ORDER');
+          } catch (err) {
+            console.error("Error parsing order data:", err);
+            window.location.href = "shop.html";
+          }
+        }
+
+        // Run on DOM ready
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", init);
+        } else {
+          init();
+        }
+
+        // Set current year
+        const yearEl = document.getElementById("currentYear");
+        if (yearEl) yearEl.textContent = new Date().getFullYear();
+      })();
+    </script>
+  </body>
+</html>

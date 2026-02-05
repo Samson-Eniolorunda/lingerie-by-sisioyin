@@ -14,8 +14,8 @@
   /* ─────────────────────────────────────────────
    * DOM Elements
    * ───────────────────────────────────────────── */
-  const notLoggedIn = $("#notLoggedIn");
-  const dashboardWrapper = $("#dashboardWrapper");
+  const authRequired = $("#authRequired");
+  const dashboardLayout = $("#dashboardLayout");
   const signInPromptBtn = $("#signInPromptBtn");
   const dashboardLogout = $("#dashboardLogout");
   const navItems = $$(".dashboard-nav-item[data-section]");
@@ -31,7 +31,7 @@
   const allOrdersContainer = $("#allOrdersContainer");
 
   // Exit if not on dashboard page
-  if (!notLoggedIn || !dashboardWrapper) {
+  if (!authRequired || !dashboardLayout) {
     console.log("📊 DASHBOARD: Not on dashboard page, skipping");
     return;
   }
@@ -258,8 +258,8 @@
   function showDashboard(user) {
     currentUser = user;
 
-    if (notLoggedIn) notLoggedIn.style.display = "none";
-    if (dashboardWrapper) dashboardWrapper.style.display = "block";
+    if (authRequired) authRequired.style.display = "none";
+    if (dashboardLayout) dashboardLayout.style.display = "block";
 
     // Update user info
     if (userName) {
@@ -281,8 +281,8 @@
   function showNotLoggedIn() {
     currentUser = null;
 
-    if (notLoggedIn) notLoggedIn.style.display = "block";
-    if (dashboardWrapper) dashboardWrapper.style.display = "none";
+    if (authRequired) authRequired.style.display = "block";
+    if (dashboardLayout) dashboardLayout.style.display = "none";
   }
 
   /* ─────────────────────────────────────────────
@@ -292,8 +292,48 @@
     // Sign in prompt
     if (signInPromptBtn) {
       signInPromptBtn.addEventListener("click", () => {
+        console.log("📊 DASHBOARD: Sign in button clicked");
+
+        // Try AUTH module first (may be ready after initial load)
         if (window.AUTH?.openModal) {
+          console.log("📊 DASHBOARD: Using AUTH.openModal");
           window.AUTH.openModal("login");
+          return;
+        }
+
+        // Fallback: directly open auth modal by clicking login button
+        const loginBtn = document.getElementById("loginBtn");
+        if (loginBtn) {
+          console.log("📊 DASHBOARD: Clicking loginBtn");
+          loginBtn.click();
+          return;
+        }
+
+        // Last resort: show auth modal directly with correct classes
+        const authModal = document.getElementById("authModal");
+        const authBackdrop = document.getElementById("authBackdrop");
+        if (authModal && authBackdrop) {
+          console.log("📊 DASHBOARD: Opening auth modal directly");
+          authModal.classList.add("active");
+          authBackdrop.classList.add("active");
+          document.body.style.overflow = "hidden";
+
+          // Switch to login tab
+          const loginTab = authModal.querySelector(
+            '.auth-tab[data-tab="login"]',
+          );
+          const signupTab = authModal.querySelector(
+            '.auth-tab[data-tab="signup"]',
+          );
+          const loginForm = authModal.querySelector("#loginForm");
+          const signupForm = authModal.querySelector("#signupForm");
+
+          if (loginTab && loginForm) {
+            loginTab.classList.add("active");
+            signupTab?.classList.remove("active");
+            loginForm.classList.add("active");
+            signupForm?.classList.remove("active");
+          }
         }
       });
     }

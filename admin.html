@@ -7,26 +7,48 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
     <meta name="color-scheme" content="light dark" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>Admin | Lingerie by Sisioyin</title>
 
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
 
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
+    <!-- Icons -->
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/admin.css" />
   </head>
-
   <body class="admin-body">
-    <!-- Toast -->
+    <!-- =========================================================================
+         WELCOME SCREEN (shown after successful login)
+         ========================================================================= -->
+    <div class="welcome-overlay" id="welcomeOverlay" hidden>
+      <div class="welcome-content">
+        <div class="welcome-avatar" id="welcomeAvatar">A</div>
+        <p class="welcome-greeting">Welcome back</p>
+        <h1 class="welcome-name" id="welcomeName">Admin</h1>
+        <div class="welcome-loader">
+          <div class="welcome-loader-bar"></div>
+        </div>
+        <p class="welcome-text">Setting up your workspace...</p>
+      </div>
+    </div>
+
+    <!-- =========================================================================
+         TOAST NOTIFICATIONS
+         ========================================================================= -->
     <div class="toast-container" id="toast" hidden>
       <div class="toast-content">
         <i class="fa-solid fa-circle-info"></i>
@@ -35,7 +57,7 @@
     </div>
 
     <!-- Undo Toast -->
-    <div class="undo-toast" id="undoToast">
+    <div class="undo-toast" id="undoToast" hidden>
       <span class="undo-msg" id="undoMsg">Item deleted</span>
       <button class="undo-btn" id="undoBtn" type="button">Undo</button>
       <div class="undo-timer">
@@ -44,7 +66,7 @@
     </div>
 
     <!-- Bulk Actions Bar -->
-    <div class="bulk-actions-bar" id="bulkActionsBar">
+    <div class="bulk-actions-bar" id="bulkActionsBar" hidden>
       <span><span class="bulk-count" id="bulkCount">0</span> selected</span>
       <div class="bulk-btns">
         <button class="bulk-btn delete" id="bulkDeleteBtn" type="button">
@@ -57,19 +79,41 @@
       </div>
     </div>
 
+    <!-- =========================================================================
+         MODALS
+         ========================================================================= -->
+
     <!-- Confirmation Modal -->
-    <div class="confirm-modal-overlay" id="confirmModal">
-      <div class="confirm-modal">
-        <div class="confirm-modal-icon danger" id="confirmIcon">
-          <i class="fa-solid fa-trash"></i>
+    <div class="modal-overlay" id="confirmModal" hidden>
+      <div class="modal-box modal-confirm">
+        <button
+          class="modal-close-x"
+          id="confirmCloseX"
+          type="button"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="confirm-icon-wrapper" id="confirmIcon">
+          <div class="confirm-icon danger">
+            <i class="fa-solid fa-trash"></i>
+          </div>
         </div>
-        <h4 id="confirmTitle">Delete Item?</h4>
-        <p id="confirmMessage">This action cannot be undone.</p>
-        <div class="confirm-modal-actions">
-          <button class="btn-cancel" id="confirmCancelBtn" type="button">
+        <h3 class="confirm-title" id="confirmTitle">Delete this item?</h3>
+        <p class="confirm-message" id="confirmMessage">
+          This action cannot be undone. The item will be permanently removed.
+        </p>
+        <div class="confirm-actions">
+          <button
+            class="confirm-btn cancel"
+            id="confirmCancelBtn"
+            type="button"
+          >
+            <i class="fa-solid fa-xmark"></i>
             Cancel
           </button>
-          <button class="btn-confirm-danger" id="confirmOkBtn" type="button">
+          <button class="confirm-btn danger" id="confirmOkBtn" type="button">
+            <i class="fa-solid fa-trash"></i>
             Delete
           </button>
         </div>
@@ -77,97 +121,295 @@
     </div>
 
     <!-- Session Timeout Modal -->
-    <div class="session-modal-overlay" id="sessionModal" hidden>
-      <div class="session-modal">
-        <i class="fa-solid fa-clock"></i>
-        <h3>Session Expiring</h3>
-        <p>Your session will expire soon due to inactivity.</p>
+    <div class="modal-overlay" id="sessionModal" hidden>
+      <div class="modal-box modal-sm">
+        <div class="modal-icon warning">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+        <h3 class="modal-title">Session Expiring</h3>
+        <p class="modal-text">
+          Your session will expire soon due to inactivity.
+        </p>
         <div class="session-countdown" id="sessionCountdown">60</div>
-        <div class="session-btns">
-          <button class="btn-outline" id="sessionLogoutBtn" type="button">
+        <div class="modal-actions">
+          <button class="btn btn-outline" id="sessionLogoutBtn" type="button">
             Logout
           </button>
-          <button class="btn-primary" id="sessionExtendBtn" type="button">
+          <button class="btn btn-primary" id="sessionExtendBtn" type="button">
             Stay Logged In
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Mobile nav overlay -->
+    <!-- Invite Admin Modal -->
+    <div class="modal-overlay" id="inviteAdminModal" hidden>
+      <div class="modal-box modal-invite">
+        <button
+          class="modal-close-x"
+          type="button"
+          data-close-invite
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="invite-header">
+          <div class="invite-icon">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <h3>Invite New Admin</h3>
+          <p class="text-muted">Add a new admin to help manage your store</p>
+        </div>
+        <form id="inviteAdminForm" class="invite-form">
+          <div class="form-group">
+            <label for="inviteAdminEmail">
+              <i class="fa-regular fa-envelope"></i>
+              Email Address
+            </label>
+            <input
+              type="email"
+              id="inviteAdminEmail"
+              class="form-input"
+              placeholder="Enter email address..."
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="inviteAdminRole">
+              <i class="fa-solid fa-shield-halved"></i>
+              Role
+            </label>
+            <select id="inviteAdminRole" class="form-select">
+              <option value="editor">Editor - Can add and edit products</option>
+              <option value="super_admin">Super Admin - Full access</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-lg invite-submit" type="submit">
+            <i class="fa-solid fa-paper-plane"></i>
+            Send Invitation
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Complete Profile Modal -->
+    <div class="modal-overlay" id="completeProfileModal" hidden>
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>Complete Your Profile</h3>
+          <button
+            class="modal-close"
+            type="button"
+            data-close-profile
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="completeProfileForm" class="modal-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="cpFirstName">First Name</label>
+              <input
+                type="text"
+                id="cpFirstName"
+                class="form-input"
+                placeholder="John"
+                autocomplete="given-name"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="cpLastName">Last Name</label>
+              <input
+                type="text"
+                id="cpLastName"
+                class="form-input"
+                placeholder="Doe"
+                autocomplete="family-name"
+                required
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-primary" type="submit">
+              <i class="fa-solid fa-check"></i>
+              Save Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div class="modal-overlay" id="imgViewerModal" hidden>
+      <div class="modal-box modal-lg">
+        <div class="modal-header">
+          <div>
+            <h3 id="imgViewerTitle">Product Images</h3>
+            <p class="text-muted" id="imgViewerCount">0 images</p>
+          </div>
+          <button
+            class="modal-close"
+            type="button"
+            data-close-viewer
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="image-slider">
+          <button
+            type="button"
+            class="slider-nav prev"
+            data-viewer-prev
+            aria-label="Previous"
+          >
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <div class="slider-viewport">
+            <div class="slider-track" id="imgViewerTrack"></div>
+          </div>
+          <button
+            type="button"
+            class="slider-nav next"
+            data-viewer-next
+            aria-label="Next"
+          >
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="slider-dots" id="imgViewerDots"></div>
+      </div>
+    </div>
+
+    <!-- Order Detail Modal -->
+    <div class="modal-overlay" id="orderDetailModal" hidden>
+      <div class="modal-box modal-lg">
+        <div class="modal-header">
+          <h3>Order Details</h3>
+          <button
+            type="button"
+            class="modal-close"
+            data-close-order
+            aria-label="Close"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body" id="orderModalBody">
+          <!-- Order details populated via JS -->
+        </div>
+        <div class="modal-footer">
+          <select class="form-select" id="orderStatusSelect">
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button
+            class="btn btn-primary"
+            id="updateOrderStatusBtn"
+            type="button"
+          >
+            Update Status
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Nav Overlay -->
     <div class="nav-overlay" id="navOverlay" hidden></div>
 
-    <!-- AUTH -->
+    <!-- =========================================================================
+         AUTH PORTAL
+         ========================================================================= -->
     <section class="auth-portal" data-auth-view>
-      <div class="auth-box">
+      <div class="auth-container">
         <div class="auth-brand">
-          <h1 class="brand-logo">LBS Admin</h1>
+          <div class="auth-logo">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <h1>LBS Admin</h1>
+          <p>Manage your store</p>
         </div>
 
-        <div class="alert-banner" id="authMsg" hidden>
+        <!-- Auth Alert -->
+        <div class="auth-alert" id="authMsg" hidden>
           <i class="fa-solid fa-triangle-exclamation"></i>
-          <span id="authMsgText">Error</span>
+          <span id="authMsgText">Error message</span>
         </div>
 
+        <!-- Auth Tabs -->
         <div class="auth-tabs" id="authSwitch">
-          <button class="tab-btn active" data-auth-tab="login" type="button">
+          <button class="auth-tab active" data-auth-tab="login" type="button">
             Login
           </button>
-          <button class="tab-btn" data-auth-tab="signup" type="button">
+          <button class="auth-tab" data-auth-tab="signup" type="button">
             Sign Up
           </button>
         </div>
 
-        <!-- LOGIN -->
+        <!-- Login Form -->
         <form
           id="loginForm"
           class="auth-form"
           data-auth-view-name="login"
           novalidate
         >
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              id="loginEmail"
-              type="email"
-              placeholder=" "
-              autocomplete="email"
-            />
+          <div class="form-group">
             <label for="loginEmail">Email Address</label>
+            <div class="input-icon">
+              <i class="fa-regular fa-envelope"></i>
+              <input
+                type="email"
+                id="loginEmail"
+                class="form-input"
+                placeholder="admin@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
           </div>
 
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              id="loginPassword"
-              type="password"
-              placeholder=" "
-              autocomplete="current-password"
-            />
+          <div class="form-group">
             <label for="loginPassword">Password</label>
-
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#loginPassword"
-              aria-label="Toggle password visibility"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
+            <div class="input-icon has-toggle">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="loginPassword"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password
+                aria-label="Toggle password"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
 
-          <button class="btn-primary full" type="submit">
+          <button class="btn btn-primary btn-lg btn-block" type="submit">
+            <i class="fa-solid fa-right-to-bracket"></i>
             Access Dashboard
           </button>
 
-          <div class="form-links">
-            <button class="btn-text" type="button" id="openResetBtn">
+          <div class="auth-links">
+            <button type="button" class="auth-link" id="openResetBtn">
               Forgot Password?
             </button>
           </div>
         </form>
 
-        <!-- SIGNUP -->
+        <!-- Signup Form -->
         <form
           id="signupForm"
           class="auth-form"
@@ -175,83 +417,99 @@
           hidden
           novalidate
         >
-          <div class="grid-2 grid-names">
-            <div class="field float">
-              <input
-                id="firstName"
-                type="text"
-                placeholder=" "
-                autocomplete="given-name"
-              />
+          <div class="form-row">
+            <div class="form-group">
               <label for="firstName">First Name</label>
-            </div>
-
-            <div class="field float">
               <input
-                id="lastName"
                 type="text"
-                placeholder=" "
-                autocomplete="family-name"
+                id="firstName"
+                class="form-input"
+                placeholder="John"
+                autocomplete="given-name"
+                required
               />
+            </div>
+            <div class="form-group">
               <label for="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                class="form-input"
+                placeholder="Doe"
+                autocomplete="family-name"
+                required
+              />
             </div>
           </div>
 
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              id="signupEmail"
-              type="email"
-              placeholder=" "
-              autocomplete="email"
-            />
+          <div class="form-group">
             <label for="signupEmail">Email Address</label>
+            <div class="input-icon">
+              <i class="fa-regular fa-envelope"></i>
+              <input
+                type="email"
+                id="signupEmail"
+                class="form-input"
+                placeholder="admin@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
           </div>
 
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              id="signupPassword"
-              type="password"
-              placeholder=" "
-              autocomplete="new-password"
-            />
+          <div class="form-group">
             <label for="signupPassword">Password</label>
-
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupPassword"
-              aria-label="Toggle password visibility"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
+            <div class="input-icon has-toggle">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="signupPassword"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password
+                aria-label="Toggle password"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              id="signupPassword2"
-              type="password"
-              placeholder=" "
-              autocomplete="new-password"
-            />
+          <div class="form-group">
             <label for="signupPassword2">Confirm Password</label>
-
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupPassword2"
-              aria-label="Toggle password visibility"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
+            <div class="input-icon has-toggle">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="signupPassword2"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password
+                aria-label="Toggle password"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
 
-          <button class="btn-primary full" type="submit">Register Admin</button>
+          <button class="btn btn-primary btn-lg btn-block" type="submit">
+            <i class="fa-solid fa-user-plus"></i>
+            Register Admin
+          </button>
         </form>
 
-        <!-- RESET -->
+        <!-- Reset Password Form -->
         <form
           id="resetForm"
           class="auth-form"
@@ -259,29 +517,40 @@
           hidden
           novalidate
         >
-          <div class="text-center mb-4">
+          <div class="auth-form-header">
             <h3>Reset Password</h3>
-            <p class="text-muted">We'll send a recovery link to your email.</p>
+            <p>We'll send a recovery link to your email.</p>
           </div>
 
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              id="resetEmail"
-              type="email"
-              placeholder=" "
-              autocomplete="email"
-            />
+          <div class="form-group">
             <label for="resetEmail">Email Address</label>
+            <div class="input-icon">
+              <i class="fa-regular fa-envelope"></i>
+              <input
+                type="email"
+                id="resetEmail"
+                class="form-input"
+                placeholder="admin@example.com"
+                autocomplete="email"
+                required
+              />
+            </div>
           </div>
 
-          <button class="btn-primary full" type="submit">Send Link</button>
-          <button class="btn-text full mt-2" type="button" id="backToLoginBtn">
-            Back to Login
+          <button class="btn btn-primary btn-lg btn-block" type="submit">
+            <i class="fa-solid fa-paper-plane"></i>
+            Send Reset Link
           </button>
+
+          <div class="auth-links">
+            <button type="button" class="auth-link" id="backToLoginBtn">
+              <i class="fa-solid fa-arrow-left"></i>
+              Back to Login
+            </button>
+          </div>
         </form>
 
-        <!-- SET PASSWORD -->
+        <!-- Set New Password Form -->
         <form
           id="setPasswordForm"
           class="auth-form"
@@ -289,79 +558,106 @@
           hidden
           novalidate
         >
-          <h3 class="text-center mb-4">Create New Password</h3>
+          <div class="auth-form-header">
+            <h3>Create New Password</h3>
+            <p>Enter your new password below.</p>
+          </div>
 
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              id="newPassword"
-              type="password"
-              placeholder=" "
-              autocomplete="new-password"
-            />
+          <div class="form-group">
             <label for="newPassword">New Password</label>
-
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#newPassword"
-              aria-label="Toggle password visibility"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
+            <div class="input-icon has-toggle">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="newPassword"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password
+                aria-label="Toggle password"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
 
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              id="newPassword2"
-              type="password"
-              placeholder=" "
-              autocomplete="new-password"
-            />
+          <div class="form-group">
             <label for="newPassword2">Confirm Password</label>
-
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#newPassword2"
-              aria-label="Toggle password visibility"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
+            <div class="input-icon has-toggle">
+              <i class="fa-solid fa-lock"></i>
+              <input
+                type="password"
+                id="newPassword2"
+                class="form-input"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                required
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                data-toggle-password
+                aria-label="Toggle password"
+              >
+                <i class="fa-regular fa-eye"></i>
+              </button>
+            </div>
           </div>
 
-          <button class="btn-primary full" type="submit">
+          <button class="btn btn-primary btn-lg btn-block" type="submit">
+            <i class="fa-solid fa-check"></i>
             Update Password
           </button>
         </form>
       </div>
     </section>
 
-    <!-- DASHBOARD -->
-    <main class="dashboard-wrapper" data-admin-view hidden>
-      <aside class="sidebar" id="sidebar">
+    <!-- =========================================================================
+         ADMIN DASHBOARD
+         ========================================================================= -->
+    <main class="admin-dashboard" data-admin-view hidden>
+      <!-- Sidebar -->
+      <aside class="admin-sidebar" id="sidebar">
         <div class="sidebar-brand">
-          <h2 class="sidebar-title">LBS Admin Dashboard</h2>
-          <p class="sidebar-sub text-muted">Manage products and access</p>
+          <a href="index.html" class="sidebar-logo">
+            <i class="fa-solid fa-heart"></i>
+            <span>LBS Admin</span>
+          </a>
+          <p class="sidebar-tagline">Store Management</p>
         </div>
 
         <nav class="sidebar-nav">
           <button
             class="nav-item active"
-            data-view-target="inventory"
+            data-view-target="dashboard"
             type="button"
           >
-            <i class="fa-solid fa-layer-group"></i> <span>Inventory</span>
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Dashboard</span>
+          </button>
+
+          <button class="nav-item" data-view-target="inventory" type="button">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Inventory</span>
           </button>
 
           <button class="nav-item" data-view-target="orders" type="button">
-            <i class="fa-solid fa-receipt"></i> <span>Orders</span>
+            <i class="fa-solid fa-receipt"></i>
+            <span>Orders</span>
+            <span class="nav-badge" id="pendingOrdersBadge" hidden>0</span>
           </button>
 
           <button class="nav-item" data-view-target="studio" type="button">
-            <i class="fa-solid fa-plus"></i> <span>Add Product</span>
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Product</span>
           </button>
+
+          <div class="nav-divider"></div>
 
           <button class="nav-item" data-view-target="activity" type="button">
             <i class="fa-solid fa-clock-rotate-left"></i>
@@ -373,89 +669,124 @@
             <span>Manage Admins</span>
           </button>
 
+          <button class="nav-item" data-view-target="siteImages" type="button">
+            <i class="fa-solid fa-images"></i>
+            <span>Site Images</span>
+          </button>
+
           <button class="nav-item" data-view-target="trash" type="button">
             <i class="fa-solid fa-trash-can"></i>
             <span>Trash</span>
           </button>
 
+          <div class="nav-divider"></div>
+
           <button class="nav-item" id="openInviteModalBtn" type="button">
-            <i class="fa-solid fa-user-plus"></i> <span>Invite Admin</span>
+            <i class="fa-solid fa-user-plus"></i>
+            <span>Invite Admin</span>
           </button>
 
-          <button class="nav-item danger" id="logoutBtn" type="button">
-            <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
-          </button>
+          <a href="index.html" class="nav-item">
+            <i class="fa-solid fa-store"></i>
+            <span>View Store</span>
+          </a>
         </nav>
+
+        <div class="sidebar-footer">
+          <div class="admin-user" id="adminUserInfo">
+            <div class="admin-avatar">
+              <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="admin-info">
+              <span class="admin-name" id="adminName">Admin</span>
+              <span class="admin-role" id="adminRole">Super Admin</span>
+            </div>
+          </div>
+          <!-- Theme toggle for mobile (inside sidebar) -->
+          <div class="sidebar-theme-toggle-wrapper">
+            <label class="theme-switch" id="sidebarThemeToggle">
+              <input type="checkbox" id="themeCheckbox" />
+              <span class="theme-slider">
+                <i class="fa-solid fa-sun sun-icon"></i>
+                <i class="fa-solid fa-moon moon-icon"></i>
+              </span>
+            </label>
+          </div>
+          <button class="nav-item danger" id="logoutBtn" type="button">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Logout</span>
+          </button>
+        </div>
       </aside>
 
-      <div class="main-content">
-        <header class="top-bar">
-          <div class="top-left">
+      <!-- Main Content -->
+      <div class="admin-main">
+        <!-- Top Bar -->
+        <header class="admin-topbar">
+          <div class="topbar-left">
             <button
               class="menu-toggle"
               type="button"
               id="menuToggleBtn"
-              aria-label="Open menu"
+              aria-label="Toggle menu"
             >
               <span class="bar"></span>
               <span class="bar"></span>
               <span class="bar"></span>
             </button>
-
-            <div class="page-title">
-              <h2 id="pageTitleDisplay">Inventory</h2>
+            <div class="page-info">
+              <h2 id="pageTitleDisplay">Dashboard</h2>
               <p class="text-muted" id="adminStatusText">Welcome back</p>
             </div>
           </div>
 
-          <div class="header-actions">
+          <div class="topbar-right">
             <button
-              class="export-btn"
+              class="topbar-btn"
               id="exportBtn"
               type="button"
-              title="Export to CSV"
+              title="Export Data"
             >
               <i class="fa-solid fa-file-export"></i>
               <span>Export</span>
             </button>
 
             <div class="stat-pill">
-              <span class="label">Total Products:</span>
+              <span class="label">Products:</span>
               <strong class="value" id="productCountText">0</strong>
             </div>
 
             <button
-              class="icon-btn"
+              class="topbar-btn icon-only"
               data-refresh
-              title="Refresh Data"
               type="button"
-              aria-label="Refresh"
+              title="Refresh Data"
             >
               <i class="fa-solid fa-rotate"></i>
             </button>
 
-            <div class="theme-toggle" id="themeToggle">
+            <div class="theme-toggle">
               <button
                 class="theme-btn"
                 data-theme-btn="light"
-                title="Light Mode"
                 type="button"
+                title="Light Mode"
               >
                 <i class="fa-solid fa-sun"></i>
               </button>
               <button
                 class="theme-btn"
                 data-theme-btn="system"
-                title="System"
                 type="button"
+                title="System"
               >
                 <i class="fa-solid fa-desktop"></i>
               </button>
               <button
                 class="theme-btn"
                 data-theme-btn="dark"
-                title="Dark Mode"
                 type="button"
+                title="Dark Mode"
               >
                 <i class="fa-solid fa-moon"></i>
               </button>
@@ -463,11 +794,86 @@
           </div>
         </header>
 
-        <!-- Inventory -->
-        <section class="content-view active" id="viewInventory">
+        <!-- =====================================================================
+                 DASHBOARD VIEW
+                 ===================================================================== -->
+        <section class="content-view active" id="viewDashboard">
+          <div class="dashboard-stats">
+            <div class="stat-card">
+              <div class="stat-card-icon products">
+                <i class="fa-solid fa-layer-group"></i>
+              </div>
+              <div class="stat-card-info">
+                <span class="stat-card-value" id="totalProductsCount">0</span>
+                <span class="stat-card-label">Total Products</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-icon orders">
+                <i class="fa-solid fa-shopping-bag"></i>
+              </div>
+              <div class="stat-card-info">
+                <span class="stat-card-value" id="totalOrdersCount">0</span>
+                <span class="stat-card-label">Total Orders</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-icon revenue">
+                <i class="fa-solid fa-naira-sign"></i>
+              </div>
+              <div class="stat-card-info">
+                <span class="stat-card-value" id="totalRevenueAmount">₦0</span>
+                <span class="stat-card-label">Total Revenue</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-card-icon pending">
+                <i class="fa-solid fa-clock"></i>
+              </div>
+              <div class="stat-card-info">
+                <span class="stat-card-value" id="pendingOrdersCount">0</span>
+                <span class="stat-card-label">Pending Orders</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="dashboard-grid">
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3><i class="fa-solid fa-shopping-bag"></i> Recent Orders</h3>
+                <a href="#" class="card-link" data-go-to="orders">View All</a>
+              </div>
+              <div class="card-body" id="recentOrdersList">
+                <p class="text-muted text-center">Loading...</p>
+              </div>
+            </div>
+
+            <div class="dashboard-card">
+              <div class="card-header">
+                <h3>
+                  <i class="fa-solid fa-boxes-stacked"></i> Low Stock Products
+                </h3>
+                <a href="#" class="card-link" data-go-to="inventory"
+                  >View All</a
+                >
+              </div>
+              <div class="card-body" id="lowStockList">
+                <p class="text-muted text-center">Loading...</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 INVENTORY VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewInventory">
           <div class="inventory-toolbar">
             <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <i class="fa-solid fa-magnifying-glass"></i>
               <input
                 type="text"
                 id="inventorySearch"
@@ -479,67 +885,77 @@
                 class="search-clear"
                 id="searchClearBtn"
                 hidden
-                aria-label="Clear search"
+                aria-label="Clear"
               >
                 <i class="fa-solid fa-xmark"></i>
               </button>
             </div>
+
             <div class="filter-group">
-              <div class="ms-wrapper">
+              <div class="dropdown-wrapper">
                 <button
                   type="button"
-                  class="ms-trigger"
+                  class="dropdown-trigger"
                   id="categoryFilterTrigger"
                 >
-                  <span class="ms-label" id="categoryFilterLabel"
-                    >All Categories</span
-                  >
-                  <i class="fa-solid fa-chevron-down arrow"></i>
+                  <span id="categoryFilterLabel">All Categories</span>
+                  <i class="fa-solid fa-chevron-down"></i>
                 </button>
-                <div class="ms-dropdown" id="categoryFilterMenu" hidden>
-                  <div class="ms-item ms-item--all" data-value="">
+                <div class="dropdown-menu" id="categoryFilterMenu" hidden>
+                  <button class="dropdown-item active" data-value="">
                     All Categories
-                  </div>
-                  <div class="ms-divider"></div>
-                  <div class="ms-item" data-value="Accessories">
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" data-value="Accessories">
                     Accessories
-                  </div>
-                  <div class="ms-item" data-value="Lingerie">Lingerie</div>
-                  <div class="ms-item" data-value="Loungewear">Loungewear</div>
-                  <div class="ms-item" data-value="Underwear">Underwear</div>
+                  </button>
+                  <button class="dropdown-item" data-value="Lingerie">
+                    Lingerie
+                  </button>
+                  <button class="dropdown-item" data-value="Loungewear">
+                    Loungewear
+                  </button>
+                  <button class="dropdown-item" data-value="Underwear">
+                    Underwear
+                  </button>
                 </div>
               </div>
-              <div class="ms-wrapper">
+
+              <div class="dropdown-wrapper">
                 <button
                   type="button"
-                  class="ms-trigger"
+                  class="dropdown-trigger"
                   id="stockFilterTrigger"
                 >
-                  <span class="ms-label" id="stockFilterLabel">All Stock</span>
-                  <i class="fa-solid fa-chevron-down arrow"></i>
+                  <span id="stockFilterLabel">All Stock</span>
+                  <i class="fa-solid fa-chevron-down"></i>
                 </button>
-                <div class="ms-dropdown" id="stockFilterMenu" hidden>
-                  <div class="ms-item ms-item--all" data-value="">
+                <div class="dropdown-menu" id="stockFilterMenu" hidden>
+                  <button class="dropdown-item active" data-value="">
                     All Stock
-                  </div>
-                  <div class="ms-divider"></div>
-                  <div class="ms-item" data-value="in-stock">In Stock</div>
-                  <div class="ms-item" data-value="out-of-stock">
+                  </button>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item" data-value="in-stock">
+                    In Stock
+                  </button>
+                  <button class="dropdown-item" data-value="out-of-stock">
                     Out of Stock
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-          <div class="inventory-grid" id="adminProductsList"></div>
-          <p
-            class="no-results-msg text-muted text-center"
-            id="noResultsMsg"
-            hidden
-          >
+
+          <div class="inventory-grid" id="adminProductsList">
+            <p class="text-muted text-center">Loading products...</p>
+          </div>
+
+          <p class="no-results" id="noResultsMsg" hidden>
+            <i class="fa-solid fa-search"></i>
             No products match your search
           </p>
-          <div class="pagination-bar" id="paginationBar" hidden>
+
+          <div class="pagination" id="paginationBar" hidden>
             <button class="page-btn" id="pagePrev" type="button" disabled>
               <i class="fa-solid fa-chevron-left"></i>
             </button>
@@ -550,132 +966,57 @@
           </div>
         </section>
 
-        <!-- Orders -->
+        <!-- =====================================================================
+                 ORDERS VIEW
+                 ===================================================================== -->
         <section class="content-view" id="viewOrders">
-          <div class="orders-container">
-            <div class="orders-header">
-              <div>
-                <h3>Order Management</h3>
-                <p class="text-muted">View and manage customer orders</p>
-              </div>
-              <div class="orders-header-actions">
-                <select class="orders-filter" id="orderStatusFilter">
-                  <option value="">All Status</option>
-                  <option value="pending">Pending</option>
-                  <option value="processing">Processing</option>
-                  <option value="shipped">Shipped</option>
-                  <option value="delivered">Delivered</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-                <button
-                  class="btn-outline btn-sm-action"
-                  id="refreshOrdersBtn"
-                  type="button"
-                >
-                  <i class="fa-solid fa-rotate"></i>
-                  Refresh
-                </button>
-              </div>
-            </div>
-
+          <div class="orders-header">
             <div class="orders-stats" id="ordersStats">
-              <div class="stat-card">
-                <div class="stat-icon pending">
+              <div class="order-stat pending">
+                <div class="order-stat-icon">
                   <i class="fa-solid fa-clock"></i>
                 </div>
-                <div class="stat-info">
-                  <span class="stat-value" id="pendingOrdersCount">0</span>
+                <div class="order-stat-info">
+                  <span class="stat-value" id="ordersPendingCount">0</span>
                   <span class="stat-label">Pending</span>
                 </div>
               </div>
-              <div class="stat-card">
-                <div class="stat-icon processing">
+              <div class="order-stat processing">
+                <div class="order-stat-icon">
                   <i class="fa-solid fa-gear"></i>
                 </div>
-                <div class="stat-info">
-                  <span class="stat-value" id="processingOrdersCount">0</span>
+                <div class="order-stat-info">
+                  <span class="stat-value" id="ordersProcessingCount">0</span>
                   <span class="stat-label">Processing</span>
                 </div>
               </div>
-              <div class="stat-card">
-                <div class="stat-icon shipped">
+              <div class="order-stat shipped">
+                <div class="order-stat-icon">
                   <i class="fa-solid fa-truck"></i>
                 </div>
-                <div class="stat-info">
-                  <span class="stat-value" id="shippedOrdersCount">0</span>
+                <div class="order-stat-info">
+                  <span class="stat-value" id="ordersShippedCount">0</span>
                   <span class="stat-label">Shipped</span>
                 </div>
               </div>
-              <div class="stat-card">
-                <div class="stat-icon delivered">
+              <div class="order-stat delivered">
+                <div class="order-stat-icon">
                   <i class="fa-solid fa-check-circle"></i>
                 </div>
-                <div class="stat-info">
-                  <span class="stat-value" id="deliveredOrdersCount">0</span>
+                <div class="order-stat-info">
+                  <span class="stat-value" id="ordersDeliveredCount">0</span>
                   <span class="stat-label">Delivered</span>
                 </div>
               </div>
             </div>
 
-            <div class="orders-table-wrapper">
-              <table class="orders-table" id="ordersTable">
-                <thead>
-                  <tr>
-                    <th>Order ID</th>
-                    <th>Date</th>
-                    <th>Customer</th>
-                    <th>Items</th>
-                    <th>Total</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="ordersTableBody">
-                  <tr>
-                    <td colspan="7" class="text-center text-muted">
-                      Loading orders...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="orders-pagination" id="ordersPagination" hidden>
-              <button
-                class="page-btn"
-                id="ordersPrevBtn"
-                type="button"
-                disabled
+            <div class="orders-actions">
+              <select
+                class="form-select"
+                id="orderStatusFilter"
+                aria-label="Filter orders by status"
               >
-                <i class="fa-solid fa-chevron-left"></i>
-              </button>
-              <span class="page-info" id="ordersPageInfo">Page 1 of 1</span>
-              <button
-                class="page-btn"
-                id="ordersNextBtn"
-                type="button"
-                disabled
-              >
-                <i class="fa-solid fa-chevron-right"></i>
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <!-- Order Detail Modal -->
-        <div class="order-modal-overlay" id="orderDetailModal" hidden>
-          <div class="order-modal">
-            <div class="order-modal-header">
-              <h3>Order Details</h3>
-              <button type="button" class="modal-close" id="closeOrderModal">
-                <i class="fa-solid fa-times"></i>
-              </button>
-            </div>
-            <div class="order-modal-body" id="orderModalBody">
-              <!-- Order details populated via JS -->
-            </div>
-            <div class="order-modal-footer">
-              <select class="status-select" id="orderStatusSelect">
+                <option value="">All Status</option>
                 <option value="pending">Pending</option>
                 <option value="processing">Processing</option>
                 <option value="shipped">Shipped</option>
@@ -683,417 +1024,361 @@
                 <option value="cancelled">Cancelled</option>
               </select>
               <button
-                class="btn-primary"
-                id="updateOrderStatusBtn"
+                class="btn btn-outline"
+                id="refreshOrdersBtn"
                 type="button"
               >
-                Update Status
+                <i class="fa-solid fa-rotate"></i>
+                Refresh
               </button>
             </div>
           </div>
-        </div>
 
-        <!-- Trash -->
-        <section class="content-view" id="viewTrash">
-          <div class="trash-container">
-            <div class="trash-header">
-              <div>
-                <h3>Deleted Products</h3>
-                <p class="text-muted">Restore or permanently delete items</p>
-              </div>
-              <button
-                class="btn-danger-outline btn-sm-action"
-                id="emptyTrashBtn"
-                type="button"
-              >
-                <i class="fa-solid fa-trash"></i>
-                Empty Trash
-              </button>
-            </div>
-            <div class="trash-list" id="trashProductsList">
-              <p class="text-muted text-center">Loading...</p>
-            </div>
+          <div class="table-responsive">
+            <table class="data-table" id="ordersTable">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody">
+                <tr>
+                  <td colspan="7" class="text-center text-muted">
+                    Loading orders...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination" id="ordersPagination" hidden>
+            <button class="page-btn" id="ordersPrevBtn" type="button" disabled>
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="page-info" id="ordersPageInfo">Page 1 of 1</span>
+            <button class="page-btn" id="ordersNextBtn" type="button" disabled>
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
           </div>
         </section>
 
-        <!-- Activity Logs -->
-        <section class="content-view" id="viewActivity">
-          <div class="activity-container">
-            <div class="activity-header">
-              <h3>Recent Activity</h3>
-              <p class="text-muted">
-                Track all admin actions across the system
-              </p>
-            </div>
-            <div class="activity-list" id="activityLogsList">
-              <p class="text-muted text-center">Loading...</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Manage Admins -->
-        <section class="content-view" id="viewAdmins">
-          <div class="admins-container">
-            <div class="admins-header">
-              <div>
-                <h3>Admin Users</h3>
-                <p class="text-muted">Manage roles and permissions</p>
-              </div>
-              <button
-                class="btn-primary btn-sm-action"
-                id="openInviteFromAdminsBtn"
-                type="button"
-              >
-                <i class="fa-solid fa-user-plus"></i>
-                Invite New Admin
-              </button>
-            </div>
-            <div class="admins-list" id="adminsList">
-              <p class="text-muted text-center">Loading...</p>
-            </div>
-          </div>
-        </section>
-
-        <!-- Studio -->
+        <!-- =====================================================================
+                 ADD/EDIT PRODUCT (STUDIO)
+                 ===================================================================== -->
         <section class="content-view" id="viewStudio">
-          <div class="form-container">
-            <div class="form-header">
+          <div class="studio-container">
+            <div class="studio-header">
               <h3 id="formTitle">Add New Product</h3>
-              <button class="btn-outline" type="button" data-clear-form>
+              <button class="btn btn-outline" type="button" data-clear-form>
                 <i class="fa-solid fa-rotate-left"></i>
                 Clear Form
               </button>
             </div>
 
-            <form id="productForm" novalidate>
+            <form id="productForm" class="product-form" novalidate>
               <input type="hidden" id="productId" />
-              <input type="hidden" id="pSizes" value="[]" />
 
-              <div class="form-row">
-                <div class="textarea-wrap">
-                  <label for="pName">Product Name</label>
-                  <input
-                    id="pName"
-                    type="text"
-                    class="std-input"
-                    placeholder="e.g. Lace Bralette"
-                  />
-                </div>
+              <!-- Basic Info -->
+              <div class="form-section">
+                <h4 class="form-section-title">Basic Information</h4>
 
-                <div class="textarea-wrap">
-                  <label for="pPrice">Price (₦)</label>
-                  <input
-                    id="pPrice"
-                    type="number"
-                    class="std-input"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div class="form-block textarea-wrap">
-                <label for="pDescription">Description</label>
-                <textarea
-                  id="pDescription"
-                  class="std-input"
-                  rows="3"
-                  placeholder="Product details..."
-                ></textarea>
-              </div>
-
-              <div class="form-row three-col">
-                <div class="select-wrap">
-                  <label id="pCategoryLabel" for="pCategoryBtn">Category</label>
-                  <input type="hidden" id="pCategory" value="" />
-                  <div
-                    class="ms-wrapper ms-wrapper--form"
-                    data-field="pCategory"
-                  >
-                    <button
-                      type="button"
-                      class="ms-trigger"
-                      id="pCategoryBtn"
-                      aria-labelledby="pCategoryLabel"
-                    >
-                      <span class="ms-label is-idle">Select...</span>
-                      <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="ms-dropdown" hidden>
-                      <div class="ms-item" data-value="Accessories">
-                        Accessories
-                      </div>
-                      <div class="ms-item" data-value="Lingerie">Lingerie</div>
-                      <div class="ms-item" data-value="Loungewear">
-                        Loungewear
-                      </div>
-                      <div class="ms-item" data-value="Underwear">
-                        Underwear
-                      </div>
-                    </div>
+                <div class="form-row">
+                  <div class="form-group flex-2">
+                    <label for="pName">Product Name</label>
+                    <input
+                      type="text"
+                      id="pName"
+                      class="form-input"
+                      placeholder="e.g. Lace Bralette"
+                      required
+                    />
+                  </div>
+                  <div class="form-group flex-1">
+                    <label for="pPrice">Price (₦)</label>
+                    <input
+                      type="number"
+                      id="pPrice"
+                      class="form-input"
+                      placeholder="0"
+                      min="0"
+                      required
+                    />
                   </div>
                 </div>
 
-                <div class="select-wrap">
-                  <label id="pGenderLabel" for="pGenderBtn">Gender</label>
-                  <input type="hidden" id="pGender" value="" />
-                  <div class="ms-wrapper ms-wrapper--form" data-field="pGender">
-                    <button
-                      type="button"
-                      class="ms-trigger"
-                      id="pGenderBtn"
-                      aria-labelledby="pGenderLabel"
-                    >
-                      <span class="ms-label is-idle">Select...</span>
-                      <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="ms-dropdown" hidden>
-                      <div class="ms-item" data-value="Women">Women</div>
-                      <div class="ms-item" data-value="Men">Men</div>
-                      <div class="ms-item" data-value="Unisex">Unisex</div>
-                      <div class="ms-item" data-value="Kids">Kids</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="textarea-wrap">
-                  <label for="pQty">Stock Qty</label>
-                  <input
-                    id="pQty"
-                    type="number"
-                    class="std-input"
-                    placeholder="0"
-                  />
+                <div class="form-group">
+                  <label for="pDescription">Description</label>
+                  <textarea
+                    id="pDescription"
+                    class="form-textarea"
+                    rows="3"
+                    placeholder="Product details..."
+                  ></textarea>
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="select-wrap">
-                  <label id="pDeliveryTypeLabel" for="pDeliveryTypeBtn"
-                    >Delivery</label
-                  >
-                  <input type="hidden" id="pDeliveryType" value="" />
-                  <div
-                    class="ms-wrapper ms-wrapper--form"
-                    data-field="pDeliveryType"
-                  >
-                    <button
-                      type="button"
-                      class="ms-trigger"
-                      id="pDeliveryTypeBtn"
-                      aria-labelledby="pDeliveryTypeLabel"
-                    >
-                      <span class="ms-label is-idle">Select...</span>
-                      <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="ms-dropdown" hidden>
-                      <div class="ms-item" data-value="standard">
-                        Standard Delivery
-                      </div>
-                      <div class="ms-item" data-value="express">
-                        Same-day Delivery
-                      </div>
-                    </div>
+              <!-- Categories & Stock -->
+              <div class="form-section">
+                <h4 class="form-section-title">Categories & Stock</h4>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="pCategory">Category</label>
+                    <select id="pCategory" class="form-select" required>
+                      <option value="">Select category...</option>
+                      <option value="Accessories">Accessories</option>
+                      <option value="Lingerie">Lingerie</option>
+                      <option value="Loungewear">Loungewear</option>
+                      <option value="Underwear">Underwear</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="pGender">Gender</label>
+                    <select id="pGender" class="form-select">
+                      <option value="">Select gender...</option>
+                      <option value="Women">Women</option>
+                      <option value="Men">Men</option>
+                      <option value="Unisex">Unisex</option>
+                      <option value="Kids">Kids</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="pQty">Stock Quantity</label>
+                    <input
+                      type="number"
+                      id="pQty"
+                      class="form-input"
+                      placeholder="0"
+                      min="0"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Variants -->
+              <div class="form-section">
+                <h4 class="form-section-title">Variants</h4>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="pDeliveryType">Delivery Type</label>
+                    <select id="pDeliveryType" class="form-select">
+                      <option value="">Select...</option>
+                      <option value="standard">Standard Delivery</option>
+                      <option value="express">Same-day Delivery</option>
+                    </select>
+                  </div>
+
+                  <!-- Size Type - kept for backwards compatibility -->
+                  <div class="form-group" style="display: none">
+                    <label>Available Sizes</label>
+                    <div class="size-stock-list" id="sizeStockList"></div>
+                    <input type="hidden" id="pSizeName" value="" />
+                    <input type="hidden" id="pSizeQty" value="0" />
                   </div>
                 </div>
 
-                <div class="select-wrap">
-                  <label id="pSizesLabel" for="sizeXS">Sizes</label>
-                  <input type="hidden" id="pSizes" value="[]" />
-                  <div class="ms-wrapper ms-wrapper--form" data-sizes>
-                    <button
-                      type="button"
-                      class="ms-trigger"
-                      aria-haspopup="listbox"
-                      aria-expanded="false"
-                    >
-                      <span class="ms-label is-idle" id="msLabel"
-                        >Select Sizes</span
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="pColorMode">Color Type</label>
+                    <select id="pColorMode" class="form-select">
+                      <option value="">Select...</option>
+                      <option value="open">Open Selection</option>
+                      <option value="assorted">Assorted Pack</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group" id="packTypeWrap" hidden>
+                    <label for="pPackType">Pack Type</label>
+                    <select id="pPackType" class="form-select">
+                      <option value="">Select...</option>
+                      <option value="2-in-1">2-in-1</option>
+                      <option value="3-in-1">3-in-1</option>
+                      <option value="4-in-1">4-in-1</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Unified Variant Input (Size + Color + Qty in one row) -->
+                <div class="form-group full-width" id="variantInputWrap">
+                  <label>
+                    <i class="fa-solid fa-cubes"></i> Stock Variants
+                    <span class="variant-counter" id="variantCounter">0</span>
+                  </label>
+                  <p class="form-hint">
+                    Add stock for each size and color combination
+                  </p>
+
+                  <div class="variant-input-card">
+                    <div class="variant-input-row">
+                      <select id="pVariantSize" class="form-select">
+                        <option value="">Size...</option>
+                        <option value="XS">XS</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                        <option value="XXXL">XXXL</option>
+                        <option value="One Size">One Size</option>
+                      </select>
+                      <input
+                        type="text"
+                        id="pVariantColor"
+                        class="form-input"
+                        placeholder="Color (e.g. Red)"
+                        list="colorSuggestions"
+                      />
+                      <datalist id="colorSuggestions">
+                        <option value="Black"></option>
+                        <option value="White"></option>
+                        <option value="Red"></option>
+                        <option value="Blue"></option>
+                        <option value="Pink"></option>
+                        <option value="Navy"></option>
+                        <option value="Beige"></option>
+                        <option value="Nude"></option>
+                        <option value="Grey"></option>
+                        <option value="Purple"></option>
+                        <option value="Green"></option>
+                        <option value="Brown"></option>
+                        <option value="Burgundy"></option>
+                        <option value="Coral"></option>
+                        <option value="Rose"></option>
+                      </datalist>
+                      <input
+                        type="number"
+                        id="pVariantQty"
+                        class="form-input"
+                        placeholder="Qty"
+                        min="0"
+                        value=""
+                      />
+                      <button
+                        type="button"
+                        id="addVariantBtn"
+                        class="btn btn-primary"
                       >
-                      <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
-
-                    <div class="ms-dropdown" hidden>
-                      <label for="msAll" class="ms-opt all">
-                        <input type="checkbox" id="msAll" data-ms-all />
-                        <span>Select All</span>
-                      </label>
-
-                      <div class="ms-chips" role="listbox" aria-label="Sizes">
-                        <label class="chip"
-                          ><input type="checkbox" id="sizeXS" value="XS" /><span
-                            >XS</span
-                          ></label
-                        >
-                        <label class="chip"
-                          ><input type="checkbox" id="sizeS" value="S" /><span
-                            >S</span
-                          ></label
-                        >
-                        <label class="chip"
-                          ><input type="checkbox" id="sizeM" value="M" /><span
-                            >M</span
-                          ></label
-                        >
-                        <label class="chip"
-                          ><input type="checkbox" id="sizeL" value="L" /><span
-                            >L</span
-                          ></label
-                        >
-                        <label class="chip"
-                          ><input type="checkbox" id="sizeXL" value="XL" /><span
-                            >XL</span
-                          ></label
-                        >
-                        <label class="chip"
-                          ><input
-                            type="checkbox"
-                            id="sizeXXL"
-                            value="XXL"
-                          /><span>XXL</span></label
-                        >
-                      </div>
+                        <i class="fa-solid fa-plus"></i> Add
+                      </button>
+                    </div>
+                    <div class="variant-quick-actions">
+                      <span class="quick-label">Quick add:</span>
+                      <button
+                        type="button"
+                        class="quick-size-btn"
+                        data-size="S"
+                      >
+                        S
+                      </button>
+                      <button
+                        type="button"
+                        class="quick-size-btn"
+                        data-size="M"
+                      >
+                        M
+                      </button>
+                      <button
+                        type="button"
+                        class="quick-size-btn"
+                        data-size="L"
+                      >
+                        L
+                      </button>
+                      <button
+                        type="button"
+                        class="quick-size-btn"
+                        data-size="XL"
+                      >
+                        XL
+                      </button>
                     </div>
                   </div>
+
+                  <!-- Variant List Display -->
+                  <div class="variant-list" id="variantList">
+                    <!-- Variant items added dynamically -->
+                  </div>
+
+                  <!-- Hidden inputs for form data -->
+                  <input type="hidden" id="pSizes" value="[]" />
+                  <input type="hidden" id="pColors" value="[]" />
+                  <input type="hidden" id="pVariantStock" value="[]" />
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="select-wrap">
-                  <label id="pColorModeLabel" for="pColorModeBtn"
-                    >Color Type</label
-                  >
-                  <input type="hidden" id="pColorMode" value="" />
-                  <div
-                    class="ms-wrapper ms-wrapper--form"
-                    data-field="pColorMode"
-                  >
-                    <button
-                      type="button"
-                      class="ms-trigger"
-                      id="pColorModeBtn"
-                      aria-labelledby="pColorModeLabel"
-                    >
-                      <span class="ms-label is-idle">Select...</span>
-                      <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="ms-dropdown" hidden>
-                      <div class="ms-item" data-value="open">
-                        Open Selection
-                      </div>
-                      <div class="ms-item" data-value="assorted">
-                        Assorted Pack
-                      </div>
-                    </div>
-                  </div>
-                </div>
+              <!-- Images -->
+              <div class="form-section">
+                <h4 class="form-section-title">Product Images</h4>
 
-                <div class="select-wrap" id="packTypeWrap" hidden>
-                  <label id="pPackTypeLabel" for="pPackTypeBtn"
-                    >Pre-Packed</label
-                  >
-                  <input type="hidden" id="pPackType" value="" />
-                  <div
-                    class="ms-wrapper ms-wrapper--form"
-                    data-field="pPackType"
-                  >
-                    <button
-                      type="button"
-                      class="ms-trigger"
-                      id="pPackTypeBtn"
-                      aria-labelledby="pPackTypeLabel"
-                    >
-                      <span class="ms-label is-idle">Select...</span>
-                      <i class="fa-solid fa-chevron-down arrow"></i>
-                    </button>
-                    <div class="ms-dropdown" hidden>
-                      <div class="ms-item" data-value="2-in-1">2-in-1</div>
-                      <div class="ms-item" data-value="3-in-1">3-in-1</div>
-                      <div class="ms-item" data-value="4-in-1">4-in-1</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div id="openColorsWrap" class="textarea-wrap">
-                  <label for="pColors">Colors</label>
+                <div class="upload-area" id="uploadArea">
                   <input
-                    id="pColors"
-                    type="text"
-                    class="std-input"
-                    placeholder="e.g. Red, Black"
-                  />
-                </div>
-              </div>
-
-              <!-- Image upload + slider -->
-              <div class="upload-area">
-                <div class="upload-top">
-                  <div>
-                    <h4 class="upload-title">Product Images</h4>
-                    <p class="upload-sub text-muted">
-                      Upload multiple images and swipe through.
-                    </p>
-                  </div>
-
-                  <input
-                    id="pImageFiles"
                     type="file"
+                    id="pImageFiles"
                     accept="image/*"
                     multiple
                     hidden
                   />
-                  <label for="pImageFiles" class="btn-outline">
+                  <label for="pImageFiles" class="upload-label">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Add Images
+                    <span>Click to upload images</span>
+                    <small>PNG, JPG up to 5MB each</small>
                   </label>
                 </div>
 
-                <div class="img-slider" id="studioImgSlider" hidden>
+                <div class="image-slider" id="studioImgSlider" hidden>
                   <button
                     type="button"
-                    class="slider-btn prev"
+                    class="slider-nav prev"
                     data-studio-prev
-                    aria-label="Previous image"
+                    aria-label="Previous"
                   >
                     <i class="fa-solid fa-chevron-left"></i>
                   </button>
-
                   <div class="slider-viewport">
                     <div class="slider-track" id="studioImgTrack"></div>
                   </div>
-
                   <button
                     type="button"
-                    class="slider-btn next"
+                    class="slider-nav next"
                     data-studio-next
-                    aria-label="Next image"
+                    aria-label="Next"
                   >
                     <i class="fa-solid fa-chevron-right"></i>
                   </button>
                 </div>
-
                 <div class="slider-dots" id="studioImgDots" hidden></div>
               </div>
 
+              <!-- Form Footer -->
               <div class="form-footer">
-                <div class="toggles">
-                  <label for="pIsActive" class="check-pill">
+                <div class="toggle-group">
+                  <label class="toggle-pill">
                     <input type="checkbox" id="pIsActive" checked />
                     <span>Live</span>
                   </label>
-                  <label for="pIsNew" class="check-pill">
+                  <label class="toggle-pill">
                     <input type="checkbox" id="pIsNew" />
-                    <span>New</span>
+                    <span>New Arrival</span>
                   </label>
                 </div>
 
-                <div class="actions">
-                  <button class="btn-primary" type="submit">
+                <div class="form-actions">
+                  <button class="btn btn-primary btn-lg" type="submit">
                     <i class="fa-solid fa-floppy-disk"></i>
                     Save Product
                   </button>
-
                   <button
-                    class="btn-danger-outline"
+                    class="btn btn-danger"
                     type="button"
                     id="deleteBtn"
                     hidden
@@ -1106,139 +1391,303 @@
             </form>
           </div>
         </section>
+
+        <!-- =====================================================================
+                 ACTIVITY LOGS VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewActivity">
+          <div class="activity-container">
+            <div class="section-header">
+              <div class="section-header-content">
+                <div>
+                  <h3>Recent Activity</h3>
+                  <p class="text-muted">
+                    Track all admin actions across the system
+                  </p>
+                </div>
+              </div>
+              <button
+                class="btn btn-outline"
+                id="refreshActivityBtn"
+                type="button"
+              >
+                <i class="fa-solid fa-rotate"></i>
+                Refresh
+              </button>
+            </div>
+            <div class="activity-list" id="activityLogsList">
+              <p class="text-muted text-center">Loading...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 MANAGE ADMINS VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewAdmins">
+          <div class="admins-container">
+            <div class="section-header">
+              <div>
+                <h3>Admin Users</h3>
+                <p class="text-muted">Manage roles and permissions</p>
+              </div>
+              <button
+                class="btn btn-primary"
+                id="openInviteFromAdminsBtn"
+                type="button"
+              >
+                <i class="fa-solid fa-user-plus"></i>
+                Invite Admin
+              </button>
+            </div>
+            <div class="admins-list" id="adminsList">
+              <p class="text-muted text-center">Loading...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 SITE IMAGES VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewSiteImages">
+          <div class="site-images-container">
+            <div class="section-header">
+              <div class="section-header-content">
+                <div>
+                  <h3>Site Images</h3>
+                  <p class="text-muted">
+                    Manage hero and category images for your website
+                  </p>
+                </div>
+              </div>
+              <button
+                class="btn btn-primary"
+                id="saveSiteImagesBtn"
+                type="button"
+              >
+                <i class="fa-solid fa-floppy-disk"></i>
+                Save All Changes
+              </button>
+            </div>
+
+            <!-- Hero Image Section -->
+            <div class="image-section">
+              <h4 class="image-section-title">
+                <i class="fa-solid fa-star"></i>
+                Hero Image
+              </h4>
+              <p class="image-section-desc">
+                This is the main image displayed on the homepage hero section.
+              </p>
+              <div class="image-upload-card" data-setting="hero_image">
+                <div class="image-preview" id="heroImagePreview">
+                  <img src="" alt="Hero Preview" />
+                </div>
+                <div class="image-input-group">
+                  <div class="input-tabs">
+                    <button
+                      type="button"
+                      class="input-tab active"
+                      data-tab="url"
+                      data-target="heroImageUrl"
+                    >
+                      <i class="fa-solid fa-link"></i> URL
+                    </button>
+                    <button
+                      type="button"
+                      class="input-tab"
+                      data-tab="upload"
+                      data-target="heroImageFile"
+                    >
+                      <i class="fa-solid fa-upload"></i> Upload
+                    </button>
+                  </div>
+                  <input
+                    type="url"
+                    id="heroImageUrl"
+                    class="form-input image-url-input"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <input
+                    type="file"
+                    id="heroImageFile"
+                    class="form-input image-file-input"
+                    accept="image/*"
+                    hidden
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Category Images Section -->
+            <div class="image-section">
+              <h4 class="image-section-title">
+                <i class="fa-solid fa-grid-2"></i>
+                Shop Category Images
+              </h4>
+              <p class="image-section-desc">
+                These images are displayed in the Shop Categories section on the
+                homepage.
+              </p>
+
+              <div class="category-images-grid">
+                <!-- Lingerie -->
+                <div class="image-upload-card" data-setting="category_lingerie">
+                  <div class="card-label">Lingerie</div>
+                  <div class="image-preview" id="lingerieImagePreview">
+                    <img src="" alt="Lingerie Preview" />
+                  </div>
+                  <div class="image-input-group">
+                    <div class="input-tabs input-tabs-sm">
+                      <button
+                        type="button"
+                        class="input-tab active"
+                        data-tab="url"
+                        data-target="lingerieImageUrl"
+                      >
+                        <i class="fa-solid fa-link"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="input-tab"
+                        data-tab="upload"
+                        data-target="lingerieImageFile"
+                      >
+                        <i class="fa-solid fa-upload"></i>
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      id="lingerieImageUrl"
+                      class="form-input image-url-input"
+                      placeholder="Image URL..."
+                    />
+                    <input
+                      type="file"
+                      id="lingerieImageFile"
+                      class="form-input image-file-input"
+                      accept="image/*"
+                      hidden
+                    />
+                  </div>
+                </div>
+
+                <!-- Loungewear -->
+                <div
+                  class="image-upload-card"
+                  data-setting="category_loungewear"
+                >
+                  <div class="card-label">Loungewear</div>
+                  <div class="image-preview" id="loungewearImagePreview">
+                    <img src="" alt="Loungewear Preview" />
+                  </div>
+                  <div class="image-input-group">
+                    <div class="input-tabs input-tabs-sm">
+                      <button
+                        type="button"
+                        class="input-tab active"
+                        data-tab="url"
+                        data-target="loungewearImageUrl"
+                      >
+                        <i class="fa-solid fa-link"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="input-tab"
+                        data-tab="upload"
+                        data-target="loungewearImageFile"
+                      >
+                        <i class="fa-solid fa-upload"></i>
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      id="loungewearImageUrl"
+                      class="form-input image-url-input"
+                      placeholder="Image URL..."
+                    />
+                    <input
+                      type="file"
+                      id="loungewearImageFile"
+                      class="form-input image-file-input"
+                      accept="image/*"
+                      hidden
+                    />
+                  </div>
+                </div>
+
+                <!-- Underwear -->
+                <div
+                  class="image-upload-card"
+                  data-setting="category_underwear"
+                >
+                  <div class="card-label">Underwear</div>
+                  <div class="image-preview" id="underwearImagePreview">
+                    <img src="" alt="Underwear Preview" />
+                  </div>
+                  <div class="image-input-group">
+                    <div class="input-tabs input-tabs-sm">
+                      <button
+                        type="button"
+                        class="input-tab active"
+                        data-tab="url"
+                        data-target="underwearImageUrl"
+                      >
+                        <i class="fa-solid fa-link"></i>
+                      </button>
+                      <button
+                        type="button"
+                        class="input-tab"
+                        data-tab="upload"
+                        data-target="underwearImageFile"
+                      >
+                        <i class="fa-solid fa-upload"></i>
+                      </button>
+                    </div>
+                    <input
+                      type="url"
+                      id="underwearImageUrl"
+                      class="form-input image-url-input"
+                      placeholder="Image URL..."
+                    />
+                    <input
+                      type="file"
+                      id="underwearImageFile"
+                      class="form-input image-file-input"
+                      accept="image/*"
+                      hidden
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 TRASH VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewTrash">
+          <div class="trash-container">
+            <div class="section-header">
+              <div>
+                <h3>Deleted Products</h3>
+                <p class="text-muted">Restore or permanently delete items</p>
+              </div>
+              <button class="btn btn-danger" id="emptyTrashBtn" type="button">
+                <i class="fa-solid fa-trash"></i>
+                Empty Trash
+              </button>
+            </div>
+            <div class="trash-list" id="trashProductsList">
+              <p class="text-muted text-center">Loading...</p>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
 
-    <!-- Invite Modal -->
-    <div class="modal-overlay" id="inviteAdminModal" hidden>
-      <div class="modal-box">
-        <div class="modal-head">
-          <h3>New Admin</h3>
-          <button
-            class="close-icon"
-            type="button"
-            data-close-invite
-            aria-label="Close"
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <form id="inviteAdminForm">
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              id="inviteAdminEmail"
-              type="email"
-              placeholder=" "
-              autocomplete="email"
-            />
-            <label for="inviteAdminEmail">Email Address</label>
-          </div>
-
-          <div class="modal-foot">
-            <button class="btn-primary" type="submit">
-              <i class="fa-solid fa-paper-plane"></i>
-              Send Invite
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Complete Profile Modal -->
-    <div class="modal-overlay" id="completeProfileModal" hidden>
-      <div class="modal-box">
-        <div class="modal-head">
-          <h3>Complete Profile</h3>
-          <button
-            class="close-icon"
-            type="button"
-            data-close-complete-profile
-            aria-label="Close"
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <form id="completeProfileForm">
-          <div class="field float">
-            <input
-              id="cpFirstName"
-              type="text"
-              placeholder=" "
-              autocomplete="given-name"
-            />
-            <label for="cpFirstName">First Name</label>
-          </div>
-
-          <div class="field float">
-            <input
-              id="cpLastName"
-              type="text"
-              placeholder=" "
-              autocomplete="family-name"
-            />
-            <label for="cpLastName">Last Name</label>
-          </div>
-
-          <div class="modal-foot">
-            <button class="btn-primary" type="submit">
-              <i class="fa-solid fa-floppy-disk"></i>
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Inventory Image Viewer Modal -->
-    <div class="modal-overlay" id="imgViewerModal" hidden>
-      <div class="modal-box modal-wide">
-        <div class="modal-head">
-          <div>
-            <h3 id="imgViewerTitle">Product</h3>
-            <p class="text-muted" id="imgViewerCount">0 images</p>
-          </div>
-          <button
-            class="close-icon"
-            type="button"
-            data-close-imgviewer
-            aria-label="Close"
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="viewer-slider">
-          <button
-            type="button"
-            class="slider-btn prev"
-            data-viewer-prev
-            aria-label="Previous image"
-          >
-            <i class="fa-solid fa-chevron-left"></i>
-          </button>
-
-          <div class="viewer-viewport">
-            <div class="viewer-track" id="imgViewerTrack"></div>
-          </div>
-
-          <button
-            type="button"
-            class="slider-btn next"
-            data-viewer-next
-            aria-label="Next image"
-          >
-            <i class="fa-solid fa-chevron-right"></i>
-          </button>
-        </div>
-
-        <div class="slider-dots" id="imgViewerDots" hidden></div>
-      </div>
-    </div>
-
-    <!-- Your existing scripts -->
+    <!-- Scripts -->
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
@@ -1247,8 +1696,6 @@
     <script defer src="assets/js/utils.js"></script>
     <script defer src="assets/js/supabase.js"></script>
     <script defer src="assets/js/app.js"></script>
-
-    <!-- Clean admin logic -->
     <script defer src="assets/js/admin.js"></script>
   </body>
 </html>

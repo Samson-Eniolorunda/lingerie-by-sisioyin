@@ -1,0 +1,469 @@
+/**
+ * Checkout Page JavaScript
+ * Handles accordion sections, payment methods, and Moniepoint integration
+ */
+(function () {
+  "use strict";
+
+  const CART_KEY = "LBS_CART_V1";
+
+  // State management
+  let completedSections = [];
+  let currentSection = "contact";
+
+  // Get cart from localStorage
+  function getCart() {
+    try {
+      return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
+    } catch {
+      return [];
+    }
+  }
+
+  // Format currency
+  function formatNaira(amount) {
+    return "₦" + Number(amount || 0).toLocaleString("en-NG");
+  }
+
+  // Calculate delivery fee based on state (SW Nigeria + Abuja only)
+  function getDeliveryFee(state) {
+    const fees = {
+      Lagos: 2000,
+      Ogun: 2000,
+      Oyo: 2500,
+      Osun: 2500,
+      Ondo: 2500,
+      Ekiti: 3000,
+      Abuja: 3500,
+    };
+    return fees[state] || 2500;
+  }
+
+  // Update progress steps
+  function updateProgressSteps() {
+    const steps = document.querySelectorAll(".checkout-progress-step");
+    const connectors = document.querySelectorAll(
+      ".checkout-progress-connector",
+    );
+
+    const sectionOrder = ["contact", "delivery", "payment"];
+    const currentIndex = sectionOrder.indexOf(currentSection);
+
+    steps.forEach((step, index) => {
+      const stepNum = index + 1;
+      step.classList.remove("completed", "active");
+
+      if (
+        index < currentIndex ||
+        completedSections.includes(sectionOrder[index])
+      ) {
+        step.classList.add("completed");
+        step.querySelector(".step-circle").innerHTML =
+          '<i class="fa-solid fa-check"></i>';
+      } else if (index === currentIndex) {
+        step.classList.add("active");
+        step.querySelector(".step-circle").textContent = stepNum;
+      } else {
+        step.querySelector(".step-circle").textContent = stepNum;
+      }
+    });
+
+    connectors.forEach((connector, index) => {
+      connector.classList.toggle("completed", index < currentIndex);
+    });
+  }
+
+  // Toggle section accordion
+  function toggleSection(sectionName) {
+    const card = document.querySelector(`[data-section="${sectionName}"]`);
+    const allCards = document.querySelectorAll(".checkout-card");
+
+    // If section is completed, allow editing
+    if (
+      completedSections.includes(sectionName) ||
+      sectionName === currentSection
+    ) {
+      allCards.forEach((c) => c.classList.remove("active", "expanded"));
+      card.classList.add("active", "expanded");
+      currentSection = sectionName;
+      updateProgressSteps();
+    }
+  }
+
+  // Complete section and move to next
+  function completeSection(sectionName) {
+    const sectionOrder = ["contact", "delivery", "payment"];
+    const currentIndex = sectionOrder.indexOf(sectionName);
+
+    // Validate section
+    if (!validateSection(sectionName)) {
+      return;
+    }
+
+    // Mark as completed
+    if (!completedSections.includes(sectionName)) {
+      completedSections.push(sectionName);
+    }
+
+    // Update card styling
+    const currentCard = document.querySelector(
+      `[data-section="${sectionName}"]`,
+    );
+    currentCard.classList.add("completed");
+    currentCard.classList.remove("active");
+
+    // Open next section
+    if (currentIndex < sectionOrder.length - 1) {
+      const nextSection = sectionOrder[currentIndex + 1];
+      const nextCard = document.querySelector(
+        `[data-section="${nextSection}"]`,
+      );
+      nextCard.classList.add("active", "expanded");
+      currentSection = nextSection;
+    }
+
+    updateProgressSteps();
+    updateTotals();
+  }
+
+  // Validate section fields
+  function validateSection(sectionName) {
+    let isValid = true;
+    let fields = [];
+
+    if (sectionName === "contact") {
+      fields = ["firstName", "lastName", "email", "phone"];
+    } else if (sectionName === "delivery") {
+      fields = ["address", "city", "state"];
+    }
+
+    fields.forEach((fieldId) => {
+      const input = document.getElementById(fieldId);
+      if (input && !input.value.trim()) {
+        input.style.borderColor = "var(--clr-error)";
+        isValid = false;
+      } else if (input) {
+        input.style.borderColor = "";
+      }
+    });
+
+    if (!isValid) {
+      showToast("Please fill in all required fields", "error");
+    }
+
+    return isValid;
+  }
+
+  // Render cart items in summary
+  function renderSummaryItems() {
+    const cart = getCart();
+    const container = document.getElementById("summaryItems");
+    const emptyEl = document.getElementById("checkoutEmpty");
+    const wrapperEl = document.getElementById("checkoutWrapper");
+
+    if (!cart.length) {
+      if (emptyEl) emptyEl.style.display = "block";
+      if (wrapperEl) wrapperEl.style.display = "none";
+      return;
+    }
+
+    if (emptyEl) emptyEl.style.display = "none";
+    if (wrapperEl) wrapperEl.style.display = "grid";
+
+    container.innerHTML = cart
+      .map(
+        (item) => `
+          <div class="summary-item">
+            <div class="summary-item-img">
+              <img src="${item.image}" alt="${item.name}" loading="lazy">
+            </div>
+            <div class="summary-item-info">
+              <span class="summary-item-name">${item.name}</span>
+              <span class="summary-item-meta">
+                ${item.selectedSize || "One Size"}${item.selectedColor ? " • " + item.selectedColor : ""} × ${item.qty}
+              </span>
+            </div>
+            <span class="summary-item-price">${formatNaira(item.price_ngn * item.qty)}</span>
+          </div>
+        `,
+      )
+      .join("");
+  }
+
+  // Calculate and update totals
+  function updateTotals() {
+    const cart = getCart();
+    const stateSelect = document.getElementById("state");
+    const state = stateSelect?.value || "Lagos";
+
+    const subtotal = cart.reduce(
+      (sum, item) => sum + item.price_ngn * item.qty,
+      0,
+    );
+    const deliveryFee = getDeliveryFee(state);
+    const total = subtotal + deliveryFee;
+
+    const subtotalEl = document.getElementById("checkoutSubtotal");
+    const deliveryEl = document.getElementById("checkoutDelivery");
+    const totalEl = document.getElementById("checkoutTotal");
+
+    if (subtotalEl) subtotalEl.textContent = formatNaira(subtotal);
+    if (deliveryEl) deliveryEl.textContent = formatNaira(deliveryFee);
+    if (totalEl) totalEl.textContent = formatNaira(total);
+  }
+
+  // Handle payment method selection
+  function setupPaymentMethods() {
+    const options = document.querySelectorAll(".payment-option");
+
+    options.forEach((option) => {
+      option.addEventListener("click", function () {
+        options.forEach((o) => o.classList.remove("selected"));
+        this.classList.add("selected");
+
+        const radio = this.querySelector('input[type="radio"]');
+        radio.checked = true;
+      });
+    });
+  }
+
+  // Show toast notification
+  function showToast(message, type = "info") {
+    if (window.UTILS?.toast) {
+      UTILS.toast(message, type);
+    } else {
+      const toast = document.getElementById("toast");
+      if (toast) {
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+    }
+  }
+
+  // Validate entire form
+  function validateForm() {
+    const required = [
+      "firstName",
+      "lastName",
+      "email",
+      "phone",
+      "address",
+      "city",
+      "state",
+    ];
+    let isValid = true;
+
+    required.forEach((field) => {
+      const input = document.getElementById(field);
+      if (!input?.value.trim()) {
+        input.style.borderColor = "var(--clr-error)";
+        isValid = false;
+      } else {
+        input.style.borderColor = "";
+      }
+    });
+
+    return isValid;
+  }
+
+  // Build order data
+  function buildOrderData() {
+    const cart = getCart();
+    const state = document.getElementById("state").value;
+    const subtotal = cart.reduce(
+      (sum, item) => sum + item.price_ngn * item.qty,
+      0,
+    );
+    const deliveryFee = getDeliveryFee(state);
+
+    return {
+      customer: {
+        firstName: document.getElementById("firstName").value,
+        lastName: document.getElementById("lastName").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+      },
+      delivery: {
+        address: document.getElementById("address").value,
+        city: document.getElementById("city").value,
+        state: state,
+        landmark: document.getElementById("landmark").value,
+        notes: document.getElementById("orderNotes").value,
+      },
+      items: cart,
+      subtotal: subtotal,
+      deliveryFee: deliveryFee,
+      total: subtotal + deliveryFee,
+      paymentMethod: document.querySelector(
+        'input[name="paymentMethod"]:checked',
+      )?.value,
+      reference: "LBS_" + Date.now(),
+    };
+  }
+
+  // Handle place order
+  function handlePlaceOrder() {
+    if (!validateForm()) {
+      showToast("Please fill in all required fields", "error");
+      return;
+    }
+
+    const orderData = buildOrderData();
+    const paymentMethod = orderData.paymentMethod;
+
+    // Both card and bank transfer use Moniepoint
+    showToast("Initializing Moniepoint payment...", "info");
+    initMoniepointPayment(orderData, paymentMethod);
+  }
+
+  // Initialize Monnify Payment (Moniepoint's payment gateway)
+  function initMoniepointPayment(orderData, paymentMethod) {
+    const btn = document.getElementById("placeOrderBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+    // Check if Monnify SDK is loaded
+    if (typeof MonnifySDK === "undefined") {
+      showToast("Payment system loading. Please wait...", "warning");
+      btn.disabled = false;
+      btn.innerHTML =
+        '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
+      return;
+    }
+
+    // Get Monnify config from APP_CONFIG or use test keys
+    const monnifyConfig = window.APP_CONFIG?.MONNIFY || {
+      apiKey: "MK_TEST_XXXXXXXXXX", // Replace with your Monnify API key
+      contractCode: "XXXXXXXXXX", // Replace with your Monnify contract code
+      isTestMode: true,
+    };
+
+    // Determine payment methods based on selection
+    const paymentMethods =
+      paymentMethod === "card"
+        ? ["CARD", "ACCOUNT_TRANSFER"]
+        : ["ACCOUNT_TRANSFER", "CARD"];
+
+    // Store order data for confirmation page
+    sessionStorage.setItem("LBS_PENDING_ORDER", JSON.stringify(orderData));
+
+    MonnifySDK.initialize({
+      amount: orderData.total,
+      currency: "NGN",
+      reference: orderData.reference,
+      customerFullName: `${orderData.customer.firstName} ${orderData.customer.lastName}`,
+      customerEmail: orderData.customer.email,
+      customerMobileNumber: orderData.customer.phone,
+      apiKey: monnifyConfig.apiKey,
+      contractCode: monnifyConfig.contractCode,
+      paymentDescription: `LBS Order - ${orderData.reference}`,
+      isTestMode: monnifyConfig.isTestMode,
+      paymentMethods: paymentMethods,
+      metadata: {
+        orderId: orderData.reference,
+        items: orderData.items.length,
+        deliveryState: orderData.delivery.state,
+      },
+      onComplete: function (response) {
+        console.log("Monnify payment complete:", response);
+
+        if (
+          response.status === "SUCCESS" ||
+          response.paymentStatus === "PAID"
+        ) {
+          // Payment successful
+          const confirmedOrder = {
+            ...orderData,
+            paymentReference:
+              response.transactionReference || response.paymentReference,
+            paymentStatus: "PAID",
+            paidAt: new Date().toISOString(),
+          };
+
+          // Store confirmed order
+          sessionStorage.setItem(
+            "LBS_CONFIRMED_ORDER",
+            JSON.stringify(confirmedOrder),
+          );
+
+          // Clear cart
+          localStorage.removeItem(CART_KEY);
+
+          // Update cart badge
+          if (window.APP?.updateCartBadge) {
+            window.APP.updateCartBadge();
+          }
+
+          showToast("Payment successful! Redirecting...", "success");
+
+          // Redirect to confirmation page
+          setTimeout(() => {
+            window.location.href = "confirmation.html";
+          }, 1500);
+        } else {
+          // Payment failed or pending
+          btn.disabled = false;
+          btn.innerHTML =
+            '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
+          showToast("Payment was not completed. Please try again.", "error");
+        }
+      },
+      onClose: function (data) {
+        console.log("Monnify closed:", data);
+        btn.disabled = false;
+        btn.innerHTML =
+          '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
+        showToast("Payment cancelled", "info");
+      },
+    });
+  }
+
+  // Handle state select for floating label
+  function setupStateSelect() {
+    const stateSelect = document.getElementById("state");
+    if (stateSelect) {
+      stateSelect.addEventListener("change", function () {
+        if (this.value) {
+          this.classList.add("has-value");
+        } else {
+          this.classList.remove("has-value");
+        }
+        updateTotals();
+      });
+    }
+  }
+
+  // Initialize checkout page
+  function init() {
+    // Check if we're on checkout page
+    if (!document.getElementById("checkoutWrapper")) return;
+
+    renderSummaryItems();
+    updateTotals();
+    setupPaymentMethods();
+    setupStateSelect();
+    updateProgressSteps();
+
+    // Event listeners
+    const placeOrderBtn = document.getElementById("placeOrderBtn");
+    if (placeOrderBtn) {
+      placeOrderBtn.addEventListener("click", handlePlaceOrder);
+    }
+
+    // Set current year
+    const yearEl = document.getElementById("currentYear");
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+    // Expose functions globally for onclick handlers
+    window.toggleSection = toggleSection;
+    window.completeSection = completeSection;
+  }
+
+  // Run on DOM ready
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();

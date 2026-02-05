@@ -192,12 +192,22 @@
    */
   UTILS.toast = function (message, type = "success", duration = 3000) {
     console.log("🔧 UTILS: toast()", type, message);
-    const toastEl = document.querySelector("[data-toast]");
-    if (!toastEl) return;
+    // Try multiple selectors for compatibility
+    let toastEl =
+      document.querySelector("[data-toast]") ||
+      document.querySelector("#toast") ||
+      document.querySelector(".toast");
+
+    if (!toastEl) {
+      // Create toast element if it doesn't exist
+      toastEl = document.createElement("div");
+      toastEl.id = "toast";
+      toastEl.className = "toast";
+      document.body.appendChild(toastEl);
+    }
 
     toastEl.textContent = message;
-    toastEl.className = "toast-notification";
-    toastEl.classList.add("toast-" + type, "show");
+    toastEl.className = "toast toast-" + type + " show";
     toastEl.hidden = false;
 
     clearTimeout(toastEl._timeout);
@@ -208,6 +218,11 @@
       }, 300);
     }, duration);
   };
+
+  /**
+   * Alias for toast
+   */
+  UTILS.showToast = UTILS.toast;
 
   /**
    * Create debounced function

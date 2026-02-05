@@ -39,37 +39,53 @@
     return "https://placehold.co/400x500/f8fafc/be185d?text=No+Image";
   }
 
+  // Check if product is new (within 14 days or marked as new in DB)
+  function isNewProduct(createdAt, isNewFlag) {
+    if (isNewFlag === true) return true;
+    if (!createdAt) return false;
+    const created = new Date(createdAt);
+    const now = new Date();
+    const diffDays = (now - created) / (1000 * 60 * 60 * 24);
+    return diffDays <= 14;
+  }
+
   function createWishlistCard(product) {
     const img = getFirstImage(product.images);
     const name = UTILS.safeText(product.name);
     const price = UTILS.formatNaira(product.price_ngn);
     const category = UTILS.safeText(product.category);
+    const description = UTILS.safeText(product.description || "").slice(0, 60);
+    const inStock = (product.qty || 0) > 0;
+    const deliveryType = product.delivery_type || "standard";
+    const isExpress = deliveryType === "express";
+    const deliveryLabel = isExpress ? "Same-day" : "Standard";
+    const reviewCount = product.review_count || 0;
+    const isNew = isNewProduct(product.created_at, product.is_new);
 
     return `
       <article class="product-card" data-product-id="${product.id}">
-        <div class="product-image">
+        <div class="card-image">
           <img src="${img}" alt="${name}" loading="lazy" />
-          <div class="product-overlay">
-            <div class="product-overlay-buttons">
-              <button type="button" class="overlay-btn quick-view-btn" data-id="${product.id}" aria-label="Quick view">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-              <button type="button" class="overlay-btn wishlist-btn active" data-action="remove-wishlist" data-id="${product.id}" aria-label="Remove from wishlist">
-                <i class="fa-solid fa-heart-crack"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div class="product-info">
-          ${category ? `<span class="product-category">${category}</span>` : ""}
-          <h3 class="product-name">${name}</h3>
-          <div class="product-meta">
-            <span class="product-price">${price}</span>
-          </div>
-          <button type="button" class="product-add-btn" data-action="quick-add" data-id="${product.id}">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <span>Add to Cart</span>
+          ${isNew ? '<span class="card-new-badge">New</span>' : ""}
+          <button type="button" class="card-wishlist active" data-action="remove-wishlist" data-id="${product.id}" data-tooltip="Remove from Wishlist" aria-label="Remove from Wishlist">
+            <i class="fa-solid fa-heart-crack"></i>
           </button>
+          ${!inStock ? '<div class="card-sold-out">Sold Out</div>' : ""}
+        </div>
+        <div class="card-info">
+          <div class="card-top-row">
+            <span class="card-category">${category}</span>
+            <span class="card-delivery ${isExpress ? "express" : ""}"><i class="fa-solid ${isExpress ? "fa-bolt" : "fa-truck"}"></i> ${deliveryLabel}</span>
+          </div>
+          <h3 class="card-name">${name}</h3>
+          ${description ? `<p class="card-description">${description}...</p>` : ""}
+          <div class="card-review">${reviewCount > 0 ? `<i class="fa-solid fa-star"></i> ${reviewCount} reviews` : '<i class="fa-regular fa-star"></i> No reviews yet'}</div>
+          <div class="card-bottom">
+            <span class="card-price">${price}</span>
+            <button type="button" class="card-cart-btn" data-action="quick-add" data-id="${product.id}" ${!inStock ? "disabled" : ""}>
+              <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+            </button>
+          </div>
         </div>
       </article>
     `;
@@ -116,6 +132,12 @@
         wishlistGrid.hidden = false;
         wishlistGrid.innerHTML = products.map(createWishlistCard).join("");
       }
+      // Update wishlist count display
+      const countEl = document.getElementById("wishlistTotal");
+      if (countEl) countEl.textContent = String(products.length);
+      // Update header display
+      const headerEl = document.getElementById("wishlistHeader");
+      if (headerEl) headerEl.hidden = false;
     } catch (err) {
       console.error("❌ WISHLIST: Exception:", err);
     }
@@ -124,38 +146,37 @@
   function initEventListeners() {
     console.log("❤️ WISHLIST: Initializing event listeners...");
 
-    // Remove from wishlist
+    // Wishlist grid actions
     wishlistGrid?.addEventListener("click", async (e) => {
+      // Remove from wishlist
       const removeBtn = e.target.closest("[data-action='remove-wishlist']");
       if (removeBtn) {
         e.preventDefault();
         const productId = removeBtn.dataset.id;
         if (productId && removeFromWishlist(productId)) {
-          // Remove card from DOM
+          // Animate card removal
           const card = removeBtn.closest(".product-card");
-          card?.remove();
-
-          // Check if wishlist is now empty
-          if (!wishlistGrid.children.length) {
-            wishlistEmpty.hidden = false;
-            wishlistGrid.hidden = true;
+          if (card) {
+            card.style.transition = "all 0.3s ease";
+            card.style.opacity = "0";
+            card.style.transform = "scale(0.8)";
+            setTimeout(() => {
+              card.remove();
+              // Update wishlist count display
+              const countEl = document.getElementById("wishlistTotal");
+              if (countEl) countEl.textContent = String(getWishlist().length);
+              // Check if wishlist is now empty
+              if (!wishlistGrid.children.length) {
+                wishlistEmpty.hidden = false;
+                wishlistGrid.hidden = true;
+              }
+            }, 300);
           }
         }
         return;
       }
 
-      // Quick view
-      const quickViewBtn = e.target.closest(".quick-view-btn");
-      if (quickViewBtn) {
-        e.preventDefault();
-        const productId = quickViewBtn.dataset.id;
-        if (productId && window.APP?.openModal) {
-          window.APP.openModal(productId);
-        }
-        return;
-      }
-
-      // Quick add to cart
+      // Quick add to cart - open modal to select size/color
       const addBtn = e.target.closest("[data-action='quick-add']");
       if (addBtn) {
         e.preventDefault();
@@ -163,6 +184,19 @@
         if (productId && window.APP?.openModal) {
           window.APP.openModal(productId);
         }
+        return;
+      }
+
+      // Card click opens quick view
+      const card = e.target.closest(".product-card");
+      if (card && !e.target.closest("button")) {
+        e.preventDefault();
+        const productId = card.dataset.productId;
+        if (productId && window.APP?.openModal) {
+          window.APP.openModal(productId);
+        }
+      }
+    });
       }
     });
   }

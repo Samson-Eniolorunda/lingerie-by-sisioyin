@@ -2,40 +2,770 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>My Account | Lingerie by Sisioyin</title>
     <meta
       name="description"
       content="Manage your account, view orders, and update your preferences at Lingerie by Sisioyin."
     />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#be185d" />
+
+    <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <style>
+      /* Dashboard Page Styles */
+      .dashboard-page {
+        min-height: 100vh;
+        background: var(--bg-muted);
+      }
+
+      .dashboard-main {
+        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-16);
+      }
+
+      /* Not Logged In State */
+      .dashboard-auth-required {
+        max-width: 500px;
+        margin: 0 auto;
+        text-align: center;
+        padding: var(--space-16) var(--space-6);
+      }
+
+      .auth-required-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-primary-dark, #9d174d)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-6);
+      }
+
+      .auth-required-icon i {
+        font-size: 2.5rem;
+        color: white;
+      }
+
+      .auth-required-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-3);
+      }
+
+      .auth-required-text {
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
+        line-height: 1.6;
+      }
+
+      /* Dashboard Layout */
+      .dashboard-layout {
+        display: grid;
+        gap: var(--space-6);
+      }
+
+      @media (min-width: 1024px) {
+        .dashboard-layout {
+          grid-template-columns: 280px 1fr;
+          align-items: start;
+        }
+      }
+
+      /* User Profile Card */
+      .user-profile-card {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        padding: var(--space-6);
+        text-align: center;
+      }
+
+      .user-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-primary-dark, #9d174d)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        font-size: 2.5rem;
+        color: white;
+        font-weight: 700;
+      }
+
+      .user-name {
+        font-size: var(--fs-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-1);
+      }
+
+      .user-email {
+        font-size: var(--fs-sm);
+        color: var(--text-secondary);
+        margin-bottom: var(--space-4);
+      }
+
+      .user-member-since {
+        font-size: var(--fs-xs);
+        color: var(--text-muted);
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--border-light);
+      }
+
+      /* Dashboard Navigation */
+      .dashboard-nav {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        padding: var(--space-4);
+        margin-top: var(--space-4);
+      }
+
+      .dashboard-nav-link {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        width: 100%;
+        padding: var(--space-3) var(--space-4);
+        border: none;
+        background: transparent;
+        border-radius: var(--radius-lg);
+        color: var(--text-secondary);
+        font-size: var(--fs-base);
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+      }
+
+      .dashboard-nav-link:hover {
+        background: var(--bg-muted);
+        color: var(--text-primary);
+      }
+
+      .dashboard-nav-link.active {
+        background: linear-gradient(
+          135deg,
+          var(--clr-primary),
+          var(--clr-primary-dark, #9d174d)
+        );
+        color: white;
+      }
+
+      .dashboard-nav-link i {
+        width: 20px;
+        text-align: center;
+      }
+
+      .dashboard-nav-link.logout {
+        color: var(--clr-error);
+        margin-top: var(--space-2);
+        border-top: 1px solid var(--border-light);
+        padding-top: var(--space-4);
+      }
+
+      .dashboard-nav-link.logout:hover {
+        background: rgba(239, 68, 68, 0.1);
+      }
+
+      /* Dashboard Content */
+      .dashboard-content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+      }
+
+      /* Dashboard Section */
+      .dashboard-section {
+        background: var(--bg-surface);
+        border-radius: var(--radius-2xl);
+        border: 2px solid var(--border-light);
+        padding: var(--space-6);
+        display: none;
+      }
+
+      .dashboard-section.active {
+        display: block;
+      }
+
+      .dashboard-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--space-6);
+        flex-wrap: wrap;
+        gap: var(--space-4);
+      }
+
+      .dashboard-section-title {
+        font-family: var(--ff-display);
+        font-size: var(--fs-xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+      }
+
+      .dashboard-section-title i {
+        color: var(--clr-primary);
+      }
+
+      /* Stats Grid */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--space-4);
+        margin-bottom: var(--space-6);
+      }
+
+      .stat-card {
+        background: var(--bg-muted);
+        border-radius: var(--radius-xl);
+        padding: var(--space-5);
+        text-align: center;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-3);
+        font-size: 1.25rem;
+      }
+
+      .stat-icon.orders {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+      .stat-icon.wishlist {
+        background: rgba(236, 72, 153, 0.1);
+        color: #ec4899;
+      }
+      .stat-icon.spent {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .stat-icon.rewards {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+
+      .stat-value {
+        font-size: var(--fs-2xl);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-1);
+      }
+
+      .stat-label {
+        font-size: var(--fs-sm);
+        color: var(--text-secondary);
+      }
+
+      /* Orders List */
+      .orders-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+      }
+
+      .order-card {
+        background: var(--bg-muted);
+        border-radius: var(--radius-xl);
+        padding: var(--space-5);
+        transition: box-shadow 0.2s;
+      }
+
+      .order-card:hover {
+        box-shadow: var(--shadow-md);
+      }
+
+      .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: var(--space-4);
+        flex-wrap: wrap;
+        gap: var(--space-3);
+      }
+
+      .order-id {
+        font-family: var(--ff-mono, monospace);
+        font-size: var(--fs-sm);
+        font-weight: 600;
+        color: var(--clr-primary);
+      }
+
+      .order-date {
+        font-size: var(--fs-sm);
+        color: var(--text-secondary);
+      }
+
+      .order-status {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-full);
+        font-size: var(--fs-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+      }
+
+      .order-status.confirmed {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .order-status.processing {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+      }
+      .order-status.shipped {
+        background: rgba(139, 92, 246, 0.1);
+        color: #8b5cf6;
+      }
+      .order-status.delivered {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+      }
+      .order-status.pending {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+      }
+      .order-status.cancelled {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      .order-items-preview {
+        display: flex;
+        gap: var(--space-2);
+        margin-bottom: var(--space-4);
+        overflow-x: auto;
+        padding-bottom: var(--space-2);
+      }
+
+      .order-item-thumb {
+        width: 60px;
+        height: 75px;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+        background: var(--bg-surface);
+      }
+
+      .order-item-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .order-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: var(--space-4);
+        border-top: 1px solid var(--border-light);
+      }
+
+      .order-total {
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      /* Profile Form */
+      .profile-form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-5);
+        max-width: 600px;
+      }
+
+      .form-row {
+        display: grid;
+        gap: var(--space-4);
+      }
+
+      @media (min-width: 640px) {
+        .form-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .form-group label {
+        font-weight: 500;
+        color: var(--text-primary);
+        font-size: var(--fs-sm);
+      }
+
+      .form-group input,
+      .form-group select {
+        padding: var(--space-3) var(--space-4);
+        border: 2px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        font-size: var(--fs-base);
+        background: var(--bg-base);
+        color: var(--text-primary);
+        transition: border-color 0.2s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: var(--clr-primary);
+      }
+
+      .form-group input:disabled {
+        background: var(--bg-muted);
+        cursor: not-allowed;
+      }
+
+      /* Addresses */
+      .addresses-grid {
+        display: grid;
+        gap: var(--space-4);
+      }
+
+      @media (min-width: 768px) {
+        .addresses-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .address-card {
+        background: var(--bg-muted);
+        border-radius: var(--radius-xl);
+        padding: var(--space-5);
+        position: relative;
+      }
+
+      .address-card.default {
+        border: 2px solid var(--clr-primary);
+      }
+
+      .address-badge {
+        position: absolute;
+        top: var(--space-3);
+        right: var(--space-3);
+        padding: var(--space-1) var(--space-2);
+        background: var(--clr-primary);
+        color: white;
+        font-size: var(--fs-xs);
+        font-weight: 600;
+        border-radius: var(--radius-md);
+      }
+
+      .address-type {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--space-2);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .address-type i {
+        color: var(--clr-primary);
+      }
+
+      .address-details {
+        color: var(--text-secondary);
+        font-size: var(--fs-sm);
+        line-height: 1.6;
+        margin-bottom: var(--space-4);
+      }
+
+      .address-actions {
+        display: flex;
+        gap: var(--space-2);
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: var(--space-12) var(--space-6);
+      }
+
+      .empty-state-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--bg-muted);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-4);
+        font-size: 2rem;
+        color: var(--text-muted);
+      }
+
+      .empty-state-title {
+        font-size: var(--fs-lg);
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: var(--space-2);
+      }
+
+      .empty-state-text {
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
+      }
+
+      /* Mobile Dashboard Nav */
+      @media (max-width: 1023px) {
+        .dashboard-sidebar {
+          position: sticky;
+          top: 80px;
+          z-index: 10;
+        }
+
+        .dashboard-nav {
+          display: flex;
+          gap: var(--space-2);
+          overflow-x: auto;
+          padding: var(--space-3);
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .dashboard-nav-link {
+          flex-shrink: 0;
+          padding: var(--space-2) var(--space-4);
+          font-size: var(--fs-sm);
+        }
+
+        .dashboard-nav-link span {
+          display: none;
+        }
+
+        .dashboard-nav-link i {
+          margin: 0;
+        }
+
+        .dashboard-nav-link.logout {
+          margin-top: 0;
+          border-top: none;
+          padding-top: var(--space-2);
+        }
+
+        .user-profile-card {
+          display: none;
+        }
+      }
+
+      /* WhatsApp Widget Modern Styles */
+      .whatsapp-float {
+        position: fixed;
+        bottom: var(--space-6);
+        right: var(--space-6);
+        z-index: 1000;
+      }
+
+      .whatsapp-float-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.75rem;
+        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
+        transition: all 0.3s ease;
+        text-decoration: none;
+        position: relative;
+      }
+
+      .whatsapp-float-btn:hover {
+        transform: scale(1.1) translateY(-2px);
+        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
+        color: white;
+      }
+
+      .whatsapp-float-btn::before {
+        content: "";
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+        z-index: -1;
+        opacity: 0.3;
+        animation: whatsapp-pulse 2s infinite;
+      }
+
+      @keyframes whatsapp-pulse {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scale(1.15);
+          opacity: 0;
+        }
+      }
+
+      .whatsapp-tooltip {
+        position: absolute;
+        right: 70px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-lg);
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        white-space: nowrap;
+        box-shadow: var(--shadow-lg);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .whatsapp-float:hover .whatsapp-tooltip {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .whatsapp-tooltip::after {
+        content: "";
+        position: absolute;
+        right: -6px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 6px solid transparent;
+        border-left-color: var(--bg-surface);
+      }
+
+      /* Mobile Nav Theme Toggle Slider */
+      .mobile-theme-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        background: var(--bg-surface-alt);
+        border-radius: var(--radius-xl);
+        margin: var(--space-4);
+      }
+
+      .mobile-theme-toggle i {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        transition: color 0.2s;
+      }
+
+      .mobile-theme-toggle i.active {
+        color: var(--clr-primary);
+      }
+
+      .theme-slider {
+        position: relative;
+        width: 50px;
+        height: 26px;
+        background: var(--bg-muted);
+        border-radius: var(--radius-full);
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .theme-slider::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.3s;
+      }
+
+      [data-theme="dark"] .theme-slider::before,
+      .dark .theme-slider::before {
+        transform: translateX(24px);
+      }
+
+      [data-theme="dark"] .theme-slider,
+      .dark .theme-slider {
+        background: var(--clr-primary);
+      }
+    </style>
   </head>
-  <body class="lbs-page">
-    <!-- Header -->
-    <header class="lbs-header" id="siteHeader">
-      <div class="header-container">
-        <a href="index.html" class="header-brand">
-          <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-          <span class="brand-name">Lingerie by Sisioyin</span>
+
+  <body class="dashboard-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
-        <nav class="header-nav" id="headerNav">
+        <nav class="nav" id="mainNav">
           <a href="index.html" class="nav-link">Home</a>
           <a href="shop.html" class="nav-link">Shop</a>
-          <a href="shop.html?category=Lingerie" class="nav-link">Lingerie</a>
-          <a href="shop.html?category=Loungewear" class="nav-link"
-            >Loungewear</a
-          >
+          <a href="shop.html?gender=Women" class="nav-link">Women</a>
+          <a href="shop.html?gender=Men" class="nav-link">Men</a>
+          <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
         </nav>
 
         <div class="header-actions">
@@ -52,30 +782,22 @@
             class="header-btn"
             id="loginBtn"
             aria-label="Sign in"
-            title="Sign In"
           >
             <i class="fa-solid fa-user"></i>
           </button>
-          <a
-            href="wishlist.html"
-            class="header-btn"
-            aria-label="Wishlist"
-            title="Wishlist"
-          >
-            <i class="fa-solid fa-heart"></i>
-          </a>
           <button
             type="button"
-            class="header-btn cart-toggle"
+            class="header-btn"
             id="cartToggle"
-            aria-label="Cart"
+            data-cart-drawer
+            aria-label="Shopping cart"
           >
             <i class="fa-solid fa-bag-shopping"></i>
-            <span class="cart-count" id="cartCount">0</span>
+            <span class="badge" data-cart-count>0</span>
           </button>
           <button
             type="button"
-            class="mobile-toggle"
+            class="header-btn menu-toggle"
             id="mobileToggle"
             aria-label="Menu"
           >
@@ -85,592 +807,603 @@
       </div>
     </header>
 
-    <!-- Mobile Navigation -->
-    <nav class="mobile-nav" id="mobileNav">
-      <div class="mobile-nav-content">
-        <a href="index.html" class="mobile-nav-link">Home</a>
-        <a href="shop.html" class="mobile-nav-link">Shop All</a>
-        <a href="shop.html?category=Lingerie" class="mobile-nav-link"
-          >Lingerie</a
-        >
-        <a href="shop.html?category=Loungewear" class="mobile-nav-link"
-          >Loungewear</a
-        >
-        <a href="wishlist.html" class="mobile-nav-link">Wishlist</a>
-        <a href="dashboard.html" class="mobile-nav-link active">My Account</a>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="dashboard-page">
-      <div class="dashboard-container">
-        <!-- Not Logged In State -->
-        <div class="not-logged-in" id="notLoggedIn">
-          <div class="not-logged-in-icon">
-            <i class="fa-solid fa-user-lock"></i>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       NEW MOBILE NAVIGATION DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="mobile-drawer" id="mobileNav">
+      <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
+      <div class="mobile-drawer-panel">
+        <div class="drawer-header">
+          <a href="index.html" class="drawer-logo">
+            <span class="drawer-logo-icon"
+              ><i class="fa-solid fa-heart"></i
+            ></span>
+            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+          </a>
+          <button
+            type="button"
+            class="drawer-close"
+            id="mobileNavClose"
+            aria-label="Close menu"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="drawer-content">
+          <a href="dashboard.html" class="drawer-user">
+            <span class="drawer-user-avatar"
+              ><i class="fa-solid fa-user"></i
+            ></span>
+            <span class="drawer-user-info">
+              <span class="drawer-user-name">My Account</span>
+              <span class="drawer-user-email">Sign in for best experience</span>
+            </span>
+            <i class="fa-solid fa-chevron-right drawer-user-arrow"></i>
+          </a>
+          <nav class="drawer-nav">
+            <span class="drawer-nav-title">Menu</span>
+            <div class="drawer-nav-list">
+              <a href="index.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-home"></i
+                ></span>
+                Home
+              </a>
+              <a href="shop.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-store"></i
+                ></span>
+                Shop All
+              </a>
+              <a href="shop.html?is_new=true" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-wand-magic-sparkles"></i
+                ></span>
+                New Arrivals
+                <span class="drawer-nav-badge">New</span>
+              </a>
+              <a href="cart.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-bag-shopping"></i
+                ></span>
+                Cart
+                <span class="drawer-nav-badge" data-cart-count>0</span>
+              </a>
+              <a href="wishlist.html" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-heart"></i
+                ></span>
+                Wishlist
+              </a>
+            </div>
+          </nav>
+          <div class="drawer-categories">
+            <span class="drawer-nav-title">Categories</span>
+            <div class="drawer-categories-grid">
+              <a href="shop.html?gender=Women" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-venus"></i
+                ></span>
+                <span class="drawer-category-label">Women</span>
+              </a>
+              <a href="shop.html?gender=Men" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-mars"></i
+                ></span>
+                <span class="drawer-category-label">Men</span>
+              </a>
+              <a href="shop.html?gender=Kids" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-child"></i
+                ></span>
+                <span class="drawer-category-label">Kids</span>
+              </a>
+              <a href="shop.html?category=Lingerie" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-gem"></i
+                ></span>
+                <span class="drawer-category-label">Lingerie</span>
+              </a>
+              <a href="shop.html?category=Loungewear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-couch"></i
+                ></span>
+                <span class="drawer-category-label">Lounge</span>
+              </a>
+              <a href="shop.html?category=Underwear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-shirt"></i
+                ></span>
+                <span class="drawer-category-label">Underwear</span>
+              </a>
+            </div>
           </div>
-          <h2>Sign In Required</h2>
-          <p>
+          <div class="drawer-support">
+            <span class="drawer-nav-title">Support</span>
+            <div class="drawer-support-links">
+              <a href="faq.html" class="drawer-support-link">FAQs</a>
+              <a href="size.html" class="drawer-support-link">Size Guide</a>
+              <a href="contact.html" class="drawer-support-link">Contact</a>
+              <a href="terms.html" class="drawer-support-link">Terms</a>
+              <a href="privacy.html" class="drawer-support-link">Privacy</a>
+            </div>
+          </div>
+        </div>
+        <div class="drawer-footer">
+          <div class="drawer-theme" id="mobileThemeToggle">
+            <i class="fa-solid fa-sun"></i>
+            <button
+              type="button"
+              class="drawer-theme-toggle theme-btn"
+              id="themeSlider"
+              role="switch"
+              aria-label="Toggle dark mode"
+              data-theme="toggle"
+            ></button>
+            <i class="fa-solid fa-moon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <main class="dashboard-main" id="main">
+      <div class="container">
+        <!-- Auth Required State -->
+        <div class="dashboard-auth-required" id="authRequired">
+          <div class="auth-required-icon">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h1 class="auth-required-title">Sign In Required</h1>
+          <p class="auth-required-text">
             Please sign in to access your account dashboard, view orders, and
             manage your profile.
           </p>
-          <button class="btn btn-primary" id="signInPromptBtn">
+          <button
+            type="button"
+            class="btn btn-primary btn-lg"
+            id="signInPromptBtn"
+          >
             <i class="fa-solid fa-sign-in-alt"></i>
             Sign In to Continue
           </button>
         </div>
 
-        <!-- Logged In Dashboard -->
+        <!-- Dashboard Content (hidden until logged in) -->
         <div
-          class="dashboard-wrapper"
-          id="dashboardWrapper"
+          class="dashboard-layout"
+          id="dashboardLayout"
           style="display: none"
         >
-          <div class="dashboard-header">
-            <h1 class="dashboard-welcome">
-              Welcome, <span id="userName">User</span>!
-            </h1>
-            <p class="dashboard-email" id="userEmail">user@example.com</p>
-          </div>
+          <!-- Sidebar -->
+          <aside class="dashboard-sidebar">
+            <!-- User Profile Card -->
+            <div class="user-profile-card">
+              <div class="user-avatar" id="userAvatar">U</div>
+              <h2 class="user-name" id="userName">User</h2>
+              <p class="user-email" id="userEmail">user@example.com</p>
+              <p class="user-member-since">
+                Member since <span id="memberSince">2026</span>
+              </p>
+            </div>
 
-          <div class="dashboard-grid">
-            <!-- Sidebar -->
-            <aside class="dashboard-sidebar">
-              <nav class="dashboard-nav">
-                <button
-                  class="dashboard-nav-item active"
-                  data-section="overview"
-                >
-                  <i class="fa-solid fa-home"></i>
-                  <span>Overview</span>
-                </button>
-                <button class="dashboard-nav-item" data-section="orders">
-                  <i class="fa-solid fa-box"></i>
-                  <span>My Orders</span>
-                </button>
-                <button class="dashboard-nav-item" data-section="wishlist">
-                  <i class="fa-solid fa-heart"></i>
-                  <span>Wishlist</span>
-                </button>
-                <button class="dashboard-nav-item" data-section="profile">
-                  <i class="fa-solid fa-user"></i>
-                  <span>Profile</span>
-                </button>
-                <div class="dashboard-nav-divider"></div>
-                <button class="dashboard-nav-item logout" id="dashboardLogout">
-                  <i class="fa-solid fa-sign-out-alt"></i>
-                  <span>Sign Out</span>
-                </button>
-              </nav>
-            </aside>
+            <!-- Navigation -->
+            <nav class="dashboard-nav">
+              <button
+                type="button"
+                class="dashboard-nav-link active"
+                data-section="overview"
+              >
+                <i class="fa-solid fa-grid-2"></i>
+                <span>Overview</span>
+              </button>
+              <button
+                type="button"
+                class="dashboard-nav-link"
+                data-section="orders"
+              >
+                <i class="fa-solid fa-box"></i>
+                <span>Orders</span>
+              </button>
+              <button
+                type="button"
+                class="dashboard-nav-link"
+                data-section="addresses"
+              >
+                <i class="fa-solid fa-location-dot"></i>
+                <span>Addresses</span>
+              </button>
+              <button
+                type="button"
+                class="dashboard-nav-link"
+                data-section="profile"
+              >
+                <i class="fa-solid fa-user-pen"></i>
+                <span>Profile</span>
+              </button>
+              <button
+                type="button"
+                class="dashboard-nav-link logout"
+                id="logoutBtn"
+              >
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Sign Out</span>
+              </button>
+            </nav>
+          </aside>
 
-            <!-- Content -->
-            <div class="dashboard-content">
-              <!-- Overview Section -->
-              <section class="dashboard-section active" id="section-overview">
-                <h2 class="dashboard-section-title">Account Overview</h2>
-                <div class="overview-cards">
-                  <a href="#" class="overview-card" data-go="orders">
-                    <div class="overview-card-icon">
-                      <i class="fa-solid fa-box"></i>
-                    </div>
-                    <div class="overview-card-value" id="totalOrders">0</div>
-                    <div class="overview-card-label">Total Orders</div>
-                  </a>
-                  <a href="wishlist.html" class="overview-card">
-                    <div class="overview-card-icon">
-                      <i class="fa-solid fa-heart"></i>
-                    </div>
-                    <div class="overview-card-value" id="wishlistCount">0</div>
-                    <div class="overview-card-label">Wishlist Items</div>
-                  </a>
-                  <a href="#" class="overview-card" data-go="profile">
-                    <div class="overview-card-icon">
-                      <i class="fa-solid fa-user"></i>
-                    </div>
-                    <div class="overview-card-value">
-                      <i class="fa-solid fa-check"></i>
-                    </div>
-                    <div class="overview-card-label">Profile Complete</div>
-                  </a>
-                </div>
-
-                <h3
-                  style="
-                    font-family: var(--font-display);
-                    font-size: 1.25rem;
-                    margin-bottom: 1rem;
-                  "
-                >
-                  Recent Orders
-                </h3>
-                <div id="recentOrdersContainer">
-                  <div class="empty-state">
-                    <div class="empty-state-icon">
-                      <i class="fa-solid fa-box-open"></i>
-                    </div>
-                    <h4 class="empty-state-title">No orders yet</h4>
-                    <p class="empty-state-text">
-                      When you place orders, they'll appear here.
-                    </p>
-                    <a href="shop.html" class="btn btn-primary"
-                      >Start Shopping</a
-                    >
-                  </div>
-                </div>
-              </section>
-
-              <!-- Orders Section -->
-              <section class="dashboard-section" id="section-orders">
-                <h2 class="dashboard-section-title">My Orders</h2>
-                <div id="allOrdersContainer">
-                  <div class="empty-state">
-                    <div class="empty-state-icon">
-                      <i class="fa-solid fa-box-open"></i>
-                    </div>
-                    <h4 class="empty-state-title">No orders yet</h4>
-                    <p class="empty-state-text">
-                      When you place orders, they'll appear here.
-                    </p>
-                    <a href="shop.html" class="btn btn-primary"
-                      >Start Shopping</a
-                    >
-                  </div>
-                </div>
-              </section>
-
-              <!-- Wishlist Section -->
-              <section class="dashboard-section" id="section-wishlist">
-                <h2 class="dashboard-section-title">My Wishlist</h2>
-                <p style="margin-bottom: 1.5rem; color: var(--text-muted)">
-                  View and manage your saved items.
-                </p>
-                <a href="wishlist.html" class="btn btn-primary">
-                  <i class="fa-solid fa-heart"></i>
-                  View Full Wishlist
+          <!-- Content Area -->
+          <div class="dashboard-content">
+            <!-- Overview Section -->
+            <section class="dashboard-section active" id="section-overview">
+              <div class="dashboard-section-header">
+                <h2 class="dashboard-section-title">
+                  <i class="fa-solid fa-grid-2"></i>
+                  Overview
+                </h2>
+                <a href="shop.html" class="btn btn-primary btn-sm">
+                  <i class="fa-solid fa-bag-shopping"></i>
+                  Shop Now
                 </a>
-              </section>
+              </div>
 
-              <!-- Profile Section -->
-              <section class="dashboard-section" id="section-profile">
-                <h2 class="dashboard-section-title">Profile Settings</h2>
-                <form class="profile-form" id="profileForm">
-                  <div class="profile-field">
-                    <label for="profileName">Full Name</label>
+              <!-- Stats -->
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <div class="stat-icon orders">
+                    <i class="fa-solid fa-box"></i>
+                  </div>
+                  <div class="stat-value" id="totalOrders">0</div>
+                  <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon wishlist">
+                    <i class="fa-solid fa-heart"></i>
+                  </div>
+                  <div class="stat-value" id="wishlistCount">0</div>
+                  <div class="stat-label">Wishlist Items</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon spent">
+                    <i class="fa-solid fa-wallet"></i>
+                  </div>
+                  <div class="stat-value" id="totalSpent">₦0</div>
+                  <div class="stat-label">Total Spent</div>
+                </div>
+                <div class="stat-card">
+                  <div class="stat-icon rewards">
+                    <i class="fa-solid fa-star"></i>
+                  </div>
+                  <div class="stat-value" id="rewardPoints">0</div>
+                  <div class="stat-label">Reward Points</div>
+                </div>
+              </div>
+
+              <!-- Recent Orders -->
+              <h3
+                style="
+                  font-size: var(--fs-lg);
+                  font-weight: 600;
+                  margin-bottom: var(--space-4);
+                "
+              >
+                Recent Orders
+              </h3>
+              <div id="recentOrders">
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <i class="fa-solid fa-box-open"></i>
+                  </div>
+                  <h4 class="empty-state-title">No orders yet</h4>
+                  <p class="empty-state-text">
+                    When you place orders, they'll appear here.
+                  </p>
+                  <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+                </div>
+              </div>
+            </section>
+
+            <!-- Orders Section -->
+            <section class="dashboard-section" id="section-orders">
+              <div class="dashboard-section-header">
+                <h2 class="dashboard-section-title">
+                  <i class="fa-solid fa-box"></i>
+                  My Orders
+                </h2>
+              </div>
+              <div class="orders-list" id="allOrders">
+                <div class="empty-state">
+                  <div class="empty-state-icon">
+                    <i class="fa-solid fa-box-open"></i>
+                  </div>
+                  <h4 class="empty-state-title">No orders yet</h4>
+                  <p class="empty-state-text">
+                    When you place orders, they'll appear here.
+                  </p>
+                  <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+                </div>
+              </div>
+            </section>
+
+            <!-- Addresses Section -->
+            <section class="dashboard-section" id="section-addresses">
+              <div class="dashboard-section-header">
+                <h2 class="dashboard-section-title">
+                  <i class="fa-solid fa-location-dot"></i>
+                  Saved Addresses
+                </h2>
+                <button
+                  type="button"
+                  class="btn btn-outline btn-sm"
+                  id="addAddressBtn"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                  Add Address
+                </button>
+              </div>
+              <div class="addresses-grid" id="addressesGrid">
+                <div class="empty-state" style="grid-column: 1 / -1">
+                  <div class="empty-state-icon">
+                    <i class="fa-solid fa-map-marker-alt"></i>
+                  </div>
+                  <h4 class="empty-state-title">No saved addresses</h4>
+                  <p class="empty-state-text">
+                    Add an address for faster checkout.
+                  </p>
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="addFirstAddressBtn"
+                  >
+                    Add Address
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section class="dashboard-section" id="section-profile">
+              <div class="dashboard-section-header">
+                <h2 class="dashboard-section-title">
+                  <i class="fa-solid fa-user-pen"></i>
+                  Edit Profile
+                </h2>
+              </div>
+              <form class="profile-form" id="profileForm">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profileFirstName">First Name</label>
                     <input
                       type="text"
-                      id="profileName"
-                      name="fullName"
-                      placeholder="Your name"
+                      id="profileFirstName"
+                      placeholder="Enter first name"
                     />
                   </div>
-                  <div class="profile-field">
-                    <label for="profileEmail">Email Address</label>
+                  <div class="form-group">
+                    <label for="profileLastName">Last Name</label>
                     <input
-                      type="email"
-                      id="profileEmail"
-                      name="email"
-                      disabled
+                      type="text"
+                      id="profileLastName"
+                      placeholder="Enter last name"
                     />
                   </div>
-                  <div class="profile-field">
-                    <label for="profilePhone">Phone Number</label>
-                    <input
-                      type="tel"
-                      id="profilePhone"
-                      name="phone"
-                      placeholder="+234 xxx xxx xxxx"
-                    />
+                </div>
+                <div class="form-group">
+                  <label for="profileEmail">Email Address</label>
+                  <input type="email" id="profileEmail" disabled />
+                </div>
+                <div class="form-group">
+                  <label for="profilePhone">Phone Number</label>
+                  <input
+                    type="tel"
+                    id="profilePhone"
+                    placeholder="+234 800 000 0000"
+                  />
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profileDob">Date of Birth</label>
+                    <input type="date" id="profileDob" />
                   </div>
-                  <div class="profile-actions">
-                    <button type="submit" class="btn btn-primary">
-                      Save Changes
-                    </button>
+                  <div class="form-group">
+                    <label for="profileGender">Gender</label>
+                    <select id="profileGender">
+                      <option value="">Prefer not to say</option>
+                      <option value="female">Female</option>
+                      <option value="male">Male</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
-                </form>
-              </section>
-            </div>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                  <i class="fa-solid fa-save"></i>
+                  Save Changes
+                </button>
+              </form>
+            </section>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="site-footer">
-      <div class="footer-container">
-        <div class="footer-main">
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
           <div class="footer-brand">
-            <a href="index.html" class="footer-logo">
-              <span class="brand-logo"><i class="fa-solid fa-heart"></i></span>
-              <span class="brand-name">Lingerie by Sisioyin</span>
+            <a
+              href="index.html"
+              class="logo"
+              style="margin-bottom: var(--space-4)"
+            >
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline"
+                >Lingerie by Sisioyin</span
+              >
             </a>
-            <p class="footer-tagline">
-              Luxe essentials defined by comfort and confidence.
+            <p>
+              Luxe essentials defined by comfort and confidence. Premium
+              lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" class="social-link" aria-label="Instagram"
+              <a href="#" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" class="social-link" aria-label="TikTok"
+              <a href="#" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
-              <a href="#" class="social-link" aria-label="WhatsApp"
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                aria-label="WhatsApp"
                 ><i class="fa-brands fa-whatsapp"></i
               ></a>
             </div>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Shop</h4>
+          <div>
+            <h4 class="footer-title">Shop</h4>
             <nav class="footer-links">
               <a href="shop.html">All Products</a>
               <a href="shop.html?category=Lingerie">Lingerie</a>
               <a href="shop.html?category=Loungewear">Loungewear</a>
-              <a href="shop.html?category=Underwear">Underwear</a>
               <a href="shop.html?is_new=true">New Arrivals</a>
             </nav>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Help</h4>
+          <div>
+            <h4 class="footer-title">Help</h4>
             <nav class="footer-links">
               <a href="dashboard.html">My Account</a>
               <a href="faq.html">FAQs</a>
               <a href="size.html">Size Guide</a>
-              <a href="terms.html">Terms of Service</a>
-              <a href="privacy.html">Privacy Policy</a>
-              <a href="https://wa.me/2349033344860" target="_blank"
-                >Contact Us</a
-              >
+              <a href="contact.html">Contact Us</a>
             </nav>
           </div>
-
-          <div class="footer-links-group">
-            <h4 class="footer-heading">Newsletter</h4>
-            <p class="footer-newsletter-text">
-              Subscribe for exclusive offers and updates.
-            </p>
-            <form class="newsletter-form" id="newsletterForm">
-              <input type="email" placeholder="Enter your email" required />
-              <button type="submit" class="btn btn-primary">
-                <i class="fa-solid fa-paper-plane"></i>
-              </button>
-            </form>
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+            </nav>
           </div>
         </div>
-
         <div class="footer-bottom">
-          <div class="footer-bottom-left">
-            <p>
-              &copy; <span id="currentYear"></span> Lingerie by Sisioyin. All
-              rights reserved.
-            </p>
-          </div>
-          <div class="theme-toggle" id="themeToggle">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            rights reserved.
+          </p>
+          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              title="Light Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              title="System Default"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
             <button
               type="button"
-              class="theme-btn"
+              class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              title="Dark Mode"
+              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
-          </div>
-          <div class="footer-bottom-right">
-            <a href="terms.html">Terms</a>
-            <a href="privacy.html">Privacy</a>
           </div>
         </div>
       </div>
     </footer>
 
-    <!-- WhatsApp Live Chat Widget -->
-    <div class="whatsapp-widget" id="whatsappWidget">
-      <div class="whatsapp-popup">
-        <button
-          type="button"
-          class="whatsapp-popup-close"
-          id="whatsappClose"
-          aria-label="Close"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <div class="whatsapp-popup-header">
-          <div class="whatsapp-popup-avatar">
-            <i class="fa-brands fa-whatsapp"></i>
-          </div>
-          <div class="whatsapp-popup-info">
-            <h4>Lingerie by Sisioyin</h4>
-            <p>Typically replies within minutes</p>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       CART DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="shop.html" class="btn btn-primary">Start Shopping</a>
           </div>
         </div>
-        <div class="whatsapp-popup-body">
-          <p>
-            👋 Hi there! Need help finding the perfect lingerie? Chat with us on
-            WhatsApp!
-          </p>
+        <div class="cd-footer" id="cartDrawerFooter" style="display: none">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="checkout.html" class="cd-checkout-btn"
+            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
+          >
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
         </div>
-        <a
-          href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-          target="_blank"
-          class="whatsapp-popup-btn"
-        >
-          <i class="fa-brands fa-whatsapp"></i>
-          Start Chat
-        </a>
       </div>
-      <button
-        type="button"
-        class="whatsapp-fab"
-        id="whatsappFab"
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       WHATSAPP WIDGET
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="whatsapp-float">
+      <span class="whatsapp-tooltip">Chat with us!</span>
+      <a
+        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
+        target="_blank"
+        class="whatsapp-float-btn"
         aria-label="Chat on WhatsApp"
       >
         <i class="fa-brands fa-whatsapp"></i>
-      </button>
+      </a>
     </div>
 
-    <!-- Cart Drawer -->
-    <div class="cart-drawer" id="cartDrawer">
-      <div class="cart-drawer-header">
-        <h3>Your Bag</h3>
-        <button type="button" class="cart-close" id="cartClose">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
-      <div class="cart-drawer-body" id="cartDrawerBody">
-        <div class="cart-empty">
-          <i class="fa-solid fa-bag-shopping"></i>
-          <p>Your bag is empty</p>
-          <a href="shop.html" class="btn btn-primary">Shop Now</a>
-        </div>
-      </div>
-      <div
-        class="cart-drawer-footer"
-        id="cartDrawerFooter"
-        style="display: none"
-      >
-        <div class="cart-subtotal">
-          <span>Subtotal</span>
-          <span id="cartSubtotal">₦0</span>
-        </div>
-        <a href="cart.html" class="btn btn-primary btn-block">View Cart</a>
-      </div>
-    </div>
-    <div class="page-overlay" id="pageOverlay"></div>
-
-    <!-- Auth Modal -->
-    <div class="auth-modal" id="authModal">
-      <div class="auth-modal-content auth-box">
-        <button type="button" class="auth-close" id="authClose">
-          <i class="fa-solid fa-times"></i>
-        </button>
-
-        <div class="auth-brand">
-          <h1 class="brand-logo"><i class="fa-solid fa-heart"></i> Welcome</h1>
-        </div>
-
-        <div class="auth-tabs" id="authTabs">
-          <button type="button" class="tab-btn active" data-tab="login">
-            Login
-          </button>
-          <button type="button" class="tab-btn" data-tab="signup">
-            Register
-          </button>
-        </div>
-
-        <!-- Login Form -->
-        <form class="auth-form active" id="loginForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              type="email"
-              id="loginEmail"
-              name="email"
-              placeholder=" "
-              autocomplete="email"
-              required
-            />
-            <label for="loginEmail">Email Address</label>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="loginPassword"
-              name="password"
-              placeholder=" "
-              autocomplete="current-password"
-              required
-            />
-            <label for="loginPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#loginPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="auth-field recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-            ></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
-            Sign In
-          </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <button
-            type="button"
-            class="btn btn-outline btn-block google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
-          </button>
-        </form>
-
-        <!-- Signup Form -->
-        <form class="auth-form" id="signupForm" novalidate>
-          <div class="field float has-icon">
-            <i class="fa-regular fa-user icon"></i>
-            <input
-              type="text"
-              id="signupName"
-              name="fullName"
-              placeholder=" "
-              autocomplete="name"
-              required
-            />
-            <label for="signupName">Full Name</label>
-          </div>
-
-          <div class="field float has-icon">
-            <i class="fa-regular fa-envelope icon"></i>
-            <input
-              type="email"
-              id="signupEmail"
-              name="email"
-              placeholder=" "
-              autocomplete="email"
-              required
-            />
-            <label for="signupEmail">Email Address</label>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="signupPassword"
-              name="password"
-              placeholder=" "
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
-            <label for="signupPassword">Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupPassword"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="field float has-icon has-trailing">
-            <i class="fa-solid fa-lock icon"></i>
-            <input
-              type="password"
-              id="signupConfirm"
-              name="confirmPassword"
-              placeholder=" "
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
-            <label for="signupConfirm">Confirm Password</label>
-            <button
-              type="button"
-              class="pw-toggle"
-              data-target="#signupConfirm"
-              aria-label="Toggle password"
-            >
-              <i class="fa-regular fa-eye"></i>
-            </button>
-          </div>
-
-          <div class="auth-field recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
-            ></div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-block">
-            Create Account
-          </button>
-
-          <div class="auth-divider"><span>or continue with</span></div>
-
-          <button
-            type="button"
-            class="btn btn-outline btn-block google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
-          </button>
-        </form>
-
-        <p class="auth-footer-text">
-          By continuing, you agree to our
-          <a href="terms.html">Terms of Service</a> and
-          <a href="privacy.html">Privacy Policy</a>
-        </p>
-      </div>
-    </div>
-
-    <!-- Search Overlay -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SEARCH OVERLAY
+       ═══════════════════════════════════════════════════════════════════════ -->
     <div class="search-overlay" id="searchOverlay">
       <div class="search-container">
-        <div class="search-header">
-          <div class="search-input-wrapper">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search for lingerie..."
-              autocomplete="off"
-            />
-            <span class="search-shortcut">Esc</span>
-          </div>
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for products..."
+            autocomplete="off"
+          />
           <button
             type="button"
             class="search-close"
@@ -680,26 +1413,205 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        <div class="search-results" id="searchResults">
-          <div class="search-empty">
-            <i class="fa-solid fa-magnifying-glass"></i>
+        <div
+          class="search-results"
+          id="searchResults"
+          style="
+            background: var(--bg-surface);
+            border-radius: var(--radius-xl);
+            margin-top: var(--space-4);
+            max-height: 400px;
+            overflow-y: auto;
+          "
+        >
+          <div
+            style="
+              padding: var(--space-8);
+              text-align: center;
+              color: var(--text-muted);
+            "
+          >
+            <i
+              class="fa-solid fa-magnifying-glass"
+              style="font-size: var(--text-2xl); margin-bottom: var(--space-2)"
+            ></i>
             <p>Start typing to search products...</p>
-            <span class="search-tip">Try "bra", "panty", or "bodysuit"</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- WhatsApp Widget -->
-    <a
-      href="https://wa.me/2349033344860"
-      class="whatsapp-widget"
-      target="_blank"
-      aria-label="Chat on WhatsApp"
-    >
-      <i class="fa-brands fa-whatsapp"></i>
-    </a>
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       AUTH MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="authBackdrop"></div>
+    <div class="modal auth-modal" id="authModal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-heart" style="color: var(--clr-primary)"></i>
+          Welcome
+        </h3>
+        <button
+          type="button"
+          class="modal-close"
+          id="authClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="auth-tab active" data-tab="login">
+            Login
+          </button>
+          <button type="button" class="auth-tab" data-tab="signup">
+            Register
+          </button>
+        </div>
 
+        <form class="auth-form active" id="loginForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Sign In
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full Name</label>
+            <input
+              type="text"
+              id="signupName"
+              name="fullName"
+              class="form-input"
+              placeholder="Enter your full name"
+              autocomplete="name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email Address</label>
+            <input
+              type="email"
+              id="signupEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
+            <input
+              type="password"
+              id="signupPassword"
+              name="password"
+              class="form-input"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupConfirm"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              id="signupConfirm"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Create Account
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <p
+          style="
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: var(--space-4);
+          "
+        >
+          By continuing, you agree to our
+          <a href="terms.html" style="color: var(--clr-primary)">Terms</a> and
+          <a href="privacy.html" style="color: var(--clr-primary)"
+            >Privacy Policy</a
+          >
+        </p>
+      </div>
+    </div>
+
+    <!-- Scripts -->
     <script src="assets/js/recaptcha.js"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
@@ -715,7 +1627,6 @@
     <script defer src="assets/js/supabase.js"></script>
     <script defer src="assets/js/app.js"></script>
     <script defer src="assets/js/auth.js"></script>
-    <script defer src="assets/js/analytics.js"></script>
     <script defer src="assets/js/dashboard.js"></script>
   </body>
 </html>
