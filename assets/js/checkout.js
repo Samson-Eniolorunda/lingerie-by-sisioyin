@@ -371,9 +371,9 @@
 
     // Get Monnify config from APP_CONFIG or use test keys
     const monnifyConfig = window.APP_CONFIG?.MONNIFY || {
-      apiKey: "MK_TEST_XXXXXXXXXX", // Replace with your Monnify API key
-      contractCode: "XXXXXXXXXX", // Replace with your Monnify contract code
-      isTestMode: true,
+      apiKey: "MK_TEST_XXXXXXXXXX", // fallback — should come from APP_CONFIG
+      contractCode: "XXXXXXXXXX",
+      isTestMode: false,
     };
 
     // Determine payment methods based on selection
@@ -562,10 +562,14 @@
 
     // Bind data-attribute section toggles (replaces inline onclick handlers)
     document.querySelectorAll("[data-toggle-section]").forEach((el) => {
-      el.addEventListener("click", () => toggleSection(el.dataset.toggleSection));
+      el.addEventListener("click", () =>
+        toggleSection(el.dataset.toggleSection),
+      );
     });
     document.querySelectorAll("[data-complete-section]").forEach((el) => {
-      el.addEventListener("click", () => completeSection(el.dataset.completeSection));
+      el.addEventListener("click", () =>
+        completeSection(el.dataset.completeSection),
+      );
     });
   }
 

@@ -77,7 +77,11 @@
     return `<div class="track-timeline">${STEPS.map((step, i) => {
       const done = i <= idx;
       const active = i === idx;
-      const cls = done ? (active ? "active" : "done") : "upcoming";
+      const cls = done
+        ? active && step.key !== "delivered"
+          ? "active"
+          : "done"
+        : "upcoming";
       let timeStr = "";
       if (i === 0 && orderDate) timeStr = fmtDate(createdAt);
       else if (done && orderDate) {
@@ -139,7 +143,7 @@
       <div class="track-not-found">
         <i class="fa-solid fa-box-open"></i>
         <p>No order found for "<strong>${query}</strong>"</p>
-        <p style="font-size:13px;margin-top:8px;">Check your order number or try your email address.</p>
+        <p style="font-size:13px;margin-top:8px;">Double-check your order number and try again.</p>
       </div>`;
   }
 
@@ -171,27 +175,8 @@
         error = res.error;
       }
 
-      // Try by email if not found
-      if (!data && query.includes("@")) {
-        const res = await c
-          .from("orders")
-          .select(
-            "id, order_number, status, created_at, items, total, shipping_cost, subtotal",
-          )
-          .eq("customer_email", query.toLowerCase().trim())
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        data = res.data;
-        error = res.error;
-      }
-
       // Try by UUID prefix
-      if (
-        !data &&
-        !query.includes("@") &&
-        !query.toUpperCase().startsWith("LBS")
-      ) {
+      if (!data && !query.toUpperCase().startsWith("LBS")) {
         const res = await c
           .from("orders")
           .select(

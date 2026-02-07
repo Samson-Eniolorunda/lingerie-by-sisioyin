@@ -56,6 +56,18 @@
     }
   })();
 
+  /* ── Load Google Maps Places API if key is configured ── */
+  (function loadGoogleMaps() {
+    const key = window.APP_CONFIG?.GOOGLE_MAPS_API_KEY;
+    if (!key || document.querySelector('script[src*="maps.googleapis.com"]'))
+      return;
+    const s = document.createElement("script");
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places`;
+    s.async = true;
+    s.defer = true;
+    document.head.appendChild(s);
+  })();
+
   /* ── Helpers ──────────────────────────────── */
   function fmtPrice(n) {
     return new Intl.NumberFormat("en-NG", {
@@ -452,6 +464,34 @@
     attachSuggestions(overlay.querySelector("#addrCity"), NG_CITIES);
     attachSuggestions(overlay.querySelector("#addrState"), NG_STATES);
 
+    // Google Places Autocomplete for street address (if API loaded)
+    try {
+      if (window.google?.maps?.places) {
+        const streetInput = overlay.querySelector("#addrStreet");
+        const autocomplete = new google.maps.places.Autocomplete(streetInput, {
+          componentRestrictions: { country: "ng" },
+          fields: ["address_components", "formatted_address"],
+          types: ["address"],
+        });
+        autocomplete.addListener("place_changed", () => {
+          const place = autocomplete.getPlace();
+          if (!place.address_components) return;
+          streetInput.value = place.formatted_address || "";
+          let city = "",
+            state = "";
+          place.address_components.forEach((c) => {
+            if (c.types.includes("locality")) city = c.long_name;
+            if (c.types.includes("administrative_area_level_1"))
+              state = c.long_name;
+          });
+          if (city) overlay.querySelector("#addrCity").value = city;
+          if (state) overlay.querySelector("#addrState").value = state;
+        });
+      }
+    } catch (_) {
+      /* Google Places not available */
+    }
+
     const closeModal = () => {
       overlay.classList.remove("active");
       document.body.style.overflow = "";
@@ -576,7 +616,12 @@
         ${TRACKING_STEPS.map((step, i) => {
           const done = i <= idx;
           const active = i === idx;
-          const cls = done ? (active ? "active" : "done") : "upcoming";
+          // Delivered step should show as "done" (green), not "active" (pink)
+          const cls = done
+            ? active && step.key !== "delivered"
+              ? "active"
+              : "done"
+            : "upcoming";
           let timeStr = "";
           if (i === 0 && orderDate) {
             timeStr = fmtDate(order.created_at);
@@ -654,6 +699,25 @@
             <div class="track-summary-row"><span>Shipping</span><span>${fmtPrice(o.shipping_cost || o.shipping || 0)}</span></div>
             <div class="track-summary-row total"><span>Total</span><span>${fmtPrice(o.total || 0)}</span></div>
           </div>
+
+          ${
+            status === "delivered"
+              ? `
+          <div class="track-section track-review-section">
+            <h4><i class="fa-solid fa-star"></i> Review Your Purchase</h4>
+            <p style="font-size:var(--text-sm);color:var(--text-muted);margin-bottom:var(--space-3);">Share your experience with the products you received.</p>
+            ${items
+              .map(
+                (it) => `
+              <button type="button" class="track-review-btn" data-review-product="${it.id || ""}" data-review-name="${(it.name || "Item").replace(/"/g, "&quot;")}">
+                <i class="fa-solid fa-pen"></i> Review "${it.name || "Item"}"
+              </button>
+            `,
+              )
+              .join("")}
+          </div>`
+              : ""
+          }
         </div>
       </div>`;
 
@@ -669,6 +733,18 @@
     modal.querySelector(".track-close").addEventListener("click", close);
     modal.addEventListener("click", (e) => {
       if (e.target === modal) close();
+    });
+
+    // Handle review button clicks for delivered orders
+    modal.querySelectorAll(".track-review-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const productId = btn.dataset.reviewProduct;
+        if (productId) {
+          close();
+          // Navigate to shop with product modal
+          window.location.href = `/shop?product=${productId}`;
+        }
+      });
     });
   }
 

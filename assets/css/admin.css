@@ -6277,6 +6277,15 @@ html[data-theme="dark"] {
     margin-bottom: 4px;
     font-size: var(--text-xs);
   }
+
+  /* Fix description touching element above it */
+  .form-row + .form-group,
+  .form-section .form-group + .form-group {
+    margin-top: var(--space-4);
+  }
+  .form-section .form-group .form-textarea {
+    margin-top: var(--space-1);
+  }
 }
 
 /* ── #20: Admin auth form — reduce spacing + no terms cookie ── */
@@ -6577,4 +6586,362 @@ select {
   padding-right: 36px;
   appearance: none;
   -webkit-appearance: none;
+}
+
+/* =============================================================================
+   Issue #13: Analytics page — enhanced design + mobile responsive
+   ============================================================================= */
+
+/* Enhanced setup cards */
+.analytics-setup-card {
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+.analytics-setup-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* Enhanced stat boxes */
+#analyticsStats .stat-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  text-align: center;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+#analyticsStats .stat-box:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+#analyticsStats .stat-box-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--clr-primary), #ec4899);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  margin: 0 auto var(--space-3);
+}
+#analyticsStats .stat-box-value {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+#analyticsStats .stat-box-label {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Enhanced chart cards */
+.analytics-chart-card {
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+.analytics-chart-card h4 {
+  font-size: var(--text-base);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Improved bar chart */
+.bar-fill {
+  background: linear-gradient(180deg, var(--clr-primary), #ec4899);
+  border-radius: 6px 6px 0 0;
+}
+.bar-col:hover .bar-fill {
+  background: linear-gradient(180deg, #ec4899, var(--clr-primary));
+  opacity: 1;
+}
+.bar-tooltip {
+  font-size: 11px;
+  background: var(--text-primary);
+  color: var(--bg-surface);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  top: -14px;
+}
+
+/* Improved donut */
+.donut-ring {
+  width: 200px;
+  height: 200px;
+  box-shadow: var(--shadow-sm);
+}
+.donut-center {
+  width: 120px;
+  height: 120px;
+}
+.donut-total {
+  font-size: 1.75rem;
+}
+
+/* Table improvements */
+.analytics-table-wrap .table tr:hover td {
+  background: var(--bg-surface-alt);
+}
+.analytics-table-wrap .table th {
+  background: var(--bg-surface-alt);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+/* Analytics mobile responsive */
+@media (max-width: 768px) {
+  .analytics-setup {
+    grid-template-columns: 1fr;
+  }
+  .analytics-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .analytics-charts {
+    grid-template-columns: 1fr;
+  }
+  .analytics-chart-card {
+    padding: var(--space-4);
+  }
+  .analytics-chart-card h4 {
+    font-size: var(--text-sm);
+  }
+}
+
+@media (max-width: 480px) {
+  .analytics-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+  }
+  #analyticsStats .stat-box {
+    padding: var(--space-3);
+  }
+  #analyticsStats .stat-box-value {
+    font-size: var(--text-lg);
+  }
+  #analyticsStats .stat-box-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+  .analytics-setup-card {
+    padding: var(--space-3);
+    gap: var(--space-3);
+  }
+  .analytics-setup-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  .analytics-bar-chart {
+    height: 160px;
+  }
+  .donut-ring {
+    width: 160px;
+    height: 160px;
+  }
+  .donut-center {
+    width: 90px;
+    height: 90px;
+  }
+  .donut-total {
+    font-size: 1.25rem;
+  }
+}
+
+/* =============================================================================
+   Issue #14: Reviews page — enhanced design + mobile responsive
+   ============================================================================= */
+
+/* Enhanced review stats */
+.reviews-stats .stat-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+  text-align: center;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+.reviews-stats .stat-box:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.reviews-stats .stat-box strong {
+  font-size: var(--text-2xl);
+  background: linear-gradient(135deg, var(--clr-primary), #ec4899);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Enhanced review cards */
+.review-card {
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s;
+}
+.review-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.review-header {
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.review-meta {
+  flex-wrap: wrap;
+}
+
+.review-rating {
+  font-size: var(--text-lg);
+  letter-spacing: 2px;
+}
+
+.review-text {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--text-secondary);
+  padding: var(--space-3);
+  background: var(--bg-surface-alt);
+  border-radius: var(--radius-lg);
+  margin: var(--space-3) 0;
+}
+
+.review-product {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: rgba(190, 24, 93, 0.08);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  color: var(--clr-primary);
+  font-weight: 500;
+}
+
+.review-actions .btn-sm {
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  padding: 6px 14px;
+  transition: all 0.2s;
+}
+
+/* Reviews mobile responsive */
+@media (max-width: 768px) {
+  .reviews-stats .stats-row {
+    gap: var(--space-2);
+  }
+  .reviews-stats .stat-box {
+    min-width: 80px;
+    padding: var(--space-3);
+  }
+  .reviews-stats .stat-box strong {
+    font-size: var(--text-lg);
+  }
+  .reviews-stats .stat-box span {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .review-card {
+    padding: var(--space-3);
+  }
+  .review-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .review-meta {
+    gap: var(--space-2);
+  }
+  .review-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .review-actions .btn-sm {
+    width: 100%;
+    justify-content: center;
+  }
+  .review-text {
+    padding: var(--space-2);
+  }
+  .reviews-stats .stats-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .reviews-stats .stat-box {
+    flex: 1 1 calc(50% - var(--space-2));
+    min-width: 0;
+  }
+}
+
+/* =============================================================================
+   Issue #15: Export dropdown menu
+   ============================================================================= */
+.export-dropdown {
+  position: relative;
+}
+.export-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  min-width: 200px;
+  padding: var(--space-2);
+  z-index: 1000;
+  animation: exportFadeIn 0.15s ease;
+}
+@keyframes exportFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.export-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+.export-option:hover {
+  background: var(--bg-surface-alt);
+}
+.export-option i {
+  width: 18px;
+  text-align: center;
+  color: var(--clr-primary);
+  font-size: var(--text-sm);
 }

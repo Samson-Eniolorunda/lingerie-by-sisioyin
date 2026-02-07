@@ -7592,19 +7592,22 @@ html[data-theme="dark"] .newsletter-btn:hover {
   top: var(--space-3);
   right: var(--space-3);
   z-index: 2;
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(4px);
   border: none;
-  width: 34px; height: 34px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #fff;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;
 }
 .auth-modal-close:hover {
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.3);
 }
 
 /* Hero section */
@@ -7620,14 +7623,21 @@ html[data-theme="dark"] .newsletter-btn:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 70% 20%, rgba(255,255,255,0.15) 0%, transparent 60%);
+  background: radial-gradient(
+    circle at 70% 20%,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
 }
 .auth-hero-icon {
-  width: 60px; height: 60px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.5rem;
   margin-bottom: var(--space-2);
   position: relative;
@@ -7668,7 +7678,10 @@ html[data-theme="dark"] .newsletter-btn:hover {
   transition: color 0.25s;
   position: relative;
   z-index: 1;
-  display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 .auth-tab:hover {
   color: var(--clr-text, var(--text-primary));
@@ -7678,7 +7691,9 @@ html[data-theme="dark"] .newsletter-btn:hover {
 }
 .auth-tab-indicator {
   position: absolute;
-  top: 4px; bottom: 4px; left: 4px;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
   width: calc(50% - 4px);
   background: linear-gradient(135deg, var(--clr-primary), var(--clr-accent));
   border-radius: var(--radius-sm);
@@ -7721,7 +7736,9 @@ html[data-theme="dark"] .newsletter-btn:hover {
   background: var(--clr-bg);
   color: var(--clr-text);
   font-size: 0.9rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .auth-input-wrap .form-input:focus,
 .auth-input-wrap input:focus {
@@ -7744,8 +7761,14 @@ html[data-theme="dark"] .newsletter-btn:hover {
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s,
+    opacity 0.2s;
 }
 .auth-submit-btn:not(.btn-disabled):hover {
   transform: translateY(-1px);
@@ -7765,8 +7788,13 @@ html[data-theme="dark"] .newsletter-btn:hover {
   font-weight: 500;
   font-size: 0.9rem;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
-  transition: border-color 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 .auth-google-btn:hover {
   border-color: var(--clr-primary);
@@ -15826,7 +15854,9 @@ html[data-theme="dark"] .dash-addr-card {
   padding: var(--space-4);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.35s, visibility 0.35s;
+  transition:
+    opacity 0.35s,
+    visibility 0.35s;
 }
 
 .consent-overlay.visible {
@@ -15847,8 +15877,14 @@ html[data-theme="dark"] .dash-addr-card {
 }
 
 @keyframes consentSlideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .consent-icon {
@@ -15905,7 +15941,9 @@ html[data-theme="dark"] .dash-addr-card {
   color: #fff;
 }
 
-.consent-btn-accept:hover { opacity: 0.9; }
+.consent-btn-accept:hover {
+  opacity: 0.9;
+}
 
 .consent-btn-essential {
   background: var(--bg-surface);
@@ -15926,7 +15964,10 @@ html[data-theme="dark"] .dash-addr-card {
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease;
+  transition:
+    max-height 0.35s ease,
+    opacity 0.25s ease,
+    margin 0.25s ease;
   margin: 0;
   padding: 0;
 }
@@ -15949,12 +15990,20 @@ html[data-theme="dark"] .dash-addr-card {
   height: 100%;
   width: 0;
   border-radius: 4px;
-  transition: width 0.3s, background 0.3s;
+  transition:
+    width 0.3s,
+    background 0.3s;
 }
 
-.pw-strength-fill.weak   { background: #ef4444; }
-.pw-strength-fill.fair    { background: #f59e0b; }
-.pw-strength-fill.strong  { background: #22c55e; }
+.pw-strength-fill.weak {
+  background: #ef4444;
+}
+.pw-strength-fill.fair {
+  background: #f59e0b;
+}
+.pw-strength-fill.strong {
+  background: #22c55e;
+}
 
 .pw-rules {
   list-style: none;
@@ -15986,7 +16035,7 @@ html[data-theme="dark"] .dash-addr-card {
 
 .pw-rule.met i {
   color: var(--clr-success, #22c55e);
-}/* =============================================================================
+} /* =============================================================================
    TRACK ORDER PAGE
    ============================================================================= */
 
@@ -16116,7 +16165,12 @@ html[data-theme="dark"] .dash-addr-card {
 
 /* ── #3: Category card text — ensure visibility on all images ── */
 .category-card__overlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0,0,0,0.2) 50%, transparent 100%);
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.75) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -16210,7 +16264,7 @@ html[data-theme="dark"] .dash-addr-card {
 
 .dash-order-status:hover {
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Track modal light-mode fix */
@@ -16280,9 +16334,9 @@ select,
   -moz-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 14px;
-  padding-right: 36px !important;
+  background-position: right 16px center;
+  background-size: 12px;
+  padding-right: 40px !important;
 }
 
 /* #11: Form group Phone / DOB / Gender — ensure consistent spacing */
@@ -16367,7 +16421,8 @@ select,
 
   /* Track page */
   .track-page {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-3) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-3)
+      var(--space-6);
   }
 
   .track-search-card {
@@ -16462,19 +16517,30 @@ html[data-theme="dark"] .qv-color {
   opacity: 0.6;
 }
 .addr-modal-icon {
-  width: 56px; height: 56px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--clr-primary), var(--clr-accent));
   color: #fff;
-  display: inline-flex; align-items: center; justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.4rem;
 }
 .addr-modal-close {
-  position: absolute; top: var(--space-3); right: var(--space-3);
-  background: none; border: none; font-size: 1.2rem;
-  cursor: pointer; opacity: 0.5; color: inherit;
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.5;
+  color: inherit;
 }
-.addr-modal-close:hover { opacity: 1; }
+.addr-modal-close:hover {
+  opacity: 1;
+}
 .addr-modal-body {
   padding: 0 var(--space-5) var(--space-5);
 }
@@ -16520,12 +16586,14 @@ html[data-theme="dark"] .qv-color {
 }
 .addr-suggestions {
   position: absolute;
-  left: 0; right: 0; top: 100%;
+  left: 0;
+  right: 0;
+  top: 100%;
   z-index: 100;
   background: var(--clr-surface);
   border: 1px solid var(--clr-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   list-style: none;
   margin: 4px 0 0;
   padding: 4px;
@@ -16554,7 +16622,9 @@ html[data-theme="dark"] .qv-color {
   font-weight: 600;
   font-size: 0.95rem;
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 .addr-save-btn:hover {
   transform: translateY(-1px);
@@ -16604,11 +16674,14 @@ html[data-theme="dark"] .qv-color {
   box-shadow: 0 0 0 3px rgba(var(--clr-primary-rgb, 139, 92, 246), 0.12);
 }
 .saved-addr-chip-icon {
-  width: 32px; height: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--clr-primary), var(--clr-accent));
   color: #fff;
-  display: flex; align-items: center; justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.75rem;
   flex-shrink: 0;
 }
@@ -16622,9 +16695,15 @@ html[data-theme="dark"] .qv-color {
 }
 
 @media (max-width: 600px) {
-  .addr-row { grid-template-columns: 1fr; }
-  .saved-addr-list { flex-direction: column; }
-  .saved-addr-chip { width: 100%; }
+  .addr-row {
+    grid-template-columns: 1fr;
+  }
+  .saved-addr-list {
+    flex-direction: column;
+  }
+  .saved-addr-chip {
+    width: 100%;
+  }
 }
 
 /* =============================================================================
@@ -16795,8 +16874,13 @@ html[data-theme="dark"] .wishlist-hero-subtitle {
 }
 
 @keyframes scrollHintPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 /* Issue #9: Chart tabs — arrange nicely on mobile */
@@ -17063,7 +17147,11 @@ html[data-theme="dark"] .track-summary {
 
 /* Auth hero — gradient is fine, ensure text is white */
 .auth-hero {
-  background: linear-gradient(135deg, var(--clr-primary), var(--clr-rose, #ec4899));
+  background: linear-gradient(
+    135deg,
+    var(--clr-primary),
+    var(--clr-rose, #ec4899)
+  );
 }
 
 .auth-hero-icon {
@@ -17282,7 +17370,9 @@ html[data-theme="dark"] .footer-links a:hover {
   }
 
   .logo-text {
-    font-size: var(--text-sm);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
 
   .nav {
@@ -17343,7 +17433,8 @@ html[data-theme="dark"] .footer-links a:hover {
 /* Shop page responsive */
 @media (max-width: 768px) {
   .shop-hero {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4)
+      var(--space-6);
   }
 
   .shop-filters {
@@ -17420,7 +17511,8 @@ html[data-theme="dark"] .footer-links a:hover {
   }
 
   .contact-hero {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4)
+      var(--space-6);
   }
 
   .contact-hero h1 {
@@ -17431,7 +17523,8 @@ html[data-theme="dark"] .footer-links a:hover {
 /* FAQ responsive */
 @media (max-width: 768px) {
   .faq-hero {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4)
+      var(--space-6);
   }
 
   .faq-hero-title {
@@ -17457,7 +17550,8 @@ html[data-theme="dark"] .footer-links a:hover {
 /* Legal pages responsive */
 @media (max-width: 768px) {
   .legal-hero {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4)
+      var(--space-6);
   }
 
   .legal-hero-title {
@@ -17472,7 +17566,8 @@ html[data-theme="dark"] .footer-links a:hover {
 /* Size guide responsive */
 @media (max-width: 768px) {
   .size-hero {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4)
+      var(--space-6);
   }
 
   .size-hero-title {
@@ -17483,7 +17578,8 @@ html[data-theme="dark"] .footer-links a:hover {
 /* Wishlist responsive */
 @media (max-width: 768px) {
   .wishlist-hero {
-    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4)
+      var(--space-6);
   }
 
   .wishlist-hero-title {
@@ -17720,13 +17816,19 @@ html[data-theme="dark"] .footer-links a:hover {
    ============================================================================= */
 
 /* Initial visibility states (replacing style="display:none") */
-.u-hidden { display: none; }
+.u-hidden {
+  display: none;
+}
 
 /* Footer logo spacing (replacing style="margin-bottom: var(--space-4)") */
-.footer .logo { margin-bottom: var(--space-4); }
+.footer .logo {
+  margin-bottom: var(--space-4);
+}
 
 /* Footer logo text inline display (replacing style="display:inline") */
-.footer .logo-text { display: inline; }
+.footer .logo-text {
+  display: inline;
+}
 
 /* Search results container (replacing inline styles on #searchResults) */
 .search-results {
@@ -17751,10 +17853,15 @@ html[data-theme="dark"] .footer-links a:hover {
 }
 
 /* Section header centered (replacing style="text-align:center; width:100%") */
-.section-header-centered { text-align: center; width: 100%; }
+.section-header-centered {
+  text-align: center;
+  width: 100%;
+}
 
 /* Checkout section non-clickable header (replacing style="cursor:default") */
-.checkout-card-header--static { cursor: default; }
+.checkout-card-header--static {
+  cursor: default;
+}
 
 /* Cart promo icon gradient (replacing inline gradient) */
 .promo-icon-gradient {
@@ -17762,10 +17869,239 @@ html[data-theme="dark"] .footer-links a:hover {
 }
 
 /* Confirmation totals wrapper (replacing style="margin-top:...") */
-.confirmation-totals { margin-top: var(--space-6); }
+.confirmation-totals {
+  margin-top: var(--space-6);
+}
 
 /* Wishlist action buttons flex (replacing inline flex) */
-.wishlist-action-btns { display: flex; gap: var(--space-2); }
+.wishlist-action-btns {
+  display: flex;
+  gap: var(--space-2);
+}
 
 /* Checkout card body visible (replacing style="display:block") */
-.checkout-card-body--open { display: block; }
+.checkout-card-body--open {
+  display: block;
+}
+
+/* =============================================================================
+   Issue #5: Wishlist mobile layout + card share button + image/price fix
+   ============================================================================= */
+
+/* Card top actions container (wishlist + share) */
+.card-top-actions {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  z-index: 2;
+}
+
+.card-share-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.card-share-btn:hover {
+  background: var(--clr-primary);
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Fix image not covering price — ensure card-image has fixed aspect ratio */
+.wishlist-grid .product-card .card-image {
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+.wishlist-grid .product-card .card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Fix wishlist card info — ensure price is always visible below image */
+.wishlist-grid .product-card .card-info {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+
+/* Wishlist grid mobile responsive */
+@media (max-width: 640px) {
+  .wishlist-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: var(--space-3);
+  }
+  .wishlist-grid .product-card .card-image {
+    aspect-ratio: 3 / 4;
+  }
+  .wishlist-grid .product-card .card-info {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+  }
+  .wishlist-grid .product-card .card-name {
+    font-size: var(--text-sm);
+    line-height: 1.3;
+  }
+  .wishlist-grid .product-card .card-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+  }
+  .wishlist-grid .product-card .card-cart-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: var(--text-xs);
+    padding: var(--space-2) var(--space-3);
+  }
+  .wishlist-grid .product-card .card-description {
+    display: none;
+  }
+  .wishlist-grid .product-card .card-review {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 380px) {
+  .wishlist-grid {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-4);
+  }
+}
+
+/* =============================================================================
+   Issue #6: FAQ "All" tab text centering
+   ============================================================================= */
+.faq-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* =============================================================================
+   Issue #9: Size/color selection — fix light/dark mode contradicting colors
+   ============================================================================= */
+.qm-size,
+.qm-color {
+  border: 2px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: all 0.2s;
+}
+.qm-size.active,
+.qm-size:hover:not(.out-of-stock) {
+  border-color: var(--clr-primary);
+  background: var(--clr-primary);
+  color: #fff;
+}
+.qm-color.active {
+  box-shadow:
+    0 0 0 3px var(--bg-surface),
+    0 0 0 5px var(--clr-primary);
+}
+
+html[data-theme="dark"] .qm-size {
+  border-color: var(--border-dark, #555);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+html[data-theme="dark"] .qm-size.active,
+html[data-theme="dark"] .qm-size:hover:not(.out-of-stock) {
+  border-color: var(--clr-primary);
+  background: var(--clr-primary);
+  color: #fff;
+}
+html[data-theme="dark"] .qm-color.active {
+  box-shadow:
+    0 0 0 3px var(--bg-surface),
+    0 0 0 5px var(--clr-primary);
+}
+
+/* Fix "30 in stock" and "Same-day" alignment on mobile */
+@media (max-width: 480px) {
+  .qm-price-stock {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .qm-price-stock .qm-stock {
+    margin-left: 0;
+  }
+  .qm-price-stock .qm-delivery-tag {
+    margin-left: auto;
+  }
+}
+
+/* =============================================================================
+   Issue #11: Auth password box same size as email + modal smaller on mobile
+   ============================================================================= */
+.auth-input-wrap .form-input,
+.auth-input-wrap input,
+.password-wrapper .form-input,
+.password-wrapper input {
+  height: 48px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .auth-modal {
+    max-width: 95vw;
+    max-height: 85vh;
+    margin: var(--space-2);
+    overflow-y: auto;
+  }
+  .auth-hero {
+    padding: var(--space-4) var(--space-3);
+  }
+  .auth-hero-icon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.2rem;
+  }
+  .auth-hero-title {
+    font-size: 1.2rem;
+  }
+  .auth-modal .modal-body {
+    padding: var(--space-4);
+  }
+}
+
+/* =============================================================================
+   Issue #8: Review button in delivered orders (dashboard)
+   ============================================================================= */
+.track-review-section {
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--space-4);
+  margin-top: var(--space-3);
+}
+.track-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--clr-primary);
+  background: var(--clr-primary-light);
+  border: 1px solid var(--clr-primary);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  margin-right: var(--space-2);
+  margin-bottom: var(--space-2);
+  transition: all 0.2s;
+}
+.track-review-btn:hover {
+  background: var(--clr-primary);
+  color: #fff;
+}

@@ -22,6 +22,24 @@
   const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
   const on = (el, evt, fn) => el && el.addEventListener(evt, fn);
 
+  /* ── Pre-check: hide auth/show admin instantly if we have a session token ── */
+  (function preCheck() {
+    try {
+      const stored = localStorage.getItem("sb-oriojylsilcsvcsefuux-auth-token");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.currentSession || parsed?.access_token) {
+          const authView = document.querySelector("[data-auth-view]");
+          const adminView = document.querySelector("[data-admin-view]");
+          if (authView) authView.hidden = true;
+          if (adminView) adminView.hidden = false;
+        }
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  })();
+
   // Escape HTML to prevent XSS
   const escapeHtml = (str) => {
     if (!str) return "";
@@ -580,9 +598,151 @@
     exportToCSV(exportData, `products_${date}.csv`);
   }
 
+  async function exportOrders() {
+    console.log("[exportOrders] Exporting orders");
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const exportData = (data || []).map((o) => ({
+        order_number: o.order_number || "",
+        customer_name: o.customer_name || "",
+        customer_email: o.customer_email || "",
+        customer_phone: o.customer_phone || "",
+        status: o.status || "",
+        total: o.total || 0,
+        subtotal: o.subtotal || 0,
+        shipping_cost: o.shipping_cost || 0,
+        payment_method: o.payment_method || "",
+        delivery_state: o.delivery_state || "",
+        items_count: Array.isArray(o.items) ? o.items.length : 0,
+        created_at: o.created_at || "",
+      }));
+      const date = new Date().toISOString().split("T")[0];
+      exportToCSV(exportData, `orders_${date}.csv`);
+    } catch (err) {
+      showToast("Failed to export orders");
+      console.error("[exportOrders]", err);
+    }
+  }
+
+  async function exportCustomers() {
+    console.log("[exportCustomers] Exporting customers");
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, email, phone, is_admin, created_at")
+        .eq("is_admin", false)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const exportData = (data || []).map((p) => ({
+        name: p.display_name || "",
+        email: p.email || "",
+        phone: p.phone || "",
+        created_at: p.created_at || "",
+      }));
+      const date = new Date().toISOString().split("T")[0];
+      exportToCSV(exportData, `customers_${date}.csv`);
+    } catch (err) {
+      showToast("Failed to export customers");
+      console.error("[exportCustomers]", err);
+    }
+  }
+
+  async function exportReviews() {
+    console.log("[exportReviews] Exporting reviews");
+    try {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      const exportData = (data || []).map((r) => ({
+        product_id: r.product_id || "",
+        reviewer_name: r.reviewer_name || "",
+        reviewer_email: r.reviewer_email || "",
+        rating: r.rating || 0,
+        title: r.title || "",
+        comment: r.comment || "",
+        is_approved: r.is_approved ? "Yes" : "No",
+        created_at: r.created_at || "",
+      }));
+      const date = new Date().toISOString().split("T")[0];
+      exportToCSV(exportData, `reviews_${date}.csv`);
+    } catch (err) {
+      showToast("Failed to export reviews");
+      console.error("[exportReviews]", err);
+    }
+  }
+
+  async function exportActivityLogs() {
+    console.log("[exportActivityLogs] Exporting activity logs");
+    try {
+      const { data, error } = await supabase
+        .from("activity_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
+      if (error) throw error;
+      const exportData = (data || []).map((l) => ({
+        action: l.action || "",
+        entity_type: l.entity_type || "",
+        entity_id: l.entity_id || "",
+        admin_id: l.admin_id || "",
+        details: JSON.stringify(l.details || {}),
+        created_at: l.created_at || "",
+      }));
+      const date = new Date().toISOString().split("T")[0];
+      exportToCSV(exportData, `activity_logs_${date}.csv`);
+    } catch (err) {
+      showToast("Failed to export activity logs");
+      console.error("[exportActivityLogs]", err);
+    }
+  }
+
   function bindExport() {
     console.log("[bindExport] Binding export button");
-    on($("#exportBtn"), "click", exportProducts);
+    const btn = $("#exportBtn");
+    const menu = $("#exportMenu");
+    if (!btn || !menu) return;
+
+    // Toggle dropdown
+    on(btn, "click", (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+    });
+
+    // Close on outside click
+    document.addEventListener("click", () => {
+      menu.hidden = true;
+    });
+
+    // Handle export options
+    on(menu, "click", async (e) => {
+      const opt = e.target.closest("[data-export]");
+      if (!opt) return;
+      menu.hidden = true;
+      const type = opt.dataset.export;
+      switch (type) {
+        case "products":
+          exportProducts();
+          break;
+        case "orders":
+          await exportOrders();
+          break;
+        case "customers":
+          await exportCustomers();
+          break;
+        case "reviews":
+          await exportReviews();
+          break;
+        case "activity":
+          await exportActivityLogs();
+          break;
+      }
+    });
   }
 
   /* =========================
@@ -2047,8 +2207,8 @@
           <td data-label="Status"><span class="order-status ${order.status}">${order.status}</span></td>
           <td data-label="Action">
             <div class="order-actions">
-              <button type="button" data-view-order="${order.id}" title="View Details">
-                <i class="fa-solid fa-eye"></i>
+              <button type="button" class="btn btn-sm btn-outline" data-view-order="${order.id}" title="View Details">
+                <i class="fa-solid fa-eye"></i> View
               </button>
             </div>
           </td>
@@ -2122,7 +2282,15 @@
     const idx = steps.findIndex((s) => s.key === status);
     return `<div class="admin-timeline">${steps
       .map((s, i) => {
-        const cls = i < idx ? "done" : i === idx ? "active" : "";
+        // Delivered step should always show as "done" (green), not "active" (pink)
+        const cls =
+          i < idx
+            ? "done"
+            : i === idx
+              ? s.key === "delivered"
+                ? "done"
+                : "active"
+              : "";
         return `<div class="admin-timeline-step ${cls}"><div class="admin-timeline-dot"><i class="fa-solid ${s.icon}"></i></div><span>${s.label}</span></div>`;
       })
       .join('<div class="admin-timeline-line"></div>')}</div>`;
@@ -5372,7 +5540,8 @@
       // ── Visits by Country ──
       if (countryEl) {
         if (!visits?.length) {
-          countryEl.innerHTML = '<p class="text-muted text-center" style="padding:2rem">No visitor data yet</p>';
+          countryEl.innerHTML =
+            '<p class="text-muted text-center" style="padding:2rem">No visitor data yet</p>';
         } else {
           const countryCounts = {};
           visits.forEach((v) => {
@@ -5388,14 +5557,18 @@
             <table class="table">
               <thead><tr><th>#</th><th>Country</th><th>Visits</th><th>%</th></tr></thead>
               <tbody>
-                ${sorted.map(([country, count], i) => `
+                ${sorted
+                  .map(
+                    ([country, count], i) => `
                   <tr>
                     <td>${i + 1}</td>
                     <td>${escapeHtml(country)}</td>
                     <td>${count}</td>
                     <td>${((count / total) * 100).toFixed(1)}%</td>
                   </tr>
-                `).join("")}
+                `,
+                  )
+                  .join("")}
               </tbody>
             </table>
           `;
@@ -5406,29 +5579,35 @@
       if (stateEl) {
         const ngVisits = visits?.filter((v) => v.country_code === "NG") || [];
         if (!ngVisits.length) {
-          stateEl.innerHTML = '<p class="text-muted text-center" style="padding:2rem">No Nigerian visitor data yet</p>';
+          stateEl.innerHTML =
+            '<p class="text-muted text-center" style="padding:2rem">No Nigerian visitor data yet</p>';
         } else {
           const stateCounts = {};
           ngVisits.forEach((v) => {
             const key = v.region || "Unknown";
             stateCounts[key] = (stateCounts[key] || 0) + 1;
           });
-          const sorted = Object.entries(stateCounts)
-            .sort((a, b) => b[1] - a[1]);
+          const sorted = Object.entries(stateCounts).sort(
+            (a, b) => b[1] - a[1],
+          );
           const total = ngVisits.length;
 
           stateEl.innerHTML = `
             <table class="table">
               <thead><tr><th>#</th><th>State</th><th>Visits</th><th>%</th></tr></thead>
               <tbody>
-                ${sorted.map(([state, count], i) => `
+                ${sorted
+                  .map(
+                    ([state, count], i) => `
                   <tr>
                     <td>${i + 1}</td>
                     <td>${escapeHtml(state)}</td>
                     <td>${count}</td>
                     <td>${((count / total) * 100).toFixed(1)}%</td>
                   </tr>
-                `).join("")}
+                `,
+                  )
+                  .join("")}
               </tbody>
             </table>
           `;
@@ -5436,8 +5615,12 @@
       }
     } catch (err) {
       console.error("[loadGeoAnalytics] Error:", err);
-      if (countryEl) countryEl.innerHTML = '<p class="text-muted text-center">Failed to load geo data</p>';
-      if (stateEl) stateEl.innerHTML = '<p class="text-muted text-center">Failed to load state data</p>';
+      if (countryEl)
+        countryEl.innerHTML =
+          '<p class="text-muted text-center">Failed to load geo data</p>';
+      if (stateEl)
+        stateEl.innerHTML =
+          '<p class="text-muted text-center">Failed to load state data</p>';
     }
   }
 

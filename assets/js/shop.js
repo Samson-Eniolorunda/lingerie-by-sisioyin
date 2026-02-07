@@ -647,7 +647,7 @@
             <div class="qm-reviews-section" id="qmReviews">
               <div class="qm-reviews-header">
                 <h3 class="qm-reviews-title"><i class="fa-solid fa-star"></i> Customer Reviews</h3>
-                <button type="button" class="qm-write-review-btn" id="qmWriteReviewBtn">Write a Review</button>
+                <button type="button" class="qm-write-review-btn" id="qmWriteReviewBtn" hidden>Write a Review</button>
               </div>
               <div class="qm-reviews-summary" id="qmReviewsSummary"></div>
               <div class="qm-reviews-list" id="qmReviewsList">
@@ -655,7 +655,7 @@
               </div>
             </div>
 
-            <!-- Review Form (hidden by default) -->
+            <!-- Review Form (hidden by default, only for verified purchasers from dashboard) -->
             <div class="qm-review-form" id="qmReviewForm" hidden>
               <h4>Write a Review</h4>
               <div class="qm-star-picker" id="qmStarPicker">
@@ -670,6 +670,7 @@
                 <button type="button" class="qm-cancel-review" id="qmCancelReview">Cancel</button>
               </div>
             </div>
+
           </div>
         </div>
       </div>
@@ -683,6 +684,35 @@
     document.body.style.overflow = "hidden";
     setupModalEvents();
     loadProductReviews(product.id);
+    checkCanReview(product.id);
+  }
+
+  // Check if user has received this product (delivered order) — only then show Write a Review
+  async function checkCanReview(productId) {
+    const btn = $("#qmWriteReviewBtn");
+    if (!btn) return;
+    btn.hidden = true;
+    try {
+      const c = window.supabaseClient || window.DB?.client;
+      if (!c) return;
+      const {
+        data: { user },
+      } = await c.auth.getUser();
+      if (!user?.email) return;
+      const { data: orders } = await c
+        .from("orders")
+        .select("items")
+        .eq("customer_email", user.email)
+        .eq("status", "delivered");
+      const hasPurchased = orders?.some(
+        (o) =>
+          Array.isArray(o.items) &&
+          o.items.some((item) => String(item.id) === String(productId)),
+      );
+      if (hasPurchased) btn.hidden = false;
+    } catch (_) {
+      /* silently fail */
+    }
   }
 
   // ── Review Functions ──────────────────────────

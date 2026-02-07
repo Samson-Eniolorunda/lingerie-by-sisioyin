@@ -10,9 +10,9 @@ window.APP_CONFIG = {
   // Monnify Payment Gateway Configuration
   // Get your keys from: https://app.monnify.com/
   MONNIFY: {
-    apiKey: "MK_TEST_XXXXXXXXXX", // Replace with your Monnify API Key
-    contractCode: "XXXXXXXXXX", // Replace with your Monnify Contract Code
-    isTestMode: true, // Set to false for production
+    apiKey: "MK_TEST_XXXXXXXXXX", // TODO: Replace with your LIVE Monnify API Key (MK_PROD_...)
+    contractCode: "XXXXXXXXXX", // TODO: Replace with your LIVE Monnify Contract Code
+    isTestMode: false, // LIVE mode — ensure live keys above before accepting payments
   },
 
   // Brand Name
@@ -23,8 +23,8 @@ window.APP_CONFIG = {
 
   // Social Media Links
   SOCIAL: {
-    instagram: "https://instagram.com/lingeriebysissioyin",
-    tiktok: "https://tiktok.com/@lingeriebysissioyin",
+    instagram: "https://instagram.com/lingeries_bysisioyin",
+    tiktok: "https://tiktok.com/@lingeries_bysisioyin",
     whatsapp: "https://wa.me/2349033344860",
   },
 
@@ -48,4 +48,9 @@ window.APP_CONFIG = {
 
   // Facebook Pixel ID
   FB_PIXEL_ID: "3483388498501534",
+
+  // Google Maps Places API Key (for address autocomplete)
+  // Get it from: https://console.cloud.google.com/apis/credentials
+  // Enable "Places API" and "Maps JavaScript API"
+  GOOGLE_MAPS_API_KEY: "",
 };

@@ -65,14 +65,25 @@
     const reviewCount = product.review_count || 0;
     const isNew = isNewProduct(product.created_at, product.is_new);
 
+    // Share URL
+    const shareUrl = encodeURIComponent(
+      window.location.origin + "/shop?product=" + product.id,
+    );
+    const shareText = encodeURIComponent(name + " - Lingerie by Sisioyin");
+
     return `
       <article class="product-card" data-product-id="${product.id}">
         <div class="card-image">
           <img src="${img}" alt="${name}" loading="lazy" />
           ${isNew ? '<span class="card-new-badge">New</span>' : ""}
-          <button type="button" class="card-wishlist active" data-action="remove-wishlist" data-id="${product.id}" data-tooltip="Remove from Wishlist" aria-label="Remove from Wishlist">
-            <i class="fa-solid fa-heart-crack"></i>
-          </button>
+          <div class="card-top-actions">
+            <button type="button" class="card-wishlist active" data-action="remove-wishlist" data-id="${product.id}" data-tooltip="Remove from Wishlist" aria-label="Remove from Wishlist">
+              <i class="fa-solid fa-heart-crack"></i>
+            </button>
+            <button type="button" class="card-share-btn" data-action="share" data-url="${shareUrl}" data-text="${shareText}" data-tooltip="Share" aria-label="Share">
+              <i class="fa-solid fa-share-nodes"></i>
+            </button>
+          </div>
           ${!inStock ? '<div class="card-sold-out">Sold Out</div>' : ""}
         </div>
         <div class="card-info">
@@ -136,7 +147,7 @@
         wishlistGrid.innerHTML = products.map(createWishlistCard).join("");
       }
       // Update wishlist count display
-      const countEl = document.getElementById("wishlistTotal");
+      const countEl = document.getElementById("wishlistItemCount");
       if (countEl) countEl.textContent = String(products.length);
       // Update header display
       const headerEl = document.getElementById("wishlistHeader");
@@ -166,7 +177,7 @@
             setTimeout(() => {
               card.remove();
               // Update wishlist count display
-              const countEl = document.getElementById("wishlistTotal");
+              const countEl = document.getElementById("wishlistItemCount");
               if (countEl) countEl.textContent = String(getWishlist().length);
               // Check if wishlist is now empty
               if (!wishlistGrid.children.length) {
@@ -186,6 +197,25 @@
         const productId = addBtn.dataset.id;
         if (productId && window.APP?.openModal) {
           window.APP.openModal(productId);
+        }
+        return;
+      }
+
+      // Share button
+      const shareBtn = e.target.closest("[data-action='share']");
+      if (shareBtn) {
+        e.preventDefault();
+        const url = decodeURIComponent(shareBtn.dataset.url || "");
+        const text = decodeURIComponent(shareBtn.dataset.text || "");
+        if (navigator.share) {
+          navigator.share({ title: text, url }).catch(() => {});
+        } else {
+          navigator.clipboard
+            ?.writeText(url)
+            .then(() => {
+              UTILS.toast("Link copied!", "success");
+            })
+            .catch(() => UTILS.toast("Could not copy link", "error"));
         }
         return;
       }

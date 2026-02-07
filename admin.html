@@ -746,15 +746,58 @@
           </div>
 
           <div class="topbar-right">
-            <button
-              class="topbar-btn"
-              id="exportBtn"
-              type="button"
-              title="Export Data"
-            >
-              <i class="fa-solid fa-file-export"></i>
-              <span>Export</span>
-            </button>
+            <div class="export-dropdown" id="exportDropdown">
+              <button
+                class="topbar-btn"
+                id="exportBtn"
+                type="button"
+                title="Export Data"
+              >
+                <i class="fa-solid fa-file-export"></i>
+                <span>Export</span>
+                <i
+                  class="fa-solid fa-chevron-down"
+                  style="font-size: 10px; margin-left: 4px"
+                ></i>
+              </button>
+              <div class="export-menu" id="exportMenu" hidden>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="products"
+                >
+                  <i class="fa-solid fa-boxes-stacked"></i> Products
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="orders"
+                >
+                  <i class="fa-solid fa-receipt"></i> Orders
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="customers"
+                >
+                  <i class="fa-solid fa-users"></i> Customers
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="reviews"
+                >
+                  <i class="fa-solid fa-star"></i> Reviews
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="activity"
+                >
+                  <i class="fa-solid fa-clock-rotate-left"></i> Activity Logs
+                </button>
+              </div>
+            </div>
 
             <div class="stat-pill">
               <span class="label">Products:</span>
@@ -1838,42 +1881,12 @@
           </div>
 
           <div class="analytics-chart-card">
-            <h4><i class="fa-solid fa-map-location-dot"></i> Visits by Nigerian State</h4>
+            <h4>
+              <i class="fa-solid fa-map-location-dot"></i> Visits by Nigerian
+              State
+            </h4>
             <div class="analytics-table-wrap" id="geoStateTable">
               <p class="text-muted text-center">Loading...</p>
-            </div>
-          </div>
-
-          <!-- Tracking Codes Setup Guide -->
-          <div class="analytics-chart-card" id="analyticsGuide">
-            <h4>
-              <i class="fa-solid fa-circle-info"></i> How to Set Up Tracking
-            </h4>
-            <div class="analytics-guide-content">
-              <div class="analytics-guide-step">
-                <strong>Google Analytics:</strong> Go to
-                <code>assets/js/config.js</code> and set your
-                <code>GA_MEASUREMENT_ID</code> (e.g. <code>G-XXXXXXXXXX</code>).
-                Get it from
-                <a
-                  href="https://analytics.google.com"
-                  target="_blank"
-                  rel="noopener"
-                  >analytics.google.com</a
-                >.
-              </div>
-              <div class="analytics-guide-step">
-                <strong>Facebook Pixel:</strong> Go to
-                <code>assets/js/config.js</code> and set your
-                <code>FB_PIXEL_ID</code> (e.g. <code>123456789012345</code>).
-                Get it from
-                <a
-                  href="https://business.facebook.com/events_manager"
-                  target="_blank"
-                  rel="noopener"
-                  >Facebook Events Manager</a
-                >.
-              </div>
             </div>
           </div>
         </section>
