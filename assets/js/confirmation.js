@@ -12,7 +12,7 @@
 
     if (!orderDataStr) {
       // No order data, redirect to shop
-      window.location.href = "shop.html";
+      window.location.href = "/shop";
       return;
     }
 
@@ -76,7 +76,7 @@
       sessionStorage.removeItem("LBS_CONFIRMED_ORDER");
     } catch (err) {
       console.error("Error parsing order data:", err);
-      window.location.href = "shop.html";
+      window.location.href = "/shop";
     }
   }
 

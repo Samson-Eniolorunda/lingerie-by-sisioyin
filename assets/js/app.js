@@ -343,7 +343,7 @@
         <div class="drawer-empty">
           <i class="fa-solid fa-bag-shopping"></i>
           <p>Your cart is empty</p>
-          <a href="shop.html" class="btn btn-primary btn-sm">Start Shopping</a>
+          <a href="/shop" class="btn btn-primary btn-sm">Start Shopping</a>
         </div>
       `;
       if (oldSubtotal) oldSubtotal.textContent = UTILS.formatNaira(0);
@@ -886,7 +886,7 @@
         e.preventDefault();
         client.auth.getSession().then(({ data }) => {
           if (data?.session?.user) {
-            window.location.href = "cart.html";
+            window.location.href = "/cart";
           } else {
             closeDrawer();
             UTILS.toast?.(
@@ -1693,7 +1693,7 @@
             ${(suggestions || [])
               .map(
                 (product) => `
-              <a href="shop.html?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
+              <a href="/shop?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
                 <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" />
                 <div class="search-result-info">
                   <div class="search-result-name">${UTILS.safeText(product.name)}</div>
@@ -1703,7 +1703,7 @@
             `,
               )
               .join("")}
-            <a href="shop.html" class="search-view-all">
+            <a href="/shop" class="search-view-all">
               <i class="fa-solid fa-store"></i> Browse all products
             </a>
           `;
@@ -1715,7 +1715,7 @@
           data
             .map(
               (product) => `
-          <a href="shop.html?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
+          <a href="/shop?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
             <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" />
             <div class="search-result-info">
               <div class="search-result-name">${UTILS.safeText(product.name)}</div>
@@ -1726,7 +1726,7 @@
             )
             .join("") +
           `
-          <a href="shop.html?search=${encodeURIComponent(query)}" class="search-view-all">
+          <a href="/shop?search=${encodeURIComponent(query)}" class="search-view-all">
             <i class="fa-solid fa-arrow-right"></i> View all results for "${UTILS.safeText(query)}"
           </a>
         `;
@@ -2024,8 +2024,8 @@
    * ───────────────────────────────────────────── */
   function initNavActiveState() {
     console.log("🔗 APP: initNavActiveState()");
-    const currentPage =
-      window.location.pathname.split("/").pop() || "index.html";
+    const pathPart = window.location.pathname.split("/").pop() || "";
+    const currentPage = pathPart.replace(/\.html$/, "") || "index";
     const currentSearch = window.location.search;
 
     // Remove all existing active classes
@@ -2036,24 +2036,26 @@
 
     // Set active state for desktop nav
     $$(".nav-link").forEach((link) => {
-      const href = link.getAttribute("href");
-      if (href === currentPage || href === currentPage + currentSearch) {
-        link.classList.add("active");
-      } else if (currentPage === "index.html" && href === "index.html") {
-        link.classList.add("active");
-      } else if (
-        currentPage.startsWith("shop") &&
-        href === "shop.html" &&
-        !currentSearch
-      ) {
+      const href = link.getAttribute("href") || "";
+      const hrefPage =
+        href
+          .replace(/^\//, "")
+          .replace(/\.html$/, "")
+          .split("?")[0] || "index";
+      if (hrefPage === currentPage) {
         link.classList.add("active");
       }
     });
 
     // Set active state for mobile nav tiles
     $$(".mobile-nav-tile").forEach((tile) => {
-      const href = tile.getAttribute("href");
-      if (href === currentPage) {
+      const href = tile.getAttribute("href") || "";
+      const hrefPage =
+        href
+          .replace(/^\//, "")
+          .replace(/\.html$/, "")
+          .split("?")[0] || "index";
+      if (hrefPage === currentPage) {
         tile.classList.add("active");
       }
     });
@@ -2123,7 +2125,11 @@
     if (localStorage.getItem(TERMS_KEY)) return;
 
     // Skip on admin page
-    if (document.body.classList.contains("admin-page") || window.location.pathname.includes("admin")) return;
+    if (
+      document.body.classList.contains("admin-page") ||
+      window.location.pathname.includes("admin")
+    )
+      return;
 
     const overlay = document.createElement("div");
     overlay.className = "consent-overlay";
@@ -2134,8 +2140,8 @@
         <p class="consent-text">
           We use essential cookies for site functionality and optional analytics cookies
           to improve your experience. By clicking <strong>Accept All</strong>, you consent to
-          our use of cookies per our <a href="privacy.html">Privacy&nbsp;Policy</a> and
-          <a href="terms.html">Terms&nbsp;of&nbsp;Service</a>.
+          our use of cookies per our <a href="/privacy">Privacy&nbsp;Policy</a> and
+          <a href="/terms">Terms&nbsp;of&nbsp;Service</a>.
         </p>
         <div class="consent-actions">
           <button class="consent-btn consent-btn-accept" id="consentAcceptAll">Accept All</button>
@@ -2149,7 +2155,10 @@
     });
 
     const dismiss = (allowAnalytics) => {
-      localStorage.setItem(TERMS_KEY, JSON.stringify({ ts: Date.now(), analytics: allowAnalytics }));
+      localStorage.setItem(
+        TERMS_KEY,
+        JSON.stringify({ ts: Date.now(), analytics: allowAnalytics }),
+      );
       overlay.classList.remove("visible");
       setTimeout(() => overlay.remove(), 400);
       // If essential-only, disable GA + FB pixels
@@ -2158,8 +2167,12 @@
       }
     };
 
-    document.getElementById("consentAcceptAll").addEventListener("click", () => dismiss(true));
-    document.getElementById("consentEssential").addEventListener("click", () => dismiss(false));
+    document
+      .getElementById("consentAcceptAll")
+      .addEventListener("click", () => dismiss(true));
+    document
+      .getElementById("consentEssential")
+      .addEventListener("click", () => dismiss(false));
   }
 
   /* ─────────────────────────────────────────────

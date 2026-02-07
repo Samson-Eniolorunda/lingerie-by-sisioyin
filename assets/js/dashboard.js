@@ -156,7 +156,7 @@
       <div class="dash-empty">
         <i class="fa-solid ${icon}"></i>
         <p>${msg}</p>
-        ${shopLink ? '<a href="shop.html" class="dash-empty-btn">Start Shopping</a>' : ""}
+        ${shopLink ? '<a href="/shop" class="dash-empty-btn">Start Shopping</a>' : ""}
       </div>`;
   }
 
@@ -272,18 +272,73 @@
 
   /* ── Nigerian address suggestions ── */
   const NG_CITIES = [
-    "Lagos", "Ikeja", "Lekki", "Victoria Island", "Surulere", "Yaba", "Ajah",
-    "Ikoyi", "Mushin", "Agege", "Oshodi", "Apapa", "Badagry", "Epe", "Ikorodu",
-    "Abuja", "Garki", "Wuse", "Maitama", "Asokoro", "Gwarinpa", "Jabi", "Kubwa",
-    "Port Harcourt", "Ibadan", "Benin City", "Kano", "Kaduna", "Enugu", "Aba",
-    "Uyo", "Calabar", "Warri", "Abeokuta", "Owerri", "Jos", "Ilorin",
-    "Akure", "Ado-Ekiti", "Asaba", "Umuahia", "Onitsha", "Nsukka", "Nnewi"
+    "Lagos",
+    "Ikeja",
+    "Lekki",
+    "Victoria Island",
+    "Surulere",
+    "Yaba",
+    "Ajah",
+    "Ikoyi",
+    "Mushin",
+    "Agege",
+    "Oshodi",
+    "Apapa",
+    "Badagry",
+    "Epe",
+    "Ikorodu",
+    "Abuja",
+    "Garki",
+    "Wuse",
+    "Maitama",
+    "Asokoro",
+    "Gwarinpa",
+    "Jabi",
+    "Kubwa",
+    "Port Harcourt",
+    "Ibadan",
+    "Benin City",
+    "Kano",
+    "Kaduna",
+    "Enugu",
+    "Aba",
+    "Uyo",
+    "Calabar",
+    "Warri",
+    "Abeokuta",
+    "Owerri",
+    "Jos",
+    "Ilorin",
+    "Akure",
+    "Ado-Ekiti",
+    "Asaba",
+    "Umuahia",
+    "Onitsha",
+    "Nsukka",
+    "Nnewi",
   ];
 
   const NG_STATES = [
-    "Lagos", "FCT", "Rivers", "Oyo", "Edo", "Kano", "Kaduna", "Enugu", "Abia",
-    "Akwa Ibom", "Cross River", "Delta", "Ogun", "Imo", "Plateau", "Kwara",
-    "Ondo", "Ekiti", "Anambra", "Ebonyi"
+    "Lagos",
+    "FCT",
+    "Rivers",
+    "Oyo",
+    "Edo",
+    "Kano",
+    "Kaduna",
+    "Enugu",
+    "Abia",
+    "Akwa Ibom",
+    "Cross River",
+    "Delta",
+    "Ogun",
+    "Imo",
+    "Plateau",
+    "Kwara",
+    "Ondo",
+    "Ekiti",
+    "Anambra",
+    "Ebonyi",
   ];
 
   function attachSuggestions(input, suggestions) {
@@ -292,11 +347,13 @@
       const val = input.value.trim().toLowerCase();
       if (listEl) listEl.remove();
       if (!val || val.length < 2) return;
-      const matches = suggestions.filter(s => s.toLowerCase().includes(val)).slice(0, 6);
+      const matches = suggestions
+        .filter((s) => s.toLowerCase().includes(val))
+        .slice(0, 6);
       if (!matches.length) return;
       listEl = document.createElement("ul");
       listEl.className = "addr-suggestions";
-      matches.forEach(m => {
+      matches.forEach((m) => {
         const li = document.createElement("li");
         li.textContent = m;
         li.addEventListener("click", () => {
@@ -311,7 +368,12 @@
       input.parentElement.appendChild(listEl);
     });
     input.addEventListener("blur", () => {
-      setTimeout(() => { if (listEl) { listEl.remove(); listEl = null; } }, 200);
+      setTimeout(() => {
+        if (listEl) {
+          listEl.remove();
+          listEl = null;
+        }
+      }, 200);
     });
   }
 
@@ -380,7 +442,9 @@
       setTimeout(() => overlay.remove(), 300);
     };
 
-    overlay.querySelector(".addr-modal-close").addEventListener("click", closeModal);
+    overlay
+      .querySelector(".addr-modal-close")
+      .addEventListener("click", closeModal);
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) closeModal();
     });

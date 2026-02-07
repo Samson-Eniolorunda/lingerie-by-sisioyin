@@ -349,7 +349,7 @@
         loginBtn.onclick = (e) => {
           e.preventDefault();
           e.stopImmediatePropagation();
-          window.location.href = "dashboard.html";
+          window.location.href = "/dashboard";
         };
       } else {
         loginBtn.hidden = false;

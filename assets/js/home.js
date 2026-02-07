@@ -509,7 +509,7 @@
           "🏠 HOME: window.APP.openModal not available, redirecting to shop",
         );
         // Fallback - redirect to shop with product
-        window.location.href = `shop.html?product=${productId}`;
+        window.location.href = `/shop?product=${productId}`;
       }
     }
   });

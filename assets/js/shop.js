@@ -521,7 +521,7 @@
 
     // Share URL
     const shareUrl = encodeURIComponent(
-      window.location.origin + "/shop.html?product=" + product.id,
+      window.location.origin + "/shop?product=" + product.id,
     );
     const shareText = encodeURIComponent(
       product.name + " - Lingerie by Sisioyin",
@@ -565,7 +565,7 @@
               sizes.length
                 ? `
             <div class="qm-section">
-              <span class="qm-label">Size <a href="size.html" class="qm-guide">Size Guide</a></span>
+              <span class="qm-label">Size <a href="/size" class="qm-guide">Size Guide</a></span>
               <div class="qm-sizes" id="qmSizes">
                 ${sizes
                   .map((s) => {
@@ -1110,7 +1110,7 @@
     // Copy link functionality
     copyLink?.addEventListener("click", async () => {
       const url =
-        window.location.origin + "/shop.html?product=" + modalProduct?.id;
+        window.location.origin + "/shop?product=" + modalProduct?.id;
       try {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(url);

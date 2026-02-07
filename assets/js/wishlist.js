@@ -51,7 +51,9 @@
 
   function createWishlistCard(product) {
     const imgRaw = getFirstImage(product.images);
-    const img = UTILS.optimizedImg ? UTILS.optimizedImg(imgRaw, 400, 75) : imgRaw;
+    const img = UTILS.optimizedImg
+      ? UTILS.optimizedImg(imgRaw, 400, 75)
+      : imgRaw;
     const name = UTILS.safeText(product.name);
     const price = UTILS.formatNaira(product.price_ngn);
     const category = UTILS.safeText(product.category);
