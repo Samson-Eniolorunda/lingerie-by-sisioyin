@@ -80,7 +80,7 @@ function buildItemRows(items: OrderItem[]): string {
         </td>
         <td style="padding:12px 8px;border-bottom:1px solid #f0e6d8;text-align:center;color:#5a4a3a;">${item.qty}</td>
         <td style="padding:12px 8px;border-bottom:1px solid #f0e6d8;text-align:right;color:#2d2319;font-weight:600;">${formatNaira(item.price_ngn * item.qty)}</td>
-      </tr>`
+      </tr>`,
     )
     .join("");
 }
@@ -163,11 +163,15 @@ function customerEmailHTML(order: OrderRecord): string {
                 <td style="padding:6px 0;color:#8b7355;font-size:14px;">Shipping</td>
                 <td style="padding:6px 0;text-align:right;color:#2d2319;font-size:14px;">${formatNaira(order.shipping_cost)}</td>
               </tr>
-              ${order.discount_amount > 0 ? `
+              ${
+                order.discount_amount > 0
+                  ? `
               <tr>
                 <td style="padding:6px 0;color:#27ae60;font-size:14px;">Discount${order.promo_code ? " (" + order.promo_code + ")" : ""}</td>
                 <td style="padding:6px 0;text-align:right;color:#27ae60;font-size:14px;">-${formatNaira(order.discount_amount)}</td>
-              </tr>` : ""}
+              </tr>`
+                  : ""
+              }
               <tr>
                 <td style="padding:12px 0 0;color:#2d2319;font-size:18px;font-weight:700;border-top:2px solid #f0e6d8;">Total</td>
                 <td style="padding:12px 0 0;text-align:right;color:#8b5a2b;font-size:18px;font-weight:700;border-top:2px solid #f0e6d8;">${formatNaira(order.total)}</td>
@@ -340,29 +344,36 @@ function adminEmailHTML(order: OrderRecord): string {
 
 // ── Status-Change Email Templates ──────────────
 
-const STATUS_META: Record<string, { emoji: string; heading: string; message: string; color: string }> = {
+const STATUS_META: Record<
+  string,
+  { emoji: string; heading: string; message: string; color: string }
+> = {
   processing: {
     emoji: "⚙️",
     heading: "Your order is being prepared!",
-    message: "We're getting your items ready for shipment. You'll receive another notification when your order ships.",
+    message:
+      "We're getting your items ready for shipment. You'll receive another notification when your order ships.",
     color: "#2196F3",
   },
   shipped: {
     emoji: "🚚",
     heading: "Your order is on its way!",
-    message: "Your package has been shipped and is on its way to you. Delivery typically takes 2–5 business days.",
+    message:
+      "Your package has been shipped and is on its way to you. Delivery typically takes 2–5 business days.",
     color: "#FF9800",
   },
   delivered: {
     emoji: "✅",
     heading: "Your order has been delivered!",
-    message: "We hope you love your new pieces! If you have any questions or concerns, don't hesitate to reach out.",
+    message:
+      "We hope you love your new pieces! If you have any questions or concerns, don't hesitate to reach out.",
     color: "#4CAF50",
   },
   cancelled: {
     emoji: "❌",
     heading: "Your order has been cancelled",
-    message: "Your order has been cancelled. If you were charged, a refund will be processed within 5–7 business days.",
+    message:
+      "Your order has been cancelled. If you were charged, a refund will be processed within 5–7 business days.",
     color: "#f44336",
   },
 };
@@ -457,7 +468,7 @@ function statusUpdateEmailHTML(order: OrderRecord, newStatus: string): string {
 async function sendEmail(
   to: string,
   subject: string,
-  html: string
+  html: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const res = await fetch("https://api.resend.com/emails", {
@@ -510,18 +521,24 @@ serve(async (req: Request) => {
     const oldRecord: Partial<OrderRecord> | undefined = payload.old_record;
 
     if (!order.order_number) {
-      return new Response(
-        JSON.stringify({ error: "Invalid order payload" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ error: "Invalid order payload" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
-    console.log(`Processing ${eventType} email for order ${order.order_number}`);
+    console.log(
+      `Processing ${eventType} email for order ${order.order_number}`,
+    );
 
     const results: { customer?: string; admin?: string } = {};
 
     // ── STATUS UPDATE ──
-    if (eventType === "UPDATE" && oldRecord && oldRecord.status !== order.status) {
+    if (
+      eventType === "UPDATE" &&
+      oldRecord &&
+      oldRecord.status !== order.status
+    ) {
       const newStatus = order.status;
       console.log(`Status changed: ${oldRecord.status} → ${newStatus}`);
 
@@ -530,7 +547,7 @@ serve(async (req: Request) => {
         const statusResult = await sendEmail(
           order.customer_email,
           `${STATUS_META[newStatus].emoji} Order ${order.order_number} — ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)} | ${BRAND}`,
-          statusUpdateEmailHTML(order, newStatus)
+          statusUpdateEmailHTML(order, newStatus),
         );
         results.customer = statusResult.success
           ? "sent"
@@ -545,16 +562,19 @@ serve(async (req: Request) => {
       const adminResult = await sendEmail(
         ADMIN_EMAIL,
         `📋 Order ${order.order_number} → ${newStatus.toUpperCase()}`,
-        `<p>Order <strong>${order.order_number}</strong> status changed from <strong>${oldRecord.status}</strong> to <strong>${newStatus}</strong>.</p><p><a href="${SITE_URL}/admin.html">Open Admin</a></p>`
+        `<p>Order <strong>${order.order_number}</strong> status changed from <strong>${oldRecord.status}</strong> to <strong>${newStatus}</strong>.</p><p><a href="${SITE_URL}/admin.html">Open Admin</a></p>`,
       );
       results.admin = adminResult.success
         ? "sent"
         : `failed: ${adminResult.error}`;
 
-      return new Response(JSON.stringify({ success: true, event: "status_update", results }), {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({ success: true, event: "status_update", results }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     // ── NEW ORDER (INSERT) ──
@@ -564,7 +584,7 @@ serve(async (req: Request) => {
       const customerResult = await sendEmail(
         order.customer_email,
         `Order Confirmed – ${order.order_number} | ${BRAND}`,
-        customerEmailHTML(order)
+        customerEmailHTML(order),
       );
       results.customer = customerResult.success
         ? "sent"
@@ -577,7 +597,7 @@ serve(async (req: Request) => {
     const adminResult = await sendEmail(
       ADMIN_EMAIL,
       `🛒 New Order ${order.order_number} – ${formatNaira(order.total)}`,
-      adminEmailHTML(order)
+      adminEmailHTML(order),
     );
     results.admin = adminResult.success
       ? "sent"
@@ -585,15 +605,18 @@ serve(async (req: Request) => {
 
     console.log("Email results:", results);
 
-    return new Response(JSON.stringify({ success: true, event: "new_order", results }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true, event: "new_order", results }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
   } catch (err) {
     console.error("Edge function error:", err);
-    return new Response(
-      JSON.stringify({ error: String(err) }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: String(err) }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });

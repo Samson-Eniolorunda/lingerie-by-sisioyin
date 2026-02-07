@@ -886,7 +886,7 @@
         e.preventDefault();
         client.auth.getSession().then(({ data }) => {
           if (data?.session?.user) {
-            window.location.href = "checkout.html";
+            window.location.href = "cart.html";
           } else {
             closeDrawer();
             UTILS.toast?.(
@@ -2122,30 +2122,44 @@
     const TERMS_KEY = "LBS_TERMS_ACCEPTED";
     if (localStorage.getItem(TERMS_KEY)) return;
 
-    const banner = document.createElement("div");
-    banner.className = "terms-banner";
-    banner.innerHTML = `
-      <div class="terms-banner-inner">
-        <p class="terms-banner-text">
-          By using this site you agree to our
-          <a href="terms.html">Terms&nbsp;of&nbsp;Service</a> and
-          <a href="privacy.html">Privacy&nbsp;Policy</a>.
-          We use cookies for analytics and to improve your experience.
+    // Skip on admin page
+    if (document.body.classList.contains("admin-page") || window.location.pathname.includes("admin")) return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "consent-overlay";
+    overlay.innerHTML = `
+      <div class="consent-modal">
+        <div class="consent-icon"><i class="fa-solid fa-cookie-bite"></i></div>
+        <h3 class="consent-title">We value your privacy</h3>
+        <p class="consent-text">
+          We use essential cookies for site functionality and optional analytics cookies
+          to improve your experience. By clicking <strong>Accept All</strong>, you consent to
+          our use of cookies per our <a href="privacy.html">Privacy&nbsp;Policy</a> and
+          <a href="terms.html">Terms&nbsp;of&nbsp;Service</a>.
         </p>
-        <button class="btn-accept" id="acceptTerms">I Agree</button>
+        <div class="consent-actions">
+          <button class="consent-btn consent-btn-accept" id="consentAcceptAll">Accept All</button>
+          <button class="consent-btn consent-btn-essential" id="consentEssential">Essential Only</button>
+        </div>
       </div>`;
-    document.body.appendChild(banner);
+    document.body.appendChild(overlay);
 
-    // show after short delay for slide-up effect
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => banner.classList.add("visible"));
+      requestAnimationFrame(() => overlay.classList.add("visible"));
     });
 
-    document.getElementById("acceptTerms").addEventListener("click", () => {
-      localStorage.setItem(TERMS_KEY, Date.now());
-      banner.classList.remove("visible");
-      banner.addEventListener("transitionend", () => banner.remove(), { once: true });
-    });
+    const dismiss = (allowAnalytics) => {
+      localStorage.setItem(TERMS_KEY, JSON.stringify({ ts: Date.now(), analytics: allowAnalytics }));
+      overlay.classList.remove("visible");
+      setTimeout(() => overlay.remove(), 400);
+      // If essential-only, disable GA + FB pixels
+      if (!allowAnalytics) {
+        window["ga-disable-G-XXXXXXXXXX"] = true; // GA opt-out
+      }
+    };
+
+    document.getElementById("consentAcceptAll").addEventListener("click", () => dismiss(true));
+    document.getElementById("consentEssential").addEventListener("click", () => dismiss(false));
   }
 
   /* ─────────────────────────────────────────────

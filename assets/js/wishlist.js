@@ -198,8 +198,6 @@
         }
       }
     });
-      }
-    });
   }
 
   // Initialize when DOM and database are ready

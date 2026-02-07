@@ -999,166 +999,161 @@
        ═══════════════════════════════════════════════════════════════════════ -->
     <div class="modal-backdrop" id="authBackdrop"></div>
     <div class="modal auth-modal" id="authModal">
-      <div class="modal-header">
-        <h3 class="modal-title">
-          <i class="fa-solid fa-heart" style="color: var(--clr-primary)"></i>
-          Welcome
-        </h3>
-        <button
-          type="button"
-          class="modal-close"
-          id="authClose"
-          aria-label="Close"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </button>
+      <button type="button" class="auth-modal-close" id="authClose" aria-label="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Decorative header -->
+      <div class="auth-hero">
+        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
+        <p class="auth-hero-sub" id="authHeroSub">Sign in to your account to continue</p>
       </div>
+
       <div class="modal-body">
+        <!-- Auth Tabs -->
         <div class="auth-tabs" id="authTabs">
           <button type="button" class="auth-tab active" data-tab="login">
-            Login
+            <i class="fa-solid fa-right-to-bracket"></i> Login
           </button>
           <button type="button" class="auth-tab" data-tab="signup">
-            Register
+            <i class="fa-solid fa-user-plus"></i> Register
           </button>
+          <span class="auth-tab-indicator"></span>
         </div>
 
+        <!-- Login Form -->
         <form class="auth-form active" id="loginForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="loginEmail">Email Address</label>
-            <input
-              type="email"
-              id="loginEmail"
-              name="email"
-              class="form-input"
-              placeholder="Enter your email"
-              autocomplete="email"
-              required
-            />
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input
+                type="email"
+                id="loginEmail"
+                name="email"
+                class="form-input"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="loginPassword">Password</label>
-            <input
-              type="password"
-              id="loginPassword"
-              name="password"
-              class="form-input"
-              placeholder="Enter your password"
-              autocomplete="current-password"
-              required
-            />
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                class="form-input"
+                placeholder="Password"
+                autocomplete="current-password"
+                required
+              />
+            </div>
           </div>
           <div class="form-group recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="loginRecaptcha"
-              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
-            ></div>
+            <div class="g-recaptcha" id="loginRecaptcha" data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"></div>
           </div>
-          <button
-            type="submit"
-            class="btn btn-primary w-full btn-disabled"
-            disabled
-          >
-            Sign In
+          <button type="submit" class="auth-submit-btn btn-disabled" disabled>
+            <span>Sign In</span>
+            <i class="fa-solid fa-arrow-right"></i>
           </button>
           <div class="auth-divider">or continue with</div>
-          <button
-            type="button"
-            class="btn btn-secondary w-full google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
+          <button type="button" class="auth-google-btn google-login-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
           </button>
         </form>
 
+        <!-- Signup Form -->
         <form class="auth-form" id="signupForm" novalidate>
-          <div class="form-group">
-            <label class="form-label" for="signupName">Full Name</label>
-            <input
-              type="text"
-              id="signupName"
-              name="fullName"
-              class="form-input"
-              placeholder="Enter your full name"
-              autocomplete="name"
-              required
-            />
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-user auth-input-icon"></i>
+              <input
+                type="text"
+                id="signupName"
+                name="fullName"
+                class="form-input"
+                placeholder="Full Name"
+                autocomplete="name"
+                required
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="signupEmail">Email Address</label>
-            <input
-              type="email"
-              id="signupEmail"
-              name="email"
-              class="form-input"
-              placeholder="Enter your email"
-              autocomplete="email"
-              required
-            />
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input
+                type="email"
+                id="signupEmail"
+                name="email"
+                class="form-input"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="signupPassword">Password</label>
-            <input
-              type="password"
-              id="signupPassword"
-              name="password"
-              class="form-input"
-              placeholder="Create a password"
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                class="form-input"
+                placeholder="Create Password"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="signupConfirm"
-              >Confirm Password</label
-            >
-            <input
-              type="password"
-              id="signupConfirm"
-              name="confirmPassword"
-              class="form-input"
-              placeholder="Confirm your password"
-              autocomplete="new-password"
-              required
-              minlength="6"
-            />
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+              <input
+                type="password"
+                id="signupConfirm"
+                name="confirmPassword"
+                class="form-input"
+                placeholder="Confirm Password"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
+            </div>
           </div>
           <div class="form-group recaptcha-field">
-            <div
-              class="g-recaptcha"
-              id="signupRecaptcha"
-              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
-            ></div>
+            <div class="g-recaptcha" id="signupRecaptcha" data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"></div>
           </div>
-          <button
-            type="submit"
-            class="btn btn-primary w-full btn-disabled"
-            disabled
-          >
-            Create Account
+          <button type="submit" class="auth-submit-btn btn-disabled" disabled>
+            <span>Create Account</span>
+            <i class="fa-solid fa-arrow-right"></i>
           </button>
           <div class="auth-divider">or continue with</div>
-          <button
-            type="button"
-            class="btn btn-secondary w-full google-login-btn"
-          >
-            <i class="fa-brands fa-google"></i> Google
+          <button type="button" class="auth-google-btn google-login-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Continue with Google
           </button>
         </form>
 
-        <p
-          style="
-            font-size: var(--text-sm);
-            color: var(--text-muted);
-            text-align: center;
-            margin-top: var(--space-4);
-          "
-        >
+        <p class="auth-legal">
           By continuing, you agree to our
-          <a href="terms.html" style="color: var(--clr-primary)">Terms</a> and
-          <a href="privacy.html" style="color: var(--clr-primary)"
-            >Privacy Policy</a
+          <a href="terms.html">Terms</a> and
+          <a href="privacy.html">Privacy Policy</a>a
           >
         </p>
       </div>

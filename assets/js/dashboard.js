@@ -270,42 +270,98 @@
       .join("");
   }
 
+  /* ── Nigerian address suggestions ── */
+  const NG_CITIES = [
+    "Lagos", "Ikeja", "Lekki", "Victoria Island", "Surulere", "Yaba", "Ajah",
+    "Ikoyi", "Mushin", "Agege", "Oshodi", "Apapa", "Badagry", "Epe", "Ikorodu",
+    "Abuja", "Garki", "Wuse", "Maitama", "Asokoro", "Gwarinpa", "Jabi", "Kubwa",
+    "Port Harcourt", "Ibadan", "Benin City", "Kano", "Kaduna", "Enugu", "Aba",
+    "Uyo", "Calabar", "Warri", "Abeokuta", "Owerri", "Jos", "Ilorin",
+    "Akure", "Ado-Ekiti", "Asaba", "Umuahia", "Onitsha", "Nsukka", "Nnewi"
+  ];
+
+  const NG_STATES = [
+    "Lagos", "FCT", "Rivers", "Oyo", "Edo", "Kano", "Kaduna", "Enugu", "Abia",
+    "Akwa Ibom", "Cross River", "Delta", "Ogun", "Imo", "Plateau", "Kwara",
+    "Ondo", "Ekiti", "Anambra", "Ebonyi"
+  ];
+
+  function attachSuggestions(input, suggestions) {
+    let listEl = null;
+    input.addEventListener("input", () => {
+      const val = input.value.trim().toLowerCase();
+      if (listEl) listEl.remove();
+      if (!val || val.length < 2) return;
+      const matches = suggestions.filter(s => s.toLowerCase().includes(val)).slice(0, 6);
+      if (!matches.length) return;
+      listEl = document.createElement("ul");
+      listEl.className = "addr-suggestions";
+      matches.forEach(m => {
+        const li = document.createElement("li");
+        li.textContent = m;
+        li.addEventListener("click", () => {
+          input.value = m;
+          listEl.remove();
+          listEl = null;
+          input.dispatchEvent(new Event("change"));
+        });
+        listEl.appendChild(li);
+      });
+      input.parentElement.style.position = "relative";
+      input.parentElement.appendChild(listEl);
+    });
+    input.addEventListener("blur", () => {
+      setTimeout(() => { if (listEl) { listEl.remove(); listEl = null; } }, 200);
+    });
+  }
+
   function promptAddress() {
-    // Build a small inline form inside a modal overlay
     const overlay = document.createElement("div");
     overlay.className = "dash-detail-overlay active";
     overlay.innerHTML = `
-      <div class="dash-detail-modal">
-        <div class="dash-detail-header">
-          <h3>Add Address</h3>
-          <button type="button" class="dash-detail-close"><i class="fa-solid fa-xmark"></i></button>
+      <div class="dash-detail-modal addr-modal">
+        <div class="addr-modal-header">
+          <div class="addr-modal-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+          <h3>Add New Address</h3>
+          <p>Start typing for location suggestions</p>
+          <button type="button" class="addr-modal-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <div class="dash-detail-body">
-          <form id="newAddressForm" style="display:flex;flex-direction:column;gap:var(--space-3);">
-            <div class="dash-form-group">
-              <label>Label <small>(optional)</small></label>
-              <input type="text" id="addrLabel" placeholder="e.g. Home, Office" />
-            </div>
-            <div class="dash-form-group">
-              <label>Street Address *</label>
-              <input type="text" id="addrStreet" required placeholder="123 Main Street" />
-            </div>
-            <div class="dash-form-row">
-              <div class="dash-form-group">
-                <label>City *</label>
-                <input type="text" id="addrCity" required placeholder="Lagos" />
-              </div>
-              <div class="dash-form-group">
-                <label>State</label>
-                <input type="text" id="addrState" placeholder="Lagos" />
+        <div class="addr-modal-body">
+          <form id="newAddressForm">
+            <div class="addr-field">
+              <label><i class="fa-solid fa-tag"></i> Label <small>(optional)</small></label>
+              <div class="addr-input-wrap">
+                <input type="text" id="addrLabel" placeholder="e.g. Home, Office, Mom's house" />
               </div>
             </div>
-            <div class="dash-form-group">
-              <label>Phone <small>(optional)</small></label>
-              <input type="tel" id="addrPhone" placeholder="+234..." />
+            <div class="addr-field">
+              <label><i class="fa-solid fa-location-dot"></i> Street Address *</label>
+              <div class="addr-input-wrap">
+                <input type="text" id="addrStreet" required placeholder="123 Main Street, Lekki Phase 1" autocomplete="street-address" />
+              </div>
             </div>
-            <button type="submit" class="dash-save-btn" style="margin-top:var(--space-2);">
-              <i class="fa-solid fa-plus"></i> Save Address
+            <div class="addr-row">
+              <div class="addr-field">
+                <label><i class="fa-solid fa-city"></i> City *</label>
+                <div class="addr-input-wrap">
+                  <input type="text" id="addrCity" required placeholder="Start typing..." autocomplete="address-level2" />
+                </div>
+              </div>
+              <div class="addr-field">
+                <label><i class="fa-solid fa-map"></i> State</label>
+                <div class="addr-input-wrap">
+                  <input type="text" id="addrState" placeholder="Start typing..." autocomplete="address-level1" />
+                </div>
+              </div>
+            </div>
+            <div class="addr-field">
+              <label><i class="fa-solid fa-phone"></i> Phone <small>(optional)</small></label>
+              <div class="addr-input-wrap">
+                <input type="tel" id="addrPhone" placeholder="+234 800 000 0000" autocomplete="tel" />
+              </div>
+            </div>
+            <button type="submit" class="addr-save-btn">
+              <i class="fa-solid fa-check"></i> Save Address
             </button>
           </form>
         </div>
@@ -314,15 +370,17 @@
     document.body.appendChild(overlay);
     document.body.style.overflow = "hidden";
 
+    // Attach city & state suggestions
+    attachSuggestions(overlay.querySelector("#addrCity"), NG_CITIES);
+    attachSuggestions(overlay.querySelector("#addrState"), NG_STATES);
+
     const closeModal = () => {
       overlay.classList.remove("active");
       document.body.style.overflow = "";
       setTimeout(() => overlay.remove(), 300);
     };
 
-    overlay
-      .querySelector(".dash-detail-close")
-      .addEventListener("click", closeModal);
+    overlay.querySelector(".addr-modal-close").addEventListener("click", closeModal);
     overlay.addEventListener("click", (e) => {
       if (e.target === overlay) closeModal();
     });
@@ -384,11 +442,36 @@
 
   /* ── Live Order Tracking UI ──────────── */
   const TRACKING_STEPS = [
-    { key: "pending",    label: "Order Placed",  icon: "fa-receipt",       desc: "Your order has been received" },
-    { key: "confirmed",  label: "Confirmed",     icon: "fa-circle-check",  desc: "Order confirmed by seller" },
-    { key: "processing", label: "Processing",    icon: "fa-boxes-stacked", desc: "Your items are being prepared" },
-    { key: "shipped",    label: "Shipped",       icon: "fa-truck-fast",    desc: "On the way to you" },
-    { key: "delivered",  label: "Delivered",     icon: "fa-box-open",      desc: "Delivered successfully" },
+    {
+      key: "pending",
+      label: "Order Placed",
+      icon: "fa-receipt",
+      desc: "Your order has been received",
+    },
+    {
+      key: "confirmed",
+      label: "Confirmed",
+      icon: "fa-circle-check",
+      desc: "Order confirmed by seller",
+    },
+    {
+      key: "processing",
+      label: "Processing",
+      icon: "fa-boxes-stacked",
+      desc: "Your items are being prepared",
+    },
+    {
+      key: "shipped",
+      label: "Shipped",
+      icon: "fa-truck-fast",
+      desc: "On the way to you",
+    },
+    {
+      key: "delivered",
+      label: "Delivered",
+      icon: "fa-box-open",
+      desc: "Delivered successfully",
+    },
   ];
 
   function buildTimeline(status, order) {

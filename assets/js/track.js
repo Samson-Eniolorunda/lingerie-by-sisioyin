@@ -34,11 +34,36 @@
   }
 
   const STEPS = [
-    { key: "pending", label: "Order Placed", icon: "fa-receipt", desc: "Your order has been received" },
-    { key: "confirmed", label: "Confirmed", icon: "fa-circle-check", desc: "Confirmed by seller" },
-    { key: "processing", label: "Processing", icon: "fa-boxes-stacked", desc: "Items being prepared" },
-    { key: "shipped", label: "Shipped", icon: "fa-truck-fast", desc: "On the way to you" },
-    { key: "delivered", label: "Delivered", icon: "fa-box-open", desc: "Delivered successfully" },
+    {
+      key: "pending",
+      label: "Order Placed",
+      icon: "fa-receipt",
+      desc: "Your order has been received",
+    },
+    {
+      key: "confirmed",
+      label: "Confirmed",
+      icon: "fa-circle-check",
+      desc: "Confirmed by seller",
+    },
+    {
+      key: "processing",
+      label: "Processing",
+      icon: "fa-boxes-stacked",
+      desc: "Items being prepared",
+    },
+    {
+      key: "shipped",
+      label: "Shipped",
+      icon: "fa-truck-fast",
+      desc: "On the way to you",
+    },
+    {
+      key: "delivered",
+      label: "Delivered",
+      icon: "fa-box-open",
+      desc: "Delivered successfully",
+    },
   ];
 
   function buildTimeline(status, createdAt) {
@@ -86,7 +111,9 @@
             <div class="track-section">
               <h4><i class="fa-solid fa-boxes-stacked"></i> ${items.length} Item${items.length !== 1 ? "s" : ""}</h4>
               <div class="track-items">
-                ${items.map((it) => `
+                ${items
+                  .map(
+                    (it) => `
                   <div class="track-item">
                     <img src="${it.image || (Array.isArray(it.images) ? it.images[0] : "") || "assets/img/placeholder.png"}" alt="" loading="lazy" />
                     <div class="track-item-info">
@@ -94,7 +121,9 @@
                       <span class="track-item-meta">${it.selectedSize || it.size || "One Size"} × ${it.quantity || it.qty || 1}</span>
                     </div>
                     <span class="track-item-price">${fmtPrice(it.price || it.price_ngn || 0)}</span>
-                  </div>`).join("")}
+                  </div>`,
+                  )
+                  .join("")}
               </div>
             </div>
             <div class="track-summary">
@@ -133,7 +162,9 @@
       if (query.toUpperCase().startsWith("LBS")) {
         const res = await c
           .from("orders")
-          .select("id, order_number, status, created_at, items, total, shipping_cost, subtotal")
+          .select(
+            "id, order_number, status, created_at, items, total, shipping_cost, subtotal",
+          )
           .eq("order_number", query.toUpperCase())
           .maybeSingle();
         data = res.data;
@@ -144,7 +175,9 @@
       if (!data && query.includes("@")) {
         const res = await c
           .from("orders")
-          .select("id, order_number, status, created_at, items, total, shipping_cost, subtotal")
+          .select(
+            "id, order_number, status, created_at, items, total, shipping_cost, subtotal",
+          )
           .eq("customer_email", query.toLowerCase().trim())
           .order("created_at", { ascending: false })
           .limit(1)
@@ -154,10 +187,16 @@
       }
 
       // Try by UUID prefix
-      if (!data && !query.includes("@") && !query.toUpperCase().startsWith("LBS")) {
+      if (
+        !data &&
+        !query.includes("@") &&
+        !query.toUpperCase().startsWith("LBS")
+      ) {
         const res = await c
           .from("orders")
-          .select("id, order_number, status, created_at, items, total, shipping_cost, subtotal")
+          .select(
+            "id, order_number, status, created_at, items, total, shipping_cost, subtotal",
+          )
           .ilike("id", `${query}%`)
           .maybeSingle();
         data = res.data;
@@ -176,7 +215,8 @@
       renderNotFound(query);
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> Track Order';
+      btn.innerHTML =
+        '<i class="fa-solid fa-magnifying-glass"></i> Track Order';
     }
   }
 

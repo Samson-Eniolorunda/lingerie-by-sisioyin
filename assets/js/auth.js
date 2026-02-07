@@ -31,11 +31,27 @@
    * Password Requirements UI
    * ───────────────────────────────────────────── */
   const PW_RULES = [
-    { key: "length",  label: "At least 8 characters", test: (p) => p.length >= 8 },
-    { key: "upper",   label: "Uppercase letter (A-Z)", test: (p) => /[A-Z]/.test(p) },
-    { key: "lower",   label: "Lowercase letter (a-z)", test: (p) => /[a-z]/.test(p) },
-    { key: "number",  label: "Number (0-9)",           test: (p) => /\d/.test(p) },
-    { key: "special", label: "Special character (!@#$…)", test: (p) => /[^A-Za-z0-9]/.test(p) },
+    {
+      key: "length",
+      label: "At least 8 characters",
+      test: (p) => p.length >= 8,
+    },
+    {
+      key: "upper",
+      label: "Uppercase letter (A-Z)",
+      test: (p) => /[A-Z]/.test(p),
+    },
+    {
+      key: "lower",
+      label: "Lowercase letter (a-z)",
+      test: (p) => /[a-z]/.test(p),
+    },
+    { key: "number", label: "Number (0-9)", test: (p) => /\d/.test(p) },
+    {
+      key: "special",
+      label: "Special character (!@#$…)",
+      test: (p) => /[^A-Za-z0-9]/.test(p),
+    },
   ];
 
   function initPasswordRequirements() {
@@ -51,13 +67,17 @@
     reqBox.innerHTML = `
       <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
       <ul class="pw-rules">
-        ${PW_RULES.map(r => `<li class="pw-rule" data-rule="${r.key}">
+        ${PW_RULES.map(
+          (r) => `<li class="pw-rule" data-rule="${r.key}">
           <i class="fa-solid fa-circle-xmark"></i> ${r.label}
-        </li>`).join("")}
+        </li>`,
+        ).join("")}
       </ul>`;
     group.after(reqBox);
 
-    pwField.addEventListener("input", () => checkPasswordStrength(pwField.value));
+    pwField.addEventListener("input", () =>
+      checkPasswordStrength(pwField.value),
+    );
     pwField.addEventListener("focus", () => reqBox.classList.add("visible"));
     pwField.addEventListener("blur", () => {
       if (!pwField.value) reqBox.classList.remove("visible");
@@ -82,7 +102,8 @@
     if (fill) {
       const pct = (passed / PW_RULES.length) * 100;
       fill.style.width = pct + "%";
-      fill.className = "pw-strength-fill " +
+      fill.className =
+        "pw-strength-fill " +
         (pct <= 40 ? "weak" : pct <= 70 ? "fair" : "strong");
     }
     return passed === PW_RULES.length;
@@ -163,6 +184,21 @@
     });
     if (loginForm) loginForm.classList.toggle("active", tab === "login");
     if (signupForm) signupForm.classList.toggle("active", tab === "signup");
+
+    // Update hero text
+    const heroTitle = document.getElementById("authHeroTitle");
+    const heroSub = document.getElementById("authHeroSub");
+    if (heroTitle) heroTitle.textContent = tab === "login" ? "Welcome Back" : "Join Us";
+    if (heroSub) heroSub.textContent = tab === "login"
+      ? "Sign in to your account to continue"
+      : "Create an account to get started";
+
+    // Move tab indicator
+    const indicator = document.querySelector(".auth-tab-indicator");
+    if (indicator) {
+      const idx = tab === "signup" ? 1 : 0;
+      indicator.style.transform = `translateX(${idx * 100}%)`;
+    }
   }
 
   /* ─────────────────────────────────────────────

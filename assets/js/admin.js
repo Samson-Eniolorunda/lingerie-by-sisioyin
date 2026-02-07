@@ -2077,28 +2077,55 @@
 
   // Status flow: what actions are available for each status
   const STATUS_FLOW = {
-    pending:    { next: "processing", nextLabel: "Process Order",  nextIcon: "fa-gear",        canCancel: true },
-    processing: { next: "shipped",    nextLabel: "Ship Order",     nextIcon: "fa-truck-fast",   canCancel: true },
-    shipped:    { next: "delivered",   nextLabel: "Mark Delivered", nextIcon: "fa-circle-check", canCancel: false },
-    delivered:  { next: null,          nextLabel: null,             nextIcon: null,              canCancel: false },
-    cancelled:  { next: null,          nextLabel: null,             nextIcon: null,              canCancel: false },
+    pending: {
+      next: "processing",
+      nextLabel: "Process Order",
+      nextIcon: "fa-gear",
+      canCancel: true,
+    },
+    processing: {
+      next: "shipped",
+      nextLabel: "Ship Order",
+      nextIcon: "fa-truck-fast",
+      canCancel: true,
+    },
+    shipped: {
+      next: "delivered",
+      nextLabel: "Mark Delivered",
+      nextIcon: "fa-circle-check",
+      canCancel: false,
+    },
+    delivered: {
+      next: null,
+      nextLabel: null,
+      nextIcon: null,
+      canCancel: false,
+    },
+    cancelled: {
+      next: null,
+      nextLabel: null,
+      nextIcon: null,
+      canCancel: false,
+    },
   };
 
   function buildOrderTimeline(status) {
     const steps = [
-      { key: "pending",    label: "Pending",    icon: "fa-clock" },
+      { key: "pending", label: "Pending", icon: "fa-clock" },
       { key: "processing", label: "Processing", icon: "fa-gear" },
-      { key: "shipped",    label: "Shipped",    icon: "fa-truck-fast" },
-      { key: "delivered",  label: "Delivered",  icon: "fa-circle-check" },
+      { key: "shipped", label: "Shipped", icon: "fa-truck-fast" },
+      { key: "delivered", label: "Delivered", icon: "fa-circle-check" },
     ];
     if (status === "cancelled") {
       return `<div class="admin-timeline"><div class="admin-timeline-step cancelled"><i class="fa-solid fa-ban"></i><span>Cancelled</span></div></div>`;
     }
-    const idx = steps.findIndex(s => s.key === status);
-    return `<div class="admin-timeline">${steps.map((s, i) => {
-      const cls = i < idx ? "done" : i === idx ? "active" : "";
-      return `<div class="admin-timeline-step ${cls}"><div class="admin-timeline-dot"><i class="fa-solid ${s.icon}"></i></div><span>${s.label}</span></div>`;
-    }).join('<div class="admin-timeline-line"></div>')}</div>`;
+    const idx = steps.findIndex((s) => s.key === status);
+    return `<div class="admin-timeline">${steps
+      .map((s, i) => {
+        const cls = i < idx ? "done" : i === idx ? "active" : "";
+        return `<div class="admin-timeline-step ${cls}"><div class="admin-timeline-dot"><i class="fa-solid ${s.icon}"></i></div><span>${s.label}</span></div>`;
+      })
+      .join('<div class="admin-timeline-line"></div>')}</div>`;
   }
 
   function renderOrderStatusActions(status) {
@@ -2132,7 +2159,14 @@
     const date = new Date(order.created_at).toLocaleString("en-NG");
     const status = order.status || "pending";
     const orderNum = order.order_number || `#${order.id.slice(0, 8)}`;
-    const shippingAddr = [order.delivery_address || order.shipping_address, order.delivery_city, order.delivery_state].filter(Boolean).join(", ") || "Not provided";
+    const shippingAddr =
+      [
+        order.delivery_address || order.shipping_address,
+        order.delivery_city,
+        order.delivery_state,
+      ]
+        .filter(Boolean)
+        .join(", ") || "Not provided";
 
     body.innerHTML = `
       <div class="order-modal-status-bar">
@@ -2160,7 +2194,9 @@
       </div>
       <div class="order-detail-section">
         <h4><i class="fa-solid fa-boxes-stacked"></i> Items (${items.length})</h4>
-        ${items.map((item) => `
+        ${items
+          .map(
+            (item) => `
           <div class="order-item-row">
             <img src="${item.image || item.images?.[0] || "assets/img/placeholder.png"}" alt="${escapeHtml(item.name)}" class="order-item-img" />
             <div class="order-item-info">
@@ -2168,7 +2204,9 @@
               <div class="order-item-meta">Size: ${item.size || item.selectedSize || "-"} &middot; Qty: ${item.quantity || item.qty || 1}</div>
             </div>
             <div class="order-item-price">₦${((item.price || item.price_ngn || 0) * (item.quantity || item.qty || 1)).toLocaleString()}</div>
-          </div>`).join("")}
+          </div>`,
+          )
+          .join("")}
       </div>
       <div class="order-detail-section order-summary-section">
         <div class="order-detail-row"><span>Subtotal</span><span>₦${(order.subtotal || order.total || 0).toLocaleString()}</span></div>
@@ -2189,12 +2227,24 @@
 
   async function updateOrderStatusTo(newStatus) {
     if (!currentOrderId) return;
-    if (newStatus === "cancelled" && !confirm("Are you sure you want to cancel this order?")) return;
+    if (
+      newStatus === "cancelled" &&
+      !confirm("Are you sure you want to cancel this order?")
+    )
+      return;
 
-    console.log("[updateOrderStatus] Updating order", currentOrderId, "to", newStatus);
+    console.log(
+      "[updateOrderStatus] Updating order",
+      currentOrderId,
+      "to",
+      newStatus,
+    );
 
     const btn = $(`[data-set-status="${newStatus}"]`);
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...'; }
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+    }
 
     const { error } = await supabase
       .from("orders")
@@ -2204,7 +2254,9 @@
     if (error) {
       console.error("[updateOrderStatus] Error:", error);
       showToast("Failed to update status");
-      if (btn) { btn.disabled = false; }
+      if (btn) {
+        btn.disabled = false;
+      }
       return;
     }
 
@@ -4339,7 +4391,7 @@
         .reduce((sum, o) => sum + (o.total || 0), 0);
 
       const ordersEl = $("#totalOrdersCount");
-      const pendingEl = $("#pendingOrdersCount");
+      const pendingEl = $("#dashPendingCount");
       const revenueEl = $("#totalRevenueAmount");
 
       if (ordersEl) ordersEl.textContent = totalOrders;
@@ -4633,9 +4685,19 @@
         .single();
       if (data?.display_name) {
         displayName = data.display_name;
+      } else if (session.user.user_metadata?.full_name) {
+        displayName = session.user.user_metadata.full_name;
+      } else if (session.user.email) {
+        displayName = session.user.email.split("@")[0];
       }
     } catch (e) {
-      console.log("Could not fetch display name");
+      // Fallback to metadata or email
+      if (session.user.user_metadata?.full_name) {
+        displayName = session.user.user_metadata.full_name;
+      } else if (session.user.email) {
+        displayName = session.user.email.split("@")[0];
+      }
+      console.log("Could not fetch display name, using fallback");
     }
 
     // Set the name

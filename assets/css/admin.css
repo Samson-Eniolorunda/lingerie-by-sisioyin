@@ -5953,11 +5953,26 @@ html[data-theme="dark"] {
   text-transform: capitalize;
 }
 
-.order-status.pending { background: rgba(245,158,11,0.12); color: #b45309; }
-.order-status.processing { background: rgba(59,130,246,0.12); color: #1d4ed8; }
-.order-status.shipped { background: rgba(139,92,246,0.12); color: #6d28d9; }
-.order-status.delivered { background: rgba(34,197,94,0.12); color: #15803d; }
-.order-status.cancelled { background: rgba(239,68,68,0.12); color: #b91c1c; }
+.order-status.pending {
+  background: rgba(245, 158, 11, 0.12);
+  color: #b45309;
+}
+.order-status.processing {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+.order-status.shipped {
+  background: rgba(139, 92, 246, 0.12);
+  color: #6d28d9;
+}
+.order-status.delivered {
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+}
+.order-status.cancelled {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
 
 /* Admin Timeline */
 .admin-timeline {
@@ -6010,8 +6025,13 @@ html[data-theme="dark"] {
   box-shadow: 0 0 0 4px rgba(190, 24, 93, 0.15);
 }
 
-.admin-timeline-step.active span { color: var(--primary); font-weight: 600; }
-.admin-timeline-step.done span { color: var(--clr-success); }
+.admin-timeline-step.active span {
+  color: var(--primary);
+  font-weight: 600;
+}
+.admin-timeline-step.done span {
+  color: var(--clr-success);
+}
 
 .admin-timeline-step.cancelled .admin-timeline-dot {
   background: var(--clr-error);
@@ -6091,8 +6111,17 @@ html[data-theme="dark"] {
   border-bottom: 1px solid var(--border-light);
 }
 
-.order-detail-row:last-child { border-bottom: none; }
-.order-detail-row.total { font-weight: 700; font-size: var(--text-base); color: var(--text-primary); border-top: 2px solid var(--border-default); padding-top: var(--space-3); margin-top: var(--space-2); }
+.order-detail-row:last-child {
+  border-bottom: none;
+}
+.order-detail-row.total {
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--text-primary);
+  border-top: 2px solid var(--border-default);
+  padding-top: var(--space-3);
+  margin-top: var(--space-2);
+}
 
 .order-summary-section {
   background: var(--bg-surface-alt);
@@ -6109,7 +6138,9 @@ html[data-theme="dark"] {
   border-bottom: 1px solid var(--border-light);
 }
 
-.order-item-row:last-child { border-bottom: none; }
+.order-item-row:last-child {
+  border-bottom: none;
+}
 
 .order-item-img {
   width: 48px;
@@ -6120,10 +6151,26 @@ html[data-theme="dark"] {
   flex-shrink: 0;
 }
 
-.order-item-info { flex: 1; min-width: 0; }
-.order-item-name { font-weight: 500; font-size: var(--text-sm); color: var(--text-primary); }
-.order-item-meta { font-size: var(--text-xs); color: var(--text-muted); margin-top: 2px; }
-.order-item-price { font-weight: 600; font-size: var(--text-sm); color: var(--text-primary); white-space: nowrap; }
+.order-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.order-item-name {
+  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+.order-item-meta {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.order-item-price {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
 
 /* Order Modal Footer - Status Actions */
 .order-modal-footer {
@@ -6146,9 +6193,171 @@ html[data-theme="dark"] {
   .order-modal-grid {
     grid-template-columns: 1fr;
   }
-  .admin-timeline-line { width: 20px; }
-  .admin-timeline-dot { width: 30px; height: 30px; font-size: 12px; }
-  .admin-timeline-step span { font-size: 10px; }
-  .order-modal-footer { flex-direction: column; }
-  .order-modal-footer .btn { width: 100%; }
+  .admin-timeline-line {
+    width: 20px;
+  }
+  .admin-timeline-dot {
+    width: 30px;
+    height: 30px;
+    font-size: 12px;
+  }
+  .admin-timeline-step span {
+    font-size: 10px;
+  }
+  .order-modal-footer {
+    flex-direction: column;
+  }
+  .order-modal-footer .btn {
+    width: 100%;
+  }
+}
+
+/* =============================================================================
+   ADMIN BUG FIXES & IMPROVEMENTS
+   ============================================================================= */
+
+/* ── #15: Order action buttons — improve visibility in both modes ── */
+.order-modal-footer .btn {
+  padding: var(--space-3) var(--space-5);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border-radius: var(--radius-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.order-modal-footer .btn[data-set-status="processing"] {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #fff;
+}
+
+.order-modal-footer .btn[data-set-status="shipped"] {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: #fff;
+}
+
+.order-modal-footer .btn[data-set-status="delivered"] {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+}
+
+.order-modal-footer .btn[data-set-status="cancelled"] {
+  background: transparent;
+  border: 2px solid #ef4444;
+  color: #ef4444;
+}
+
+.order-modal-footer .btn[data-set-status="cancelled"]:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.order-modal-footer .btn:hover:not([data-set-status="cancelled"]) {
+  opacity: 0.85;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ── #19: Studio form-row mobile fix — ensure proper spacing ── */
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-4);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-3);
+  }
+
+  .form-group label {
+    margin-bottom: 4px;
+    font-size: var(--text-xs);
+  }
+}
+
+/* ── #20: Admin auth form — reduce spacing + no terms cookie ── */
+.auth-form {
+  gap: var(--space-3);
+}
+
+.auth-form-header {
+  margin-bottom: var(--space-2);
+}
+
+.auth-form .form-group {
+  margin-bottom: var(--space-2);
+}
+
+/* ── #23: Admin dropdown overflow + unified arrow style ── */
+.form-select,
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  padding-right: 36px;
+}
+
+/* Stock filter dropdown — prevent overflow */
+.content-header .form-select,
+.content-header select {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── #16: Analytics page — cleaner design ── */
+.analytics-setup {
+  padding: var(--space-5);
+}
+
+.analytics-setup-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  transition: all 0.2s;
+}
+
+.analytics-setup-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.analytics-stats {
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.analytics-chart-card {
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-sm);
+}
+
+@media (max-width: 640px) {
+  .analytics-charts {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .analytics-setup-card {
+    flex-direction: column;
+    text-align: center;
+    padding: var(--space-4);
+  }
 }

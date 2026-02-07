@@ -475,6 +475,49 @@
   }
 
   // Initialize checkout page
+  /* ── Saved address picker ── */
+  function loadSavedAddresses() {
+    const picker = document.getElementById("savedAddrPicker");
+    const list = document.getElementById("savedAddrList");
+    if (!picker || !list) return;
+
+    let addrs = [];
+    try { addrs = JSON.parse(localStorage.getItem("LBS_ADDRESSES") || "[]"); } catch { /* ignore */ }
+    if (!addrs.length) { picker.style.display = "none"; return; }
+
+    picker.style.display = "";
+    list.innerHTML = addrs.map((a, i) => `
+      <button type="button" class="saved-addr-chip" data-idx="${i}">
+        <span class="saved-addr-chip-icon"><i class="fa-solid fa-location-dot"></i></span>
+        <span class="saved-addr-chip-text">
+          <strong>${a.label || "Address " + (i + 1)}</strong>
+          <small>${a.street}, ${a.city}${a.state ? ", " + a.state : ""}</small>
+        </span>
+      </button>`).join("");
+
+    list.querySelectorAll(".saved-addr-chip").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const a = addrs[+btn.dataset.idx];
+        if (!a) return;
+        const addrEl = document.getElementById("address");
+        const cityEl = document.getElementById("city");
+        const stateEl = document.getElementById("state");
+        if (addrEl) addrEl.value = a.street;
+        if (cityEl) cityEl.value = a.city;
+        if (stateEl) {
+          // Try to match select option
+          const opt = [...stateEl.options].find(o => o.value.toLowerCase().includes((a.state || "").toLowerCase()));
+          stateEl.value = opt ? opt.value : a.state || "";
+        }
+        // Highlight selected chip
+        list.querySelectorAll(".saved-addr-chip").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        // Trigger floating label
+        [addrEl, cityEl, stateEl].forEach(el => { if (el) el.dispatchEvent(new Event("input")); });
+      });
+    });
+  }
+
   function init() {
     // Check if we're on checkout page
     if (!document.getElementById("checkoutWrapper")) return;
@@ -484,6 +527,7 @@
     setupPaymentMethods();
     setupStateSelect();
     updateProgressSteps();
+    loadSavedAddresses();
 
     // Event listeners
     const placeOrderBtn = document.getElementById("placeOrderBtn");
