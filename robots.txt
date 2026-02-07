@@ -1,0 +1,9 @@
+# Lingerie by Sisioyin - robots.txt
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /dashboard
+
+# Sitemap
+Sitemap: https://lingeriebysisioyin.store/sitemap.xml

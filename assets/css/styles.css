@@ -7726,11 +7726,12 @@ html[data-theme="dark"] .newsletter-btn:hover {
   opacity: 0.7;
   pointer-events: none;
   transition: opacity 0.2s;
+  z-index: 1;
 }
 .auth-input-wrap .form-input,
 .auth-input-wrap input {
   width: 100%;
-  padding: 0.75rem 0.85rem 0.75rem 2.5rem;
+  padding: 0.75rem 2.8rem 0.75rem 2.5rem;
   border: 1.5px solid var(--clr-border);
   border-radius: var(--radius-md);
   background: var(--clr-bg);
@@ -7748,6 +7749,36 @@ html[data-theme="dark"] .newsletter-btn:hover {
 }
 .auth-input-wrap:focus-within .auth-input-icon {
   opacity: 1;
+}
+
+/* Password wrapper inside auth modal */
+.auth-input-wrap .password-wrapper {
+  width: 100%;
+  position: relative;
+}
+.auth-input-wrap .password-wrapper .form-input,
+.auth-input-wrap .password-wrapper input {
+  padding-right: 2.8rem;
+}
+.auth-input-wrap .password-toggle {
+  z-index: 2;
+}
+
+/* Forgot password link */
+.auth-forgot {
+  text-align: right;
+  margin: -0.25rem 0 var(--space-3);
+}
+.auth-forgot-link {
+  font-size: 0.8rem;
+  color: var(--clr-primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.auth-forgot-link:hover {
+  color: var(--clr-primary-hover);
+  text-decoration: underline;
 }
 
 /* Submit & Google buttons */
@@ -9360,16 +9391,46 @@ html[data-theme="dark"] .newsletter-btn:hover {
   background: var(--clr-primary-dark);
 }
 
+/* Hide checkout progress when cart is empty */
+.checkout-progress-section.is-hidden {
+  display: none;
+}
+
+/* Breadcrumb disabled link */
+.breadcrumb-disabled {
+  pointer-events: none;
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* Checkout Responsive */
 @media (max-width: 768px) {
+  .checkout-progress {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: var(--space-4) var(--space-2);
+    scrollbar-width: none;
+  }
+  .checkout-progress::-webkit-scrollbar {
+    display: none;
+  }
+
   .checkout-progress-step .step-circle {
-    width: 40px;
-    height: 40px;
-    font-size: var(--text-base);
+    width: 36px;
+    height: 36px;
+    font-size: var(--text-sm);
+    border-width: 2px;
   }
 
   .checkout-progress-step .step-label {
     font-size: var(--text-xs);
+    white-space: nowrap;
+  }
+
+  .checkout-progress-connector {
+    min-width: 20px;
+    max-width: 50px;
+    margin-bottom: 22px;
   }
 
   .checkout-card-header {
@@ -15246,26 +15307,33 @@ html[data-theme="dark"] .dash-addr-card {
 @media (max-width: 480px) {
   .checkout-progress {
     gap: 0;
-    padding: var(--space-3) 0;
+    padding: var(--space-2) 0;
   }
 
   .checkout-progress-step .step-circle {
-    width: 32px;
-    height: 32px;
-    font-size: var(--text-sm);
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+    border-width: 2px;
   }
 
   .checkout-progress-step .step-label {
-    font-size: 0.65rem;
+    font-size: 0.6rem;
+    max-width: 60px;
+    text-align: center;
+    line-height: 1.2;
   }
 
   .checkout-progress-connector {
-    max-width: 40px;
-    margin-bottom: 20px;
+    min-width: 12px;
+    max-width: 30px;
+    margin-bottom: 16px;
+    height: 2px;
   }
 
   .checkout-progress-step {
-    max-width: 80px;
+    max-width: 65px;
+    min-width: 0;
   }
 }
 
@@ -15945,6 +16013,16 @@ html[data-theme="dark"] .dash-addr-card {
   opacity: 0.9;
 }
 
+.consent-btn-save {
+  background: var(--clr-primary);
+  color: #fff;
+  opacity: 0.85;
+}
+
+.consent-btn-save:hover {
+  opacity: 1;
+}
+
 .consent-btn-essential {
   background: var(--bg-surface);
   color: var(--text-secondary);
@@ -15954,6 +16032,94 @@ html[data-theme="dark"] .dash-addr-card {
 .consent-btn-essential:hover {
   background: var(--bg-muted);
   color: var(--text-primary);
+}
+
+/* Cookie Consent Toggles */
+.consent-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  text-align: left;
+}
+
+.consent-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+}
+
+.consent-toggle-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.consent-toggle-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.consent-toggle-desc {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.consent-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.consent-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.consent-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background: var(--border-medium, #ccc);
+  border-radius: 22px;
+  transition: background 0.25s;
+}
+
+.consent-slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.25s;
+}
+
+.consent-switch input:checked + .consent-slider {
+  background: var(--clr-primary);
+}
+
+.consent-switch input:checked + .consent-slider::before {
+  transform: translateX(18px);
+}
+
+.consent-switch.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.consent-switch.disabled .consent-slider {
+  background: var(--clr-primary);
 }
 
 /* =============================================================================
@@ -18104,4 +18270,267 @@ html[data-theme="dark"] .qm-color.active {
 .track-review-btn:hover {
   background: var(--clr-primary);
   color: #fff;
+}
+
+/* =============================================================================
+   Review/Rating Dropdown Border Fix + Unified Dropdown Styling
+   ============================================================================= */
+
+/* Ensure all select/dropdown borders are always visible */
+select,
+.form-select,
+.sort-dropdown,
+.dash-order-filter select,
+.dash-form-group select,
+.qm-review-input,
+.summary-delivery-select {
+  border: 1.5px solid var(--border-default, #d1d5db);
+  border-radius: var(--radius-md);
+}
+
+select:focus,
+.form-select:focus,
+.sort-dropdown:focus,
+.qm-review-input:focus,
+.summary-delivery-select:focus {
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
+  outline: none;
+}
+
+/* Dark mode dropdown borders */
+html[data-theme="dark"] select,
+html[data-theme="dark"] .form-select,
+html[data-theme="dark"] .sort-dropdown,
+html[data-theme="dark"] .qm-review-input,
+html[data-theme="dark"] .summary-delivery-select {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Unified dropdown arrow — colored, padded from border */
+select,
+.form-select,
+.sort-dropdown {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23be185d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px;
+  padding-right: 38px !important;
+}
+
+/* Export dropdown unified styling */
+.export-dropdown {
+  position: relative;
+}
+
+.export-menu {
+  min-width: 180px;
+  border: 1.5px solid var(--border-default, #d1d5db);
+}
+
+html[data-theme="dark"] .export-menu {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* =============================================================================
+   Form Spacing — Mobile
+   ============================================================================= */
+@media (max-width: 640px) {
+  .form-group,
+  .form-floating,
+  .dash-form-group {
+    margin-bottom: var(--space-3);
+  }
+
+  .form-row-2 {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .form-floating label {
+    font-size: var(--text-sm);
+  }
+
+  /* Reduce card padding on mobile */
+  .checkout-card-body {
+    padding: var(--space-3);
+  }
+
+  /* Review form compact */
+  .qm-review-form {
+    padding: var(--space-3);
+  }
+
+  .qm-star-picker {
+    gap: 0.15rem;
+  }
+
+  .qm-star-btn {
+    font-size: 1.25rem;
+  }
+}
+
+/* =============================================================================
+   Post-Delivery Review Popup
+   ============================================================================= */
+.review-popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.35s,
+    visibility 0.35s;
+}
+
+.review-popup-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.review-popup-modal {
+  background: var(--bg-primary, #fff);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-2xl);
+  padding: var(--space-6);
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+  animation: consentSlideUp 0.4s ease-out;
+  position: relative;
+}
+
+.review-popup-close {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--space-1);
+  transition: color 0.2s;
+}
+
+.review-popup-close:hover {
+  color: var(--text-primary);
+}
+
+.review-popup-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f59e0b, #eab308);
+  border-radius: var(--radius-full);
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.review-popup-title {
+  font-family: var(--ff-display, var(--font-heading));
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.review-popup-text {
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-4);
+}
+
+.review-popup-stars {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.review-popup-star {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 2rem;
+  color: #f59e0b;
+  padding: 0;
+  transition: transform 0.15s;
+}
+
+.review-popup-star:hover {
+  transform: scale(1.2);
+}
+
+.review-popup-star.active i {
+  color: #f59e0b;
+}
+
+.review-popup-comment {
+  width: 100%;
+  padding: var(--space-3);
+  border: 1.5px solid var(--border-default, #d1d5db);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface, #fff);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  resize: vertical;
+  min-height: 70px;
+  margin-bottom: var(--space-4);
+  transition: border-color 0.2s;
+}
+
+.review-popup-comment:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+.review-popup-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.review-popup-submit {
+  width: 100%;
+}
+
+.review-popup-skip {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  padding: var(--space-2);
+  transition: color 0.2s;
+}
+
+.review-popup-skip:hover {
+  color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+  .review-popup-modal {
+    padding: var(--space-4);
+    margin: var(--space-3);
+  }
+
+  .review-popup-star {
+    font-size: 1.5rem;
+  }
 }

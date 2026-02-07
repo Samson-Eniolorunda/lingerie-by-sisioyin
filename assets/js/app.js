@@ -2138,13 +2138,55 @@
         <div class="consent-icon"><i class="fa-solid fa-cookie-bite"></i></div>
         <h3 class="consent-title">We value your privacy</h3>
         <p class="consent-text">
-          We use essential cookies for site functionality and optional analytics cookies
-          to improve your experience. By clicking <strong>Accept All</strong>, you consent to
-          our use of cookies per our <a href="/privacy">Privacy&nbsp;Policy</a> and
+          We use cookies to enhance your experience. Manage your preferences below
+          or read our <a href="/privacy">Privacy&nbsp;Policy</a> and
           <a href="/terms">Terms&nbsp;of&nbsp;Service</a>.
         </p>
+        <div class="consent-toggles">
+          <div class="consent-toggle-row">
+            <div class="consent-toggle-info">
+              <span class="consent-toggle-label">Essential</span>
+              <span class="consent-toggle-desc">Required for site functionality</span>
+            </div>
+            <label class="consent-switch disabled">
+              <input type="checkbox" checked disabled />
+              <span class="consent-slider"></span>
+            </label>
+          </div>
+          <div class="consent-toggle-row">
+            <div class="consent-toggle-info">
+              <span class="consent-toggle-label">Analytics</span>
+              <span class="consent-toggle-desc">Help us understand site usage</span>
+            </div>
+            <label class="consent-switch">
+              <input type="checkbox" id="consentAnalytics" checked />
+              <span class="consent-slider"></span>
+            </label>
+          </div>
+          <div class="consent-toggle-row">
+            <div class="consent-toggle-info">
+              <span class="consent-toggle-label">Marketing</span>
+              <span class="consent-toggle-desc">Personalized ads &amp; recommendations</span>
+            </div>
+            <label class="consent-switch">
+              <input type="checkbox" id="consentMarketing" />
+              <span class="consent-slider"></span>
+            </label>
+          </div>
+          <div class="consent-toggle-row">
+            <div class="consent-toggle-info">
+              <span class="consent-toggle-label">Functional</span>
+              <span class="consent-toggle-desc">Remember preferences &amp; settings</span>
+            </div>
+            <label class="consent-switch">
+              <input type="checkbox" id="consentFunctional" checked />
+              <span class="consent-slider"></span>
+            </label>
+          </div>
+        </div>
         <div class="consent-actions">
           <button class="consent-btn consent-btn-accept" id="consentAcceptAll">Accept All</button>
+          <button class="consent-btn consent-btn-save" id="consentSavePrefs">Save Preferences</button>
           <button class="consent-btn consent-btn-essential" id="consentEssential">Essential Only</button>
         </div>
       </div>`;
@@ -2154,25 +2196,194 @@
       requestAnimationFrame(() => overlay.classList.add("visible"));
     });
 
-    const dismiss = (allowAnalytics) => {
+    const dismiss = (prefs) => {
       localStorage.setItem(
         TERMS_KEY,
-        JSON.stringify({ ts: Date.now(), analytics: allowAnalytics }),
+        JSON.stringify({ ts: Date.now(), ...prefs }),
       );
       overlay.classList.remove("visible");
       setTimeout(() => overlay.remove(), 400);
-      // If essential-only, disable GA + FB pixels
-      if (!allowAnalytics) {
-        window["ga-disable-G-XXXXXXXXXX"] = true; // GA opt-out
+      // Disable GA + FB if analytics not allowed
+      if (!prefs.analytics) {
+        window["ga-disable-" + (window.APP_CONFIG?.GA_MEASUREMENT_ID || "")] =
+          true;
+      }
+      if (!prefs.marketing && window.fbq) {
+        // Revoke FB pixel consent
+        try {
+          window.fbq("consent", "revoke");
+        } catch (_) {}
       }
     };
 
     document
       .getElementById("consentAcceptAll")
-      .addEventListener("click", () => dismiss(true));
+      .addEventListener("click", () =>
+        dismiss({ analytics: true, marketing: true, functional: true }),
+      );
+    document.getElementById("consentSavePrefs").addEventListener("click", () =>
+      dismiss({
+        analytics: !!document.getElementById("consentAnalytics")?.checked,
+        marketing: !!document.getElementById("consentMarketing")?.checked,
+        functional: !!document.getElementById("consentFunctional")?.checked,
+      }),
+    );
     document
       .getElementById("consentEssential")
-      .addEventListener("click", () => dismiss(false));
+      .addEventListener("click", () =>
+        dismiss({ analytics: false, marketing: false, functional: false }),
+      );
+  }
+
+  /* ─────────────────────────────────────────────
+   * Post-Delivery Review Popup
+   * Checks if user has delivered orders without reviews
+   * ───────────────────────────────────────────── */
+  function initPostDeliveryReview() {
+    const REVIEW_KEY = "LBS_REVIEW_PROMPTED";
+
+    window.addEventListener("auth:changed", async (e) => {
+      const user = e.detail?.user;
+      if (!user) return;
+
+      // Only prompt once per session
+      if (sessionStorage.getItem(REVIEW_KEY)) return;
+      sessionStorage.setItem(REVIEW_KEY, "1");
+
+      const client = window.DB?.client;
+      if (!client) return;
+
+      try {
+        // Get delivered orders for this user
+        const { data: orders } = await client
+          .from("orders")
+          .select("id, order_number, items, status, customer_email")
+          .eq("customer_email", user.email)
+          .eq("status", "delivered")
+          .order("created_at", { ascending: false })
+          .limit(5);
+
+        if (!orders?.length) return;
+
+        // Check which orders already have reviews
+        const orderIds = orders.map((o) => o.id);
+        const { data: reviews } = await client
+          .from("reviews")
+          .select("order_id")
+          .in("order_id", orderIds);
+
+        const reviewedOrderIds = new Set(
+          (reviews || []).map((r) => r.order_id),
+        );
+        const unreviewedOrders = orders.filter(
+          (o) => !reviewedOrderIds.has(o.id),
+        );
+
+        if (!unreviewedOrders.length) return;
+
+        // Show review popup for the first unreviewed order
+        const order = unreviewedOrders[0];
+        const firstName =
+          user.user_metadata?.full_name?.split(" ")[0] || "there";
+        showReviewPopup(order, firstName, client);
+      } catch (err) {
+        console.log("APP: Review check skipped:", err.message);
+      }
+    });
+  }
+
+  function showReviewPopup(order, firstName, client) {
+    const itemName = order.items?.[0]?.name || "your order";
+    const overlay = document.createElement("div");
+    overlay.className = "review-popup-overlay";
+    overlay.innerHTML = `
+      <div class="review-popup-modal">
+        <button class="review-popup-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+        <div class="review-popup-icon"><i class="fa-solid fa-star"></i></div>
+        <h3 class="review-popup-title">Hi ${UTILS.safeText(firstName)}! How was your order?</h3>
+        <p class="review-popup-text">Your order <strong>${UTILS.safeText(order.order_number || "")}</strong> including <em>${UTILS.safeText(itemName)}</em> has been delivered. We'd love your feedback!</p>
+        <div class="review-popup-stars" id="reviewPopupStars">
+          ${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="review-popup-star" data-rating="${n}"><i class="fa-regular fa-star"></i></button>`).join("")}
+        </div>
+        <textarea class="review-popup-comment" id="reviewPopupComment" placeholder="Share your experience (optional)" rows="3"></textarea>
+        <div class="review-popup-actions">
+          <button class="btn btn-primary review-popup-submit" id="reviewPopupSubmit">Submit Review</button>
+          <button class="review-popup-skip" id="reviewPopupSkip">Maybe Later</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("visible"));
+
+    let selectedRating = 0;
+
+    // Star click
+    overlay
+      .querySelector("#reviewPopupStars")
+      .addEventListener("click", (e) => {
+        const star = e.target.closest(".review-popup-star");
+        if (!star) return;
+        selectedRating = parseInt(star.dataset.rating);
+        overlay.querySelectorAll(".review-popup-star").forEach((s, i) => {
+          const icon = s.querySelector("i");
+          icon.className =
+            i < selectedRating ? "fa-solid fa-star" : "fa-regular fa-star";
+          s.classList.toggle("active", i < selectedRating);
+        });
+      });
+
+    // Submit
+    overlay
+      .querySelector("#reviewPopupSubmit")
+      .addEventListener("click", async () => {
+        if (!selectedRating) {
+          showToast("Please select a rating", "warning");
+          return;
+        }
+
+        const comment = overlay
+          .querySelector("#reviewPopupComment")
+          .value.trim();
+        const btn = overlay.querySelector("#reviewPopupSubmit");
+        btn.disabled = true;
+        btn.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+        try {
+          const { error } = await client.from("reviews").insert({
+            order_id: order.id,
+            product_name: order.items?.[0]?.name || "",
+            rating: selectedRating,
+            comment: comment || null,
+            customer_name:
+              window.AUTH?.getUser()?.user_metadata?.full_name || "Customer",
+            customer_email: window.AUTH?.getUser()?.email || "",
+            is_approved: false,
+          });
+
+          if (error) throw error;
+          showToast("Thank you for your review!", "success");
+        } catch (err) {
+          showToast("Failed to submit review", "error");
+        }
+
+        closePopup();
+      });
+
+    // Skip / Close
+    const closePopup = () => {
+      overlay.classList.remove("visible");
+      setTimeout(() => overlay.remove(), 350);
+    };
+    overlay
+      .querySelector("#reviewPopupSkip")
+      .addEventListener("click", closePopup);
+    overlay
+      .querySelector(".review-popup-close")
+      .addEventListener("click", closePopup);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) closePopup();
+    });
   }
 
   /* ─────────────────────────────────────────────
@@ -2199,5 +2410,6 @@
   initRealtime();
   registerServiceWorker();
   initTermsBanner();
+  initPostDeliveryReview();
   console.log("✅ APP: Bootstrap complete");
 })();

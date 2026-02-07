@@ -202,7 +202,7 @@ function customerEmailHTML(order: OrderRecord): string {
         <!-- CTA -->
         <tr>
           <td style="padding:0 32px 32px;text-align:center;">
-            <a href="${SITE_URL}/dashboard.html" style="display:inline-block;background:#8b5a2b;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+            <a href="${SITE_URL}/dashboard" style="display:inline-block;background:#8b5a2b;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
               Track Your Order
             </a>
           </td>
@@ -323,7 +323,7 @@ function adminEmailHTML(order: OrderRecord): string {
         <!-- CTA -->
         <tr>
           <td style="padding:0 32px 32px;text-align:center;">
-            <a href="${SITE_URL}/admin.html" style="display:inline-block;background:#2d2319;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+            <a href="${SITE_URL}/admin" style="display:inline-block;background:#2d2319;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
               Open Admin Panel
             </a>
           </td>
@@ -436,7 +436,7 @@ function statusUpdateEmailHTML(order: OrderRecord, newStatus: string): string {
         <!-- CTA -->
         <tr>
           <td style="padding:16px 32px 32px;text-align:center;">
-            <a href="${SITE_URL}/track.html?order=${encodeURIComponent(order.order_number)}" style="display:inline-block;background:#8b5a2b;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+            <a href="${SITE_URL}/track?order=${encodeURIComponent(order.order_number)}" style="display:inline-block;background:#8b5a2b;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
               Track Your Order
             </a>
           </td>
@@ -562,7 +562,7 @@ serve(async (req: Request) => {
       const adminResult = await sendEmail(
         ADMIN_EMAIL,
         `📋 Order ${order.order_number} → ${newStatus.toUpperCase()}`,
-        `<p>Order <strong>${order.order_number}</strong> status changed from <strong>${oldRecord.status}</strong> to <strong>${newStatus}</strong>.</p><p><a href="${SITE_URL}/admin.html">Open Admin</a></p>`,
+        `<p>Order <strong>${order.order_number}</strong> status changed from <strong>${oldRecord.status}</strong> to <strong>${newStatus}</strong>.</p><p><a href="${SITE_URL}/admin">Open Admin</a></p>`,
       );
       results.admin = adminResult.success
         ? "sent"

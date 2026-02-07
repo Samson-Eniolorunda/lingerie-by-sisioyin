@@ -1258,6 +1258,7 @@
         siteImages: "Site Images",
         reviews: "Customer Reviews",
         analytics: "Analytics",
+        customers: "Customers",
       };
       title.textContent = titles[viewId] || viewId;
     }
@@ -1300,6 +1301,11 @@
     // Load analytics when switching to that view
     if (viewId === "analytics") {
       loadAnalytics();
+    }
+
+    // Load customers when switching to that view
+    if (viewId === "customers") {
+      loadCustomers();
     }
   }
 
@@ -5305,10 +5311,9 @@
         .from("orders")
         .select("id, total, status");
 
-      const totalRevenue = (allOrders || []).reduce(
-        (s, o) => s + (parseFloat(o.total) || 0),
-        0,
-      );
+      const totalRevenue = (allOrders || [])
+        .filter((o) => o.status === "delivered")
+        .reduce((s, o) => s + (parseFloat(o.total) || 0), 0);
       const totalOrders = (allOrders || []).length;
       const conversionRate =
         customerCount > 0
@@ -5452,7 +5457,9 @@
 
     try {
       // Get order items and count
-      const { data: orders } = await supabase.from("orders").select("items");
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("items, status");
 
       if (!orders || !orders.length) {
         container.innerHTML =
@@ -5460,18 +5467,20 @@
         return;
       }
 
-      // Tally product occurrences
+      // Tally product occurrences — only count delivered orders for revenue
       const productCounts = {};
       const productRevenue = {};
       orders.forEach((order) => {
         const items = order.items || [];
+        const isDelivered = order.status === "delivered";
         items.forEach((item) => {
           const name = item.name || "Unknown";
-          productCounts[name] =
-            (productCounts[name] || 0) + (item.quantity || 1);
-          productRevenue[name] =
-            (productRevenue[name] || 0) +
-            (item.price || 0) * (item.quantity || 1);
+          const qty = item.quantity || item.qty || 1;
+          const price = item.price_ngn || item.price || 0;
+          productCounts[name] = (productCounts[name] || 0) + qty;
+          if (isDelivered) {
+            productRevenue[name] = (productRevenue[name] || 0) + price * qty;
+          }
         });
       });
 
@@ -5622,6 +5631,187 @@
         stateEl.innerHTML =
           '<p class="text-muted text-center">Failed to load state data</p>';
     }
+  }
+
+  /* =========================
+    Customers Management
+  ========================= */
+  let allCustomers = [];
+
+  async function loadCustomers() {
+    console.log("[loadCustomers] Loading customers");
+    const body = $("#customersBody");
+    if (!body) return;
+
+    body.innerHTML =
+      '<tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>';
+
+    try {
+      // Fetch all non-admin profiles
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("id, full_name, email, phone, created_at, is_admin")
+        .eq("is_admin", false)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+
+      // Fetch order summaries per customer email
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("customer_email, total, status");
+
+      const orderMap = {};
+      (orders || []).forEach((o) => {
+        const key = (o.customer_email || "").toLowerCase();
+        if (!orderMap[key]) orderMap[key] = { count: 0, spent: 0 };
+        orderMap[key].count++;
+        if (o.status === "delivered")
+          orderMap[key].spent += parseFloat(o.total) || 0;
+      });
+
+      allCustomers = (profiles || []).map((p) => {
+        const key = (p.email || "").toLowerCase();
+        const stats = orderMap[key] || { count: 0, spent: 0 };
+        return { ...p, orderCount: stats.count, totalSpent: stats.spent };
+      });
+
+      // Update stats
+      const now = new Date();
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const newCount = allCustomers.filter(
+        (c) => new Date(c.created_at) >= thirtyDaysAgo,
+      ).length;
+      const withOrders = allCustomers.filter((c) => c.orderCount > 0).length;
+
+      const totalEl = $("#custTotalCount");
+      const newEl = $("#custNewCount");
+      const withOrdersEl = $("#custWithOrdersCount");
+      if (totalEl) totalEl.textContent = allCustomers.length;
+      if (newEl) newEl.textContent = newCount;
+      if (withOrdersEl) withOrdersEl.textContent = withOrders;
+
+      renderCustomers(allCustomers);
+    } catch (err) {
+      console.error("[loadCustomers] Error:", err);
+      body.innerHTML =
+        '<tr><td colspan="7" class="text-center text-muted">Failed to load customers</td></tr>';
+    }
+  }
+
+  function renderCustomers(customers) {
+    const body = $("#customersBody");
+    if (!body) return;
+
+    if (!customers.length) {
+      body.innerHTML =
+        '<tr><td colspan="7" class="text-center text-muted">No customers found</td></tr>';
+      return;
+    }
+
+    const fmt = (n) =>
+      "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+    body.innerHTML = customers
+      .map(
+        (c, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${escapeHtml(c.full_name || "—")}</td>
+          <td>${escapeHtml(c.email || "—")}</td>
+          <td>${escapeHtml(c.phone || "—")}</td>
+          <td>${c.orderCount}</td>
+          <td>${fmt(c.totalSpent)}</td>
+          <td>${c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : "—"}</td>
+        </tr>
+      `,
+      )
+      .join("");
+  }
+
+  // Customer search
+  on($("#customerSearch"), "input", (e) => {
+    const q = (e.target.value || "").toLowerCase();
+    if (!q) {
+      renderCustomers(allCustomers);
+      return;
+    }
+    const filtered = allCustomers.filter((c) =>
+      [c.full_name, c.email, c.phone].some((f) =>
+        (f || "").toLowerCase().includes(q),
+      ),
+    );
+    renderCustomers(filtered);
+  });
+
+  // Customer export dropdown
+  (function bindCustomerExport() {
+    const btn = $("#customerExportBtn");
+    const menu = $("#customerExportMenu");
+    if (!btn || !menu) return;
+
+    on(btn, "click", (e) => {
+      e.stopPropagation();
+      menu.hidden = !menu.hidden;
+    });
+    document.addEventListener("click", () => {
+      if (menu) menu.hidden = true;
+    });
+
+    on(menu, "click", (e) => {
+      const opt = e.target.closest("[data-customer-export]");
+      if (!opt) return;
+      menu.hidden = true;
+      const fmt = opt.dataset.customerExport;
+      exportCustomersAs(fmt);
+    });
+  })();
+
+  function exportCustomersAs(format) {
+    if (!allCustomers.length) {
+      showToast("No customers to export");
+      return;
+    }
+
+    const date = new Date().toISOString().split("T")[0];
+    const rows = allCustomers.map((c) => ({
+      name: c.full_name || "",
+      email: c.email || "",
+      phone: c.phone || "",
+      orders: c.orderCount,
+      total_spent: c.totalSpent,
+      joined: c.created_at
+        ? new Date(c.created_at).toLocaleDateString("en-GB")
+        : "",
+    }));
+
+    if (format === "csv") {
+      exportToCSV(rows, `customers_${date}.csv`);
+    } else if (format === "json") {
+      const blob = new Blob([JSON.stringify(rows, null, 2)], {
+        type: "application/json",
+      });
+      downloadBlob(blob, `customers_${date}.json`);
+    } else if (format === "txt") {
+      const header = "Name | Email | Phone | Orders | Total Spent | Joined";
+      const sep = "-".repeat(80);
+      const lines = rows.map(
+        (r) =>
+          `${r.name} | ${r.email} | ${r.phone} | ${r.orders} | ₦${r.total_spent.toLocaleString()} | ${r.joined}`,
+      );
+      const text = [header, sep, ...lines].join("\n");
+      const blob = new Blob([text], { type: "text/plain" });
+      downloadBlob(blob, `customers_${date}.txt`);
+    }
+  }
+
+  function downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("Exported successfully");
   }
 
   /* =========================
@@ -5877,7 +6067,7 @@
           password,
           options: {
             data: { first_name: firstName, last_name: lastName },
-            emailRedirectTo: window.location.origin + "/admin.html",
+            emailRedirectTo: window.location.origin + "/admin",
           },
         });
 

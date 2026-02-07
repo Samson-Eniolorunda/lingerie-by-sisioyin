@@ -157,8 +157,19 @@
     if (!cart.length) {
       if (emptyEl) emptyEl.style.display = "block";
       if (wrapperEl) wrapperEl.style.display = "none";
+      // Hide checkout progress when cart is empty
+      const progressSection = document.querySelector(
+        ".checkout-progress-section",
+      );
+      if (progressSection) progressSection.classList.add("is-hidden");
       return;
     }
+
+    // Show progress when cart has items
+    const progressSection = document.querySelector(
+      ".checkout-progress-section",
+    );
+    if (progressSection) progressSection.classList.remove("is-hidden");
 
     if (emptyEl) emptyEl.style.display = "none";
     if (wrapperEl) wrapperEl.style.display = "grid";

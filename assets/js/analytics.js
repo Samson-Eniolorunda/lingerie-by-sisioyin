@@ -326,7 +326,74 @@
     initGoogleAnalytics();
     initFacebookPixel();
     trackVisitorLocation();
+    trackDeviceType();
     console.log("✅ ANALYTICS: Module initialized");
+  }
+
+  /* ─────────────────────────────────────────────
+   * Device Type Tracking
+   * ───────────────────────────────────────────── */
+  function trackDeviceType() {
+    try {
+      if (sessionStorage.getItem("lbs_device_tracked")) return;
+
+      const ua = navigator.userAgent || "";
+      const width = window.innerWidth;
+      let deviceType = "desktop";
+      if (/Mobi|Android/i.test(ua) || width < 768) deviceType = "mobile";
+      else if (/Tablet|iPad/i.test(ua) || (width >= 768 && width < 1024))
+        deviceType = "tablet";
+
+      const browser = (function () {
+        if (ua.includes("Firefox")) return "Firefox";
+        if (ua.includes("Edg")) return "Edge";
+        if (ua.includes("OPR") || ua.includes("Opera")) return "Opera";
+        if (ua.includes("Chrome")) return "Chrome";
+        if (ua.includes("Safari")) return "Safari";
+        return "Other";
+      })();
+
+      const os = (function () {
+        if (ua.includes("Windows")) return "Windows";
+        if (ua.includes("Mac OS")) return "macOS";
+        if (ua.includes("Linux")) return "Linux";
+        if (ua.includes("Android")) return "Android";
+        if (/iPhone|iPad|iPod/.test(ua)) return "iOS";
+        return "Other";
+      })();
+
+      // Send to GA4
+      if (window.gtag && GA_ID) {
+        window.gtag("event", "device_info", {
+          device_type: deviceType,
+          browser: browser,
+          operating_system: os,
+          screen_width: width,
+          screen_height: window.innerHeight,
+        });
+      }
+
+      // Store in Supabase site_visits if available
+      const c = window.supabaseClient || window.DB?.client;
+      if (c) {
+        c.from("site_visits")
+          .update({
+            device_type: deviceType,
+            browser: browser,
+            os: os,
+          })
+          .eq("page", window.location.pathname)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .then(() => {})
+          .catch(() => {});
+      }
+
+      sessionStorage.setItem("lbs_device_tracked", "1");
+      console.log("📊 ANALYTICS: Device tracked:", deviceType, browser, os);
+    } catch (err) {
+      console.log("📊 ANALYTICS: Device tracking skipped:", err.message);
+    }
   }
 
   /* ─────────────────────────────────────────────
@@ -340,7 +407,7 @@
 
       const res = await fetch(
         "http://ip-api.com/json/?fields=status,country,countryCode,regionName,city",
-        { cache: "no-store" }
+        { cache: "no-store" },
       );
       if (!res.ok) return;
 
@@ -376,18 +443,25 @@
       // Store in Supabase analytics_events table if available
       const c = window.supabaseClient || window.DB?.client;
       if (c) {
-        c.from("site_visits").insert({
-          country: locationData.country,
-          country_code: locationData.country_code,
-          region: locationData.region,
-          city: locationData.city,
-          page: window.location.pathname,
-          referrer: document.referrer || null,
-        }).then(() => {}).catch(() => {});
+        c.from("site_visits")
+          .insert({
+            country: locationData.country,
+            country_code: locationData.country_code,
+            region: locationData.region,
+            city: locationData.city,
+            page: window.location.pathname,
+            referrer: document.referrer || null,
+          })
+          .then(() => {})
+          .catch(() => {});
       }
 
       sessionStorage.setItem("lbs_geo_tracked", "1");
-      console.log("📊 ANALYTICS: Visitor location tracked:", locationData.country, locationData.region);
+      console.log(
+        "📊 ANALYTICS: Visitor location tracked:",
+        locationData.country,
+        locationData.region,
+      );
     } catch (err) {
       // Silently fail — geo tracking is non-critical
       console.log("📊 ANALYTICS: Geo tracking skipped:", err.message);

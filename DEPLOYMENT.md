@@ -97,6 +97,47 @@ Vercel auto-deploys on every push to `main`.
 
 ---
 
+## Local Development (Pretty URLs)
+
+Vercel's `cleanUrls: true` in `vercel.json` strips `.html` extensions in production.
+To get the same pretty URLs locally, use the **Vercel CLI**:
+
+```bash
+npm i -g vercel          # install once
+vercel dev               # starts local server at http://localhost:3000
+```
+
+This reads `vercel.json` and serves `/shop` → `shop.html`, `/cart` → `cart.html`, etc., exactly like production.
+
+> **Alternative:** If you prefer VS Code Live Server, URLs will need `.html` — this only affects local dev and won't impact the deployed site.
+
+---
+
+## Monnify Configuration
+
+To receive **support** and **chargeback** notification emails:
+
+1. Log into [Monnify Dashboard](https://app.monnify.com) → **Settings** → **Business Profile**
+2. Set **Support Email** to `support@lingeriebysisioyin.store`
+3. Under **Notifications** → enable **Chargeback Notifications**
+4. Set the chargeback notification email to `adelugbaoyindamola@lingeriebysisioyin.store`
+
+---
+
+## Google OAuth Branding
+
+To show your site name instead of the Supabase project URL on the Google consent screen:
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com) → **APIs & Services** → **OAuth consent screen**
+2. Set the **Application name** to `Lingerie by Sisioyin`
+3. Add `lingeriebysisioyin.store` to **Authorized domains**
+4. Upload a logo if desired
+5. In **Supabase Dashboard** → **Authentication** → **URL Configuration**, set:
+   - **Site URL**: `https://lingeriebysisioyin.store`
+   - **Redirect URLs**: `https://lingeriebysisioyin.store/**`
+
+---
+
 ## Database Migrations
 
 For schema changes, edit `supabase_complete.sql` and run the new SQL in:

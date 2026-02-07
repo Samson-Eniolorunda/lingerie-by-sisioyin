@@ -106,6 +106,23 @@
       countEl.textContent = `${count} item${count !== 1 ? "s" : ""} in your cart`;
     }
 
+    // Toggle checkout progress visibility + breadcrumb link
+    const progressSection = document.querySelector(
+      ".checkout-progress-section",
+    );
+    const breadcrumbCheckout = document.querySelector(
+      '.breadcrumb a[href="/checkout"]',
+    );
+    if (!cart.length) {
+      if (progressSection) progressSection.classList.add("is-hidden");
+      if (breadcrumbCheckout)
+        breadcrumbCheckout.classList.add("breadcrumb-disabled");
+    } else {
+      if (progressSection) progressSection.classList.remove("is-hidden");
+      if (breadcrumbCheckout)
+        breadcrumbCheckout.classList.remove("breadcrumb-disabled");
+    }
+
     // Empty state
     if (!cart.length) {
       console.log("🛒 CART: No items - showing empty state");

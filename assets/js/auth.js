@@ -58,12 +58,12 @@
     const pwField = $("#signupPassword");
     if (!pwField) return;
 
-    // Inject requirements UI after the password field's form-group
-    const group = pwField.closest(".form-group");
+    // Inject requirements UI after the password field's auth-field wrapper
+    const group = pwField.closest(".auth-field");
     if (!group) return;
 
     const reqBox = document.createElement("div");
-    reqBox.className = "password-requirements";
+    reqBox.className = "password-requirements visible"; // Always visible when on signup tab
     reqBox.innerHTML = `
       <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
       <ul class="pw-rules">
@@ -75,13 +75,12 @@
       </ul>`;
     group.after(reqBox);
 
+    // Live validation as user types
     pwField.addEventListener("input", () =>
       checkPasswordStrength(pwField.value),
     );
+    // Always show requirements when signup tab is active
     pwField.addEventListener("focus", () => reqBox.classList.add("visible"));
-    pwField.addEventListener("blur", () => {
-      if (!pwField.value) reqBox.classList.remove("visible");
-    });
   }
 
   function checkPasswordStrength(pw) {
@@ -188,10 +187,13 @@
     // Update hero text
     const heroTitle = document.getElementById("authHeroTitle");
     const heroSub = document.getElementById("authHeroSub");
-    if (heroTitle) heroTitle.textContent = tab === "login" ? "Welcome Back" : "Join Us";
-    if (heroSub) heroSub.textContent = tab === "login"
-      ? "Sign in to your account to continue"
-      : "Create an account to get started";
+    if (heroTitle)
+      heroTitle.textContent = tab === "login" ? "Welcome Back" : "Join Us";
+    if (heroSub)
+      heroSub.textContent =
+        tab === "login"
+          ? "Sign in to your account to continue"
+          : "Create an account to get started";
 
     // Move tab indicator
     const indicator = document.querySelector(".auth-tab-indicator");
@@ -298,6 +300,9 @@
         provider: "google",
         options: {
           redirectTo: window.location.origin,
+          queryParams: {
+            prompt: "select_account",
+          },
         },
       });
 
@@ -305,6 +310,53 @@
     } catch (err) {
       console.error("🔐 AUTH: Google login error:", err);
       window.UTILS?.toast?.(err.message || "Google login failed", "error");
+    }
+  }
+
+  /* ─────────────────────────────────────────────
+   * Forgot Password
+   * ───────────────────────────────────────────── */
+  async function handleForgotPassword() {
+    const email = loginForm?.querySelector('[name="email"]')?.value?.trim();
+    if (!email) {
+      window.UTILS?.toast?.("Please enter your email address first", "warning");
+      return;
+    }
+
+    const client = getClient();
+    if (!client) {
+      window.UTILS?.toast?.("Authentication service unavailable", "error");
+      return;
+    }
+
+    const forgotBtn = document.getElementById("forgotPasswordLink");
+    if (forgotBtn) {
+      forgotBtn.textContent = "Sending...";
+      forgotBtn.style.pointerEvents = "none";
+    }
+
+    try {
+      const { error } = await client.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + "/dashboard",
+      });
+
+      if (error) throw error;
+
+      window.UTILS?.toast?.(
+        "Password reset link sent! Check your email.",
+        "success",
+      );
+    } catch (err) {
+      console.error("🔐 AUTH: Forgot password error:", err);
+      window.UTILS?.toast?.(
+        err.message || "Failed to send reset link",
+        "error",
+      );
+    } finally {
+      if (forgotBtn) {
+        forgotBtn.textContent = "Forgot password?";
+        forgotBtn.style.pointerEvents = "";
+      }
     }
   }
 
@@ -560,6 +612,15 @@
     $$(".google-login-btn").forEach((btn) => {
       btn.addEventListener("click", handleGoogleLogin);
     });
+
+    // Forgot password link
+    const forgotLink = document.getElementById("forgotPasswordLink");
+    if (forgotLink) {
+      forgotLink.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleForgotPassword();
+      });
+    }
 
     // Password toggle buttons
     $$(".pw-toggle").forEach((btn) => {

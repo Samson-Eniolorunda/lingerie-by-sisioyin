@@ -5,22 +5,22 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v4";
+const CACHE_NAME = "lbs-cache-v5";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
-  "/shop.html",
-  "/cart.html",
-  "/checkout.html",
-  "/confirmation.html",
-  "/wishlist.html",
-  "/dashboard.html",
-  "/contact.html",
-  "/faq.html",
-  "/size.html",
-  "/terms.html",
-  "/privacy.html",
-  "/track.html",
+  "/shop",
+  "/cart",
+  "/checkout",
+  "/confirmation",
+  "/wishlist",
+  "/dashboard",
+  "/contact",
+  "/faq",
+  "/size",
+  "/terms",
+  "/privacy",
+  "/track",
   "/assets/css/styles.css",
   "/assets/js/config.js",
   "/assets/js/utils.js",

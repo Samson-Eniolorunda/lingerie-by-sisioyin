@@ -684,6 +684,11 @@
             <span>Analytics</span>
           </button>
 
+          <button class="nav-item" data-view-target="customers" type="button">
+            <i class="fa-solid fa-users"></i>
+            <span>Customers</span>
+          </button>
+
           <div class="nav-divider"></div>
 
           <button class="nav-item" id="openInviteModalBtn" type="button">
@@ -1888,6 +1893,93 @@
             <div class="analytics-table-wrap" id="geoStateTable">
               <p class="text-muted text-center">Loading...</p>
             </div>
+          </div>
+        </section>
+
+        <!-- ═══ Customers View ═══ -->
+        <section class="content-view" id="viewCustomers">
+          <div class="view-header">
+            <h2><i class="fa-solid fa-users"></i> Customers</h2>
+            <div class="view-header-actions">
+              <input
+                type="search"
+                id="customerSearch"
+                class="search-input"
+                placeholder="Search customers..."
+              />
+              <div class="export-dropdown" id="customerExportDropdown">
+                <button
+                  class="topbar-btn"
+                  id="customerExportBtn"
+                  type="button"
+                  title="Export Customers"
+                >
+                  <i class="fa-solid fa-file-export"></i>
+                  <span>Export</span>
+                  <i
+                    class="fa-solid fa-chevron-down"
+                    style="font-size: 10px; margin-left: 4px"
+                  ></i>
+                </button>
+                <div class="export-menu" id="customerExportMenu" hidden>
+                  <button
+                    type="button"
+                    class="export-option"
+                    data-customer-export="csv"
+                  >
+                    <i class="fa-solid fa-file-csv"></i> CSV
+                  </button>
+                  <button
+                    type="button"
+                    class="export-option"
+                    data-customer-export="json"
+                  >
+                    <i class="fa-solid fa-file-code"></i> JSON
+                  </button>
+                  <button
+                    type="button"
+                    class="export-option"
+                    data-customer-export="txt"
+                  >
+                    <i class="fa-solid fa-file-lines"></i> Plain Text
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="customers-stats" id="customerStats">
+            <div class="stat-card stat-card--mini">
+              <span class="stat-value" id="custTotalCount">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-card stat-card--mini">
+              <span class="stat-value" id="custNewCount">0</span>
+              <span class="stat-label">New (30d)</span>
+            </div>
+            <div class="stat-card stat-card--mini">
+              <span class="stat-value" id="custWithOrdersCount">0</span>
+              <span class="stat-label">With Orders</span>
+            </div>
+          </div>
+          <div class="table-responsive" id="customersTableWrap">
+            <table class="table" id="customersTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Orders</th>
+                  <th>Total Spent</th>
+                  <th>Joined</th>
+                </tr>
+              </thead>
+              <tbody id="customersBody">
+                <tr>
+                  <td colspan="7" class="text-center text-muted">Loading...</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </section>
       </div>
