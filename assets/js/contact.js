@@ -100,6 +100,10 @@
       '<i class="fa-solid fa-paper-plane"></i> Send Message';
   };
 
+  // Bind reset button (replaces inline onclick)
+  const resetBtn = document.getElementById("resetContactBtn");
+  if (resetBtn) resetBtn.addEventListener("click", window.resetContactForm);
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", init);
   } else {

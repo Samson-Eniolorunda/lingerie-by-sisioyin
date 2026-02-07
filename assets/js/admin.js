@@ -5168,6 +5168,9 @@
 
       // Top products
       await renderTopProducts();
+
+      // Geo analytics (country & Nigerian state)
+      await loadGeoAnalytics();
     } catch (err) {
       console.error("[loadAnalytics] Error:", err);
     }
@@ -5345,6 +5348,98 @@
   // Analytics refresh & period change handlers
   on($("#analyticsRefreshBtn"), "click", () => loadAnalytics());
   on($("#analyticsPeriod"), "change", () => loadAnalytics());
+
+  /* ─────────────────────────────────────────────
+   * Geo Analytics: Visitors by Country & Nigerian State
+   * ───────────────────────────────────────────── */
+  async function loadGeoAnalytics() {
+    const countryEl = $("#geoCountryTable");
+    const stateEl = $("#geoStateTable");
+    if (!countryEl && !stateEl) return;
+
+    try {
+      const days = parseInt($("#analyticsPeriod")?.value || "30", 10);
+      const since = new Date();
+      since.setDate(since.getDate() - days);
+
+      const { data: visits, error } = await supabase
+        .from("site_visits")
+        .select("country, country_code, region")
+        .gte("created_at", since.toISOString());
+
+      if (error) throw error;
+
+      // ── Visits by Country ──
+      if (countryEl) {
+        if (!visits?.length) {
+          countryEl.innerHTML = '<p class="text-muted text-center" style="padding:2rem">No visitor data yet</p>';
+        } else {
+          const countryCounts = {};
+          visits.forEach((v) => {
+            const key = v.country || "Unknown";
+            countryCounts[key] = (countryCounts[key] || 0) + 1;
+          });
+          const sorted = Object.entries(countryCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 20);
+          const total = visits.length;
+
+          countryEl.innerHTML = `
+            <table class="table">
+              <thead><tr><th>#</th><th>Country</th><th>Visits</th><th>%</th></tr></thead>
+              <tbody>
+                ${sorted.map(([country, count], i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td>${escapeHtml(country)}</td>
+                    <td>${count}</td>
+                    <td>${((count / total) * 100).toFixed(1)}%</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `;
+        }
+      }
+
+      // ── Nigerian Visitors by State ──
+      if (stateEl) {
+        const ngVisits = visits?.filter((v) => v.country_code === "NG") || [];
+        if (!ngVisits.length) {
+          stateEl.innerHTML = '<p class="text-muted text-center" style="padding:2rem">No Nigerian visitor data yet</p>';
+        } else {
+          const stateCounts = {};
+          ngVisits.forEach((v) => {
+            const key = v.region || "Unknown";
+            stateCounts[key] = (stateCounts[key] || 0) + 1;
+          });
+          const sorted = Object.entries(stateCounts)
+            .sort((a, b) => b[1] - a[1]);
+          const total = ngVisits.length;
+
+          stateEl.innerHTML = `
+            <table class="table">
+              <thead><tr><th>#</th><th>State</th><th>Visits</th><th>%</th></tr></thead>
+              <tbody>
+                ${sorted.map(([state, count], i) => `
+                  <tr>
+                    <td>${i + 1}</td>
+                    <td>${escapeHtml(state)}</td>
+                    <td>${count}</td>
+                    <td>${((count / total) * 100).toFixed(1)}%</td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          `;
+        }
+      }
+    } catch (err) {
+      console.error("[loadGeoAnalytics] Error:", err);
+      if (countryEl) countryEl.innerHTML = '<p class="text-muted text-center">Failed to load geo data</p>';
+      if (stateEl) stateEl.innerHTML = '<p class="text-muted text-center">Failed to load state data</p>';
+    }
+  }
 
   /* =========================
     Reviews Management

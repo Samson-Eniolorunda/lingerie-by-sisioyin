@@ -702,7 +702,39 @@ CREATE POLICY "storage: admin delete site images"
   USING (bucket_id = 'site-images' AND public.is_admin());
 
 -- ============================================================================
--- 20) PERMISSIONS
+-- 20) SITE VISITS — Geo Analytics (Country & Nigerian State Tracking)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.site_visits (
+  id            UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  country       TEXT,
+  country_code  TEXT,
+  region        TEXT,         -- State/Province (Nigerian states for NG visitors)
+  city          TEXT,
+  page          TEXT,
+  referrer      TEXT,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_site_visits_country  ON public.site_visits(country_code);
+CREATE INDEX IF NOT EXISTS idx_site_visits_region   ON public.site_visits(region);
+CREATE INDEX IF NOT EXISTS idx_site_visits_created  ON public.site_visits(created_at DESC);
+
+ALTER TABLE public.site_visits ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can insert visits (anonymous tracking)
+DROP POLICY IF EXISTS "Anyone can insert site visits" ON public.site_visits;
+CREATE POLICY "Anyone can insert site visits"
+  ON public.site_visits FOR INSERT
+  WITH CHECK (true);
+
+-- Only admins can read visit analytics
+DROP POLICY IF EXISTS "Admins can read site visits" ON public.site_visits;
+CREATE POLICY "Admins can read site visits"
+  ON public.site_visits FOR SELECT
+  USING (public.is_admin());
+
+-- ============================================================================
+-- 21) PERMISSIONS
 -- ============================================================================
 GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT USAGE ON SCHEMA public TO anon;
@@ -712,10 +744,10 @@ COMMIT;
 -- ============================================================================
 -- DONE!
 --
--- Tables (10):
+-- Tables (11):
 --   profiles, admin_invites, products, admin_activity_logs,
 --   reviews, testimonials, newsletter_subscribers, promo_codes,
---   orders, site_settings
+--   orders, site_settings, site_visits
 --
 -- Functions (7):
 --   is_admin, set_updated_at, set_audit_fields, log_activity_with_name,

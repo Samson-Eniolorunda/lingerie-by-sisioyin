@@ -291,7 +291,7 @@
         <div
           class="checkout-empty-state"
           id="checkoutEmpty"
-          style="display: none"
+          class="u-hidden"
         >
           <div class="empty-icon">
             <i class="fa-solid fa-bag-shopping"></i>
@@ -316,7 +316,7 @@
             >
               <div
                 class="checkout-card-header"
-                onclick="toggleSection('contact')"
+                data-toggle-section="contact"
               >
                 <div class="card-icon">
                   <i class="fa-solid fa-user"></i>
@@ -381,7 +381,7 @@
                 <button
                   type="button"
                   class="section-continue-btn"
-                  onclick="completeSection('contact')"
+                  data-complete-section="contact"
                 >
                   Continue to Delivery <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -396,7 +396,7 @@
             >
               <div
                 class="checkout-card-header"
-                onclick="toggleSection('delivery')"
+                data-toggle-section="delivery"
               >
                 <div class="card-icon">
                   <i class="fa-solid fa-truck"></i>
@@ -411,7 +411,7 @@
               </div>
               <div class="checkout-card-body">
                 <!-- Saved addresses -->
-                <div id="savedAddrPicker" class="saved-addr-picker" style="display:none">
+                <div id="savedAddrPicker" class="saved-addr-picker u-hidden" >
                   <label class="saved-addr-label"><i class="fa-solid fa-bookmark"></i> Use a saved address</label>
                   <div id="savedAddrList" class="saved-addr-list"></div>
                 </div>
@@ -480,7 +480,7 @@
                 <button
                   type="button"
                   class="section-continue-btn"
-                  onclick="completeSection('delivery')"
+                  data-complete-section="delivery"
                 >
                   Continue to Payment <i class="fa-solid fa-arrow-right"></i>
                 </button>
@@ -491,7 +491,7 @@
             <div class="checkout-card" id="paymentCard" data-section="payment">
               <div
                 class="checkout-card-header"
-                onclick="toggleSection('payment')"
+                data-toggle-section="payment"
               >
                 <div class="card-icon">
                   <i class="fa-solid fa-credit-card"></i>
@@ -564,7 +564,7 @@
                   <span>Subtotal</span>
                   <span id="checkoutSubtotal">₦0</span>
                 </div>
-                <div class="summary-row" id="discountRow" style="display: none">
+                <div class="summary-row u-hidden" id="discountRow" >
                   <span>Discount</span>
                   <span class="discount" id="checkoutDiscount">-₦0</span>
                 </div>
@@ -759,7 +759,7 @@
         <p class="auth-legal">
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
-          <a href="/privacy">Privacy Policy</a>a
+          <a href="/privacy">Privacy Policy</a>
           >
         </p>
       </div>
@@ -788,24 +788,12 @@
         <div
           class="search-results"
           id="searchResults"
-          style="
-            background: var(--bg-surface);
-            border-radius: var(--radius-xl);
-            margin-top: var(--space-4);
-            max-height: 400px;
-            overflow-y: auto;
-          "
+
         >
-          <div
-            style="
-              padding: var(--space-8);
-              text-align: center;
-              color: var(--text-muted);
-            "
-          >
+          <div class="search-placeholder">
             <i
               class="fa-solid fa-magnifying-glass"
-              style="font-size: var(--text-2xl); margin-bottom: var(--space-2)"
+
             ></i>
             <p>Start typing to search products...</p>
           </div>
@@ -839,7 +827,7 @@
             <a href="/shop" class="btn btn-primary">Start Shopping</a>
           </div>
         </div>
-        <div class="cd-footer" id="cartDrawerFooter" style="display: none">
+        <div class="cd-footer u-hidden" id="cartDrawerFooter" >
           <div class="cd-subtotal">
             <span class="cd-subtotal-label">Subtotal</span>
             <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
@@ -868,10 +856,10 @@
             <a
               href="/"
               class="logo"
-              style="margin-bottom: var(--space-4)"
+             
             >
               <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
-              <span class="logo-text" style="display: inline"
+              <span class="logo-text"
                 >Lingerie by Sisioyin</span
               >
             </a>

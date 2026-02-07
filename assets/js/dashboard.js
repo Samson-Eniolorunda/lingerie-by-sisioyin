@@ -40,6 +40,22 @@
     return window.DB?.client || null;
   }
 
+  /* ── Pre-check: hide gate instantly if we have a session cookie ── */
+  (function preCheck() {
+    try {
+      const stored = localStorage.getItem("sb-oriojylsilcsvcsefuux-auth-token");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed?.currentSession || parsed?.access_token) {
+          gate.style.display = "none";
+          shell.style.display = "block";
+        }
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  })();
+
   /* ── Helpers ──────────────────────────────── */
   function fmtPrice(n) {
     return new Intl.NumberFormat("en-NG", {
@@ -732,7 +748,7 @@
   async function init() {
     bind();
     const c = client();
-    if (!c) return setTimeout(init, 500);
+    if (!c) return setTimeout(init, 200);
 
     try {
       const {
@@ -745,8 +761,8 @@
   }
 
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", () => setTimeout(init, 600));
+    document.addEventListener("DOMContentLoaded", () => setTimeout(init, 100));
   } else {
-    setTimeout(init, 600);
+    setTimeout(init, 100);
   }
 })();

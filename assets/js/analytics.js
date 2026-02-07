@@ -325,7 +325,73 @@
   function init() {
     initGoogleAnalytics();
     initFacebookPixel();
+    trackVisitorLocation();
     console.log("✅ ANALYTICS: Module initialized");
+  }
+
+  /* ─────────────────────────────────────────────
+   * Visitor Location Tracking (Country & Nigerian State)
+   * Uses ip-api.com (free, no key needed, 45 req/min)
+   * ───────────────────────────────────────────── */
+  async function trackVisitorLocation() {
+    try {
+      // Avoid duplicate tracking within the same session
+      if (sessionStorage.getItem("lbs_geo_tracked")) return;
+
+      const res = await fetch(
+        "http://ip-api.com/json/?fields=status,country,countryCode,regionName,city",
+        { cache: "no-store" }
+      );
+      if (!res.ok) return;
+
+      const geo = await res.json();
+      if (geo.status !== "success") return;
+
+      const locationData = {
+        country: geo.country || "Unknown",
+        country_code: geo.countryCode || "",
+        region: geo.regionName || "",
+        city: geo.city || "",
+      };
+
+      // Send to GA4 as custom event
+      if (window.gtag && GA_ID) {
+        window.gtag("event", "visitor_location", {
+          country: locationData.country,
+          country_code: locationData.country_code,
+          region: locationData.region,
+          city: locationData.city,
+          is_nigeria: locationData.country_code === "NG" ? "yes" : "no",
+        });
+
+        // If Nigerian visitor, also send state-level event
+        if (locationData.country_code === "NG" && locationData.region) {
+          window.gtag("event", "nigerian_visitor", {
+            state: locationData.region,
+            city: locationData.city,
+          });
+        }
+      }
+
+      // Store in Supabase analytics_events table if available
+      const c = window.supabaseClient || window.DB?.client;
+      if (c) {
+        c.from("site_visits").insert({
+          country: locationData.country,
+          country_code: locationData.country_code,
+          region: locationData.region,
+          city: locationData.city,
+          page: window.location.pathname,
+          referrer: document.referrer || null,
+        }).then(() => {}).catch(() => {});
+      }
+
+      sessionStorage.setItem("lbs_geo_tracked", "1");
+      console.log("📊 ANALYTICS: Visitor location tracked:", locationData.country, locationData.region);
+    } catch (err) {
+      // Silently fail — geo tracking is non-critical
+      console.log("📊 ANALYTICS: Geo tracking skipped:", err.message);
+    }
   }
 
   // Expose globally

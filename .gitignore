@@ -38,3 +38,4 @@ GOOGLE_LOGIN_SETUP.md
 # Supabase local temp files
 supabase/.temp/
 supabase/config.toml
+nul

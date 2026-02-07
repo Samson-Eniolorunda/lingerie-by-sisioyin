@@ -559,6 +559,14 @@
     // Expose functions globally for onclick handlers
     window.toggleSection = toggleSection;
     window.completeSection = completeSection;
+
+    // Bind data-attribute section toggles (replaces inline onclick handlers)
+    document.querySelectorAll("[data-toggle-section]").forEach((el) => {
+      el.addEventListener("click", () => toggleSection(el.dataset.toggleSection));
+    });
+    document.querySelectorAll("[data-complete-section]").forEach((el) => {
+      el.addEventListener("click", () => completeSection(el.dataset.completeSection));
+    });
   }
 
   // Run on DOM ready

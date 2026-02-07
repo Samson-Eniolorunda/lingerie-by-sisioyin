@@ -193,6 +193,19 @@ input[type="number"] {
   --radius-3xl: 1.5rem; /* 24px */
   --radius-full: 9999px;
 
+  /* ─── Alias Variables (used by auth modal & other components) ─── */
+  --clr-accent: var(--clr-rose);
+  --clr-bg: var(--bg-body);
+  --clr-border: var(--border-default);
+  --clr-text: var(--text-primary);
+  --clr-text-muted: var(--text-muted);
+  --clr-surface: var(--bg-surface);
+  --clr-primary-rgb: 190, 24, 93;
+  --bg-primary: var(--bg-surface);
+  --bg-secondary: var(--bg-surface-alt);
+  --bg-hover: var(--bg-muted);
+  --primary: var(--clr-primary);
+
   /* ─── Transitions ─── */
   --transition-fast: 150ms ease;
   --transition-base: 200ms ease;
@@ -7118,6 +7131,16 @@ html[data-theme="dark"] {
     var(--bg-surface) 0%,
     rgba(190, 24, 93, 0.1) 100%
   );
+
+  /* Dark mode aliases */
+  --clr-bg: #0a0a0f;
+  --clr-border: #3d3d4a;
+  --clr-text: #f8fafc;
+  --clr-text-muted: #94a3b8;
+  --clr-surface: #111118;
+  --bg-primary: #111118;
+  --bg-secondary: #1a1a24;
+  --bg-hover: #2a2a34;
 }
 
 /* ─── Dark Mode Overrides for Hardcoded Colors ─── */
@@ -16603,3 +16626,1146 @@ html[data-theme="dark"] .qv-color {
   .saved-addr-list { flex-direction: column; }
   .saved-addr-chip { width: 100%; }
 }
+
+/* =============================================================================
+   COMPREHENSIVE FIX PASS — Issues #1-15
+   ============================================================================= */
+
+/* ── Issue #7: Hero text visibility in LIGHT mode ──
+   These hero sections use gradient backgrounds (primary→primary-dark)
+   with white text. Explicitly set color so it never inherits a theme var. */
+
+.faq-hero-title,
+.faq-hero-subtitle,
+.size-hero-title,
+.size-hero-subtitle,
+.contact-hero h1,
+.contact-hero p,
+.legal-hero-title,
+.legal-hero-updated,
+.wishlist-hero-title,
+.wishlist-hero-subtitle {
+  color: #fff !important;
+}
+
+.category-showcase-name,
+.category-showcase-count {
+  color: #fff !important;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Dark mode: these are on gradient hero banners — white still works */
+html[data-theme="dark"] .faq-hero-title,
+html[data-theme="dark"] .faq-hero-subtitle,
+html[data-theme="dark"] .size-hero-title,
+html[data-theme="dark"] .size-hero-subtitle,
+html[data-theme="dark"] .contact-hero h1,
+html[data-theme="dark"] .contact-hero p,
+html[data-theme="dark"] .legal-hero-title,
+html[data-theme="dark"] .legal-hero-updated,
+html[data-theme="dark"] .wishlist-hero-title,
+html[data-theme="dark"] .wishlist-hero-subtitle {
+  color: #fff !important;
+}
+
+/* ── Issue #8: Drawer user name/email overflow ── */
+.drawer-user-info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.drawer-user-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+}
+
+.drawer-user-email {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  max-width: 100%;
+}
+
+.drawer-user {
+  overflow: hidden;
+}
+
+/* ── Issue #9: Sort dropdown mobile overflow ── */
+@media (max-width: 640px) {
+  .sort-dropdown,
+  .sort-select,
+  #sortSelect {
+    max-width: 130px;
+    font-size: var(--text-xs);
+    padding: 6px 28px 6px 8px !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .shop-toolbar {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+}
+
+/* Issue #9: card-cart-btn touching border on mobile */
+@media (max-width: 480px) {
+  .card-cart-btn {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    margin-right: 2px;
+  }
+
+  .card-bottom {
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+  }
+
+  .card-price {
+    font-size: 0.8rem;
+  }
+}
+
+/* Issue #9: FAQ tabs — indicate more content (scroll hint) */
+@media (max-width: 640px) {
+  .faq-tabs {
+    position: relative;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-right: var(--space-8);
+  }
+
+  .faq-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .faq-tabs::after {
+    content: "";
+    position: sticky;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    min-width: 40px;
+    background: linear-gradient(to left, var(--bg-surface) 30%, transparent);
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+}
+
+/* Issue #9: Size chart — indicate hidden content on mobile */
+@media (max-width: 640px) {
+  .size-table-wrapper {
+    position: relative;
+  }
+
+  .size-table-wrapper::after {
+    content: "Scroll →";
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+    background: var(--clr-primary);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 10px;
+    font-weight: 600;
+    pointer-events: none;
+    animation: scrollHintPulse 2s ease-in-out infinite;
+    z-index: 2;
+  }
+
+  .size-table-wrapper:has(::-webkit-scrollbar:horizontal:active)::after,
+  .size-table-wrapper.scrolled::after {
+    display: none;
+  }
+}
+
+@keyframes scrollHintPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Issue #9: Chart tabs — arrange nicely on mobile */
+@media (max-width: 640px) {
+  .chart-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+
+  .chart-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chart-tab {
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* Issue #9: Form group label with "description" touching placeholder box */
+.form-group label,
+.addr-field label {
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* ── Issue #10: Shop size/color selectors — dark mode visibility ── */
+/* Size buttons in quick view modal */
+.qv-size,
+.size-option,
+.variant-size-btn {
+  border: 2px solid var(--border-default);
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+html[data-theme="dark"] .qv-size,
+html[data-theme="dark"] .size-option,
+html[data-theme="dark"] .variant-size-btn {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.qv-size:hover,
+.size-option:hover,
+.variant-size-btn:hover {
+  border-color: var(--clr-primary);
+  color: var(--clr-primary);
+}
+
+.qv-size.active,
+.size-option.active,
+.variant-size-btn.active {
+  background: var(--clr-primary) !important;
+  border-color: var(--clr-primary) !important;
+  color: #fff !important;
+}
+
+/* Color buttons in quick view modal */
+.qv-color,
+.color-option,
+.variant-color-btn {
+  border: 3px solid var(--border-default);
+  transition: all 0.2s;
+}
+
+html[data-theme="dark"] .qv-color,
+html[data-theme="dark"] .color-option,
+html[data-theme="dark"] .variant-color-btn {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.qv-color.active,
+.color-option.active,
+.variant-color-btn.active {
+  border-color: var(--clr-primary) !important;
+  box-shadow: 0 0 0 2px var(--clr-primary);
+}
+
+/* Issue #10: qm-price-stock responsive */
+@media (max-width: 480px) {
+  .qm-price-stock,
+  .qv-price-stock {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .qm-price,
+  .qv-price {
+    font-size: var(--text-lg);
+  }
+}
+
+/* ── Issue #12: Dashboard topbar responsive ── */
+@media (max-width: 768px) {
+  .dash-topbar {
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    text-align: center;
+  }
+
+  .dash-topbar-left {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .dash-topbar-left > div {
+    text-align: center;
+  }
+
+  .dash-topbar-right {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .dash-greeting {
+    font-size: var(--text-lg);
+  }
+
+  .dash-email {
+    font-size: var(--text-xs);
+  }
+
+  .dash-topbar-action span {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .dash-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .dash-tab {
+    flex-shrink: 0;
+    font-size: var(--text-xs);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .dash-tab span {
+    display: none;
+  }
+
+  .dash-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .dash-stat-value {
+    font-size: var(--text-lg);
+  }
+}
+
+/* ── Issue #12: Track modal light mode text visibility ── */
+.track-modal {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.track-header-info h3 {
+  color: var(--text-primary);
+}
+
+.track-section h4 {
+  color: var(--text-primary);
+}
+
+.track-item-name {
+  color: var(--text-primary);
+}
+
+.track-item-meta {
+  color: var(--text-secondary);
+}
+
+.track-item-price {
+  color: var(--text-primary);
+}
+
+.track-summary {
+  background: var(--bg-surface-alt);
+}
+
+.track-summary-row {
+  color: var(--text-secondary);
+}
+
+.track-summary-row.total {
+  color: var(--text-primary);
+}
+
+.track-close {
+  background: var(--bg-surface-alt);
+  color: var(--text-secondary);
+}
+
+.track-close:hover {
+  background: var(--bg-muted);
+  color: var(--text-primary);
+}
+
+/* Dark mode track modal */
+html[data-theme="dark"] .track-modal {
+  background: var(--bg-surface);
+  border-color: var(--border-light);
+}
+
+html[data-theme="dark"] .track-header-info h3 {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .track-step-label {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .track-step-desc {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .track-item-name {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .track-item-price {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .track-summary {
+  background: var(--bg-surface-alt);
+}
+
+/* ── Issue #13: Auth Modal — Comprehensive Color Fix ──
+   The auth modal was using undefined CSS variables causing invisible text/inputs */
+
+/* Auth modal base — ensure background in both modes */
+.auth-modal {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.auth-modal .modal-body {
+  background: var(--bg-surface);
+}
+
+/* Auth hero — gradient is fine, ensure text is white */
+.auth-hero {
+  background: linear-gradient(135deg, var(--clr-primary), var(--clr-rose, #ec4899));
+}
+
+.auth-hero-icon {
+  color: #fff;
+}
+
+.auth-hero-title {
+  color: #fff;
+}
+
+.auth-hero-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Auth tabs — ensure visible background & text */
+.auth-tabs {
+  background: var(--bg-surface-alt);
+  border-color: var(--border-default);
+}
+
+.auth-tab {
+  color: var(--text-muted);
+}
+
+.auth-tab:hover {
+  color: var(--text-primary);
+}
+
+.auth-tab.active {
+  color: #fff;
+}
+
+/* Auth inputs — visible in both modes */
+.auth-input-wrap .form-input,
+.auth-input-wrap input {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+.auth-input-wrap .form-input::placeholder,
+.auth-input-wrap input::placeholder {
+  color: var(--text-muted);
+}
+
+.auth-input-wrap .form-input:focus,
+.auth-input-wrap input:focus {
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.12);
+}
+
+/* Auth Google button */
+.auth-google-btn {
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.auth-google-btn:hover {
+  border-color: var(--clr-primary);
+  background: var(--bg-surface-alt);
+}
+
+/* Auth legal text */
+.auth-legal {
+  color: var(--text-muted);
+}
+
+/* Auth divider */
+.auth-divider {
+  color: var(--text-muted);
+}
+
+/* Dark mode auth modal overrides */
+html[data-theme="dark"] .auth-modal {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .auth-modal .modal-body {
+  background: var(--bg-surface);
+}
+
+html[data-theme="dark"] .auth-tabs {
+  background: var(--bg-muted);
+  border-color: var(--border-light);
+}
+
+html[data-theme="dark"] .auth-tab {
+  color: var(--text-muted);
+}
+
+html[data-theme="dark"] .auth-tab:hover {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .auth-input-wrap .form-input,
+html[data-theme="dark"] .auth-input-wrap input {
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html[data-theme="dark"] .auth-input-wrap .form-input::placeholder,
+html[data-theme="dark"] .auth-input-wrap input::placeholder {
+  color: var(--text-muted);
+}
+
+html[data-theme="dark"] .auth-google-btn {
+  background: var(--bg-surface-alt);
+  color: var(--text-primary);
+  border-color: var(--border-default);
+}
+
+html[data-theme="dark"] .auth-modal-close {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ── Issue #14: Full Color Palette Audit for Theme Visibility ──
+   Ensure all text is visible in both light and dark modes */
+
+/* Dashboard auth gate */
+.dash-gate-card {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.dash-gate-title {
+  color: var(--text-primary);
+}
+
+.dash-gate-text {
+  color: var(--text-secondary);
+}
+
+/* Newsletter input */
+html[data-theme="dark"] .newsletter-input {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .newsletter-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Feature cards — text visibility */
+html[data-theme="dark"] .feature-card {
+  background: var(--bg-surface);
+}
+
+html[data-theme="dark"] .feature-title {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .feature-text {
+  color: var(--text-secondary);
+}
+
+/* Section titles */
+html[data-theme="dark"] .section-title {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .section-subtitle {
+  color: var(--text-secondary);
+}
+
+/* Product card text */
+html[data-theme="dark"] .card-name {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .card-price {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .card-description {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .card-category {
+  color: var(--text-muted);
+}
+
+/* Footer dark mode */
+html[data-theme="dark"] .footer {
+  background: var(--bg-base);
+}
+
+html[data-theme="dark"] .footer-title {
+  color: var(--text-primary);
+}
+
+html[data-theme="dark"] .footer-links a {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .footer-links a:hover {
+  color: var(--clr-primary);
+}
+
+/* ── Comprehensive Responsive — All Pages ── */
+
+/* Global: Ensure container doesn't overflow */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Header responsive */
+@media (max-width: 768px) {
+  .header-inner {
+    padding: 0 var(--space-3);
+  }
+
+  .logo-text {
+    font-size: var(--text-sm);
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .header-actions {
+    gap: var(--space-1);
+  }
+
+  .header-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Hero responsive */
+@media (max-width: 768px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    text-align: center;
+    gap: var(--space-6);
+  }
+
+  .hero-eyebrow {
+    justify-content: center;
+  }
+
+  .hero-heading {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+  }
+
+  .hero-text {
+    font-size: var(--text-sm);
+  }
+
+  .hero-cta {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-heading {
+    font-size: clamp(1.5rem, 7vw, 2rem);
+  }
+
+  .hero-cta {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .hero-cta .btn {
+    width: 100%;
+  }
+}
+
+/* Shop page responsive */
+@media (max-width: 768px) {
+  .shop-hero {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  }
+
+  .shop-filters {
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .filter-dropdown {
+    min-width: auto;
+    flex: 1 1 calc(50% - var(--space-2));
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 380px) {
+  .product-grid {
+    gap: var(--space-2);
+  }
+
+  .card-info {
+    padding: var(--space-2);
+  }
+
+  .card-name {
+    font-size: var(--text-sm);
+    line-height: 1.3;
+  }
+}
+
+/* Cart page responsive */
+@media (max-width: 768px) {
+  .cart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-summary {
+    position: static;
+  }
+}
+
+@media (max-width: 480px) {
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .cart-item-img {
+    width: 100%;
+    max-width: 120px;
+  }
+}
+
+/* Checkout responsive */
+@media (max-width: 768px) {
+  .checkout-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-summary {
+    position: static;
+    order: -1;
+  }
+}
+
+/* Contact page responsive */
+@media (max-width: 768px) {
+  .contact-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-hero {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  }
+
+  .contact-hero h1 {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+}
+
+/* FAQ responsive */
+@media (max-width: 768px) {
+  .faq-hero {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  }
+
+  .faq-hero-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+  }
+
+  .faq-categories {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .faq-categories {
+    grid-template-columns: 1fr;
+  }
+
+  .faq-item-title {
+    font-size: var(--text-sm);
+    padding-right: var(--space-8);
+  }
+}
+
+/* Legal pages responsive */
+@media (max-width: 768px) {
+  .legal-hero {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  }
+
+  .legal-hero-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+  }
+
+  .legal-content {
+    padding: var(--space-4);
+  }
+}
+
+/* Size guide responsive */
+@media (max-width: 768px) {
+  .size-hero {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  }
+
+  .size-hero-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+  }
+}
+
+/* Wishlist responsive */
+@media (max-width: 768px) {
+  .wishlist-hero {
+    padding: calc(var(--header-height) + var(--space-4)) var(--space-4) var(--space-6);
+  }
+
+  .wishlist-hero-title {
+    font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+  }
+
+  .wishlist-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 380px) {
+  .wishlist-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Quick view modal responsive */
+@media (max-width: 640px) {
+  .qv-modal {
+    width: 95%;
+    max-height: 90vh;
+    margin: 5vh auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .qv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .qv-gallery {
+    max-height: 300px;
+  }
+
+  .qv-details {
+    padding: var(--space-4);
+  }
+
+  .qv-title {
+    font-size: var(--text-lg);
+  }
+
+  .qv-actions {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .qv-add-to-cart,
+  .qv-buy-now {
+    width: 100%;
+  }
+}
+
+/* Confirmation page responsive */
+@media (max-width: 768px) {
+  .confirm-container {
+    padding: var(--space-4);
+  }
+
+  .confirm-success-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+}
+
+/* Track page responsive */
+@media (max-width: 480px) {
+  .track-overlay {
+    padding: var(--space-2);
+    align-items: flex-end;
+  }
+
+  .track-modal {
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin: 0;
+  }
+}
+
+/* Categories responsive */
+@media (max-width: 768px) {
+  .category-showcase {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .category-showcase {
+    grid-template-columns: 1fr;
+  }
+
+  .category-showcase-name {
+    font-size: var(--text-lg) !important;
+  }
+}
+
+/* Testimonials responsive */
+@media (max-width: 768px) {
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Footer responsive */
+@media (max-width: 768px) {
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-brand p {
+    font-size: var(--text-sm);
+  }
+}
+
+/* Cart drawer responsive */
+@media (max-width: 480px) {
+  .cart-drawer {
+    width: 92%;
+  }
+
+  .cd-item {
+    gap: var(--space-2);
+  }
+
+  .cd-item-img {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+/* Cookie consent responsive */
+@media (max-width: 380px) {
+  .consent-modal {
+    padding: var(--space-4);
+    margin: var(--space-2);
+  }
+
+  .consent-title {
+    font-size: var(--text-lg);
+  }
+}
+
+/* Mobile drawer responsive */
+@media (max-width: 380px) {
+  .mobile-drawer-panel {
+    width: 90%;
+  }
+
+  .drawer-categories-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Search overlay responsive */
+@media (max-width: 480px) {
+  .search-overlay {
+    padding-top: 10vh;
+  }
+
+  .search-container {
+    margin-inline: var(--space-2);
+  }
+
+  .search-input-wrapper input {
+    font-size: var(--text-base);
+    padding: var(--space-4);
+    padding-left: var(--space-10);
+  }
+}
+
+/* Dashboard panels responsive */
+@media (max-width: 480px) {
+  .dash-card {
+    border-radius: var(--radius-lg);
+  }
+
+  .dash-card-header {
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+
+  .dash-order-card {
+    padding: var(--space-3);
+  }
+
+  .dash-order-thumbs img {
+    width: 36px;
+    height: 36px;
+  }
+
+  .dash-addr-card {
+    padding: var(--space-3);
+  }
+
+  .dash-quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .dash-action-card {
+    padding: var(--space-3);
+    font-size: var(--text-sm);
+  }
+}
+
+/* Profile form responsive */
+@media (max-width: 480px) {
+  .dash-form-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+
+  .dash-profile-form {
+    padding: var(--space-3);
+  }
+}
+
+/* ── Issue #12: Remove .logo-text in dashboard body — handled by hiding in dash-brand-mark ── */
+.dash-brand-mark .logo-text {
+  display: none;
+}
+
+/* =============================================================================
+   Issue #2: CSS utility classes to replace inline styles
+   ============================================================================= */
+
+/* Initial visibility states (replacing style="display:none") */
+.u-hidden { display: none; }
+
+/* Footer logo spacing (replacing style="margin-bottom: var(--space-4)") */
+.footer .logo { margin-bottom: var(--space-4); }
+
+/* Footer logo text inline display (replacing style="display:inline") */
+.footer .logo-text { display: inline; }
+
+/* Search results container (replacing inline styles on #searchResults) */
+.search-results {
+  background: var(--bg-surface);
+  border-radius: var(--radius-xl);
+  margin-top: var(--space-4);
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Search placeholder (replacing inline styles on search empty state) */
+.search-placeholder {
+  padding: var(--space-8);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.search-placeholder i {
+  font-size: var(--text-2xl);
+  margin-bottom: var(--space-2);
+  display: block;
+}
+
+/* Section header centered (replacing style="text-align:center; width:100%") */
+.section-header-centered { text-align: center; width: 100%; }
+
+/* Checkout section non-clickable header (replacing style="cursor:default") */
+.checkout-card-header--static { cursor: default; }
+
+/* Cart promo icon gradient (replacing inline gradient) */
+.promo-icon-gradient {
+  background: linear-gradient(135deg, var(--clr-success), #059669);
+}
+
+/* Confirmation totals wrapper (replacing style="margin-top:...") */
+.confirmation-totals { margin-top: var(--space-6); }
+
+/* Wishlist action buttons flex (replacing inline flex) */
+.wishlist-action-btns { display: flex; gap: var(--space-2); }
+
+/* Checkout card body visible (replacing style="display:block") */
+.checkout-card-body--open { display: block; }

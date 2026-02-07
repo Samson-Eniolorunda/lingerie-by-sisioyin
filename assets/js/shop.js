@@ -1109,8 +1109,7 @@
 
     // Copy link functionality
     copyLink?.addEventListener("click", async () => {
-      const url =
-        window.location.origin + "/shop?product=" + modalProduct?.id;
+      const url = window.location.origin + "/shop?product=" + modalProduct?.id;
       try {
         if (navigator.clipboard && window.isSecureContext) {
           await navigator.clipboard.writeText(url);
@@ -1146,7 +1145,55 @@
     const starPicker = $("#qmStarPicker");
     let selectedStars = 0;
 
-    writeBtn?.addEventListener("click", () => {
+    writeBtn?.addEventListener("click", async () => {
+      // ── Purchase verification: only verified buyers can review ──
+      const c = window.supabaseClient || window.DB?.client;
+      if (!c) {
+        toast("Please log in to write a review", "warning");
+        window.APP?.toggleAuth?.();
+        return;
+      }
+
+      const {
+        data: { user },
+      } = await c.auth.getUser();
+      if (!user?.email) {
+        toast("Please log in to write a review", "warning");
+        window.APP?.toggleAuth?.();
+        return;
+      }
+
+      try {
+        writeBtn.disabled = true;
+        writeBtn.textContent = "Verifying purchase...";
+        const { data: orders, error } = await c
+          .from("orders")
+          .select("items")
+          .eq("customer_email", user.email)
+          .in("status", ["delivered", "shipped", "processing", "confirmed"]);
+
+        if (error) throw error;
+
+        const hasPurchased = orders?.some(
+          (o) =>
+            Array.isArray(o.items) &&
+            o.items.some(
+              (item) => String(item.id) === String(modalProduct?.id),
+            ),
+        );
+
+        if (!hasPurchased) {
+          toast("Only verified purchasers can write reviews", "warning");
+          return;
+        }
+      } catch (err) {
+        console.error("Purchase check error:", err);
+        // On error, still allow (admin approval required anyway)
+      } finally {
+        writeBtn.disabled = false;
+        writeBtn.textContent = "Write a Review";
+      }
+
       if (reviewForm) reviewForm.hidden = false;
       writeBtn.style.display = "none";
       reviewForm?.scrollIntoView({ behavior: "smooth", block: "nearest" });
