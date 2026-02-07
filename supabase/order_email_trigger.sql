@@ -52,7 +52,7 @@ END;
 $$;
 
 -- ============================================================================
--- Attach trigger to orders table
+-- Attach trigger to orders table (INSERT)
 -- ============================================================================
 DROP TRIGGER IF EXISTS trigger_notify_new_order ON public.orders;
 CREATE TRIGGER trigger_notify_new_order
@@ -61,9 +61,58 @@ CREATE TRIGGER trigger_notify_new_order
   EXECUTE FUNCTION public.notify_new_order();
 
 -- ============================================================================
--- DONE! Every new order INSERT will now fire the Edge Function.
+-- Status-change trigger function: fires edge function on status UPDATE
+-- ============================================================================
+CREATE OR REPLACE FUNCTION public.notify_order_status_change()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+  edge_url TEXT;
+  payload  JSONB;
+BEGIN
+  -- Only fire if the status actually changed
+  IF OLD.status IS NOT DISTINCT FROM NEW.status THEN
+    RETURN NEW;
+  END IF;
+
+  edge_url := 'https://oriojylsilcsvcsefuux.supabase.co/functions/v1/send-order-email';
+
+  payload := jsonb_build_object(
+    'type',       'UPDATE',
+    'table',      'orders',
+    'record',     row_to_json(NEW)::jsonb,
+    'old_record', row_to_json(OLD)::jsonb
+  );
+
+  PERFORM net.http_post(
+    url     := edge_url,
+    body    := payload,
+    headers := jsonb_build_object(
+      'Content-Type',  'application/json',
+      'Authorization', 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9yaW9qeWxzaWxjc3Zjc2VmdXV4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxMjY2MzUsImV4cCI6MjA4MzcwMjYzNX0.iLhf2GI8O060w-uBcNmqDMCiIQrg3sOj2N_Rf_EDKiY'
+    )
+  );
+
+  RETURN NEW;
+END;
+$$;
+
+-- ============================================================================
+-- Attach trigger to orders table (UPDATE — status change)
+-- ============================================================================
+DROP TRIGGER IF EXISTS trigger_notify_order_status_change ON public.orders;
+CREATE TRIGGER trigger_notify_order_status_change
+  AFTER UPDATE OF status ON public.orders
+  FOR EACH ROW
+  WHEN (OLD.status IS DISTINCT FROM NEW.status)
+  EXECUTE FUNCTION public.notify_order_status_change();
+
+-- ============================================================================
+-- DONE! New orders → confirmation email. Status changes → status update email.
 --
--- To test: Insert a test order from Supabase SQL Editor:
+-- To test INSERT: Insert a test order from Supabase SQL Editor:
 --
 --   INSERT INTO public.orders (
 --     customer_name, customer_email, customer_phone,
@@ -75,5 +124,10 @@ CREATE TRIGGER trigger_notify_new_order
 --     '[{"name":"Test Bra","price_ngn":5000,"qty":1,"selectedSize":"M"}]'::jsonb,
 --     5000, 2000, 7000
 --   );
+--
+-- To test UPDATE:
+--
+--   UPDATE public.orders SET status = 'shipped'
+--   WHERE order_number = 'LBS-XXXXXXXX-XXXX';
 --
 -- ============================================================================

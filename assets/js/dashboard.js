@@ -382,80 +382,114 @@
     shell.style.display = "none";
   }
 
-  /* ── Order tracking timeline ───────────── */
+  /* ── Live Order Tracking UI ──────────── */
   const TRACKING_STEPS = [
-    { key: "pending", label: "Order Placed", icon: "fa-receipt" },
-    { key: "confirmed", label: "Confirmed", icon: "fa-circle-check" },
-    { key: "processing", label: "Processing", icon: "fa-boxes-stacked" },
-    { key: "shipped", label: "Shipped", icon: "fa-truck-fast" },
-    { key: "delivered", label: "Delivered", icon: "fa-box-open" },
+    { key: "pending",    label: "Order Placed",  icon: "fa-receipt",       desc: "Your order has been received" },
+    { key: "confirmed",  label: "Confirmed",     icon: "fa-circle-check",  desc: "Order confirmed by seller" },
+    { key: "processing", label: "Processing",    icon: "fa-boxes-stacked", desc: "Your items are being prepared" },
+    { key: "shipped",    label: "Shipped",       icon: "fa-truck-fast",    desc: "On the way to you" },
+    { key: "delivered",  label: "Delivered",     icon: "fa-box-open",      desc: "Delivered successfully" },
   ];
 
-  function buildTimeline(status) {
+  function buildTimeline(status, order) {
     if (status === "cancelled") {
       return `
-        <div class="dash-timeline">
-          <div class="dash-timeline-step cancelled">
-            <div class="dash-timeline-icon"><i class="fa-solid fa-ban"></i></div>
-            <div class="dash-timeline-label">Cancelled</div>
+        <div class="track-timeline">
+          <div class="track-step cancelled">
+            <div class="track-step-dot"><i class="fa-solid fa-ban"></i></div>
+            <div class="track-step-content">
+              <span class="track-step-label">Order Cancelled</span>
+              <span class="track-step-desc">This order has been cancelled</span>
+            </div>
           </div>
         </div>`;
     }
+
     const idx = TRACKING_STEPS.findIndex((s) => s.key === status);
+    const orderDate = order?.created_at ? new Date(order.created_at) : null;
+
     return `
-      <div class="dash-timeline">
+      <div class="track-timeline">
         ${TRACKING_STEPS.map((step, i) => {
           const done = i <= idx;
           const active = i === idx;
-          const cls = done ? (active ? "active" : "done") : "";
+          const cls = done ? (active ? "active" : "done") : "upcoming";
+          let timeStr = "";
+          if (i === 0 && orderDate) {
+            timeStr = fmtDate(order.created_at);
+          } else if (done && orderDate) {
+            const est = new Date(orderDate.getTime() + i * 24 * 3600 * 1000);
+            timeStr = fmtDate(est.toISOString());
+          }
           return `
-            <div class="dash-timeline-step ${cls}">
-              <div class="dash-timeline-icon"><i class="fa-solid ${step.icon}"></i></div>
-              <div class="dash-timeline-label">${step.label}</div>
+            <div class="track-step ${cls}">
+              <div class="track-step-indicator">
+                <div class="track-step-dot"><i class="fa-solid ${done ? "fa-check" : step.icon}"></i></div>
+                ${i < TRACKING_STEPS.length - 1 ? '<div class="track-step-line"></div>' : ""}
+              </div>
+              <div class="track-step-content">
+                <span class="track-step-label">${step.label}</span>
+                <span class="track-step-desc">${step.desc}</span>
+                ${timeStr ? `<span class="track-step-time">${timeStr}</span>` : ""}
+              </div>
             </div>`;
         }).join("")}
-      </div>`;
+      </div>
+      ${idx >= 0 && idx < 4 ? `<div class="track-eta"><i class="fa-solid fa-clock"></i> Estimated delivery: ${fmtDate(new Date(orderDate.getTime() + 4 * 24 * 3600 * 1000).toISOString())}</div>` : ""}`;
   }
 
-  /* ── Order detail modal ──────────────────── */
+  /* ── Order detail modal — Live Tracking UI ── */
   function viewOrder(id) {
     const o = orders.find((x) => x.id === id);
     if (!o) return;
     const items = Array.isArray(o.items) ? o.items : [];
+    const status = o.status || "pending";
+    const orderNum = o.order_number || `#${o.id?.substring(0, 8)}`;
+
     const itemsHTML = items
       .map(
         (it) => `
-        <div class="dash-detail-item">
-          <img src="${it.image || (Array.isArray(it.images) ? it.images[0] : "") || "assets/img/placeholder.png"}" alt="" />
-          <div>
-            <strong>${it.name || "Item"}</strong>
-            <span>Qty: ${it.quantity || 1} &middot; ${fmtPrice(it.price || 0)}</span>
+        <div class="track-item">
+          <img src="${it.image || (Array.isArray(it.images) ? it.images[0] : "") || "assets/img/placeholder.png"}" alt="" loading="lazy" />
+          <div class="track-item-info">
+            <span class="track-item-name">${it.name || "Item"}</span>
+            <span class="track-item-meta">${it.selectedSize || it.size || "One Size"}${it.selectedColor ? " · " + it.selectedColor : ""} × ${it.quantity || it.qty || 1}</span>
           </div>
+          <span class="track-item-price">${fmtPrice(it.price || it.price_ngn || 0)}</span>
         </div>`,
       )
       .join("");
 
-    const status = o.status || "pending";
-    const timelineHTML = buildTimeline(status);
+    const timelineHTML = buildTimeline(status, o);
     const modal = document.createElement("div");
-    modal.className = "dash-detail-overlay active";
+    modal.className = "track-overlay active";
     modal.innerHTML = `
-      <div class="dash-detail-modal">
-        <div class="dash-detail-header">
-          <h3>Order #${o.id?.substring(0, 8)}</h3>
-          <button type="button" class="dash-detail-close"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="dash-detail-body">
-          <div class="dash-detail-meta">
-            <span><i class="fa-regular fa-calendar"></i> ${fmtDate(o.created_at)}</span>
-            <span class="dash-order-status" data-status="${statusClass(status)}">${status}</span>
+      <div class="track-modal">
+        <div class="track-header">
+          <div class="track-header-info">
+            <h3>Order ${orderNum}</h3>
+            <span class="track-date">${fmtDate(o.created_at)}</span>
           </div>
+          <button type="button" class="track-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="track-status-badge" data-status="${status}">
+          <i class="fa-solid ${status === "cancelled" ? "fa-ban" : status === "delivered" ? "fa-check-circle" : "fa-circle-dot"}"></i>
+          <span>${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+        </div>
+
+        <div class="track-body">
           ${timelineHTML}
-          <div class="dash-detail-items">${itemsHTML}</div>
-          <div class="dash-detail-summary">
-            <div class="dash-detail-row"><span>Subtotal</span><span>${fmtPrice(o.subtotal || o.total || 0)}</span></div>
-            <div class="dash-detail-row"><span>Shipping</span><span>${fmtPrice(o.shipping || 0)}</span></div>
-            <div class="dash-detail-row total"><span>Total</span><span>${fmtPrice(o.total || 0)}</span></div>
+
+          <div class="track-section">
+            <h4><i class="fa-solid fa-boxes-stacked"></i> Items</h4>
+            <div class="track-items">${itemsHTML}</div>
+          </div>
+
+          <div class="track-summary">
+            <div class="track-summary-row"><span>Subtotal</span><span>${fmtPrice(o.subtotal || o.total || 0)}</span></div>
+            <div class="track-summary-row"><span>Shipping</span><span>${fmtPrice(o.shipping_cost || o.shipping || 0)}</span></div>
+            <div class="track-summary-row total"><span>Total</span><span>${fmtPrice(o.total || 0)}</span></div>
           </div>
         </div>
       </div>`;
@@ -469,7 +503,7 @@
       setTimeout(() => modal.remove(), 300);
     };
 
-    modal.querySelector(".dash-detail-close").addEventListener("click", close);
+    modal.querySelector(".track-close").addEventListener("click", close);
     modal.addEventListener("click", (e) => {
       if (e.target === modal) close();
     });

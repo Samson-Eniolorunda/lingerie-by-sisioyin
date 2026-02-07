@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Track Your Order | Lingerie by Sisioyin</title>
+    <meta
+      name="description"
+      content="Track your order status at Lingerie by Sisioyin. Enter your order number or email to see real-time updates."
+    />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#be185d" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <!-- HEADER -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
+        </a>
+
+        <nav class="nav" id="mainNav">
+          <a href="index.html" class="nav-link">Home</a>
+          <a href="shop.html" class="nav-link">Shop</a>
+          <a href="shop.html?gender=Women" class="nav-link">Women</a>
+          <a href="shop.html?gender=Men" class="nav-link">Men</a>
+          <a href="shop.html?gender=Kids" class="nav-link">Kids</a>
+        </nav>
+
+        <div class="header-actions">
+          <button type="button" class="header-btn" id="searchToggle" aria-label="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button type="button" class="header-btn" id="loginBtn" aria-label="Sign in">
+            <i class="fa-solid fa-user"></i>
+          </button>
+          <button type="button" class="header-btn" id="cartToggle" data-cart-drawer aria-label="Shopping cart">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="badge" data-cart-count>0</span>
+          </button>
+          <button type="button" class="header-btn menu-toggle" id="mobileToggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main id="main">
+      <div class="track-page">
+        <div class="track-page-header">
+          <h1>Track Your Order</h1>
+          <p>Enter your order number or email address to view your order status</p>
+        </div>
+
+        <div class="track-search-card">
+          <form class="track-search-form" id="trackForm">
+            <div class="track-input-group">
+              <i class="fa-solid fa-hashtag"></i>
+              <input
+                type="text"
+                id="trackInput"
+                placeholder="Order number (e.g. LBS-20260207-0001) or email"
+                required
+                autocomplete="off"
+              />
+            </div>
+            <button type="submit" class="track-search-btn" id="trackBtn">
+              <i class="fa-solid fa-magnifying-glass"></i> Track Order
+            </button>
+          </form>
+
+          <div id="trackResult"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a href="index.html" class="logo" style="margin-bottom: var(--space-4)">
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text" style="display: inline">Lingerie by Sisioyin</span>
+            </a>
+            <p>Luxe essentials defined by comfort and confidence. Premium lingerie and loungewear for the modern woman.</p>
+          </div>
+          <div>
+            <h4 class="footer-title">Shop</h4>
+            <nav class="footer-links">
+              <a href="shop.html">All Products</a>
+              <a href="shop.html?category=Lingerie">Lingerie</a>
+              <a href="shop.html?category=Loungewear">Loungewear</a>
+              <a href="shop.html?is_new=true">New Arrivals</a>
+            </nav>
+          </div>
+          <div>
+            <h4 class="footer-title">Help</h4>
+            <nav class="footer-links">
+              <a href="dashboard.html">My Account</a>
+              <a href="track.html">Track Order</a>
+              <a href="faq.html">FAQs</a>
+              <a href="size.html">Size Guide</a>
+              <a href="contact.html">Contact Us</a>
+            </nav>
+          </div>
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="terms.html">Terms of Service</a>
+              <a href="privacy.html">Privacy Policy</a>
+            </nav>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All rights reserved.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script defer src="assets/js/config.js"></script>
+    <script defer src="assets/js/utils.js"></script>
+    <script defer src="assets/js/supabase.js"></script>
+    <script defer src="assets/js/app.js"></script>
+    <script defer src="assets/js/auth.js"></script>
+    <script defer src="assets/js/track.js"></script>
+  </body>
+</html>

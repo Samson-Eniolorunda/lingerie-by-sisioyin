@@ -322,7 +322,7 @@
           discount_amount: orderData.discountAmount || 0,
           promo_code: orderData.promoCode || null,
           total: orderData.total,
-          status: "pending",
+          status: orderData.paymentStatus === "PAID" ? "processing" : "pending",
           payment_method: orderData.paymentMethod || "card",
           payment_status: orderData.paymentStatus || "paid",
           notes: orderData.delivery.notes || null,

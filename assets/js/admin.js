@@ -2075,6 +2075,49 @@
     }
   }
 
+  // Status flow: what actions are available for each status
+  const STATUS_FLOW = {
+    pending:    { next: "processing", nextLabel: "Process Order",  nextIcon: "fa-gear",        canCancel: true },
+    processing: { next: "shipped",    nextLabel: "Ship Order",     nextIcon: "fa-truck-fast",   canCancel: true },
+    shipped:    { next: "delivered",   nextLabel: "Mark Delivered", nextIcon: "fa-circle-check", canCancel: false },
+    delivered:  { next: null,          nextLabel: null,             nextIcon: null,              canCancel: false },
+    cancelled:  { next: null,          nextLabel: null,             nextIcon: null,              canCancel: false },
+  };
+
+  function buildOrderTimeline(status) {
+    const steps = [
+      { key: "pending",    label: "Pending",    icon: "fa-clock" },
+      { key: "processing", label: "Processing", icon: "fa-gear" },
+      { key: "shipped",    label: "Shipped",    icon: "fa-truck-fast" },
+      { key: "delivered",  label: "Delivered",  icon: "fa-circle-check" },
+    ];
+    if (status === "cancelled") {
+      return `<div class="admin-timeline"><div class="admin-timeline-step cancelled"><i class="fa-solid fa-ban"></i><span>Cancelled</span></div></div>`;
+    }
+    const idx = steps.findIndex(s => s.key === status);
+    return `<div class="admin-timeline">${steps.map((s, i) => {
+      const cls = i < idx ? "done" : i === idx ? "active" : "";
+      return `<div class="admin-timeline-step ${cls}"><div class="admin-timeline-dot"><i class="fa-solid ${s.icon}"></i></div><span>${s.label}</span></div>`;
+    }).join('<div class="admin-timeline-line"></div>')}</div>`;
+  }
+
+  function renderOrderStatusActions(status) {
+    const footer = $("#orderModalFooter");
+    if (!footer) return;
+    const flow = STATUS_FLOW[status] || {};
+    let html = "";
+    if (flow.next) {
+      html += `<button type="button" class="btn btn-primary" data-set-status="${flow.next}"><i class="fa-solid ${flow.nextIcon}"></i> ${flow.nextLabel}</button>`;
+    }
+    if (flow.canCancel) {
+      html += `<button type="button" class="btn btn-danger btn-outline" data-set-status="cancelled"><i class="fa-solid fa-ban"></i> Cancel Order</button>`;
+    }
+    if (!flow.next && !flow.canCancel) {
+      html += `<span class="order-final-status"><i class="fa-solid fa-check"></i> Order ${status}</span>`;
+    }
+    footer.innerHTML = html;
+  }
+
   function openOrderModal(orderId) {
     console.log("[openOrderModal] Opening order:", orderId);
     const order = ordersCache.find((o) => o.id === orderId);
@@ -2083,99 +2126,58 @@
     currentOrderId = orderId;
     const modal = $("#orderDetailModal");
     const body = $("#orderModalBody");
-    const statusSelect = $("#orderStatusSelect");
-
     if (!modal || !body) return;
 
     const items = order.items || [];
     const date = new Date(order.created_at).toLocaleString("en-NG");
+    const status = order.status || "pending";
+    const orderNum = order.order_number || `#${order.id.slice(0, 8)}`;
+    const shippingAddr = [order.delivery_address || order.shipping_address, order.delivery_city, order.delivery_state].filter(Boolean).join(", ") || "Not provided";
 
     body.innerHTML = `
-      <div class="order-detail-section">
-        <h4>Order Information</h4>
-        <div class="order-detail-row">
-          <span>Order ID</span>
-          <strong>#${order.id.slice(0, 8)}</strong>
+      <div class="order-modal-status-bar">
+        <span class="order-status ${status}">${status}</span>
+        <span class="order-modal-id">${orderNum}</span>
+        <span class="order-modal-date"><i class="fa-regular fa-calendar"></i> ${date}</span>
+      </div>
+      ${buildOrderTimeline(status)}
+      <div class="order-modal-grid">
+        <div class="order-detail-section compact">
+          <h4><i class="fa-solid fa-user"></i> Customer</h4>
+          <p><strong>${order.customer_name || "Guest"}</strong></p>
+          <p>${order.customer_email || "-"}</p>
+          <p>${order.customer_phone || "-"}</p>
         </div>
-        <div class="order-detail-row">
-          <span>Date</span>
-          <span>${date}</span>
+        <div class="order-detail-section compact">
+          <h4><i class="fa-solid fa-location-dot"></i> Shipping</h4>
+          <p>${shippingAddr}</p>
         </div>
-        <div class="order-detail-row">
-          <span>Payment Method</span>
-          <span>${order.payment_method || "Monnify"}</span>
-        </div>
-        <div class="order-detail-row">
-          <span>Payment Reference</span>
-          <span>${order.payment_reference || "-"}</span>
+        <div class="order-detail-section compact">
+          <h4><i class="fa-solid fa-credit-card"></i> Payment</h4>
+          <p>${order.payment_method || "Monnify"}</p>
+          <p class="text-muted">${order.payment_reference || "-"}</p>
         </div>
       </div>
-
       <div class="order-detail-section">
-        <h4>Customer</h4>
-        <div class="order-detail-row">
-          <span>Name</span>
-          <span>${order.customer_name || "Guest"}</span>
-        </div>
-        <div class="order-detail-row">
-          <span>Email</span>
-          <span>${order.customer_email || "-"}</span>
-        </div>
-        <div class="order-detail-row">
-          <span>Phone</span>
-          <span>${order.customer_phone || "-"}</span>
-        </div>
-      </div>
-
-      <div class="order-detail-section">
-        <h4>Shipping Address</h4>
-        <p>${order.shipping_address || "Not provided"}</p>
-      </div>
-
-      <div class="order-detail-section">
-        <h4>Items (${items.length})</h4>
-        ${items
-          .map(
-            (item) => `
+        <h4><i class="fa-solid fa-boxes-stacked"></i> Items (${items.length})</h4>
+        ${items.map((item) => `
           <div class="order-item-row">
-            <img src="${item.image || item.images?.[0] || "assets/img/placeholder.png"}" 
-                 alt="${item.name}" class="order-item-img" />
+            <img src="${item.image || item.images?.[0] || "assets/img/placeholder.png"}" alt="${escapeHtml(item.name)}" class="order-item-img" />
             <div class="order-item-info">
-              <div class="order-item-name">${item.name}</div>
-              <div class="order-item-meta">Size: ${item.size || "-"} | Qty: ${item.quantity || 1}</div>
+              <div class="order-item-name">${escapeHtml(item.name)}</div>
+              <div class="order-item-meta">Size: ${item.size || item.selectedSize || "-"} &middot; Qty: ${item.quantity || item.qty || 1}</div>
             </div>
-            <div class="order-item-price">₦${((item.price || 0) * (item.quantity || 1)).toLocaleString()}</div>
-          </div>
-        `,
-          )
-          .join("")}
+            <div class="order-item-price">₦${((item.price || item.price_ngn || 0) * (item.quantity || item.qty || 1)).toLocaleString()}</div>
+          </div>`).join("")}
       </div>
+      <div class="order-detail-section order-summary-section">
+        <div class="order-detail-row"><span>Subtotal</span><span>₦${(order.subtotal || order.total || 0).toLocaleString()}</span></div>
+        <div class="order-detail-row"><span>Shipping</span><span>₦${(order.shipping_cost || 0).toLocaleString()}</span></div>
+        ${order.discount_amount ? `<div class="order-detail-row"><span>Discount${order.promo_code ? " (" + order.promo_code + ")" : ""}</span><span style="color:var(--success)">-₦${order.discount_amount.toLocaleString()}</span></div>` : ""}
+        <div class="order-detail-row total"><span>Total</span><span>₦${(order.total || 0).toLocaleString()}</span></div>
+      </div>`;
 
-      <div class="order-detail-section">
-        <h4>Order Summary</h4>
-        <div class="order-detail-row">
-          <span>Subtotal</span>
-          <span>₦${(order.subtotal || order.total || 0).toLocaleString()}</span>
-        </div>
-        ${
-          order.discount
-            ? `
-          <div class="order-detail-row">
-            <span>Discount${order.promo_code ? ` (${order.promo_code})` : ""}</span>
-            <span style="color: var(--success);">-₦${order.discount.toLocaleString()}</span>
-          </div>
-        `
-            : ""
-        }
-        <div class="order-detail-row" style="font-weight: 700;">
-          <span>Total</span>
-          <span>₦${(order.total || 0).toLocaleString()}</span>
-        </div>
-      </div>
-    `;
-
-    if (statusSelect) statusSelect.value = order.status || "pending";
-
+    renderOrderStatusActions(status);
     modal.hidden = false;
   }
 
@@ -2185,19 +2187,14 @@
     currentOrderId = null;
   }
 
-  async function updateOrderStatus() {
+  async function updateOrderStatusTo(newStatus) {
     if (!currentOrderId) return;
+    if (newStatus === "cancelled" && !confirm("Are you sure you want to cancel this order?")) return;
 
-    const statusSelect = $("#orderStatusSelect");
-    const newStatus = statusSelect?.value;
-    if (!newStatus) return;
+    console.log("[updateOrderStatus] Updating order", currentOrderId, "to", newStatus);
 
-    console.log(
-      "[updateOrderStatus] Updating order",
-      currentOrderId,
-      "to",
-      newStatus,
-    );
+    const btn = $(`[data-set-status="${newStatus}"]`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...'; }
 
     const { error } = await supabase
       .from("orders")
@@ -2207,6 +2204,7 @@
     if (error) {
       console.error("[updateOrderStatus] Error:", error);
       showToast("Failed to update status");
+      if (btn) { btn.disabled = false; }
       return;
     }
 
@@ -2214,6 +2212,12 @@
     showToast(`Order status updated to ${newStatus}`);
     closeOrderModal();
     await loadOrders();
+  }
+
+  // Legacy wrapper
+  async function updateOrderStatus() {
+    const statusSelect = $("#orderStatusSelect");
+    if (statusSelect?.value) await updateOrderStatusTo(statusSelect.value);
   }
 
   function bindOrdersActions() {
@@ -2244,7 +2248,13 @@
       if (e.target.id === "orderDetailModal") closeOrderModal();
     });
 
-    // Update status
+    // Status action buttons (delegated)
+    on($("#orderModalFooter"), "click", (e) => {
+      const btn = e.target?.closest("[data-set-status]");
+      if (btn) updateOrderStatusTo(btn.dataset.setStatus);
+    });
+
+    // Legacy update status button
     on($("#updateOrderStatusBtn"), "click", updateOrderStatus);
 
     // Pagination

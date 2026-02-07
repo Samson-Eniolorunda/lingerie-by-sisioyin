@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v2";
+const CACHE_NAME = "lbs-cache-v3";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
@@ -20,6 +20,7 @@ const STATIC_ASSETS = [
   "/size.html",
   "/terms.html",
   "/privacy.html",
+  "/track.html",
   "/assets/css/styles.css",
   "/assets/js/config.js",
   "/assets/js/utils.js",
@@ -39,6 +40,7 @@ const STATIC_ASSETS = [
   "/assets/js/faq.js",
   "/assets/js/size.js",
   "/assets/js/legal.js",
+  "/assets/js/track.js",
   "/site.webmanifest",
 ];
 

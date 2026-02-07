@@ -2116,6 +2116,39 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Terms Acceptance Banner
+   * ───────────────────────────────────────────── */
+  function initTermsBanner() {
+    const TERMS_KEY = "LBS_TERMS_ACCEPTED";
+    if (localStorage.getItem(TERMS_KEY)) return;
+
+    const banner = document.createElement("div");
+    banner.className = "terms-banner";
+    banner.innerHTML = `
+      <div class="terms-banner-inner">
+        <p class="terms-banner-text">
+          By using this site you agree to our
+          <a href="terms.html">Terms&nbsp;of&nbsp;Service</a> and
+          <a href="privacy.html">Privacy&nbsp;Policy</a>.
+          We use cookies for analytics and to improve your experience.
+        </p>
+        <button class="btn-accept" id="acceptTerms">I Agree</button>
+      </div>`;
+    document.body.appendChild(banner);
+
+    // show after short delay for slide-up effect
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => banner.classList.add("visible"));
+    });
+
+    document.getElementById("acceptTerms").addEventListener("click", () => {
+      localStorage.setItem(TERMS_KEY, Date.now());
+      banner.classList.remove("visible");
+      banner.addEventListener("transitionend", () => banner.remove(), { once: true });
+    });
+  }
+
+  /* ─────────────────────────────────────────────
    * Bootstrap
    * ───────────────────────────────────────────── */
   console.log("🚀 APP: Bootstrap started");
@@ -2138,5 +2171,6 @@
   renderCartDrawer();
   initRealtime();
   registerServiceWorker();
+  initTermsBanner();
   console.log("✅ APP: Bootstrap complete");
 })();

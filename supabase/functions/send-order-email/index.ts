@@ -338,6 +338,120 @@ function adminEmailHTML(order: OrderRecord): string {
 </html>`;
 }
 
+// ── Status-Change Email Templates ──────────────
+
+const STATUS_META: Record<string, { emoji: string; heading: string; message: string; color: string }> = {
+  processing: {
+    emoji: "⚙️",
+    heading: "Your order is being prepared!",
+    message: "We're getting your items ready for shipment. You'll receive another notification when your order ships.",
+    color: "#2196F3",
+  },
+  shipped: {
+    emoji: "🚚",
+    heading: "Your order is on its way!",
+    message: "Your package has been shipped and is on its way to you. Delivery typically takes 2–5 business days.",
+    color: "#FF9800",
+  },
+  delivered: {
+    emoji: "✅",
+    heading: "Your order has been delivered!",
+    message: "We hope you love your new pieces! If you have any questions or concerns, don't hesitate to reach out.",
+    color: "#4CAF50",
+  },
+  cancelled: {
+    emoji: "❌",
+    heading: "Your order has been cancelled",
+    message: "Your order has been cancelled. If you were charged, a refund will be processed within 5–7 business days.",
+    color: "#f44336",
+  },
+};
+
+function statusUpdateEmailHTML(order: OrderRecord, newStatus: string): string {
+  const meta = STATUS_META[newStatus] || {
+    emoji: "📦",
+    heading: `Order status: ${newStatus}`,
+    message: `Your order status has been updated to "${newStatus}".`,
+    color: "#8b5a2b",
+  };
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#faf8f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f5;padding:32px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#8b5a2b,#a0724e);padding:32px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:0.5px;">${BRAND}</h1>
+          </td>
+        </tr>
+
+        <!-- Status Icon + Heading -->
+        <tr>
+          <td style="padding:32px 32px 8px;text-align:center;">
+            <div style="font-size:48px;line-height:1;">${meta.emoji}</div>
+            <h2 style="margin:16px 0 8px;color:#2d2319;font-size:22px;">${meta.heading}</h2>
+            <p style="margin:0;color:#8b7355;font-size:15px;line-height:1.5;">${meta.message}</p>
+          </td>
+        </tr>
+
+        <!-- Order Info Bar -->
+        <tr>
+          <td style="padding:16px 32px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf8f5;border-radius:8px;">
+              <tr>
+                <td style="padding:16px;text-align:center;border-right:1px solid #f0e6d8;">
+                  <span style="color:#8b7355;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Order</span><br>
+                  <strong style="color:#2d2319;font-size:15px;">${order.order_number}</strong>
+                </td>
+                <td style="padding:16px;text-align:center;border-right:1px solid #f0e6d8;">
+                  <span style="color:#8b7355;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Status</span><br>
+                  <strong style="color:${meta.color};font-size:15px;text-transform:capitalize;">${newStatus}</strong>
+                </td>
+                <td style="padding:16px;text-align:center;">
+                  <span style="color:#8b7355;font-size:12px;text-transform:uppercase;letter-spacing:1px;">Total</span><br>
+                  <strong style="color:#8b5a2b;font-size:15px;">${formatNaira(order.total)}</strong>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:16px 32px 32px;text-align:center;">
+            <a href="${SITE_URL}/track.html?order=${encodeURIComponent(order.order_number)}" style="display:inline-block;background:#8b5a2b;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;font-size:15px;">
+              Track Your Order
+            </a>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#faf8f5;padding:24px 32px;text-align:center;border-top:1px solid #f0e6d8;">
+            <p style="margin:0 0 8px;color:#8b7355;font-size:13px;">
+              Questions? Reply to this email or reach us at
+              <a href="mailto:support@lingeriebysisioyin.store" style="color:#8b5a2b;">support@lingeriebysisioyin.store</a>
+            </p>
+            <p style="margin:0;color:#b8a898;font-size:12px;">
+              &copy; ${new Date().getFullYear()} ${BRAND} &bull;
+              <a href="${SITE_URL}" style="color:#8b7355;text-decoration:none;">${SITE_URL.replace("https://", "")}</a>
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+}
+
 // ── Send via Resend ────────────────────────────
 
 async function sendEmail(
@@ -390,8 +504,10 @@ serve(async (req: Request) => {
     const payload = await req.json();
 
     // The payload from a database webhook contains the new record
-    // Format: { type: "INSERT", table: "orders", record: {...}, ... }
+    // Format: { type: "INSERT"|"UPDATE", table: "orders", record: {...}, old_record: {...} }
+    const eventType = payload.type || "INSERT";
     const order: OrderRecord = payload.record || payload;
+    const oldRecord: Partial<OrderRecord> | undefined = payload.old_record;
 
     if (!order.order_number) {
       return new Response(
@@ -400,9 +516,48 @@ serve(async (req: Request) => {
       );
     }
 
-    console.log(`Processing email for order ${order.order_number}`);
+    console.log(`Processing ${eventType} email for order ${order.order_number}`);
 
     const results: { customer?: string; admin?: string } = {};
+
+    // ── STATUS UPDATE ──
+    if (eventType === "UPDATE" && oldRecord && oldRecord.status !== order.status) {
+      const newStatus = order.status;
+      console.log(`Status changed: ${oldRecord.status} → ${newStatus}`);
+
+      // Send status update email to customer
+      if (order.customer_email && STATUS_META[newStatus]) {
+        const statusResult = await sendEmail(
+          order.customer_email,
+          `${STATUS_META[newStatus].emoji} Order ${order.order_number} — ${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)} | ${BRAND}`,
+          statusUpdateEmailHTML(order, newStatus)
+        );
+        results.customer = statusResult.success
+          ? "sent"
+          : `failed: ${statusResult.error}`;
+      } else {
+        results.customer = order.customer_email
+          ? `skipped (no template for "${newStatus}")`
+          : "skipped (no email)";
+      }
+
+      // Notify admin of status change
+      const adminResult = await sendEmail(
+        ADMIN_EMAIL,
+        `📋 Order ${order.order_number} → ${newStatus.toUpperCase()}`,
+        `<p>Order <strong>${order.order_number}</strong> status changed from <strong>${oldRecord.status}</strong> to <strong>${newStatus}</strong>.</p><p><a href="${SITE_URL}/admin.html">Open Admin</a></p>`
+      );
+      results.admin = adminResult.success
+        ? "sent"
+        : `failed: ${adminResult.error}`;
+
+      return new Response(JSON.stringify({ success: true, event: "status_update", results }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // ── NEW ORDER (INSERT) ──
 
     // 1. Send confirmation email to customer (if they provided an email)
     if (order.customer_email) {
@@ -430,7 +585,7 @@ serve(async (req: Request) => {
 
     console.log("Email results:", results);
 
-    return new Response(JSON.stringify({ success: true, results }), {
+    return new Response(JSON.stringify({ success: true, event: "new_order", results }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

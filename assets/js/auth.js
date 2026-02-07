@@ -28,6 +28,67 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Password Requirements UI
+   * ───────────────────────────────────────────── */
+  const PW_RULES = [
+    { key: "length",  label: "At least 8 characters", test: (p) => p.length >= 8 },
+    { key: "upper",   label: "Uppercase letter (A-Z)", test: (p) => /[A-Z]/.test(p) },
+    { key: "lower",   label: "Lowercase letter (a-z)", test: (p) => /[a-z]/.test(p) },
+    { key: "number",  label: "Number (0-9)",           test: (p) => /\d/.test(p) },
+    { key: "special", label: "Special character (!@#$…)", test: (p) => /[^A-Za-z0-9]/.test(p) },
+  ];
+
+  function initPasswordRequirements() {
+    const pwField = $("#signupPassword");
+    if (!pwField) return;
+
+    // Inject requirements UI after the password field's form-group
+    const group = pwField.closest(".form-group");
+    if (!group) return;
+
+    const reqBox = document.createElement("div");
+    reqBox.className = "password-requirements";
+    reqBox.innerHTML = `
+      <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
+      <ul class="pw-rules">
+        ${PW_RULES.map(r => `<li class="pw-rule" data-rule="${r.key}">
+          <i class="fa-solid fa-circle-xmark"></i> ${r.label}
+        </li>`).join("")}
+      </ul>`;
+    group.after(reqBox);
+
+    pwField.addEventListener("input", () => checkPasswordStrength(pwField.value));
+    pwField.addEventListener("focus", () => reqBox.classList.add("visible"));
+    pwField.addEventListener("blur", () => {
+      if (!pwField.value) reqBox.classList.remove("visible");
+    });
+  }
+
+  function checkPasswordStrength(pw) {
+    let passed = 0;
+    PW_RULES.forEach((rule) => {
+      const el = document.querySelector(`.pw-rule[data-rule="${rule.key}"]`);
+      if (!el) return;
+      const ok = rule.test(pw);
+      if (ok) passed++;
+      el.classList.toggle("met", ok);
+      el.querySelector("i").className = ok
+        ? "fa-solid fa-circle-check"
+        : "fa-solid fa-circle-xmark";
+    });
+
+    // Strength bar
+    const fill = $("#pwStrengthFill");
+    if (fill) {
+      const pct = (passed / PW_RULES.length) * 100;
+      fill.style.width = pct + "%";
+      fill.className = "pw-strength-fill " +
+        (pct <= 40 ? "weak" : pct <= 70 ? "fair" : "strong");
+    }
+    return passed === PW_RULES.length;
+  }
+
+  /* ─────────────────────────────────────────────
    * State
    * ───────────────────────────────────────────── */
   let currentUser = null;
@@ -430,9 +491,9 @@
           return;
         }
 
-        if (password.length < 6) {
+        if (!checkPasswordStrength(password)) {
           window.UTILS?.toast?.(
-            "Password must be at least 6 characters",
+            "Password does not meet all requirements",
             "error",
           );
           return;
@@ -490,6 +551,7 @@
   async function init() {
     console.log("🔐 AUTH: Initializing");
     setupEventListeners();
+    initPasswordRequirements();
 
     // Check current session
     const client = getClient();

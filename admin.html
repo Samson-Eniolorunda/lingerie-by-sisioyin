@@ -299,6 +299,7 @@
           <button
             type="button"
             class="modal-close"
+            id="closeOrderModal"
             data-close-order
             aria-label="Close"
           >
@@ -308,21 +309,8 @@
         <div class="modal-body" id="orderModalBody">
           <!-- Order details populated via JS -->
         </div>
-        <div class="modal-footer">
-          <select class="form-select" id="orderStatusSelect">
-            <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <button
-            class="btn btn-primary"
-            id="updateOrderStatusBtn"
-            type="button"
-          >
-            Update Status
-          </button>
+        <div class="modal-footer order-modal-footer" id="orderModalFooter">
+          <!-- Status actions populated dynamically -->
         </div>
       </div>
     </div>
@@ -994,7 +982,7 @@
                   <i class="fa-solid fa-clock"></i>
                 </div>
                 <div class="order-stat-info">
-                  <span class="stat-value" id="ordersPendingCount">0</span>
+                  <span class="stat-value" id="pendingOrdersCount">0</span>
                   <span class="stat-label">Pending</span>
                 </div>
               </div>
@@ -1003,7 +991,7 @@
                   <i class="fa-solid fa-gear"></i>
                 </div>
                 <div class="order-stat-info">
-                  <span class="stat-value" id="ordersProcessingCount">0</span>
+                  <span class="stat-value" id="processingOrdersCount">0</span>
                   <span class="stat-label">Processing</span>
                 </div>
               </div>
@@ -1012,7 +1000,7 @@
                   <i class="fa-solid fa-truck"></i>
                 </div>
                 <div class="order-stat-info">
-                  <span class="stat-value" id="ordersShippedCount">0</span>
+                  <span class="stat-value" id="shippedOrdersCount">0</span>
                   <span class="stat-label">Shipped</span>
                 </div>
               </div>
@@ -1021,7 +1009,7 @@
                   <i class="fa-solid fa-check-circle"></i>
                 </div>
                 <div class="order-stat-info">
-                  <span class="stat-value" id="ordersDeliveredCount">0</span>
+                  <span class="stat-value" id="deliveredOrdersCount">0</span>
                   <span class="stat-label">Delivered</span>
                 </div>
               </div>
