@@ -9,6 +9,20 @@
       content="Find your perfect fit with our comprehensive size guide. Measurement tips, size charts, and fitting advice for lingerie and loungewear."
     />
     <meta name="theme-color" content="#be185d" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Size Guide | Lingerie by Sisioyin" />
+    <meta
+      property="og:description"
+      content="Find your perfect fit with our comprehensive size guide. Measurement tips, size charts, and fitting advice."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/img/og-image.png" />
+    <meta
+      property="og:url"
+      content="https://lingeriebysisioyin.store/size.html"
+    />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
@@ -19,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -31,580 +45,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
-
-    <style>
-      /* Size Guide Page Styles */
-      .size-page {
-        min-height: 100vh;
-        background: var(--bg-muted);
-      }
-
-      /* Hero */
-      .size-hero {
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-10);
-        text-align: center;
-        color: white;
-      }
-
-      .size-hero-icon {
-        width: 80px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-4);
-        font-size: 2rem;
-      }
-
-      .size-hero-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-3xl);
-        font-weight: 700;
-        margin-bottom: var(--space-2);
-      }
-
-      .size-hero-subtitle {
-        font-size: var(--fs-lg);
-        opacity: 0.9;
-        max-width: 500px;
-        margin: 0 auto;
-      }
-
-      /* Main */
-      .size-main {
-        padding: var(--space-8) 0 var(--space-16);
-      }
-
-      /* How to Measure Section */
-      .measure-section {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-8);
-        margin-bottom: var(--space-8);
-      }
-
-      .measure-header {
-        text-align: center;
-        margin-bottom: var(--space-8);
-      }
-
-      .measure-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .measure-subtitle {
-        color: var(--text-secondary);
-      }
-
-      .measure-grid {
-        display: grid;
-        gap: var(--space-6);
-      }
-
-      @media (min-width: 768px) {
-        .measure-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      @media (min-width: 1024px) {
-        .measure-grid {
-          grid-template-columns: repeat(4, 1fr);
-        }
-      }
-
-      .measure-card {
-        text-align: center;
-        padding: var(--space-6);
-        background: var(--bg-muted);
-        border-radius: var(--radius-xl);
-        transition: transform 0.2s;
-      }
-
-      .measure-card:hover {
-        transform: translateY(-4px);
-      }
-
-      .measure-icon {
-        width: 70px;
-        height: 70px;
-        border-radius: 50%;
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-4);
-        font-size: 1.75rem;
-        color: white;
-      }
-
-      .measure-card h3 {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .measure-card p {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-        line-height: 1.6;
-      }
-
-      /* Size Chart Tabs */
-      .chart-tabs {
-        display: flex;
-        gap: var(--space-2);
-        flex-wrap: wrap;
-        margin-bottom: var(--space-6);
-        padding: var(--space-3);
-        background: var(--bg-surface);
-        border-radius: var(--radius-xl);
-        border: 2px solid var(--border-light);
-      }
-
-      .chart-tab {
-        padding: var(--space-3) var(--space-6);
-        border: none;
-        background: transparent;
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-base);
-        font-weight: 500;
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .chart-tab:hover {
-        background: var(--bg-muted);
-        color: var(--text-primary);
-      }
-
-      .chart-tab.active {
-        background: var(--clr-primary);
-        color: white;
-      }
-
-      /* Size Charts */
-      .chart-content {
-        display: none;
-      }
-
-      .chart-content.active {
-        display: block;
-      }
-
-      .size-chart {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        overflow: hidden;
-        margin-bottom: var(--space-6);
-      }
-
-      .size-chart-header {
-        padding: var(--space-5) var(--space-6);
-        background: var(--bg-muted);
-        border-bottom: 2px solid var(--border-light);
-      }
-
-      .size-chart-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-lg);
-        font-weight: 700;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-      }
-
-      .size-chart-title i {
-        color: var(--clr-primary);
-      }
-
-      .size-table-wrapper {
-        overflow-x: auto;
-      }
-
-      .size-table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      .size-table th,
-      .size-table td {
-        padding: var(--space-4);
-        text-align: center;
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .size-table th {
-        background: var(--bg-muted);
-        font-weight: 600;
-        color: var(--text-primary);
-        font-size: var(--fs-sm);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-
-      .size-table td {
-        color: var(--text-secondary);
-      }
-
-      .size-table tbody tr:hover {
-        background: var(--bg-muted);
-      }
-
-      .size-table .size-name {
-        font-weight: 600;
-        color: var(--clr-primary);
-      }
-
-      /* Fit Tips */
-      .fit-tips {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-8);
-        margin-top: var(--space-8);
-      }
-
-      .fit-tips-header {
-        text-align: center;
-        margin-bottom: var(--space-6);
-      }
-
-      .fit-tips-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .fit-tips-grid {
-        display: grid;
-        gap: var(--space-4);
-      }
-
-      @media (min-width: 768px) {
-        .fit-tips-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      .fit-tip {
-        display: flex;
-        gap: var(--space-4);
-        padding: var(--space-5);
-        background: var(--bg-muted);
-        border-radius: var(--radius-xl);
-      }
-
-      .fit-tip-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: var(--radius-lg);
-        background: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        color: var(--clr-primary);
-        font-size: 1.25rem;
-      }
-
-      .fit-tip-content h4 {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-1);
-      }
-
-      .fit-tip-content p {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-        line-height: 1.6;
-      }
-
-      /* Size Calculator */
-      .size-calculator {
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        border-radius: var(--radius-2xl);
-        padding: var(--space-8);
-        margin-top: var(--space-8);
-        color: white;
-      }
-
-      .calculator-header {
-        text-align: center;
-        margin-bottom: var(--space-6);
-      }
-
-      .calculator-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        margin-bottom: var(--space-2);
-      }
-
-      .calculator-subtitle {
-        opacity: 0.9;
-      }
-
-      .calculator-form {
-        max-width: 500px;
-        margin: 0 auto;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: var(--radius-xl);
-        padding: var(--space-6);
-      }
-
-      .calculator-row {
-        display: grid;
-        gap: var(--space-4);
-        margin-bottom: var(--space-4);
-      }
-
-      @media (min-width: 480px) {
-        .calculator-row {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      .calculator-group {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .calculator-group label {
-        font-weight: 500;
-        font-size: var(--fs-sm);
-      }
-
-      .calculator-group input,
-      .calculator-group select {
-        padding: var(--space-3) var(--space-4);
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-base);
-        background: rgba(255, 255, 255, 0.95);
-        color: var(--text-primary);
-      }
-
-      .calculator-group input:focus,
-      .calculator-group select:focus {
-        outline: none;
-        border-color: white;
-      }
-
-      .calculator-result {
-        text-align: center;
-        padding: var(--space-5);
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: var(--radius-lg);
-        margin-top: var(--space-4);
-      }
-
-      .calculator-result-label {
-        font-size: var(--fs-sm);
-        opacity: 0.9;
-        margin-bottom: var(--space-1);
-      }
-
-      .calculator-result-value {
-        font-size: var(--fs-3xl);
-        font-weight: 700;
-      }
-
-      /* CTA */
-      .size-cta {
-        text-align: center;
-        margin-top: var(--space-10);
-        padding: var(--space-10);
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-      }
-
-      .size-cta-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-3);
-      }
-
-      .size-cta-text {
-        color: var(--text-secondary);
-        margin-bottom: var(--space-6);
-      }
-
-      /* Fix hero padding for fixed header */
-      .size-hero {
-        padding-top: calc(80px + var(--space-16));
-      }
-
-      /* WhatsApp Widget Modern Styles */
-      .whatsapp-float {
-        position: fixed;
-        bottom: var(--space-6);
-        right: var(--space-6);
-        z-index: 1000;
-      }
-
-      .whatsapp-float-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.75rem;
-        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-        transition: all 0.3s ease;
-        text-decoration: none;
-        position: relative;
-      }
-
-      .whatsapp-float-btn:hover {
-        transform: scale(1.1) translateY(-2px);
-        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
-        color: white;
-      }
-
-      .whatsapp-float-btn::before {
-        content: "";
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        z-index: -1;
-        opacity: 0.3;
-        animation: whatsapp-pulse 2s infinite;
-      }
-
-      @keyframes whatsapp-pulse {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 0.3;
-        }
-        50% {
-          transform: scale(1.15);
-          opacity: 0;
-        }
-      }
-
-      .whatsapp-tooltip {
-        position: absolute;
-        right: 70px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: var(--bg-surface);
-        color: var(--text-primary);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-sm);
-        font-weight: 500;
-        white-space: nowrap;
-        box-shadow: var(--shadow-lg);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-      }
-
-      .whatsapp-float:hover .whatsapp-tooltip {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .whatsapp-tooltip::after {
-        content: "";
-        position: absolute;
-        right: -6px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: 6px solid transparent;
-        border-left-color: var(--bg-surface);
-      }
-
-      /* Mobile Nav Theme Toggle Slider */
-      .mobile-theme-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3);
-        padding: var(--space-4);
-        background: var(--bg-surface-alt);
-        border-radius: var(--radius-xl);
-        margin: var(--space-4);
-      }
-
-      .mobile-theme-toggle i {
-        font-size: 1.1rem;
-        color: var(--text-muted);
-        transition: color 0.2s;
-      }
-
-      .mobile-theme-toggle i.active {
-        color: var(--clr-primary);
-      }
-
-      .theme-slider {
-        position: relative;
-        width: 50px;
-        height: 26px;
-        background: var(--bg-muted);
-        border-radius: var(--radius-full);
-        cursor: pointer;
-        transition: background 0.3s;
-      }
-
-      .theme-slider::before {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s;
-      }
-
-      [data-theme="dark"] .theme-slider::before,
-      .dark .theme-slider::before {
-        transform: translateX(24px);
-      }
-
-      [data-theme="dark"] .theme-slider,
-      .dark .theme-slider {
-        background: var(--clr-primary);
-      }
-    </style>
   </head>
 
   <body class="size-page">
@@ -1261,7 +701,6 @@
               type="button"
               class="btn btn-outline btn-block"
               id="calculateSizeBtn"
-              style="border-color: white; color: white"
             >
               <i class="fa-solid fa-calculator"></i>
               Calculate My Size
@@ -1314,10 +753,18 @@
               lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Instagram"
+              <a
+                href="https://instagram.com/lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" aria-label="TikTok"
+              <a
+                href="https://tiktok.com/@lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
               <a
@@ -1359,13 +806,12 @@
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
-          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
+          <div id="themeToggle">
             <button
               type="button"
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
@@ -1374,7 +820,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
@@ -1383,7 +828,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
@@ -1438,21 +882,6 @@
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════════════
-       WHATSAPP WIDGET
-       ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="whatsapp-float">
-      <span class="whatsapp-tooltip">Chat with us!</span>
-      <a
-        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-        target="_blank"
-        class="whatsapp-float-btn"
-        aria-label="Chat on WhatsApp"
-      >
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
@@ -1563,7 +992,7 @@
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -1639,7 +1068,7 @@
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -1692,69 +1121,6 @@
     <script defer src="assets/js/app.js"></script>
     <script defer src="assets/js/auth.js"></script>
 
-    <script>
-      // Size Guide Page JavaScript
-      document.addEventListener("DOMContentLoaded", function () {
-        // Chart tabs
-        const chartTabs = document.querySelectorAll(".chart-tab");
-        const chartContents = document.querySelectorAll(".chart-content");
-
-        chartTabs.forEach((tab) => {
-          tab.addEventListener("click", () => {
-            const chart = tab.dataset.chart;
-
-            chartTabs.forEach((t) => t.classList.remove("active"));
-            tab.classList.add("active");
-
-            chartContents.forEach((content) => {
-              content.classList.toggle(
-                "active",
-                content.id === `chart-${chart}`,
-              );
-            });
-          });
-        });
-
-        // Size calculator
-        const calculateBtn = document.getElementById("calculateSizeBtn");
-        const underbustInput = document.getElementById("underbust");
-        const bustInput = document.getElementById("bust");
-        const sizeResult = document.getElementById("sizeResult");
-        const recommendedSize = document.getElementById("recommendedSize");
-
-        calculateBtn.addEventListener("click", () => {
-          const underbust = parseInt(underbustInput.value);
-          const bust = parseInt(bustInput.value);
-
-          if (!underbust || !bust) {
-            alert("Please enter both measurements");
-            return;
-          }
-
-          // Calculate band size
-          let bandSize;
-          if (underbust < 68) bandSize = 30;
-          else if (underbust < 73) bandSize = 32;
-          else if (underbust < 78) bandSize = 34;
-          else if (underbust < 83) bandSize = 36;
-          else if (underbust < 88) bandSize = 38;
-          else if (underbust < 93) bandSize = 40;
-          else bandSize = 42;
-
-          // Calculate cup size
-          const difference = bust - underbust;
-          let cupSize;
-          if (difference < 11) cupSize = "A";
-          else if (difference < 14) cupSize = "B";
-          else if (difference < 17) cupSize = "C";
-          else if (difference < 20) cupSize = "D";
-          else if (difference < 23) cupSize = "DD";
-          else cupSize = "E";
-
-          recommendedSize.textContent = `${bandSize}${cupSize}`;
-          sizeResult.style.display = "block";
-        });
-      });
-    </script>
+    <script src="assets/js/size.js"></script>
   </body>
 </html>

@@ -642,9 +642,7 @@
             const colorValue = getColorValue(colorName);
             const colorQty = typeof c === "object" ? c.qty || 1 : 1;
             const isInStock = colorQty > 0;
-            const isActive = i === 0;
-            if (isActive) modalSelectedColor = colorName;
-            return `<button class="qv-color${isActive ? " active" : ""}${!isInStock ? " out-of-stock" : ""}" 
+            return `<button class="qv-color${!isInStock ? " out-of-stock" : ""}" 
             data-color="${UTILS.safeText(colorName)}" 
             data-qty="${colorQty}" 
             title="${UTILS.safeText(colorName)}${!isInStock ? " (Out of Stock)" : ""}"
@@ -652,6 +650,7 @@
             ${!isInStock ? "disabled" : ""}></button>`;
           })
           .join("");
+        modalSelectedColor = "";
       }
 
       // Sizes - normalizeSizes now returns array of {name, qty} objects
@@ -877,6 +876,35 @@
     // Continue shopping button
     $("#continueShoppingBtn")?.addEventListener("click", closeDrawer);
 
+    // Checkout button — require login before proceeding
+    const checkoutBtn = $(".cd-checkout-btn");
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", (e) => {
+        const client = window.DB?.client;
+        if (!client) return; // Supabase not loaded, let link work normally
+
+        e.preventDefault();
+        client.auth.getSession().then(({ data }) => {
+          if (data?.session?.user) {
+            window.location.href = "checkout.html";
+          } else {
+            closeDrawer();
+            UTILS.toast?.(
+              "Please sign in or create an account to proceed to checkout. It only takes a moment!",
+              "info",
+            );
+            setTimeout(() => {
+              if (window.AUTH?.openModal) {
+                window.AUTH.openModal("login");
+              } else {
+                document.getElementById("loginBtn")?.click();
+              }
+            }, 1200);
+          }
+        });
+      });
+    }
+
     // Modern cart drawer body - handle qty/remove actions
     const cartDrawerBody = $("#cartDrawerBody");
     cartDrawerBody?.addEventListener("click", (e) => {
@@ -972,28 +1000,40 @@
       }
     });
 
-    // Size selection (support both old .size-btn and new .qv-size)
+    // Size selection — tap to select, tap again to unselect
     $("#modalSizes")?.addEventListener("click", (e) => {
       const btn = e.target.closest(".qv-size, .size-btn");
       if (!btn || btn.disabled) return;
 
+      const wasActive = btn.classList.contains("active");
       $$("#modalSizes .qv-size, #modalSizes .size-btn").forEach((el) =>
         el.classList.remove("active"),
       );
-      btn.classList.add("active");
-      modalSelectedSize = btn.dataset.size || "";
+
+      if (wasActive) {
+        modalSelectedSize = "";
+      } else {
+        btn.classList.add("active");
+        modalSelectedSize = btn.dataset.size || "";
+      }
     });
 
-    // Color selection
+    // Color selection — tap to select, tap again to unselect
     $("#modalColors")?.addEventListener("click", (e) => {
       const btn = e.target.closest(".qv-color");
       if (!btn || btn.disabled) return;
 
+      const wasActive = btn.classList.contains("active");
       $$("#modalColors .qv-color").forEach((el) =>
         el.classList.remove("active"),
       );
-      btn.classList.add("active");
-      modalSelectedColor = btn.dataset.color || "";
+
+      if (wasActive) {
+        modalSelectedColor = "";
+      } else {
+        btn.classList.add("active");
+        modalSelectedColor = btn.dataset.color || "";
+      }
     });
 
     // Quantity controls
@@ -1240,36 +1280,95 @@
 
   /* ─────────────────────────────────────────────
    * WhatsApp Live Chat Widget
+   * Dynamically injected on all pages using config
+   * Uses the floating style with gradient, pulse animation & tooltip
    * ───────────────────────────────────────────── */
   function initWhatsAppWidget() {
     console.log("💬 APP: initWhatsAppWidget()");
-    const widget = $("#whatsappWidget");
-    const fab = $("#whatsappFab");
-    const closeBtn = $("#whatsappClose");
 
-    if (!widget || !fab) return;
+    // Don't show on admin page
+    if (
+      document.body.classList.contains("admin-body") ||
+      document.body.classList.contains("admin-page")
+    )
+      return;
 
-    // Toggle popup on fab click
-    fab.addEventListener("click", () => {
-      console.log("💬 APP: WhatsApp FAB clicked");
-      widget.classList.toggle("show-popup");
+    // Remove any existing hardcoded widget (cleanup)
+    document
+      .querySelectorAll(".whatsapp-float, .whatsapp-widget")
+      .forEach((el) => el.remove());
+
+    const waLink =
+      window.APP_CONFIG?.SOCIAL?.whatsapp || "https://wa.me/2349033344860";
+    const number = waLink.replace(/\D/g, "");
+    const message = encodeURIComponent("Hello! I'd like to make an enquiry.");
+    const whatsappUrl = `https://wa.me/${number}?text=${message}`;
+
+    // Create WhatsApp chat widget with popup
+    const widget = document.createElement("div");
+    widget.className = "whatsapp-float";
+    widget.innerHTML = `
+      <div class="wa-popup" id="waPopup">
+        <div class="wa-popup-header">
+          <div class="wa-popup-avatar">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div class="wa-popup-info">
+            <span class="wa-popup-name">Lingerie by Sisioyin</span>
+            <span class="wa-popup-status">Typically replies within minutes</span>
+          </div>
+          <button class="wa-popup-close" id="waPopupClose" aria-label="Close chat popup">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="wa-popup-body">
+          <div class="wa-popup-msg">
+            <p>Hi there! 👋</p>
+            <p>How can we help you today? Tap below to start a conversation on WhatsApp.</p>
+            <span class="wa-popup-time">${new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+          </div>
+        </div>
+        <a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer" class="wa-popup-cta">
+          <i class="fa-brands fa-whatsapp"></i> Start Chat
+        </a>
+      </div>
+      <button class="whatsapp-float-btn" id="waToggle" aria-label="Chat on WhatsApp" title="Chat with us on WhatsApp">
+        <i class="fa-brands fa-whatsapp wa-icon-chat"></i>
+        <i class="fa-solid fa-xmark wa-icon-close"></i>
+      </button>
+      <span class="whatsapp-tooltip">Chat with us!</span>
+    `;
+
+    document.body.appendChild(widget);
+
+    // Show widget after 10 second delay
+    setTimeout(() => {
+      widget.classList.add("wa-visible");
+    }, 10000);
+
+    // Toggle popup
+    const toggleBtn = widget.querySelector("#waToggle");
+    const popup = widget.querySelector("#waPopup");
+    const closeBtn = widget.querySelector("#waPopupClose");
+
+    toggleBtn.addEventListener("click", () => {
+      const isOpen = widget.classList.toggle("wa-open");
+      toggleBtn.setAttribute("aria-expanded", isOpen);
     });
 
-    // Close popup
-    closeBtn?.addEventListener("click", () => {
-      console.log("💬 APP: WhatsApp popup closed");
-      widget.classList.remove("show-popup");
+    closeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      widget.classList.remove("wa-open");
+      toggleBtn.setAttribute("aria-expanded", "false");
     });
 
-    // Auto-show popup after 10 seconds (first visit only)
-    const hasSeenPopup = sessionStorage.getItem("LBS_WHATSAPP_POPUP_SHOWN");
-    if (!hasSeenPopup) {
-      setTimeout(() => {
-        console.log("💬 APP: Auto-showing WhatsApp popup after 10 seconds");
-        widget.classList.add("show-popup");
-        sessionStorage.setItem("LBS_WHATSAPP_POPUP_SHOWN", "true");
-      }, 10000);
-    }
+    // Close popup on outside click
+    document.addEventListener("click", (e) => {
+      if (!widget.contains(e.target) && widget.classList.contains("wa-open")) {
+        widget.classList.remove("wa-open");
+        toggleBtn.setAttribute("aria-expanded", "false");
+      }
+    });
   }
 
   /* ─────────────────────────────────────────────
@@ -1961,6 +2060,62 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Update Social & WhatsApp Links from Config
+   * Reads SOCIAL object in config.js and patches all
+   * footer-social links, contact social links, WhatsApp
+   * buttons, and phone hrefs so you only edit config.js.
+   * ───────────────────────────────────────────── */
+  function updateSocialLinks() {
+    const social = window.APP_CONFIG?.SOCIAL || {};
+
+    // ── WhatsApp: update every wa.me link, preserve ?text= param ──
+    if (social.whatsapp) {
+      // Extract raw number from "https://wa.me/2349033344860"
+      const number = social.whatsapp.replace(/\D/g, "");
+      document.querySelectorAll('a[href*="wa.me/"]').forEach((link) => {
+        try {
+          const url = new URL(link.href);
+          const text = url.searchParams.get("text");
+          link.href = `https://wa.me/${number}${text ? "?text=" + encodeURIComponent(text) : ""}`;
+        } catch (_) {
+          link.href = social.whatsapp;
+        }
+      });
+      // Update tel: links (contact page phone number)
+      document.querySelectorAll('a[href^="tel:"]').forEach((link) => {
+        link.href = `tel:+${number}`;
+        // Update visible text if it looks like a phone number
+        if (/^\+?[\d\s()-]+$/.test(link.textContent.trim())) {
+          link.textContent = `+${number.replace(/(\d{3})(\d{3})(\d{3})(\d{4})/, "$1 $2 $3 $4")}`;
+        }
+      });
+    }
+
+    // ── Instagram: update footer + contact social links ──
+    if (social.instagram) {
+      document.querySelectorAll('a[aria-label="Instagram"]').forEach((link) => {
+        link.href = social.instagram;
+      });
+    }
+
+    // ── TikTok: update footer + contact social links ──
+    if (social.tiktok) {
+      document.querySelectorAll('a[aria-label="TikTok"]').forEach((link) => {
+        link.href = social.tiktok;
+      });
+    }
+
+    // ── Facebook (if added later) ──
+    if (social.facebook) {
+      document.querySelectorAll('a[aria-label="Facebook"]').forEach((link) => {
+        link.href = social.facebook;
+      });
+    }
+
+    console.log("✅ APP: Social links updated from config");
+  }
+
+  /* ─────────────────────────────────────────────
    * Bootstrap
    * ───────────────────────────────────────────── */
   console.log("🚀 APP: Bootstrap started");
@@ -1972,6 +2127,7 @@
   initModal();
   initKeyboardNav();
   initWhatsAppWidget();
+  updateSocialLinks();
   initScrollReveal();
   initCounterAnimation();
   initWishlist();

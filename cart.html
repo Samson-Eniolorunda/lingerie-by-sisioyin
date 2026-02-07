@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -409,19 +409,11 @@
 
               <!-- Delivery Selection -->
               <div class="summary-delivery">
-                <label class="summary-delivery-label">
+                <label class="summary-delivery-label" for="deliveryArea">
                   <i class="fa-solid fa-truck"></i> Delivery Location
                 </label>
                 <select id="deliveryArea" class="summary-delivery-select">
-                  <option value="Lagos" data-fee="2000">Lagos — ₦2,000</option>
-                  <option value="Ogun" data-fee="2000">Ogun — ₦2,000</option>
-                  <option value="Oyo" data-fee="2500">Oyo — ₦2,500</option>
-                  <option value="Osun" data-fee="2500">Osun — ₦2,500</option>
-                  <option value="Ondo" data-fee="2500">Ondo — ₦2,500</option>
-                  <option value="Ekiti" data-fee="2500">Ekiti — ₦2,500</option>
-                  <option value="Abuja" data-fee="3500">
-                    Abuja (FCT) — ₦3,500
-                  </option>
+                  <!-- Populated from config.js DELIVERY_FEES -->
                 </select>
               </div>
 
@@ -540,10 +532,18 @@
               lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Instagram"
+              <a
+                href="https://instagram.com/lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" aria-label="TikTok"
+              <a
+                href="https://tiktok.com/@lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
               <a
@@ -591,13 +591,12 @@
             rights reserved.
           </p>
 
-          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
+          <div id="themeToggle">
             <button
               type="button"
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
@@ -606,7 +605,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
@@ -615,7 +613,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
@@ -626,18 +623,6 @@
 
     <!-- Toast Notification -->
     <div class="toast" data-toast></div>
-
-    <!-- WhatsApp Widget -->
-    <div class="whatsapp-widget" id="whatsappWidget">
-      <a
-        href="https://wa.me/2349033344860?text=Hi%2C%20I%20need%20help%20with%20my%20order"
-        target="_blank"
-        class="whatsapp-btn"
-        aria-label="Chat on WhatsApp"
-      >
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
-    </div>
 
     <!-- Auth Modal -->
     <div class="modal-backdrop" id="authBackdrop"></div>
@@ -695,7 +680,7 @@
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -771,7 +756,7 @@
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button

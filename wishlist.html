@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -32,471 +32,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
-
-    <style>
-      /* Wishlist Page Styles */
-      .wishlist-page {
-        min-height: 100vh;
-        background: var(--bg-muted);
-      }
-
-      /* Page Header */
-      .wishlist-hero {
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-10);
-        text-align: center;
-        color: white;
-      }
-
-      .wishlist-hero-icon {
-        width: 80px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-4);
-        font-size: 2rem;
-      }
-
-      .wishlist-hero-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-3xl);
-        font-weight: 700;
-        margin-bottom: var(--space-2);
-      }
-
-      .wishlist-hero-subtitle {
-        font-size: var(--fs-lg);
-        opacity: 0.9;
-      }
-
-      /* Wishlist Main */
-      .wishlist-main {
-        padding: var(--space-8) 0 var(--space-16);
-      }
-
-      /* Wishlist Actions Bar */
-      .wishlist-actions {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: var(--space-6);
-        flex-wrap: wrap;
-        gap: var(--space-4);
-      }
-
-      .wishlist-count {
-        font-size: var(--fs-lg);
-        font-weight: 600;
-        color: var(--text-primary);
-      }
-
-      .wishlist-count span {
-        color: var(--clr-primary);
-      }
-
-      /* Wishlist Grid */
-      .wishlist-grid {
-        display: grid;
-        gap: var(--space-6);
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      }
-
-      /* Wishlist Card */
-      .wishlist-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        overflow: hidden;
-        transition:
-          transform 0.3s,
-          box-shadow 0.3s;
-      }
-
-      .wishlist-card:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-xl);
-      }
-
-      .wishlist-card-image {
-        position: relative;
-        aspect-ratio: 3/4;
-        overflow: hidden;
-        background: var(--bg-muted);
-      }
-
-      .wishlist-card-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s;
-      }
-
-      .wishlist-card:hover .wishlist-card-image img {
-        transform: scale(1.05);
-      }
-
-      .wishlist-card-badges {
-        position: absolute;
-        top: var(--space-3);
-        left: var(--space-3);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .wishlist-badge {
-        padding: var(--space-1) var(--space-3);
-        border-radius: var(--radius-full);
-        font-size: var(--fs-xs);
-        font-weight: 600;
-        text-transform: uppercase;
-      }
-
-      .wishlist-badge.new {
-        background: var(--clr-accent);
-        color: white;
-      }
-
-      .wishlist-badge.sale {
-        background: var(--clr-error);
-        color: white;
-      }
-
-      .wishlist-badge.low-stock {
-        background: var(--clr-warning);
-        color: #000;
-      }
-
-      .wishlist-remove-btn {
-        position: absolute;
-        top: var(--space-3);
-        right: var(--space-3);
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: var(--bg-surface);
-        border: none;
-        color: var(--clr-error);
-        font-size: 1.25rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow-md);
-      }
-
-      .wishlist-remove-btn:hover {
-        background: var(--clr-error);
-        color: white;
-        transform: scale(1.1);
-      }
-
-      .wishlist-card-content {
-        padding: var(--space-5);
-      }
-
-      .wishlist-card-category {
-        font-size: var(--fs-xs);
-        color: var(--text-muted);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: var(--space-2);
-      }
-
-      .wishlist-card-name {
-        font-size: var(--fs-lg);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-        line-height: 1.3;
-      }
-
-      .wishlist-card-name a {
-        color: inherit;
-        text-decoration: none;
-      }
-
-      .wishlist-card-name a:hover {
-        color: var(--clr-primary);
-      }
-
-      .wishlist-card-price {
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-        margin-bottom: var(--space-4);
-      }
-
-      .wishlist-price-current {
-        font-size: var(--fs-xl);
-        font-weight: 700;
-        color: var(--clr-primary);
-      }
-
-      .wishlist-price-original {
-        font-size: var(--fs-sm);
-        color: var(--text-muted);
-        text-decoration: line-through;
-      }
-
-      .wishlist-card-meta {
-        display: flex;
-        gap: var(--space-3);
-        margin-bottom: var(--space-4);
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-      }
-
-      .wishlist-card-meta span {
-        display: flex;
-        align-items: center;
-        gap: var(--space-1);
-      }
-
-      .wishlist-card-actions {
-        display: flex;
-        gap: var(--space-2);
-      }
-
-      .wishlist-card-actions .btn {
-        flex: 1;
-      }
-
-      /* Empty Wishlist */
-      .wishlist-empty {
-        text-align: center;
-        padding: var(--space-16) var(--space-6);
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-      }
-
-      .wishlist-empty-icon {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        background: linear-gradient(
-          135deg,
-          rgba(236, 72, 153, 0.1),
-          rgba(190, 24, 93, 0.1)
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-6);
-        font-size: 3rem;
-        color: var(--clr-primary);
-      }
-
-      .wishlist-empty-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-3);
-      }
-
-      .wishlist-empty-text {
-        color: var(--text-secondary);
-        max-width: 400px;
-        margin: 0 auto var(--space-8);
-        line-height: 1.6;
-      }
-
-      /* Quick Actions */
-      .wishlist-quick-actions {
-        display: flex;
-        gap: var(--space-4);
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: var(--space-8);
-        padding-top: var(--space-8);
-        border-top: 1px solid var(--border-light);
-      }
-
-      .quick-action-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-4);
-        background: var(--bg-muted);
-        border-radius: var(--radius-xl);
-        text-decoration: none;
-        color: var(--text-primary);
-        transition: all 0.2s;
-        min-width: 140px;
-      }
-
-      .quick-action-card:hover {
-        background: var(--clr-primary);
-        color: white;
-        transform: translateY(-2px);
-      }
-
-      .quick-action-card i {
-        font-size: 1.5rem;
-      }
-
-      .quick-action-card span {
-        font-size: var(--fs-sm);
-        font-weight: 500;
-      }
-
-      /* Fix hero padding for fixed header */
-      .wishlist-hero {
-        padding-top: calc(80px + var(--space-16));
-      }
-
-      /* WhatsApp Widget Modern Styles */
-      .whatsapp-float {
-        position: fixed;
-        bottom: var(--space-6);
-        right: var(--space-6);
-        z-index: 1000;
-      }
-
-      .whatsapp-float-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.75rem;
-        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-        transition: all 0.3s ease;
-        text-decoration: none;
-        position: relative;
-      }
-
-      .whatsapp-float-btn:hover {
-        transform: scale(1.1) translateY(-2px);
-        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
-        color: white;
-      }
-
-      .whatsapp-float-btn::before {
-        content: "";
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        z-index: -1;
-        opacity: 0.3;
-        animation: whatsapp-pulse 2s infinite;
-      }
-
-      @keyframes whatsapp-pulse {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 0.3;
-        }
-        50% {
-          transform: scale(1.15);
-          opacity: 0;
-        }
-      }
-
-      .whatsapp-tooltip {
-        position: absolute;
-        right: 70px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: var(--bg-surface);
-        color: var(--text-primary);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-sm);
-        font-weight: 500;
-        white-space: nowrap;
-        box-shadow: var(--shadow-lg);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-      }
-
-      .whatsapp-float:hover .whatsapp-tooltip {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .whatsapp-tooltip::after {
-        content: "";
-        position: absolute;
-        right: -6px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: 6px solid transparent;
-        border-left-color: var(--bg-surface);
-      }
-
-      /* Mobile Nav Theme Toggle Slider */
-      .mobile-theme-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3);
-        padding: var(--space-4);
-        background: var(--bg-surface-alt);
-        border-radius: var(--radius-xl);
-        margin: var(--space-4);
-      }
-
-      .mobile-theme-toggle i {
-        font-size: 1.1rem;
-        color: var(--text-muted);
-        transition: color 0.2s;
-      }
-
-      .mobile-theme-toggle i.active {
-        color: var(--clr-primary);
-      }
-
-      .theme-slider {
-        position: relative;
-        width: 50px;
-        height: 26px;
-        background: var(--bg-muted);
-        border-radius: var(--radius-full);
-        cursor: pointer;
-        transition: background 0.3s;
-      }
-
-      .theme-slider::before {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s;
-      }
-
-      [data-theme="dark"] .theme-slider::before,
-      .dark .theme-slider::before {
-        transform: translateX(24px);
-      }
-
-      [data-theme="dark"] .theme-slider,
-      .dark .theme-slider {
-        background: var(--clr-primary);
-      }
-    </style>
   </head>
 
   <body class="wishlist-page">
@@ -810,10 +345,10 @@
               lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Instagram"
+              <a href="https://instagram.com/lingeriebysissioyin" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" aria-label="TikTok"
+              <a href="https://tiktok.com/@lingeriebysissioyin" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
               <a
@@ -855,13 +390,12 @@
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
-          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
+          <div id="themeToggle">
             <button
               type="button"
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
@@ -870,7 +404,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
@@ -879,7 +412,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
@@ -934,21 +466,6 @@
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════════════
-       WHATSAPP WIDGET
-       ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="whatsapp-float">
-      <span class="whatsapp-tooltip">Chat with us!</span>
-      <a
-        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-        target="_blank"
-        class="whatsapp-float-btn"
-        aria-label="Chat on WhatsApp"
-      >
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
@@ -1059,7 +576,7 @@
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -1135,7 +652,7 @@
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button

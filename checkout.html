@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -336,6 +336,7 @@
                       type="text"
                       id="firstName"
                       name="firstName"
+                      autocomplete="given-name"
                       placeholder=" "
                       required
                     />
@@ -346,6 +347,7 @@
                       type="text"
                       id="lastName"
                       name="lastName"
+                      autocomplete="family-name"
                       placeholder=" "
                       required
                     />
@@ -358,6 +360,7 @@
                       type="email"
                       id="email"
                       name="email"
+                      autocomplete="email"
                       placeholder=" "
                       required
                     />
@@ -368,6 +371,7 @@
                       type="tel"
                       id="phone"
                       name="phone"
+                      autocomplete="tel"
                       placeholder=" "
                       required
                     />
@@ -411,6 +415,7 @@
                     type="text"
                     id="address"
                     name="address"
+                    autocomplete="street-address"
                     placeholder=" "
                     required
                   />
@@ -422,13 +427,19 @@
                       type="text"
                       id="city"
                       name="city"
+                      autocomplete="address-level2"
                       placeholder=" "
                       required
                     />
                     <label for="city">City *</label>
                   </div>
                   <div class="form-floating">
-                    <select id="state" name="state" required>
+                    <select
+                      id="state"
+                      name="state"
+                      autocomplete="address-level1"
+                      required
+                    >
                       <option value="">Select State</option>
                       <option value="Lagos">Lagos</option>
                       <option value="Ogun">Ogun</option>
@@ -446,6 +457,7 @@
                     type="text"
                     id="landmark"
                     name="landmark"
+                    autocomplete="off"
                     placeholder=" "
                   />
                   <label for="landmark">Landmark / Nearest Bus Stop</label>
@@ -455,6 +467,7 @@
                     id="orderNotes"
                     name="orderNotes"
                     rows="3"
+                    autocomplete="off"
                     placeholder=" "
                   ></textarea>
                   <label for="orderNotes">Order Notes (Optional)</label>
@@ -641,7 +654,7 @@
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -718,7 +731,7 @@
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -869,10 +882,10 @@
               lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Instagram"
+              <a href="https://instagram.com/lingeriebysissioyin" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" aria-label="TikTok"
+              <a href="https://tiktok.com/@lingeriebysissioyin" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
               <a
@@ -921,13 +934,12 @@
             &copy; <span id="currentYear">2025</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
-          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
+          <div id="themeToggle">
             <button
               type="button"
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
@@ -936,7 +948,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
@@ -945,7 +956,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>

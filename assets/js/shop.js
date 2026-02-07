@@ -190,7 +190,10 @@
 
   // Create Product Card - Clean modern design
   function createProductCard(p) {
-    const img = getFirstImage(p.images);
+    const imgRaw = getFirstImage(p.images);
+    const img = window.UTILS?.optimizedImg
+      ? window.UTILS.optimizedImg(imgRaw, 400, 75)
+      : imgRaw;
     const name = safeText(p.name);
     const price = formatPrice(p.price_ngn);
     const category = safeText(p.category || "Uncategorized");
@@ -590,12 +593,7 @@
                     const colorValue = getColorValue(colorName);
                     const colorQty = c.qty || 0;
                     const isColorInStock = colorQty > 0;
-                    const firstAvailable = colors.findIndex(
-                      (col) => (col.qty || 0) > 0,
-                    );
-                    const isActive =
-                      i === (firstAvailable >= 0 ? firstAvailable : 0);
-                    return `<button class="qm-color${isActive ? " active" : ""}${!isColorInStock ? " out-of-stock" : ""}" data-color="${safeText(colorName)}" data-qty="${colorQty}" data-tooltip="${safeText(colorName)}${!isColorInStock ? " (Out of Stock)" : ""}" style="background:${safeText(colorValue)}" ${!isColorInStock ? "disabled" : ""}><span class="qm-color-name">${safeText(colorName)}</span></button>`;
+                    return `<button class="qm-color${!isColorInStock ? " out-of-stock" : ""}" data-color="${safeText(colorName)}" data-qty="${colorQty}" data-tooltip="${safeText(colorName)}${!isColorInStock ? " (Out of Stock)" : ""}" style="background:${safeText(colorValue)}" ${!isColorInStock ? "disabled" : ""}><span class="qm-color-name">${safeText(colorName)}</span></button>`;
                   })
                   .join("")}
               </div>
@@ -644,21 +642,178 @@
                 <button type="button" class="qm-share-btn copy" id="qmCopyLink" title="Copy Link"><i class="fa-solid fa-link"></i></button>
               </div>
             </div>
+
+            <!-- Reviews Section -->
+            <div class="qm-reviews-section" id="qmReviews">
+              <div class="qm-reviews-header">
+                <h3 class="qm-reviews-title"><i class="fa-solid fa-star"></i> Customer Reviews</h3>
+                <button type="button" class="qm-write-review-btn" id="qmWriteReviewBtn">Write a Review</button>
+              </div>
+              <div class="qm-reviews-summary" id="qmReviewsSummary"></div>
+              <div class="qm-reviews-list" id="qmReviewsList">
+                <p class="qm-reviews-loading">Loading reviews...</p>
+              </div>
+            </div>
+
+            <!-- Review Form (hidden by default) -->
+            <div class="qm-review-form" id="qmReviewForm" hidden>
+              <h4>Write a Review</h4>
+              <div class="qm-star-picker" id="qmStarPicker">
+                ${[1, 2, 3, 4, 5].map((n) => `<button type="button" class="qm-star-btn" data-star="${n}" aria-label="${n} star"><i class="fa-regular fa-star"></i></button>`).join("")}
+              </div>
+              <input type="text" id="qmReviewName" placeholder="Your name" maxlength="100" class="qm-review-input" />
+              <input type="email" id="qmReviewEmail" placeholder="Email (optional)" maxlength="200" class="qm-review-input" />
+              <input type="text" id="qmReviewTitle" placeholder="Review title (optional)" maxlength="150" class="qm-review-input" />
+              <textarea id="qmReviewComment" placeholder="Share your experience..." rows="3" maxlength="1000" class="qm-review-input"></textarea>
+              <div class="qm-review-form-actions">
+                <button type="button" class="qm-submit-review" id="qmSubmitReview">Submit Review</button>
+                <button type="button" class="qm-cancel-review" id="qmCancelReview">Cancel</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     `;
 
     if (showColors && colors.length) {
-      // Select first in-stock color, or first color if all out of stock
-      const firstAvailable = colors.find((c) => (c.qty || 0) > 0);
-      modalSelectedColor = firstAvailable
-        ? firstAvailable.name
-        : colors[0].name;
+      // No pre-selection — user must choose a color
+      modalSelectedColor = "";
     }
     productModal.hidden = false;
     document.body.style.overflow = "hidden";
     setupModalEvents();
+    loadProductReviews(product.id);
+  }
+
+  // ── Review Functions ──────────────────────────
+  async function loadProductReviews(productId) {
+    const listEl = $("#qmReviewsList");
+    const summaryEl = $("#qmReviewsSummary");
+    if (!listEl) return;
+
+    try {
+      const c = window.supabaseClient;
+      if (!c) {
+        listEl.innerHTML = '<p class="qm-no-reviews">Reviews unavailable</p>';
+        return;
+      }
+
+      const { data: reviews, error } = await c
+        .from("reviews")
+        .select("*")
+        .eq("product_id", productId)
+        .eq("is_approved", true)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+
+      // Summary
+      if (summaryEl && reviews?.length) {
+        const avg = (
+          reviews.reduce((s, r) => s + r.rating, 0) / reviews.length
+        ).toFixed(1);
+        const stars = renderStars(Math.round(avg));
+        summaryEl.innerHTML = `<span class="qm-avg-rating">${avg}</span> ${stars} <span class="qm-review-count">(${reviews.length} review${reviews.length !== 1 ? "s" : ""})</span>`;
+      } else if (summaryEl) {
+        summaryEl.innerHTML = "";
+      }
+
+      // List
+      if (!reviews?.length) {
+        listEl.innerHTML =
+          '<p class="qm-no-reviews">No reviews yet. Be the first!</p>';
+        return;
+      }
+
+      listEl.innerHTML = reviews
+        .map((r) => {
+          const date = new Date(r.created_at).toLocaleDateString("en-NG", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          });
+          return `
+          <div class="qm-review-item">
+            <div class="qm-review-item-header">
+              <span class="qm-review-author">${safeText(r.customer_name)}</span>
+              <span class="qm-review-date">${date}</span>
+            </div>
+            <div class="qm-review-stars">${renderStars(r.rating)}</div>
+            ${r.title ? `<strong class="qm-review-item-title">${safeText(r.title)}</strong>` : ""}
+            <p class="qm-review-text">${safeText(r.comment)}</p>
+          </div>`;
+        })
+        .join("");
+    } catch (err) {
+      console.error("Failed to load reviews:", err);
+      listEl.innerHTML = '<p class="qm-no-reviews">Could not load reviews</p>';
+    }
+  }
+
+  function renderStars(count) {
+    return Array.from(
+      { length: 5 },
+      (_, i) => `<i class="fa-${i < count ? "solid" : "regular"} fa-star"></i>`,
+    ).join("");
+  }
+
+  async function submitReview(productId) {
+    const name = $("#qmReviewName")?.value?.trim();
+    const email = $("#qmReviewEmail")?.value?.trim();
+    const title = $("#qmReviewTitle")?.value?.trim();
+    const comment = $("#qmReviewComment")?.value?.trim();
+    const stars =
+      productModal?.querySelectorAll(".qm-star-btn.active")?.length || 0;
+
+    if (!name) {
+      toast("Please enter your name", "warning");
+      return;
+    }
+    if (!comment) {
+      toast("Please write a comment", "warning");
+      return;
+    }
+    if (!stars) {
+      toast("Please select a star rating", "warning");
+      return;
+    }
+
+    const btn = $("#qmSubmitReview");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Submitting...";
+    }
+
+    try {
+      const c = window.supabaseClient;
+      if (!c) throw new Error("Not connected");
+
+      const { error } = await c.from("reviews").insert({
+        product_id: productId,
+        customer_name: name,
+        customer_email: email || null,
+        rating: stars,
+        title: title || null,
+        comment: comment,
+      });
+
+      if (error) throw error;
+
+      toast("Review submitted! It will appear after approval.", "success");
+      const form = $("#qmReviewForm");
+      if (form) form.hidden = true;
+      // Refresh reviews list
+      await loadProductReviews(productId);
+    } catch (err) {
+      console.error("Review submit error:", err);
+      toast("Failed to submit review. Please try again.", "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Submit Review";
+      }
+    }
   }
 
   function closeModal() {
@@ -981,6 +1136,63 @@
       } catch {
         toast("Failed to copy link", "error");
       }
+    });
+
+    // ── Review events ──
+    const writeBtn = $("#qmWriteReviewBtn");
+    const reviewForm = $("#qmReviewForm");
+    const cancelReview = $("#qmCancelReview");
+    const submitReview$ = $("#qmSubmitReview");
+    const starPicker = $("#qmStarPicker");
+    let selectedStars = 0;
+
+    writeBtn?.addEventListener("click", () => {
+      if (reviewForm) reviewForm.hidden = false;
+      writeBtn.style.display = "none";
+      reviewForm?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+
+    cancelReview?.addEventListener("click", () => {
+      if (reviewForm) reviewForm.hidden = true;
+      if (writeBtn) writeBtn.style.display = "";
+      selectedStars = 0;
+      starPicker?.querySelectorAll(".qm-star-btn").forEach((b) => {
+        b.classList.remove("active");
+        b.innerHTML = '<i class="fa-regular fa-star"></i>';
+      });
+    });
+
+    starPicker?.addEventListener("click", (e) => {
+      const btn = e.target.closest(".qm-star-btn");
+      if (!btn) return;
+      selectedStars = parseInt(btn.dataset.star, 10);
+      starPicker.querySelectorAll(".qm-star-btn").forEach((b) => {
+        const s = parseInt(b.dataset.star, 10);
+        const filled = s <= selectedStars;
+        b.classList.toggle("active", filled);
+        b.innerHTML = `<i class="fa-${filled ? "solid" : "regular"} fa-star"></i>`;
+      });
+    });
+
+    starPicker?.addEventListener("mouseover", (e) => {
+      const btn = e.target.closest(".qm-star-btn");
+      if (!btn) return;
+      const hoverStar = parseInt(btn.dataset.star, 10);
+      starPicker.querySelectorAll(".qm-star-btn").forEach((b) => {
+        const s = parseInt(b.dataset.star, 10);
+        b.innerHTML = `<i class="fa-${s <= hoverStar ? "solid" : "regular"} fa-star"></i>`;
+      });
+    });
+
+    starPicker?.addEventListener("mouseleave", () => {
+      starPicker.querySelectorAll(".qm-star-btn").forEach((b) => {
+        const s = parseInt(b.dataset.star, 10);
+        b.innerHTML = `<i class="fa-${s <= selectedStars ? "solid" : "regular"} fa-star"></i>`;
+      });
+    });
+
+    submitReview$?.addEventListener("click", () => {
+      if (modalProduct) submitReview(modalProduct.id);
     });
   }
 

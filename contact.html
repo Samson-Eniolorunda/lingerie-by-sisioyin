@@ -10,16 +10,22 @@
     />
     <meta name="theme-color" content="#be185d" />
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
-    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
-    <link rel="manifest" href="site.webmanifest" />
-
-    <!-- Fonts -->
+    <!-- Open Graph -->
+    <meta property="og:title" content="Contact Us | Lingerie by Sisioyin" />
+    <meta
+      property="og:description"
+      content="Get in touch with Lingerie by Sisioyin. We're here to help with orders, sizing questions, or any inquiries."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="assets/img/og-image.png" />
+    <meta
+      property="og:url"
+      content="https://lingeriebysisioyin.store/contact.html"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -31,521 +37,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
-
-    <style>
-      /* Contact Page Styles */
-      .contact-hero {
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary) 0%,
-          var(--clr-primary-dark, #9d174d) 100%
-        );
-        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-10);
-        text-align: center;
-        color: white;
-      }
-
-      .contact-hero h1 {
-        font-family: var(--ff-display);
-        font-size: clamp(2rem, 5vw, 3.5rem);
-        font-weight: 700;
-        margin-bottom: var(--space-4);
-      }
-
-      .contact-hero p {
-        font-size: var(--fs-lg);
-        opacity: 0.9;
-        max-width: 600px;
-        margin: 0 auto;
-      }
-
-      .contact-main {
-        padding: var(--space-16) 0;
-      }
-
-      .contact-grid {
-        display: grid;
-        gap: var(--space-8);
-      }
-
-      @media (min-width: 1024px) {
-        .contact-grid {
-          grid-template-columns: 1fr 400px;
-        }
-      }
-
-      /* Contact Form Card */
-      .contact-form-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-8);
-      }
-
-      .contact-form-card h2 {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .contact-form-card > p {
-        color: var(--text-secondary);
-        margin-bottom: var(--space-6);
-      }
-
-      .contact-form {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-5);
-      }
-
-      .form-row {
-        display: grid;
-        gap: var(--space-5);
-      }
-
-      @media (min-width: 640px) {
-        .form-row {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .form-group label {
-        font-weight: 500;
-        color: var(--text-primary);
-        font-size: var(--fs-sm);
-      }
-
-      .form-group input,
-      .form-group select,
-      .form-group textarea {
-        padding: var(--space-3) var(--space-4);
-        border: 2px solid var(--border-light);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-base);
-        background: var(--bg-base);
-        color: var(--text-primary);
-        transition:
-          border-color 0.2s,
-          box-shadow 0.2s;
-      }
-
-      .form-group input:focus,
-      .form-group select:focus,
-      .form-group textarea:focus {
-        outline: none;
-        border-color: var(--clr-primary);
-        box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
-      }
-
-      .form-group textarea {
-        min-height: 150px;
-        resize: vertical;
-      }
-
-      .contact-submit-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-2);
-        padding: var(--space-4) var(--space-8);
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        color: white;
-        border: none;
-        border-radius: var(--radius-full);
-        font-weight: 600;
-        font-size: var(--fs-base);
-        cursor: pointer;
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
-      }
-
-      .contact-submit-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(190, 24, 93, 0.3);
-      }
-
-      .contact-submit-btn:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        transform: none;
-      }
-
-      /* Contact Info Sidebar */
-      .contact-info {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
-      }
-
-      .info-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-6);
-      }
-
-      .info-card h3 {
-        font-size: var(--fs-lg);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-4);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-      }
-
-      .info-card h3 i {
-        width: 40px;
-        height: 40px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        color: white;
-        border-radius: var(--radius-lg);
-        font-size: 1rem;
-      }
-
-      .info-item {
-        display: flex;
-        align-items: flex-start;
-        gap: var(--space-3);
-        padding: var(--space-3) 0;
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .info-item:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-      }
-
-      .info-item i {
-        color: var(--clr-primary);
-        width: 20px;
-        text-align: center;
-        margin-top: 2px;
-      }
-
-      .info-item-content {
-        flex: 1;
-      }
-
-      .info-item-label {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-        margin-bottom: 2px;
-      }
-
-      .info-item-value {
-        color: var(--text-primary);
-        font-weight: 500;
-      }
-
-      .info-item-value a {
-        color: var(--clr-primary);
-        text-decoration: none;
-      }
-
-      .info-item-value a:hover {
-        text-decoration: underline;
-      }
-
-      /* Social Links */
-      .social-links {
-        display: flex;
-        gap: var(--space-3);
-        margin-top: var(--space-4);
-      }
-
-      .social-link {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--bg-muted);
-        border-radius: var(--radius-lg);
-        color: var(--text-secondary);
-        font-size: 1.25rem;
-        transition: all 0.2s;
-        text-decoration: none;
-      }
-
-      .social-link:hover {
-        background: var(--clr-primary);
-        color: white;
-        transform: translateY(-2px);
-      }
-
-      /* Business Hours */
-      .hours-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .hours-row {
-        display: flex;
-        justify-content: space-between;
-        padding: var(--space-2) 0;
-        border-bottom: 1px dashed var(--border-light);
-      }
-
-      .hours-row:last-child {
-        border-bottom: none;
-      }
-
-      .hours-day {
-        font-weight: 500;
-        color: var(--text-primary);
-      }
-
-      .hours-time {
-        color: var(--text-secondary);
-      }
-
-      .hours-time.closed {
-        color: var(--clr-error);
-      }
-
-      /* FAQ Quick Links */
-      .quick-links {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .quick-link {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        padding: var(--space-3) var(--space-4);
-        background: var(--bg-muted);
-        border-radius: var(--radius-lg);
-        color: var(--text-primary);
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.2s;
-      }
-
-      .quick-link:hover {
-        background: var(--clr-primary);
-        color: white;
-        transform: translateX(5px);
-      }
-
-      .quick-link i {
-        font-size: 0.875rem;
-      }
-
-      /* Form Success State */
-      .form-success {
-        text-align: center;
-        padding: var(--space-12);
-      }
-
-      .form-success-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--clr-success), #059669);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-6);
-      }
-
-      .form-success-icon i {
-        font-size: 2.5rem;
-        color: white;
-      }
-
-      .form-success h3 {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .form-success p {
-        color: var(--text-secondary);
-        margin-bottom: var(--space-6);
-      }
-
-      /* Fix hero padding for fixed header */
-      .contact-hero {
-        padding-top: calc(80px + var(--space-16));
-      }
-
-      /* Fix dropdown arrow */
-      .form-group select {
-        padding-right: var(--space-10);
-        appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right var(--space-3) center;
-        background-size: 20px;
-      }
-
-      /* WhatsApp Widget Modern Styles */
-      .whatsapp-float {
-        position: fixed;
-        bottom: var(--space-6);
-        right: var(--space-6);
-        z-index: 1000;
-      }
-
-      .whatsapp-float-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.75rem;
-        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-        transition: all 0.3s ease;
-        text-decoration: none;
-        position: relative;
-      }
-
-      .whatsapp-float-btn:hover {
-        transform: scale(1.1) translateY(-2px);
-        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
-        color: white;
-      }
-
-      .whatsapp-float-btn::before {
-        content: "";
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        z-index: -1;
-        opacity: 0.3;
-        animation: whatsapp-pulse 2s infinite;
-      }
-
-      @keyframes whatsapp-pulse {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 0.3;
-        }
-        50% {
-          transform: scale(1.15);
-          opacity: 0;
-        }
-      }
-
-      .whatsapp-tooltip {
-        position: absolute;
-        right: 70px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: var(--bg-surface);
-        color: var(--text-primary);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-sm);
-        font-weight: 500;
-        white-space: nowrap;
-        box-shadow: var(--shadow-lg);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-      }
-
-      .whatsapp-float:hover .whatsapp-tooltip {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .whatsapp-tooltip::after {
-        content: "";
-        position: absolute;
-        right: -6px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: 6px solid transparent;
-        border-left-color: var(--bg-surface);
-      }
-
-      /* Mobile Nav Theme Toggle Slider */
-      .mobile-theme-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3);
-        padding: var(--space-4);
-        background: var(--bg-surface-alt);
-        border-radius: var(--radius-xl);
-        margin: var(--space-4);
-      }
-
-      .mobile-theme-toggle i {
-        font-size: 1.1rem;
-        color: var(--text-muted);
-        transition: color 0.2s;
-      }
-
-      .mobile-theme-toggle i.active {
-        color: var(--clr-primary);
-      }
-
-      .theme-slider {
-        position: relative;
-        width: 50px;
-        height: 26px;
-        background: var(--bg-muted);
-        border-radius: var(--radius-full);
-        cursor: pointer;
-        transition: background 0.3s;
-      }
-
-      .theme-slider::before {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s;
-      }
-
-      [data-theme="dark"] .theme-slider::before,
-      .dark .theme-slider::before {
-        transform: translateX(24px);
-      }
-
-      [data-theme="dark"] .theme-slider,
-      .dark .theme-slider {
-        background: var(--clr-primary);
-      }
-    </style>
   </head>
 
   <body class="contact-page">
@@ -781,6 +272,7 @@
                     type="text"
                     id="contactName"
                     name="name"
+                    autocomplete="name"
                     required
                     placeholder="Enter your name"
                   />
@@ -791,6 +283,7 @@
                     type="email"
                     id="contactEmail"
                     name="email"
+                    autocomplete="email"
                     required
                     placeholder="your@email.com"
                   />
@@ -804,12 +297,18 @@
                     type="tel"
                     id="contactPhone"
                     name="phone"
+                    autocomplete="tel"
                     placeholder="+234 800 000 0000"
                   />
                 </div>
                 <div class="form-group">
                   <label for="contactSubject">Subject *</label>
-                  <select id="contactSubject" name="subject" required>
+                  <select
+                    id="contactSubject"
+                    name="subject"
+                    autocomplete="off"
+                    required
+                  >
                     <option value="">Select a topic</option>
                     <option value="order">Order Inquiry</option>
                     <option value="product">Product Question</option>
@@ -827,6 +326,7 @@
                   type="text"
                   id="contactOrderId"
                   name="orderId"
+                  autocomplete="off"
                   placeholder="e.g., LBS_1234567890"
                 />
               </div>
@@ -836,6 +336,7 @@
                 <textarea
                   id="contactMessage"
                   name="message"
+                  autocomplete="off"
                   required
                   placeholder="Tell us how we can help you..."
                 ></textarea>
@@ -882,8 +383,8 @@
                 <div class="info-item-content">
                   <div class="info-item-label">Email</div>
                   <div class="info-item-value">
-                    <a href="mailto:hello@lingeriebysissioyin.com"
-                      >hello@lingeriebysissioyin.com</a
+                    <a href="mailto:support@lingeriebysisioyin.store"
+                      >support@lingeriebysisioyin.store</a
                     >
                   </div>
                 </div>
@@ -903,7 +404,7 @@
                 <i class="fa-solid fa-location-dot"></i>
                 <div class="info-item-content">
                   <div class="info-item-label">Location</div>
-                  <div class="info-item-value">Akure, Ondo State, Nigeria</div>
+                  <div class="info-item-value">Lagos State, Nigeria</div>
                 </div>
               </div>
 
@@ -996,10 +497,18 @@
               lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Instagram"
+              <a
+                href="https://instagram.com/lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" aria-label="TikTok"
+              <a
+                href="https://tiktok.com/@lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
               <a
@@ -1045,13 +554,12 @@
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
-          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
+          <div id="themeToggle">
             <button
               type="button"
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
@@ -1060,7 +568,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
@@ -1069,7 +576,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
@@ -1124,21 +630,6 @@
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════════════
-       WHATSAPP WIDGET
-       ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="whatsapp-float">
-      <span class="whatsapp-tooltip">Chat with us!</span>
-      <a
-        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-        target="_blank"
-        class="whatsapp-float-btn"
-        aria-label="Chat on WhatsApp"
-      >
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
@@ -1249,7 +740,7 @@
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -1325,7 +816,7 @@
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -1378,118 +869,6 @@
     <script defer src="assets/js/app.js"></script>
     <script defer src="assets/js/auth.js"></script>
 
-    <script>
-      // Contact Form Handler
-      (function () {
-        "use strict";
-
-        function init() {
-          const form = document.getElementById("contactForm");
-          const submitBtn = document.getElementById("contactSubmitBtn");
-          const formSuccess = document.getElementById("formSuccess");
-
-          if (!form) return;
-
-          form.addEventListener("submit", async function (e) {
-            e.preventDefault();
-
-            // Get form data
-            const formData = {
-              name: document.getElementById("contactName").value.trim(),
-              email: document.getElementById("contactEmail").value.trim(),
-              phone: document.getElementById("contactPhone").value.trim(),
-              subject: document.getElementById("contactSubject").value,
-              orderId: document.getElementById("contactOrderId").value.trim(),
-              message: document.getElementById("contactMessage").value.trim(),
-              timestamp: new Date().toISOString(),
-            };
-
-            // Validate
-            if (
-              !formData.name ||
-              !formData.email ||
-              !formData.subject ||
-              !formData.message
-            ) {
-              window.UTILS?.toast?.(
-                "Please fill in all required fields",
-                "error",
-              );
-              return;
-            }
-
-            // Show loading
-            submitBtn.disabled = true;
-            submitBtn.innerHTML =
-              '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
-
-            try {
-              // Try to save to Supabase if available
-              if (window.DB?.client) {
-                const { error } = await window.DB.client
-                  .from("contact_messages")
-                  .insert([formData]);
-
-                if (error) {
-                  console.error("Supabase error:", error);
-                  // Fall through to WhatsApp fallback
-                }
-              }
-
-              // Show success
-              form.style.display = "none";
-              formSuccess.style.display = "block";
-              window.UTILS?.toast?.("Message sent successfully!", "success");
-            } catch (err) {
-              console.error("Contact form error:", err);
-
-              // Fallback: Open WhatsApp with message
-              const whatsappMsg = encodeURIComponent(
-                `*Contact Form Submission*\n\n` +
-                  `*Name:* ${formData.name}\n` +
-                  `*Email:* ${formData.email}\n` +
-                  `*Phone:* ${formData.phone || "Not provided"}\n` +
-                  `*Subject:* ${formData.subject}\n` +
-                  `*Order ID:* ${formData.orderId || "N/A"}\n\n` +
-                  `*Message:*\n${formData.message}`,
-              );
-
-              window.open(
-                `https://wa.me/2349033344860?text=${whatsappMsg}`,
-                "_blank",
-              );
-
-              // Show success anyway
-              form.style.display = "none";
-              formSuccess.style.display = "block";
-            }
-          });
-
-          // Set current year
-          const yearEl = document.getElementById("currentYear");
-          if (yearEl) yearEl.textContent = new Date().getFullYear();
-        }
-
-        // Reset form function
-        window.resetContactForm = function () {
-          const form = document.getElementById("contactForm");
-          const formSuccess = document.getElementById("formSuccess");
-          const submitBtn = document.getElementById("contactSubmitBtn");
-
-          form.reset();
-          form.style.display = "flex";
-          formSuccess.style.display = "none";
-          submitBtn.disabled = false;
-          submitBtn.innerHTML =
-            '<i class="fa-solid fa-paper-plane"></i> Send Message';
-        };
-
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", init);
-        } else {
-          init();
-        }
-      })();
-    </script>
+    <script src="assets/js/contact.js"></script>
   </body>
 </html>

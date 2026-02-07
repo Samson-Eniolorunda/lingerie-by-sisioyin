@@ -47,7 +47,7 @@ function onRecaptchaLoad() {
   if (loginRecaptcha) {
     try {
       window.loginRecaptchaWidgetId = grecaptcha.render("loginRecaptcha", {
-        sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+        sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
         callback: onLoginRecaptchaSuccess,
         "expired-callback": onLoginRecaptchaExpired,
       });
@@ -59,7 +59,7 @@ function onRecaptchaLoad() {
   if (signupRecaptcha) {
     try {
       window.signupRecaptchaWidgetId = grecaptcha.render("signupRecaptcha", {
-        sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+        sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
         callback: onSignupRecaptchaSuccess,
         "expired-callback": onSignupRecaptchaExpired,
       });

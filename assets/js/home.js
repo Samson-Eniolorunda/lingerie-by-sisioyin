@@ -77,7 +77,10 @@
 
   function createProductCard(product) {
     console.log("🏠 HOME: createProductCard()", product?.name);
-    const imageUrl = getFirstImage(product.images);
+    const imageRaw = getFirstImage(product.images);
+    const imageUrl = UTILS.optimizedImg
+      ? UTILS.optimizedImg(imageRaw, 400, 75)
+      : imageRaw;
     const name = UTILS.safeText(product.name || "Product");
     const category = UTILS.safeText(product.category || "");
     const price = UTILS.formatNaira(product.price_ngn || 0);

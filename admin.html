@@ -9,15 +9,22 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Admin | Lingerie by Sisioyin</title>
+    <meta
+      name="description"
+      content="Admin dashboard for Lingerie by Sisioyin. Manage products, orders, and site settings."
+    />
+    <meta name="theme-color" content="#be185d" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -679,6 +686,16 @@
             <span>Trash</span>
           </button>
 
+          <button class="nav-item" data-view-target="reviews" type="button">
+            <i class="fa-solid fa-star-half-stroke"></i>
+            <span>Reviews</span>
+          </button>
+
+          <button class="nav-item" data-view-target="analytics" type="button">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Analytics</span>
+          </button>
+
           <div class="nav-divider"></div>
 
           <button class="nav-item" id="openInviteModalBtn" type="button">
@@ -1180,7 +1197,7 @@
 
                   <!-- Size Type - kept for backwards compatibility -->
                   <div class="form-group" style="display: none">
-                    <label>Available Sizes</label>
+                    <label for="pSizeName">Available Sizes</label>
                     <div class="size-stock-list" id="sizeStockList"></div>
                     <input type="hidden" id="pSizeName" value="" />
                     <input type="hidden" id="pSizeQty" value="0" />
@@ -1210,7 +1227,7 @@
 
                 <!-- Unified Variant Input (Size + Color + Qty in one row) -->
                 <div class="form-group full-width" id="variantInputWrap">
-                  <label>
+                  <label for="pVariantSize">
                     <i class="fa-solid fa-cubes"></i> Stock Variants
                     <span class="variant-counter" id="variantCounter">0</span>
                   </label>
@@ -1681,6 +1698,179 @@
             </div>
             <div class="trash-list" id="trashProductsList">
               <p class="text-muted text-center">Loading...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 REVIEWS VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewReviews">
+          <div class="section-header">
+            <div>
+              <h3>Customer Reviews</h3>
+              <p class="text-muted">Manage product reviews and ratings</p>
+            </div>
+            <div class="header-actions">
+              <select id="reviewsFilterStatus" class="form-select">
+                <option value="all">All Reviews</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <select id="reviewsFilterRating" class="form-select">
+                <option value="all">All Ratings</option>
+                <option value="5">5 Stars</option>
+                <option value="4">4 Stars</option>
+                <option value="3">3 Stars</option>
+                <option value="2">2 Stars</option>
+                <option value="1">1 Star</option>
+              </select>
+            </div>
+          </div>
+          <div class="reviews-stats" id="reviewsStats"></div>
+          <div class="reviews-list" id="adminReviewsList">
+            <p class="text-muted text-center">Loading reviews...</p>
+          </div>
+        </section>
+
+        <!-- =====================================================================
+                 ANALYTICS VIEW
+                 ===================================================================== -->
+        <section class="content-view" id="viewAnalytics">
+          <div class="section-header">
+            <div>
+              <h3>Analytics Overview</h3>
+              <p class="text-muted">
+                Monitor Google Analytics &amp; Facebook Pixel performance
+              </p>
+            </div>
+            <div class="header-actions">
+              <select id="analyticsPeriod" class="form-select">
+                <option value="7">Last 7 Days</option>
+                <option value="30" selected>Last 30 Days</option>
+                <option value="90">Last 90 Days</option>
+              </select>
+              <button
+                type="button"
+                class="btn btn-outline btn-sm"
+                id="analyticsRefreshBtn"
+              >
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Setup Status -->
+          <div class="analytics-setup" id="analyticsSetup">
+            <div class="analytics-setup-card" id="gaSetupCard">
+              <div class="analytics-setup-icon ga">
+                <i class="fa-brands fa-google"></i>
+              </div>
+              <div class="analytics-setup-info">
+                <h4>Google Analytics</h4>
+                <p class="analytics-setup-status" id="gaStatus">Checking...</p>
+              </div>
+              <span class="analytics-setup-badge" id="gaBadge">—</span>
+            </div>
+            <div class="analytics-setup-card" id="fbSetupCard">
+              <div class="analytics-setup-icon fb">
+                <i class="fa-brands fa-facebook-f"></i>
+              </div>
+              <div class="analytics-setup-info">
+                <h4>Facebook Pixel</h4>
+                <p class="analytics-setup-status" id="fbStatus">Checking...</p>
+              </div>
+              <span class="analytics-setup-badge" id="fbBadge">—</span>
+            </div>
+          </div>
+
+          <!-- Site Traffic Overview (from database) -->
+          <div class="analytics-stats" id="analyticsStats">
+            <div class="stat-box">
+              <div class="stat-box-icon"><i class="fa-solid fa-users"></i></div>
+              <div class="stat-box-value" id="anTotalCustomers">0</div>
+              <div class="stat-box-label">Total Customers</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-icon">
+                <i class="fa-solid fa-cart-shopping"></i>
+              </div>
+              <div class="stat-box-value" id="anTotalOrders">0</div>
+              <div class="stat-box-label">Total Orders</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-icon">
+                <i class="fa-solid fa-naira-sign"></i>
+              </div>
+              <div class="stat-box-value" id="anTotalRevenue">₦0</div>
+              <div class="stat-box-label">Total Revenue</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-icon">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+              </div>
+              <div class="stat-box-value" id="anConversionRate">0%</div>
+              <div class="stat-box-label">Conversion Rate</div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="analytics-charts">
+            <div class="analytics-chart-card">
+              <h4><i class="fa-solid fa-chart-line"></i> Revenue Over Time</h4>
+              <div class="analytics-chart" id="revenueChart">
+                <div class="analytics-bar-chart" id="revenueBarChart"></div>
+              </div>
+            </div>
+            <div class="analytics-chart-card">
+              <h4><i class="fa-solid fa-chart-pie"></i> Orders by Status</h4>
+              <div class="analytics-chart" id="ordersStatusChart">
+                <div class="analytics-donut" id="ordersDonut"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Products -->
+          <div class="analytics-chart-card">
+            <h4>
+              <i class="fa-solid fa-ranking-star"></i> Top Selling Products
+            </h4>
+            <div class="analytics-table-wrap" id="topProductsTable">
+              <p class="text-muted text-center">Loading...</p>
+            </div>
+          </div>
+
+          <!-- Tracking Codes Setup Guide -->
+          <div class="analytics-chart-card" id="analyticsGuide">
+            <h4>
+              <i class="fa-solid fa-circle-info"></i> How to Set Up Tracking
+            </h4>
+            <div class="analytics-guide-content">
+              <div class="analytics-guide-step">
+                <strong>Google Analytics:</strong> Go to
+                <code>assets/js/config.js</code> and set your
+                <code>GA_MEASUREMENT_ID</code> (e.g. <code>G-XXXXXXXXXX</code>).
+                Get it from
+                <a
+                  href="https://analytics.google.com"
+                  target="_blank"
+                  rel="noopener"
+                  >analytics.google.com</a
+                >.
+              </div>
+              <div class="analytics-guide-step">
+                <strong>Facebook Pixel:</strong> Go to
+                <code>assets/js/config.js</code> and set your
+                <code>FB_PIXEL_ID</code> (e.g. <code>123456789012345</code>).
+                Get it from
+                <a
+                  href="https://business.facebook.com/events_manager"
+                  target="_blank"
+                  rel="noopener"
+                  >Facebook Events Manager</a
+                >.
+              </div>
             </div>
           </div>
         </section>

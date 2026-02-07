@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -32,719 +32,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
-
-    <style>
-      /* Dashboard Page Styles */
-      .dashboard-page {
-        min-height: 100vh;
-        background: var(--bg-muted);
-      }
-
-      .dashboard-main {
-        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-16);
-      }
-
-      /* Not Logged In State */
-      .dashboard-auth-required {
-        max-width: 500px;
-        margin: 0 auto;
-        text-align: center;
-        padding: var(--space-16) var(--space-6);
-      }
-
-      .auth-required-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-6);
-      }
-
-      .auth-required-icon i {
-        font-size: 2.5rem;
-        color: white;
-      }
-
-      .auth-required-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-3);
-      }
-
-      .auth-required-text {
-        color: var(--text-secondary);
-        margin-bottom: var(--space-6);
-        line-height: 1.6;
-      }
-
-      /* Dashboard Layout */
-      .dashboard-layout {
-        display: grid;
-        gap: var(--space-6);
-      }
-
-      @media (min-width: 1024px) {
-        .dashboard-layout {
-          grid-template-columns: 280px 1fr;
-          align-items: start;
-        }
-      }
-
-      /* User Profile Card */
-      .user-profile-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-6);
-        text-align: center;
-      }
-
-      .user-avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-4);
-        font-size: 2.5rem;
-        color: white;
-        font-weight: 700;
-      }
-
-      .user-name {
-        font-size: var(--fs-xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-1);
-      }
-
-      .user-email {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-        margin-bottom: var(--space-4);
-      }
-
-      .user-member-since {
-        font-size: var(--fs-xs);
-        color: var(--text-muted);
-        padding-top: var(--space-4);
-        border-top: 1px solid var(--border-light);
-      }
-
-      /* Dashboard Navigation */
-      .dashboard-nav {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-4);
-        margin-top: var(--space-4);
-      }
-
-      .dashboard-nav-link {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        width: 100%;
-        padding: var(--space-3) var(--space-4);
-        border: none;
-        background: transparent;
-        border-radius: var(--radius-lg);
-        color: var(--text-secondary);
-        font-size: var(--fs-base);
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: left;
-      }
-
-      .dashboard-nav-link:hover {
-        background: var(--bg-muted);
-        color: var(--text-primary);
-      }
-
-      .dashboard-nav-link.active {
-        background: linear-gradient(
-          135deg,
-          var(--clr-primary),
-          var(--clr-primary-dark, #9d174d)
-        );
-        color: white;
-      }
-
-      .dashboard-nav-link i {
-        width: 20px;
-        text-align: center;
-      }
-
-      .dashboard-nav-link.logout {
-        color: var(--clr-error);
-        margin-top: var(--space-2);
-        border-top: 1px solid var(--border-light);
-        padding-top: var(--space-4);
-      }
-
-      .dashboard-nav-link.logout:hover {
-        background: rgba(239, 68, 68, 0.1);
-      }
-
-      /* Dashboard Content */
-      .dashboard-content {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-6);
-      }
-
-      /* Dashboard Section */
-      .dashboard-section {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        padding: var(--space-6);
-        display: none;
-      }
-
-      .dashboard-section.active {
-        display: block;
-      }
-
-      .dashboard-section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: var(--space-6);
-        flex-wrap: wrap;
-        gap: var(--space-4);
-      }
-
-      .dashboard-section-title {
-        font-family: var(--ff-display);
-        font-size: var(--fs-xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-      }
-
-      .dashboard-section-title i {
-        color: var(--clr-primary);
-      }
-
-      /* Stats Grid */
-      .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: var(--space-4);
-        margin-bottom: var(--space-6);
-      }
-
-      .stat-card {
-        background: var(--bg-muted);
-        border-radius: var(--radius-xl);
-        padding: var(--space-5);
-        text-align: center;
-        transition:
-          transform 0.2s,
-          box-shadow 0.2s;
-      }
-
-      .stat-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-lg);
-      }
-
-      .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: var(--radius-lg);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-3);
-        font-size: 1.25rem;
-      }
-
-      .stat-icon.orders {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3b82f6;
-      }
-      .stat-icon.wishlist {
-        background: rgba(236, 72, 153, 0.1);
-        color: #ec4899;
-      }
-      .stat-icon.spent {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-      }
-      .stat-icon.rewards {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-      }
-
-      .stat-value {
-        font-size: var(--fs-2xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-1);
-      }
-
-      .stat-label {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-      }
-
-      /* Orders List */
-      .orders-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-4);
-      }
-
-      .order-card {
-        background: var(--bg-muted);
-        border-radius: var(--radius-xl);
-        padding: var(--space-5);
-        transition: box-shadow 0.2s;
-      }
-
-      .order-card:hover {
-        box-shadow: var(--shadow-md);
-      }
-
-      .order-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: var(--space-4);
-        flex-wrap: wrap;
-        gap: var(--space-3);
-      }
-
-      .order-id {
-        font-family: var(--ff-mono, monospace);
-        font-size: var(--fs-sm);
-        font-weight: 600;
-        color: var(--clr-primary);
-      }
-
-      .order-date {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-      }
-
-      .order-status {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        padding: var(--space-1) var(--space-3);
-        border-radius: var(--radius-full);
-        font-size: var(--fs-xs);
-        font-weight: 600;
-        text-transform: uppercase;
-      }
-
-      .order-status.confirmed {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-      }
-      .order-status.processing {
-        background: rgba(59, 130, 246, 0.1);
-        color: #3b82f6;
-      }
-      .order-status.shipped {
-        background: rgba(139, 92, 246, 0.1);
-        color: #8b5cf6;
-      }
-      .order-status.delivered {
-        background: rgba(16, 185, 129, 0.1);
-        color: #10b981;
-      }
-      .order-status.pending {
-        background: rgba(245, 158, 11, 0.1);
-        color: #f59e0b;
-      }
-      .order-status.cancelled {
-        background: rgba(239, 68, 68, 0.1);
-        color: #ef4444;
-      }
-
-      .order-items-preview {
-        display: flex;
-        gap: var(--space-2);
-        margin-bottom: var(--space-4);
-        overflow-x: auto;
-        padding-bottom: var(--space-2);
-      }
-
-      .order-item-thumb {
-        width: 60px;
-        height: 75px;
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        flex-shrink: 0;
-        background: var(--bg-surface);
-      }
-
-      .order-item-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .order-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding-top: var(--space-4);
-        border-top: 1px solid var(--border-light);
-      }
-
-      .order-total {
-        font-weight: 700;
-        color: var(--text-primary);
-      }
-
-      /* Profile Form */
-      .profile-form {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-5);
-        max-width: 600px;
-      }
-
-      .form-row {
-        display: grid;
-        gap: var(--space-4);
-      }
-
-      @media (min-width: 640px) {
-        .form-row {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      .form-group {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .form-group label {
-        font-weight: 500;
-        color: var(--text-primary);
-        font-size: var(--fs-sm);
-      }
-
-      .form-group input,
-      .form-group select {
-        padding: var(--space-3) var(--space-4);
-        border: 2px solid var(--border-light);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-base);
-        background: var(--bg-base);
-        color: var(--text-primary);
-        transition: border-color 0.2s;
-      }
-
-      .form-group input:focus,
-      .form-group select:focus {
-        outline: none;
-        border-color: var(--clr-primary);
-      }
-
-      .form-group input:disabled {
-        background: var(--bg-muted);
-        cursor: not-allowed;
-      }
-
-      /* Addresses */
-      .addresses-grid {
-        display: grid;
-        gap: var(--space-4);
-      }
-
-      @media (min-width: 768px) {
-        .addresses-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-      }
-
-      .address-card {
-        background: var(--bg-muted);
-        border-radius: var(--radius-xl);
-        padding: var(--space-5);
-        position: relative;
-      }
-
-      .address-card.default {
-        border: 2px solid var(--clr-primary);
-      }
-
-      .address-badge {
-        position: absolute;
-        top: var(--space-3);
-        right: var(--space-3);
-        padding: var(--space-1) var(--space-2);
-        background: var(--clr-primary);
-        color: white;
-        font-size: var(--fs-xs);
-        font-weight: 600;
-        border-radius: var(--radius-md);
-      }
-
-      .address-type {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-        display: flex;
-        align-items: center;
-        gap: var(--space-2);
-      }
-
-      .address-type i {
-        color: var(--clr-primary);
-      }
-
-      .address-details {
-        color: var(--text-secondary);
-        font-size: var(--fs-sm);
-        line-height: 1.6;
-        margin-bottom: var(--space-4);
-      }
-
-      .address-actions {
-        display: flex;
-        gap: var(--space-2);
-      }
-
-      /* Empty State */
-      .empty-state {
-        text-align: center;
-        padding: var(--space-12) var(--space-6);
-      }
-
-      .empty-state-icon {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        background: var(--bg-muted);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-4);
-        font-size: 2rem;
-        color: var(--text-muted);
-      }
-
-      .empty-state-title {
-        font-size: var(--fs-lg);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .empty-state-text {
-        color: var(--text-secondary);
-        margin-bottom: var(--space-6);
-      }
-
-      /* Mobile Dashboard Nav */
-      @media (max-width: 1023px) {
-        .dashboard-sidebar {
-          position: sticky;
-          top: 80px;
-          z-index: 10;
-        }
-
-        .dashboard-nav {
-          display: flex;
-          gap: var(--space-2);
-          overflow-x: auto;
-          padding: var(--space-3);
-          -webkit-overflow-scrolling: touch;
-        }
-
-        .dashboard-nav-link {
-          flex-shrink: 0;
-          padding: var(--space-2) var(--space-4);
-          font-size: var(--fs-sm);
-        }
-
-        .dashboard-nav-link span {
-          display: none;
-        }
-
-        .dashboard-nav-link i {
-          margin: 0;
-        }
-
-        .dashboard-nav-link.logout {
-          margin-top: 0;
-          border-top: none;
-          padding-top: var(--space-2);
-        }
-
-        .user-profile-card {
-          display: none;
-        }
-      }
-
-      /* WhatsApp Widget Modern Styles */
-      .whatsapp-float {
-        position: fixed;
-        bottom: var(--space-6);
-        right: var(--space-6);
-        z-index: 1000;
-      }
-
-      .whatsapp-float-btn {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.75rem;
-        box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-        transition: all 0.3s ease;
-        text-decoration: none;
-        position: relative;
-      }
-
-      .whatsapp-float-btn:hover {
-        transform: scale(1.1) translateY(-2px);
-        box-shadow: 0 6px 30px rgba(37, 211, 102, 0.5);
-        color: white;
-      }
-
-      .whatsapp-float-btn::before {
-        content: "";
-        position: absolute;
-        inset: -3px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
-        z-index: -1;
-        opacity: 0.3;
-        animation: whatsapp-pulse 2s infinite;
-      }
-
-      @keyframes whatsapp-pulse {
-        0%,
-        100% {
-          transform: scale(1);
-          opacity: 0.3;
-        }
-        50% {
-          transform: scale(1.15);
-          opacity: 0;
-        }
-      }
-
-      .whatsapp-tooltip {
-        position: absolute;
-        right: 70px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: var(--bg-surface);
-        color: var(--text-primary);
-        padding: var(--space-2) var(--space-4);
-        border-radius: var(--radius-lg);
-        font-size: var(--fs-sm);
-        font-weight: 500;
-        white-space: nowrap;
-        box-shadow: var(--shadow-lg);
-        opacity: 0;
-        visibility: hidden;
-        transition: all 0.3s ease;
-      }
-
-      .whatsapp-float:hover .whatsapp-tooltip {
-        opacity: 1;
-        visibility: visible;
-      }
-
-      .whatsapp-tooltip::after {
-        content: "";
-        position: absolute;
-        right: -6px;
-        top: 50%;
-        transform: translateY(-50%);
-        border: 6px solid transparent;
-        border-left-color: var(--bg-surface);
-      }
-
-      /* Mobile Nav Theme Toggle Slider */
-      .mobile-theme-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3);
-        padding: var(--space-4);
-        background: var(--bg-surface-alt);
-        border-radius: var(--radius-xl);
-        margin: var(--space-4);
-      }
-
-      .mobile-theme-toggle i {
-        font-size: 1.1rem;
-        color: var(--text-muted);
-        transition: color 0.2s;
-      }
-
-      .mobile-theme-toggle i.active {
-        color: var(--clr-primary);
-      }
-
-      .theme-slider {
-        position: relative;
-        width: 50px;
-        height: 26px;
-        background: var(--bg-muted);
-        border-radius: var(--radius-full);
-        cursor: pointer;
-        transition: background 0.3s;
-      }
-
-      .theme-slider::before {
-        content: "";
-        position: absolute;
-        top: 3px;
-        left: 3px;
-        width: 20px;
-        height: 20px;
-        background: white;
-        border-radius: 50%;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.3s;
-      }
-
-      [data-theme="dark"] .theme-slider::before,
-      .dark .theme-slider::before {
-        transform: translateX(24px);
-      }
-
-      [data-theme="dark"] .theme-slider,
-      .dark .theme-slider {
-        background: var(--clr-primary);
-      }
-    </style>
   </head>
 
   <body class="dashboard-page">
@@ -949,267 +236,263 @@
     <!-- ═══════════════════════════════════════════════════════════════════════
        MAIN CONTENT
        ═══════════════════════════════════════════════════════════════════════ -->
-    <main class="dashboard-main" id="main">
-      <div class="container">
-        <!-- Auth Required State -->
-        <div class="dashboard-auth-required" id="authRequired">
-          <div class="auth-required-icon">
-            <i class="fa-solid fa-lock"></i>
-          </div>
-          <h1 class="auth-required-title">Sign In Required</h1>
-          <p class="auth-required-text">
-            Please sign in to access your account dashboard, view orders, and
-            manage your profile.
+    <main class="dash" id="main">
+      <!-- Auth Gate -->
+      <section class="dash-gate" id="authRequired">
+        <div class="dash-gate-card">
+          <div class="dash-gate-icon"><i class="fa-solid fa-lock"></i></div>
+          <h1 class="dash-gate-title">Welcome Back</h1>
+          <p class="dash-gate-text">
+            Sign in to view your orders, manage your profile and track
+            deliveries.
           </p>
-          <button
-            type="button"
-            class="btn btn-primary btn-lg"
-            id="signInPromptBtn"
-          >
-            <i class="fa-solid fa-sign-in-alt"></i>
-            Sign In to Continue
+          <button type="button" class="dash-gate-btn" id="signInPromptBtn">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
           </button>
+          <a href="shop.html" class="dash-gate-link"
+            >or continue shopping &rarr;</a
+          >
         </div>
+      </section>
 
-        <!-- Dashboard Content (hidden until logged in) -->
-        <div
-          class="dashboard-layout"
-          id="dashboardLayout"
-          style="display: none"
-        >
-          <!-- Sidebar -->
-          <aside class="dashboard-sidebar">
-            <!-- User Profile Card -->
-            <div class="user-profile-card">
-              <div class="user-avatar" id="userAvatar">U</div>
-              <h2 class="user-name" id="userName">User</h2>
-              <p class="user-email" id="userEmail">user@example.com</p>
-              <p class="user-member-since">
-                Member since <span id="memberSince">2026</span>
-              </p>
+      <!-- Dashboard Shell (hidden until logged in) -->
+      <div class="dash-shell" id="dashboardLayout" style="display: none">
+        <!-- Top Bar -->
+        <header class="dash-topbar">
+          <div class="dash-topbar-left">
+            <div class="dash-avatar" id="userAvatar">U</div>
+            <div>
+              <h1 class="dash-greeting">
+                Hello, <span id="userName">User</span>
+              </h1>
+              <p class="dash-email" id="userEmail">user@example.com</p>
             </div>
+          </div>
+          <div class="dash-topbar-right">
+            <a href="shop.html" class="dash-topbar-action">
+              <i class="fa-solid fa-bag-shopping"></i><span>Shop</span>
+            </a>
+            <a href="wishlist.html" class="dash-topbar-action">
+              <i class="fa-solid fa-heart"></i><span>Wishlist</span>
+            </a>
+            <button
+              type="button"
+              class="dash-topbar-action logout"
+              id="logoutBtn"
+            >
+              <i class="fa-solid fa-right-from-bracket"></i
+              ><span>Sign Out</span>
+            </button>
+          </div>
+        </header>
 
-            <!-- Navigation -->
-            <nav class="dashboard-nav">
-              <button
-                type="button"
-                class="dashboard-nav-link active"
-                data-section="overview"
-              >
-                <i class="fa-solid fa-grid-2"></i>
-                <span>Overview</span>
+        <!-- Tab Navigation -->
+        <nav class="dash-tabs" id="dashTabs">
+          <button type="button" class="dash-tab active" data-section="overview">
+            <i class="fa-solid fa-grid-2"></i><span>Overview</span>
+          </button>
+          <button type="button" class="dash-tab" data-section="orders">
+            <i class="fa-solid fa-box"></i><span>Orders</span>
+          </button>
+          <button type="button" class="dash-tab" data-section="addresses">
+            <i class="fa-solid fa-location-dot"></i><span>Addresses</span>
+          </button>
+          <button type="button" class="dash-tab" data-section="profile">
+            <i class="fa-solid fa-user-pen"></i><span>Profile</span>
+          </button>
+        </nav>
+
+        <!-- ── OVERVIEW ────────────────────────────────────── -->
+        <section class="dash-panel active" id="section-overview">
+          <!-- Stat Cards -->
+          <div class="dash-stats">
+            <div class="dash-stat" data-accent="blue">
+              <div class="dash-stat-icon"><i class="fa-solid fa-box"></i></div>
+              <div class="dash-stat-body">
+                <span class="dash-stat-value" id="totalOrders">0</span>
+                <span class="dash-stat-label">Orders</span>
+              </div>
+            </div>
+            <div class="dash-stat" data-accent="pink">
+              <div class="dash-stat-icon">
+                <i class="fa-solid fa-heart"></i>
+              </div>
+              <div class="dash-stat-body">
+                <span class="dash-stat-value" id="wishlistCount">0</span>
+                <span class="dash-stat-label">Wishlist</span>
+              </div>
+            </div>
+            <div class="dash-stat" data-accent="green">
+              <div class="dash-stat-icon">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
+              <div class="dash-stat-body">
+                <span class="dash-stat-value" id="totalSpent">₦0</span>
+                <span class="dash-stat-label">Total Spent</span>
+              </div>
+            </div>
+            <div class="dash-stat" data-accent="amber">
+              <div class="dash-stat-icon"><i class="fa-solid fa-star"></i></div>
+              <div class="dash-stat-body">
+                <span class="dash-stat-value" id="rewardPoints">0</span>
+                <span class="dash-stat-label">Points</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Orders -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">
+                <i class="fa-solid fa-clock-rotate-left"></i> Recent Orders
+              </h2>
+              <button type="button" class="dash-link-btn" data-go="orders">
+                View all &rarr;
               </button>
-              <button
-                type="button"
-                class="dashboard-nav-link"
-                data-section="orders"
-              >
-                <i class="fa-solid fa-box"></i>
-                <span>Orders</span>
+            </div>
+            <div class="dash-card-body" id="recentOrders">
+              <div class="dash-empty">
+                <i class="fa-solid fa-box-open"></i>
+                <p>No orders yet</p>
+                <a href="shop.html" class="dash-empty-btn">Start Shopping</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="dash-quick-actions">
+            <a href="shop.html" class="dash-action-card">
+              <i class="fa-solid fa-bag-shopping"></i>
+              <span>Browse Shop</span>
+            </a>
+            <a href="wishlist.html" class="dash-action-card">
+              <i class="fa-solid fa-heart"></i>
+              <span>My Wishlist</span>
+            </a>
+            <a href="size.html" class="dash-action-card">
+              <i class="fa-solid fa-ruler"></i>
+              <span>Size Guide</span>
+            </a>
+            <a href="contact.html" class="dash-action-card">
+              <i class="fa-solid fa-headset"></i>
+              <span>Get Help</span>
+            </a>
+          </div>
+        </section>
+
+        <!-- ── ORDERS ──────────────────────────────────────── -->
+        <section class="dash-panel" id="section-orders">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">
+                <i class="fa-solid fa-box"></i> My Orders
+              </h2>
+              <div class="dash-order-filter">
+                <select id="orderFilter">
+                  <option value="all">All Orders</option>
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+            </div>
+            <div class="dash-card-body" id="allOrders">
+              <div class="dash-empty">
+                <i class="fa-solid fa-box-open"></i>
+                <p>No orders yet</p>
+                <a href="shop.html" class="dash-empty-btn">Start Shopping</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── ADDRESSES ───────────────────────────────────── -->
+        <section class="dash-panel" id="section-addresses">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">
+                <i class="fa-solid fa-location-dot"></i> Saved Addresses
+              </h2>
+              <button type="button" class="dash-add-btn" id="addAddressBtn">
+                <i class="fa-solid fa-plus"></i> Add New
               </button>
-              <button
-                type="button"
-                class="dashboard-nav-link"
-                data-section="addresses"
-              >
-                <i class="fa-solid fa-location-dot"></i>
-                <span>Addresses</span>
-              </button>
-              <button
-                type="button"
-                class="dashboard-nav-link"
-                data-section="profile"
-              >
-                <i class="fa-solid fa-user-pen"></i>
-                <span>Profile</span>
-              </button>
-              <button
-                type="button"
-                class="dashboard-nav-link logout"
-                id="logoutBtn"
-              >
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Sign Out</span>
-              </button>
-            </nav>
-          </aside>
-
-          <!-- Content Area -->
-          <div class="dashboard-content">
-            <!-- Overview Section -->
-            <section class="dashboard-section active" id="section-overview">
-              <div class="dashboard-section-header">
-                <h2 class="dashboard-section-title">
-                  <i class="fa-solid fa-grid-2"></i>
-                  Overview
-                </h2>
-                <a href="shop.html" class="btn btn-primary btn-sm">
-                  <i class="fa-solid fa-bag-shopping"></i>
-                  Shop Now
-                </a>
-              </div>
-
-              <!-- Stats -->
-              <div class="stats-grid">
-                <div class="stat-card">
-                  <div class="stat-icon orders">
-                    <i class="fa-solid fa-box"></i>
-                  </div>
-                  <div class="stat-value" id="totalOrders">0</div>
-                  <div class="stat-label">Total Orders</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-icon wishlist">
-                    <i class="fa-solid fa-heart"></i>
-                  </div>
-                  <div class="stat-value" id="wishlistCount">0</div>
-                  <div class="stat-label">Wishlist Items</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-icon spent">
-                    <i class="fa-solid fa-wallet"></i>
-                  </div>
-                  <div class="stat-value" id="totalSpent">₦0</div>
-                  <div class="stat-label">Total Spent</div>
-                </div>
-                <div class="stat-card">
-                  <div class="stat-icon rewards">
-                    <i class="fa-solid fa-star"></i>
-                  </div>
-                  <div class="stat-value" id="rewardPoints">0</div>
-                  <div class="stat-label">Reward Points</div>
-                </div>
-              </div>
-
-              <!-- Recent Orders -->
-              <h3
-                style="
-                  font-size: var(--fs-lg);
-                  font-weight: 600;
-                  margin-bottom: var(--space-4);
-                "
-              >
-                Recent Orders
-              </h3>
-              <div id="recentOrders">
-                <div class="empty-state">
-                  <div class="empty-state-icon">
-                    <i class="fa-solid fa-box-open"></i>
-                  </div>
-                  <h4 class="empty-state-title">No orders yet</h4>
-                  <p class="empty-state-text">
-                    When you place orders, they'll appear here.
-                  </p>
-                  <a href="shop.html" class="btn btn-primary">Start Shopping</a>
-                </div>
-              </div>
-            </section>
-
-            <!-- Orders Section -->
-            <section class="dashboard-section" id="section-orders">
-              <div class="dashboard-section-header">
-                <h2 class="dashboard-section-title">
-                  <i class="fa-solid fa-box"></i>
-                  My Orders
-                </h2>
-              </div>
-              <div class="orders-list" id="allOrders">
-                <div class="empty-state">
-                  <div class="empty-state-icon">
-                    <i class="fa-solid fa-box-open"></i>
-                  </div>
-                  <h4 class="empty-state-title">No orders yet</h4>
-                  <p class="empty-state-text">
-                    When you place orders, they'll appear here.
-                  </p>
-                  <a href="shop.html" class="btn btn-primary">Start Shopping</a>
-                </div>
-              </div>
-            </section>
-
-            <!-- Addresses Section -->
-            <section class="dashboard-section" id="section-addresses">
-              <div class="dashboard-section-header">
-                <h2 class="dashboard-section-title">
-                  <i class="fa-solid fa-location-dot"></i>
-                  Saved Addresses
-                </h2>
-                <button
-                  type="button"
-                  class="btn btn-outline btn-sm"
-                  id="addAddressBtn"
-                >
-                  <i class="fa-solid fa-plus"></i>
-                  Add Address
-                </button>
-              </div>
-              <div class="addresses-grid" id="addressesGrid">
-                <div class="empty-state" style="grid-column: 1 / -1">
-                  <div class="empty-state-icon">
-                    <i class="fa-solid fa-map-marker-alt"></i>
-                  </div>
-                  <h4 class="empty-state-title">No saved addresses</h4>
-                  <p class="empty-state-text">
-                    Add an address for faster checkout.
-                  </p>
+            </div>
+            <div class="dash-card-body">
+              <div class="dash-addresses" id="addressesGrid">
+                <div class="dash-empty">
+                  <i class="fa-solid fa-map-marker-alt"></i>
+                  <p>No saved addresses</p>
                   <button
                     type="button"
-                    class="btn btn-primary"
+                    class="dash-empty-btn"
                     id="addFirstAddressBtn"
                   >
                     Add Address
                   </button>
                 </div>
               </div>
-            </section>
+            </div>
+          </div>
+        </section>
 
-            <!-- Profile Section -->
-            <section class="dashboard-section" id="section-profile">
-              <div class="dashboard-section-header">
-                <h2 class="dashboard-section-title">
-                  <i class="fa-solid fa-user-pen"></i>
-                  Edit Profile
-                </h2>
-              </div>
-              <form class="profile-form" id="profileForm">
-                <div class="form-row">
-                  <div class="form-group">
+        <!-- ── PROFILE ─────────────────────────────────────── -->
+        <section class="dash-panel" id="section-profile">
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <h2 class="dash-card-title">
+                <i class="fa-solid fa-user-pen"></i> Edit Profile
+              </h2>
+            </div>
+            <div class="dash-card-body">
+              <form class="dash-profile-form" id="profileForm">
+                <div class="dash-form-row">
+                  <div class="dash-form-group">
                     <label for="profileFirstName">First Name</label>
                     <input
                       type="text"
                       id="profileFirstName"
-                      placeholder="Enter first name"
+                      autocomplete="given-name"
+                      placeholder="First name"
                     />
                   </div>
-                  <div class="form-group">
+                  <div class="dash-form-group">
                     <label for="profileLastName">Last Name</label>
                     <input
                       type="text"
                       id="profileLastName"
-                      placeholder="Enter last name"
+                      autocomplete="family-name"
+                      placeholder="Last name"
                     />
                   </div>
                 </div>
-                <div class="form-group">
-                  <label for="profileEmail">Email Address</label>
-                  <input type="email" id="profileEmail" disabled />
+                <div class="dash-form-group">
+                  <label for="profileEmail">Email</label>
+                  <input
+                    type="email"
+                    id="profileEmail"
+                    autocomplete="email"
+                    disabled
+                  />
                 </div>
-                <div class="form-group">
-                  <label for="profilePhone">Phone Number</label>
+                <div class="dash-form-group">
+                  <label for="profilePhone">Phone</label>
                   <input
                     type="tel"
                     id="profilePhone"
+                    autocomplete="tel"
                     placeholder="+234 800 000 0000"
                   />
                 </div>
-                <div class="form-row">
-                  <div class="form-group">
+                <div class="dash-form-row">
+                  <div class="dash-form-group">
                     <label for="profileDob">Date of Birth</label>
-                    <input type="date" id="profileDob" />
+                    <input type="date" id="profileDob" autocomplete="bday" />
                   </div>
-                  <div class="form-group">
+                  <div class="dash-form-group">
                     <label for="profileGender">Gender</label>
-                    <select id="profileGender">
+                    <select id="profileGender" autocomplete="sex">
                       <option value="">Prefer not to say</option>
                       <option value="female">Female</option>
                       <option value="male">Male</option>
@@ -1217,14 +500,13 @@
                     </select>
                   </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                  <i class="fa-solid fa-save"></i>
-                  Save Changes
+                <button type="submit" class="dash-save-btn">
+                  <i class="fa-solid fa-check"></i> Save Changes
                 </button>
               </form>
-            </section>
+            </div>
           </div>
-        </div>
+        </section>
       </div>
     </main>
 
@@ -1250,10 +532,10 @@
               lingerie and loungewear for the modern woman.
             </p>
             <div class="footer-social">
-              <a href="#" aria-label="Instagram"
+              <a href="https://instagram.com/lingeriebysissioyin" target="_blank" rel="noopener noreferrer" aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
-              <a href="#" aria-label="TikTok"
+              <a href="https://tiktok.com/@lingeriebysissioyin" target="_blank" rel="noopener noreferrer" aria-label="TikTok"
                 ><i class="fa-brands fa-tiktok"></i
               ></a>
               <a
@@ -1295,13 +577,12 @@
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
-          <div style="display: flex; gap: var(--space-2)" id="themeToggle">
+          <div id="themeToggle">
             <button
               type="button"
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="light"
               aria-label="Light mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-sun"></i>
             </button>
@@ -1310,7 +591,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="system"
               aria-label="System theme"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-desktop"></i>
             </button>
@@ -1319,7 +599,6 @@
               class="btn btn-icon btn-ghost theme-btn"
               data-theme="dark"
               aria-label="Dark mode"
-              style="width: 36px; height: 36px"
             >
               <i class="fa-solid fa-moon"></i>
             </button>
@@ -1374,21 +653,6 @@
           </button>
         </div>
       </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════════════
-       WHATSAPP WIDGET
-       ═══════════════════════════════════════════════════════════════════════ -->
-    <div class="whatsapp-float">
-      <span class="whatsapp-tooltip">Chat with us!</span>
-      <a
-        href="https://wa.me/2349033344860?text=Hi%2C%20I%27m%20interested%20in%20your%20products"
-        target="_blank"
-        class="whatsapp-float-btn"
-        aria-label="Chat on WhatsApp"
-      >
-        <i class="fa-brands fa-whatsapp"></i>
-      </a>
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
@@ -1499,7 +763,7 @@
             <div
               class="g-recaptcha"
               id="loginRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button
@@ -1575,7 +839,7 @@
             <div
               class="g-recaptcha"
               id="signupRecaptcha"
-              data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
             ></div>
           </div>
           <button

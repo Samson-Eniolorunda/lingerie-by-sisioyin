@@ -11,7 +11,7 @@
   /* ─────────────────────────────────────────────
    * Configuration
    * ───────────────────────────────────────────── */
-  const config = window.CONFIG || {};
+  const config = window.APP_CONFIG || {};
   const GA_ID = config.GA_MEASUREMENT_ID || "";
   const FB_ID = config.FB_PIXEL_ID || "";
 

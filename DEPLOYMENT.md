@@ -1,156 +1,115 @@
-# Lingerie by Sisioyin - Deployment Guide
+# Deployment Guide
 
-## 🚀 Deploy to Vercel
+## Architecture
 
-### Prerequisites
+| Layer           | Service                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| Hosting         | [Vercel](https://vercel.com) (static site)                                    |
+| Database & Auth | [Supabase](https://supabase.com) (Postgres + Auth + Storage + Edge Functions) |
+| Payments        | [Moniepoint / Monnify](https://app.monnify.com)                               |
+| Email           | [Resend](https://resend.com) via Supabase Edge Function                       |
+| Domain          | [Namecheap](https://namecheap.com) → `lingeriebysisioyin.store`               |
+| Analytics       | Google Analytics (GA4) + Facebook Pixel                                       |
+| Bot Protection  | Google reCAPTCHA v2                                                           |
 
-- A [Vercel account](https://vercel.com/signup)
-- A [GitHub account](https://github.com) (recommended)
-- Git installed on your computer
+---
 
-### Step 1: Push to GitHub
+## Prerequisites
+
+- [Git](https://git-scm.com/) installed
+- [Vercel](https://vercel.com/signup) account (free)
+- [Supabase](https://supabase.com) project already set up with `supabase_complete.sql`
+- Domain DNS pointing to Vercel
+
+---
+
+## Step 1 — Push to GitHub
 
 ```bash
-# Initialize git repository
-cd "d:\OneDrive\Documents\LBS\LBS"
-git init
 git add .
-git commit -m "Initial commit"
-
-# Create a new repo on GitHub, then:
-git remote add origin https://github.com/YOUR_USERNAME/lingerie-by-sisioyin.git
-git branch -M main
+git commit -m "deploy: initial release"
 git push -u origin main
 ```
 
-### Step 2: Deploy on Vercel
+## Step 2 — Deploy on Vercel
 
-1. Go to [vercel.com](https://vercel.com) and sign in
-2. Click **"Add New..."** → **"Project"**
-3. Import your GitHub repository
-4. Click **"Deploy"** (no build settings needed for static site)
+1. Go to [vercel.com](https://vercel.com) → **Add New Project**
+2. Import the GitHub repository `lingerie-by-sisioyin`
+3. Framework Preset: **Other** (static site, no build step)
+4. Click **Deploy**
 
-### Step 3: Set Environment Variables (Optional)
+## Step 3 — Custom Domain
 
-If you want to use environment variables for extra security:
-
-1. In Vercel dashboard, go to **Settings** → **Environment Variables**
-2. Add the following:
-   - `SUPABASE_URL` = your Supabase project URL
-   - `SUPABASE_ANON_KEY` = your Supabase anon key
-   - `PAYSTACK_PUBLIC_KEY` = your Paystack public key
-
----
-
-## 🔐 Security Measures
-
-### 1. Admin Page Protection
-
-The admin page (`admin.html`) is protected by:
-
-- **Supabase Authentication** - Must be logged in
-- **Admin Role Check** - Uses `is_admin()` RPC function
-- **Role-Based Access** - `super_admin` vs `editor` permissions
-- **Row Level Security (RLS)** - Database-level protection
-
-### 2. API Token Security
-
-**Understanding Supabase Keys:**
-
-- The **anon key** is designed to be public (like a publishable Stripe key)
-- Security comes from **Row Level Security (RLS)** policies
-- The **service role key** (never expose this!) is for server-side only
-
-**Your RLS Policies Protect:**
-
-- Only admins can access admin-only data
-- Users can only read/update their own profile
-- Products are publicly readable but only admin-writable
-- Activity logs are admin-only
-
-### 3. Additional Security Headers
-
-The `vercel.json` adds security headers:
-
-- `X-Frame-Options: DENY` - Prevents clickjacking
-- `X-Content-Type-Options: nosniff` - Prevents MIME sniffing
-- `X-Robots-Tag: noindex` - Hides admin from search engines
+1. Vercel Dashboard → **Settings** → **Domains**
+2. Add `lingeriebysisioyin.store`
+3. In Namecheap → **Advanced DNS**, add:
+   - **A Record** → `@` → `76.76.21.21`
+   - **CNAME** → `www` → `cname.vercel-dns.com`
+4. Wait for DNS propagation (5-30 min)
 
 ---
 
-## 🛡️ Supabase Security Checklist
+## Security
 
-Run these checks in your Supabase dashboard:
+### Supabase Keys
 
-### 1. Verify RLS is Enabled
+- The **anon key** in `config.js` is a public client key — safe to commit
+- Security is enforced by **Row Level Security (RLS)** policies in the database
+- The **service role key** is server-side only — never in frontend code
+- API secrets (Resend, reCAPTCHA secret) are stored as **Supabase Edge Function secrets**
 
-```sql
--- Check all tables have RLS enabled
-SELECT tablename, rowsecurity
-FROM pg_tables
-WHERE schemaname = 'public';
-```
+### Vercel Headers (`vercel.json`)
 
-### 2. Verify Admin Function Works
+- `X-Content-Type-Options: nosniff` — prevents MIME sniffing
+- `X-Frame-Options: SAMEORIGIN` — prevents clickjacking
+- `X-Robots-Tag: noindex` on `admin.html` — hides admin from search engines
+- `Cache-Control: no-cache` on `config.js` — always serves fresh config
 
-```sql
--- Test the is_admin function (as authenticated user)
-SELECT is_admin();
-```
+### Admin Page
 
-### 3. Create Your First Super Admin
-
-```sql
--- After signing up, make yourself super admin
-UPDATE profiles
-SET is_admin = true, role = 'super_admin'
-WHERE email = 'your-email@example.com';
-```
+- Protected by Supabase Auth (must be logged in)
+- `is_admin()` RPC function checks role before granting access
+- Role-based UI: Super Admin vs Editor (see `ROLE_PERMISSIONS.md`)
 
 ---
 
-## 🔄 Updating the Site
+## Email Notifications
 
-After making changes:
+Order confirmation emails are sent automatically via a Supabase Edge Function:
+
+1. Checkout inserts order into `orders` table
+2. Database trigger calls `send-order-email` Edge Function via `pg_net`
+3. Edge Function sends emails through Resend API
+
+See `EDGE_FUNCTION_DEPLOY.md` for setup details.
+
+---
+
+## Updating the Site
 
 ```bash
 git add .
-git commit -m "Your update message"
+git commit -m "fix: description of change"
 git push
 ```
 
-Vercel will automatically redeploy!
+Vercel auto-deploys on every push to `main`.
 
 ---
 
-## 📝 Important Notes
+## Database Migrations
 
-1. **reCAPTCHA**: Replace the test key with your production key
-   - Get keys from: https://www.google.com/recaptcha/admin
-   - Update in all HTML files where `g-recaptcha` appears
-
-2. **Paystack**: Replace test key with live key for production
-   - Get keys from: https://dashboard.paystack.com/#/settings/developer
-
-3. **Custom Domain**:
-   - In Vercel, go to **Settings** → **Domains**
-   - Add your custom domain and follow DNS instructions
+For schema changes, edit `supabase_complete.sql` and run the new SQL in:
+**Supabase Dashboard → SQL Editor**
 
 ---
 
-## 🆘 Troubleshooting
+## Troubleshooting
 
-**Admin access denied:**
-
-- Check you've run the SQL to make yourself admin
-- Verify `is_admin` function exists in Supabase
-
-**RLS errors:**
-
-- Ensure all policies from `supabase_complete.sql` are applied
-- Check the Supabase logs for specific errors
-
-**Images not loading:**
-
-- Verify storage bucket policies are set correctly
-- Check bucket name matches `APP_CONFIG.STORAGE_BUCKET`
+| Problem             | Fix                                                                                               |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| Admin access denied | Run `UPDATE profiles SET is_admin = true, role = 'super_admin' WHERE email = '...'` in SQL Editor |
+| RLS errors          | Verify all policies from `supabase_complete.sql` are applied                                      |
+| Images not loading  | Check storage bucket policies and bucket name matches `product-images`                            |
+| Emails not sending  | Check Edge Function logs in Supabase Dashboard, verify domain in Resend                           |
+| Payment not working | Replace Monnify test keys with live keys in `config.js`                                           |

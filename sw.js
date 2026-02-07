@@ -5,14 +5,19 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v1";
+const CACHE_NAME = "lbs-cache-v2";
 const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/shop.html",
   "/cart.html",
+  "/checkout.html",
+  "/confirmation.html",
   "/wishlist.html",
+  "/dashboard.html",
+  "/contact.html",
   "/faq.html",
+  "/size.html",
   "/terms.html",
   "/privacy.html",
   "/assets/css/styles.css",
@@ -22,10 +27,18 @@ const STATIC_ASSETS = [
   "/assets/js/app.js",
   "/assets/js/auth.js",
   "/assets/js/analytics.js",
+  "/assets/js/recaptcha.js",
   "/assets/js/home.js",
   "/assets/js/shop.js",
   "/assets/js/cart.js",
+  "/assets/js/checkout.js",
+  "/assets/js/confirmation.js",
   "/assets/js/wishlist.js",
+  "/assets/js/dashboard.js",
+  "/assets/js/contact.js",
+  "/assets/js/faq.js",
+  "/assets/js/size.js",
+  "/assets/js/legal.js",
   "/site.webmanifest",
 ];
 
@@ -88,7 +101,7 @@ self.addEventListener("fetch", (event) => {
     url.hostname.includes("supabase") ||
     url.hostname.includes("google") ||
     url.hostname.includes("facebook") ||
-    url.hostname.includes("paystack")
+    url.hostname.includes("monnify")
   ) {
     return;
   }

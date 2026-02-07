@@ -411,5 +411,76 @@
 
   // Export to global
   global.UTILS = UTILS;
+
+  /* ─────────────────────────────────────────────
+   * Image Optimization
+   * ───────────────────────────────────────────── */
+
+  /**
+   * Convert a Supabase Storage URL to an optimized render URL
+   * Uses Supabase Image Transformations (WebP, resize)
+   * For non-Supabase URLs, returns the original src unchanged.
+   *
+   * @param {string} src   - Original image URL
+   * @param {number} [width=400]   - Desired width in px
+   * @param {number} [quality=75]  - Quality 1-100
+   * @returns {string} Optimized URL (or original if not transformable)
+   */
+  UTILS.optimizedImg = function (src, width, quality) {
+    if (!src || typeof src !== "string") return src || "";
+    width = width || 400;
+    quality = quality || 75;
+
+    // Only transform Supabase Storage public URLs
+    // Pattern: https://<project>.supabase.co/storage/v1/object/public/<bucket>/...
+    const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
+    if (!supabaseUrl || !src.startsWith(supabaseUrl)) return src;
+    const marker = "/storage/v1/object/public/";
+    if (!src.includes(marker)) return src;
+
+    // Replace /object/public/ with /render/image/public/ and add params
+    const optimized = src.replace(
+      "/storage/v1/object/public/",
+      "/storage/v1/render/image/public/",
+    );
+    const sep = optimized.includes("?") ? "&" : "?";
+    return `${optimized}${sep}width=${width}&quality=${quality}`;
+  };
+
+  /**
+   * Build an <img> tag with srcset for responsive sizes
+   *
+   * @param {string}  src     - Original Supabase Storage URL
+   * @param {string}  alt     - Alt text
+   * @param {string}  [cls]   - Optional CSS class(es)
+   * @param {number[]} [sizes] - Array of widths for srcset, default [200,400,800]
+   * @returns {string} HTML string
+   */
+  UTILS.responsiveImg = function (src, alt, cls, sizes) {
+    alt = UTILS.safeText(alt);
+    cls = cls ? ` class="${cls}"` : "";
+    if (!src || typeof src !== "string") {
+      return `<img src="assets/img/placeholder.png" alt="${alt}"${cls} loading="lazy" />`;
+    }
+
+    const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
+    const canTransform =
+      supabaseUrl &&
+      src.startsWith(supabaseUrl) &&
+      src.includes("/storage/v1/object/public/");
+
+    if (!canTransform) {
+      return `<img src="${src}" alt="${alt}"${cls} loading="lazy" />`;
+    }
+
+    sizes = sizes || [200, 400, 800];
+    const srcset = sizes
+      .map((w) => `${UTILS.optimizedImg(src, w, 75)} ${w}w`)
+      .join(", ");
+    const fallback = UTILS.optimizedImg(src, sizes[1] || 400, 75);
+
+    return `<img src="${fallback}" srcset="${srcset}" sizes="(max-width:480px) 200px, (max-width:768px) 400px, 800px" alt="${alt}"${cls} loading="lazy" />`;
+  };
+
   console.log("✅ UTILS: Module ready");
 })(typeof window !== "undefined" ? window : this);

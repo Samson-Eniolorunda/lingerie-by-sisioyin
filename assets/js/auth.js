@@ -67,7 +67,7 @@
             window.loginRecaptchaWidgetId = grecaptcha.render(
               "loginRecaptcha",
               {
-                sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+                sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
                 callback: window.onLoginRecaptchaSuccess,
                 "expired-callback": window.onLoginRecaptchaExpired,
               },
@@ -77,7 +77,7 @@
             window.signupRecaptchaWidgetId = grecaptcha.render(
               "signupRecaptcha",
               {
-                sitekey: "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI",
+                sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
                 callback: window.onSignupRecaptchaSuccess,
                 "expired-callback": window.onSignupRecaptchaExpired,
               },
@@ -229,11 +229,55 @@
   /* ─────────────────────────────────────────────
    * UI Updates
    * ───────────────────────────────────────────── */
+  function getInitials(user) {
+    const name = user?.user_metadata?.full_name || "";
+    if (name) {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2)
+        return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+      return parts[0][0]?.toUpperCase() || "U";
+    }
+    return (user?.email?.[0] || "U").toUpperCase();
+  }
+
   function updateAuthUI(user) {
     currentUser = user;
 
     if (loginBtn) {
-      loginBtn.hidden = !!user;
+      if (user) {
+        // Swap icon to initials and navigate to dashboard on click
+        loginBtn.hidden = false;
+        loginBtn.innerHTML = `<span class="user-initials">${getInitials(user)}</span>`;
+        loginBtn.setAttribute("aria-label", "My Account");
+        loginBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          window.location.href = "dashboard.html";
+        };
+      } else {
+        loginBtn.hidden = false;
+        loginBtn.innerHTML = '<i class="fa-solid fa-user"></i>';
+        loginBtn.setAttribute("aria-label", "Sign in");
+        loginBtn.onclick = null;
+      }
+    }
+
+    // Update mobile drawer user section
+    const drawerName = document.querySelector(".drawer-user-name");
+    const drawerEmail = document.querySelector(".drawer-user-email");
+    const drawerAvatar = document.querySelector(".drawer-user-avatar");
+    if (user) {
+      const name =
+        user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+      if (drawerName) drawerName.textContent = name;
+      if (drawerEmail) drawerEmail.textContent = user.email || "";
+      if (drawerAvatar)
+        drawerAvatar.innerHTML = `<span class="user-initials">${getInitials(user)}</span>`;
+    } else {
+      if (drawerName) drawerName.textContent = "My Account";
+      if (drawerEmail) drawerEmail.textContent = "Sign in for best experience";
+      if (drawerAvatar)
+        drawerAvatar.innerHTML = '<i class="fa-solid fa-user"></i>';
     }
 
     // Dispatch event for other modules
@@ -408,9 +452,11 @@
       });
     }
 
-    // Login button
+    // Login button — only opens auth modal if not logged in
     if (loginBtn) {
-      loginBtn.addEventListener("click", () => openAuthModal("login"));
+      loginBtn.addEventListener("click", () => {
+        if (!currentUser) openAuthModal("login");
+      });
     }
 
     // Google login buttons

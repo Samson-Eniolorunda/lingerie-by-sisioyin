@@ -28,10 +28,11 @@
 
   function getDeliveryFee() {
     const deliverySelect = $("#deliveryArea");
-    const selected = deliverySelect?.querySelector("option:checked");
+    const selected = deliverySelect?.value;
     if (!selected) return 0;
-    const fee = selected.getAttribute("data-fee");
-    return fee ? parseInt(fee, 10) : 0;
+    const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
+    const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT || 2500;
+    return fees[selected] || fallback;
   }
 
   function generateOrderId() {
@@ -142,7 +143,10 @@
           item.selectedSize ||
           "One Size";
         const color = item.selectedColor || "";
-        const img = item.image || "assets/img/placeholder.png";
+        const imgRaw = item.image || "assets/img/placeholder.png";
+        const img = window.UTILS?.optimizedImg
+          ? window.UTILS.optimizedImg(imgRaw, 200, 75)
+          : imgRaw;
         const vid = window.UTILS?.safeText?.(item.variantId) || item.variantId;
 
         return `
@@ -357,6 +361,24 @@
     if (removePromoBtn) {
       removePromoBtn.addEventListener("click", removePromoCode);
     }
+
+    // Auth-gate checkout buttons — require login before navigating
+    const checkoutLinks = $$("#proceedCheckoutBtn, .cd-checkout-btn");
+    checkoutLinks.forEach((link) => {
+      link.addEventListener("click", (e) => {
+        const user = window.AUTH?.getUser?.();
+        if (!user) {
+          e.preventDefault();
+          window.UTILS?.toast?.(
+            "Please sign in or create an account to proceed to checkout. It only takes a moment!",
+            "info",
+          );
+          setTimeout(() => {
+            window.AUTH?.openModal?.("login");
+          }, 1200);
+        }
+      });
+    });
   }
 
   /* -------------------------
@@ -382,6 +404,9 @@
 
     console.log("🛒 CART: On cart page, setting up...");
 
+    // Populate delivery dropdown from config
+    populateDeliveryDropdown();
+
     // Setup event handlers
     setupEventHandlers();
 
@@ -389,6 +414,20 @@
     renderCart();
 
     console.log("✅ CART: Page initialized");
+  }
+
+  function populateDeliveryDropdown() {
+    const select = $("#deliveryArea");
+    if (!select) return;
+    const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
+    const fmt = (n) => "₦" + Number(n).toLocaleString();
+    const abujaLabel = { Abuja: "Abuja (FCT)" };
+    select.innerHTML = Object.entries(fees)
+      .map(([state, fee]) => {
+        const label = abujaLabel[state] || state;
+        return `<option value="${state}">${label} — ${fmt(fee)}</option>`;
+      })
+      .join("");
   }
 
   // Run init when DOM is ready

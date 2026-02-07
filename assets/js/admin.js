@@ -1096,8 +1096,15 @@
         admins: "Manage Admins",
         trash: "Trash",
         siteImages: "Site Images",
+        reviews: "Customer Reviews",
+        analytics: "Analytics",
       };
       title.textContent = titles[viewId] || viewId;
+    }
+
+    // Load reviews when navigating to reviews view
+    if (viewId === "reviews") {
+      loadReviews();
     }
 
     // If entering studio with no productId, make sure we are in ADD mode
@@ -1128,6 +1135,11 @@
     // Load site images when switching to that view
     if (viewId === "siteImages") {
       loadSiteImages();
+    }
+
+    // Load analytics when switching to that view
+    if (viewId === "analytics") {
+      loadAnalytics();
     }
   }
 
@@ -2091,7 +2103,7 @@
         </div>
         <div class="order-detail-row">
           <span>Payment Method</span>
-          <span>${order.payment_method || "Paystack"}</span>
+          <span>${order.payment_method || "Monnify"}</span>
         </div>
         <div class="order-detail-row">
           <span>Payment Reference</span>
@@ -4988,6 +5000,435 @@
   }
 
   /* =========================
+    Analytics Module
+  ========================= */
+  async function loadAnalytics() {
+    console.log("[loadAnalytics] Loading analytics data");
+    const config = window.APP_CONFIG || {};
+    const gaId = config.GA_MEASUREMENT_ID || "";
+    const fbId = config.FB_PIXEL_ID || "";
+
+    // Update setup status cards
+    const gaStatus = $("#gaStatus");
+    const fbStatus = $("#fbStatus");
+    const gaBadge = $("#gaBadge");
+    const fbBadge = $("#fbBadge");
+
+    if (gaStatus) {
+      if (gaId) {
+        gaStatus.textContent = `Connected: ${gaId}`;
+        gaBadge.textContent = "Active";
+        gaBadge.className = "analytics-setup-badge active";
+      } else {
+        gaStatus.textContent =
+          "Not configured — add GA_MEASUREMENT_ID to config.js";
+        gaBadge.textContent = "Inactive";
+        gaBadge.className = "analytics-setup-badge inactive";
+      }
+    }
+    if (fbStatus) {
+      if (fbId) {
+        fbStatus.textContent = `Connected: ${fbId}`;
+        fbBadge.textContent = "Active";
+        fbBadge.className = "analytics-setup-badge active";
+      } else {
+        fbStatus.textContent = "Not configured — add FB_PIXEL_ID to config.js";
+        fbBadge.textContent = "Inactive";
+        fbBadge.className = "analytics-setup-badge inactive";
+      }
+    }
+
+    // Load real data from Supabase
+    try {
+      const period = parseInt($("#analyticsPeriod")?.value || "30");
+      const since = new Date();
+      since.setDate(since.getDate() - period);
+      const sinceISO = since.toISOString();
+
+      // Fetch orders for the period
+      const { data: orders, error } = await supabase
+        .from("orders")
+        .select("id, total, status, created_at")
+        .gte("created_at", sinceISO)
+        .order("created_at", { ascending: true });
+
+      if (error) throw error;
+
+      // Fetch total customers
+      const { count: customerCount } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("is_admin", false);
+
+      // Fetch all-time totals
+      const { data: allOrders } = await supabase
+        .from("orders")
+        .select("id, total, status");
+
+      const totalRevenue = (allOrders || []).reduce(
+        (s, o) => s + (parseFloat(o.total) || 0),
+        0,
+      );
+      const totalOrders = (allOrders || []).length;
+      const conversionRate =
+        customerCount > 0
+          ? ((totalOrders / customerCount) * 100).toFixed(1)
+          : "0";
+
+      // Update stat boxes
+      const fmt = (n) =>
+        "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+      const anTotalCustomers = $("#anTotalCustomers");
+      const anTotalOrders = $("#anTotalOrders");
+      const anTotalRevenue = $("#anTotalRevenue");
+      const anConversionRate = $("#anConversionRate");
+
+      if (anTotalCustomers) anTotalCustomers.textContent = customerCount || 0;
+      if (anTotalOrders) anTotalOrders.textContent = totalOrders;
+      if (anTotalRevenue) anTotalRevenue.textContent = fmt(totalRevenue);
+      if (anConversionRate) anConversionRate.textContent = conversionRate + "%";
+
+      // Revenue bar chart (daily totals for period)
+      renderRevenueChart(orders || [], period);
+
+      // Orders donut chart
+      renderOrdersDonut(allOrders || []);
+
+      // Top products
+      await renderTopProducts();
+    } catch (err) {
+      console.error("[loadAnalytics] Error:", err);
+    }
+  }
+
+  function renderRevenueChart(orders, period) {
+    const container = $("#revenueBarChart");
+    if (!container) return;
+
+    // Group by date
+    const daily = {};
+    orders.forEach((o) => {
+      const d = new Date(o.created_at).toLocaleDateString("en-GB", {
+        month: "short",
+        day: "numeric",
+      });
+      daily[d] = (daily[d] || 0) + (parseFloat(o.total) || 0);
+    });
+
+    const entries = Object.entries(daily);
+    if (!entries.length) {
+      container.innerHTML =
+        '<p class="text-muted text-center" style="padding:2rem">No order data for this period</p>';
+      return;
+    }
+
+    const maxVal = Math.max(...entries.map(([, v]) => v), 1);
+
+    container.innerHTML = entries
+      .map(([date, val]) => {
+        const pct = Math.max((val / maxVal) * 100, 4);
+        const fmt =
+          "₦" + val.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+        return `
+        <div class="bar-col">
+          <div class="bar-tooltip">${fmt}</div>
+          <div class="bar-fill" style="height:${pct}%"></div>
+          <span class="bar-label">${date}</span>
+        </div>
+      `;
+      })
+      .join("");
+  }
+
+  function renderOrdersDonut(orders) {
+    const container = $("#ordersDonut");
+    if (!container) return;
+
+    const statusMap = {};
+    orders.forEach((o) => {
+      const s = o.status || "pending";
+      statusMap[s] = (statusMap[s] || 0) + 1;
+    });
+
+    const total = orders.length;
+    const divisor = total || 1; // avoid division by zero
+    const colors = {
+      pending: "#f59e0b",
+      processing: "#3b82f6",
+      shipped: "#8b5cf6",
+      delivered: "#10b981",
+      cancelled: "#ef4444",
+      refunded: "#6b7280",
+    };
+
+    let offset = 0;
+    const segments = Object.entries(statusMap).map(([status, count]) => {
+      const pct = (count / divisor) * 100;
+      const seg = {
+        status,
+        count,
+        pct,
+        offset,
+        color: colors[status] || "#9ca3af",
+      };
+      offset += pct;
+      return seg;
+    });
+
+    // CSS conic-gradient donut
+    const gradParts = segments
+      .map((s) => `${s.color} ${s.offset - s.pct}% ${s.offset}%`)
+      .join(", ");
+
+    container.innerHTML = `
+      <div class="donut-ring" style="background:conic-gradient(${gradParts})">
+        <div class="donut-center">
+          <span class="donut-total">${total}</span>
+          <span class="donut-label">Orders</span>
+        </div>
+      </div>
+      <div class="donut-legend">
+        ${segments
+          .map(
+            (s) => `
+          <div class="donut-legend-item">
+            <span class="donut-dot" style="background:${s.color}"></span>
+            <span>${escapeHtml(s.status)}</span>
+            <strong>${s.count}</strong>
+          </div>
+        `,
+          )
+          .join("")}
+      </div>
+    `;
+  }
+
+  async function renderTopProducts() {
+    const container = $("#topProductsTable");
+    if (!container) return;
+
+    try {
+      // Get order items and count
+      const { data: orders } = await supabase.from("orders").select("items");
+
+      if (!orders || !orders.length) {
+        container.innerHTML =
+          '<p class="text-muted text-center" style="padding:2rem">No order data yet</p>';
+        return;
+      }
+
+      // Tally product occurrences
+      const productCounts = {};
+      const productRevenue = {};
+      orders.forEach((order) => {
+        const items = order.items || [];
+        items.forEach((item) => {
+          const name = item.name || "Unknown";
+          productCounts[name] =
+            (productCounts[name] || 0) + (item.quantity || 1);
+          productRevenue[name] =
+            (productRevenue[name] || 0) +
+            (item.price || 0) * (item.quantity || 1);
+        });
+      });
+
+      const sorted = Object.entries(productCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10);
+
+      if (!sorted.length) {
+        container.innerHTML =
+          '<p class="text-muted text-center" style="padding:2rem">No product data</p>';
+        return;
+      }
+
+      const fmt = (n) =>
+        "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+      container.innerHTML = `
+        <table class="table">
+          <thead><tr><th>#</th><th>Product</th><th>Units Sold</th><th>Revenue</th></tr></thead>
+          <tbody>
+            ${sorted
+              .map(
+                ([name, count], i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${escapeHtml(name)}</td>
+                <td>${count}</td>
+                <td>${fmt(productRevenue[name] || 0)}</td>
+              </tr>
+            `,
+              )
+              .join("")}
+          </tbody>
+        </table>
+      `;
+    } catch (err) {
+      console.error("[renderTopProducts] Error:", err);
+      container.innerHTML =
+        '<p class="text-muted text-center">Failed to load</p>';
+    }
+  }
+
+  // Analytics refresh & period change handlers
+  on($("#analyticsRefreshBtn"), "click", () => loadAnalytics());
+  on($("#analyticsPeriod"), "change", () => loadAnalytics());
+
+  /* =========================
+    Reviews Management
+  ========================= */
+  let allReviews = [];
+
+  async function loadReviews() {
+    const list = $("#adminReviewsList");
+    const statsEl = $("#reviewsStats");
+    if (!list) return;
+
+    list.innerHTML = '<p class="text-muted text-center">Loading reviews...</p>';
+
+    try {
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      allReviews = data || [];
+      renderReviewsStats(statsEl, allReviews);
+      filterAndRenderReviews();
+    } catch (err) {
+      console.error("[loadReviews] Error:", err);
+      list.innerHTML = `<p class="text-muted text-center">Error loading reviews: ${err.message}</p>`;
+    }
+  }
+
+  function renderReviewsStats(el, reviews) {
+    if (!el) return;
+    const total = reviews.length;
+    const approved = reviews.filter((r) => r.status === "approved").length;
+    const pending = reviews.filter((r) => r.status === "pending").length;
+    const rejected = reviews.filter((r) => r.status === "rejected").length;
+    const avgRating =
+      total > 0
+        ? (
+            reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / total
+          ).toFixed(1)
+        : "0.0";
+
+    el.innerHTML = `
+      <div class="stats-row">
+        <div class="stat-box"><strong>${total}</strong><span>Total</span></div>
+        <div class="stat-box"><strong>${approved}</strong><span>Approved</span></div>
+        <div class="stat-box"><strong>${pending}</strong><span>Pending</span></div>
+        <div class="stat-box"><strong>${rejected}</strong><span>Rejected</span></div>
+        <div class="stat-box"><strong>${avgRating} ★</strong><span>Avg Rating</span></div>
+      </div>
+    `;
+  }
+
+  function filterAndRenderReviews() {
+    const statusFilter = $("#reviewsFilterStatus")?.value || "all";
+    const ratingFilter = $("#reviewsFilterRating")?.value || "all";
+
+    let filtered = [...allReviews];
+    if (statusFilter !== "all")
+      filtered = filtered.filter((r) => r.status === statusFilter);
+    if (ratingFilter !== "all")
+      filtered = filtered.filter((r) => String(r.rating) === ratingFilter);
+
+    renderReviewsList(filtered);
+  }
+
+  function renderReviewsList(reviews) {
+    const list = $("#adminReviewsList");
+    if (!list) return;
+
+    if (reviews.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <i class="fa-solid fa-star-half-stroke" style="font-size:2rem;opacity:0.3"></i>
+          <p class="text-muted">No reviews found</p>
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = reviews
+      .map((r) => {
+        const stars =
+          "★".repeat(r.rating || 0) + "☆".repeat(5 - (r.rating || 0));
+        const date = new Date(r.created_at).toLocaleDateString("en-NG", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        });
+        const statusClass = r.status || "pending";
+        return `
+          <div class="review-card" data-review-id="${r.id}">
+            <div class="review-header">
+              <div class="review-meta">
+                <strong>${escapeHtml(r.reviewer_name || r.customer_email || "Anonymous")}</strong>
+                <span class="review-date">${date}</span>
+              </div>
+              <span class="review-rating">${stars}</span>
+            </div>
+            ${r.product_name ? `<p class="review-product"><i class="fa-solid fa-tag"></i> ${escapeHtml(r.product_name)}</p>` : ""}
+            <p class="review-text">${escapeHtml(r.comment || r.review_text || "")}</p>
+            <div class="review-actions">
+              <span class="order-status ${statusClass}">${statusClass}</span>
+              ${statusClass !== "approved" ? `<button class="btn btn-sm btn-success" onclick="window._adminApproveReview('${r.id}')"><i class="fa-solid fa-check"></i> Approve</button>` : ""}
+              ${statusClass !== "rejected" ? `<button class="btn btn-sm btn-danger" onclick="window._adminRejectReview('${r.id}')"><i class="fa-solid fa-xmark"></i> Reject</button>` : ""}
+              <button class="btn btn-sm btn-outline" onclick="window._adminDeleteReview('${r.id}')"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>`;
+      })
+      .join("");
+  }
+
+  async function updateReviewStatus(reviewId, status) {
+    try {
+      const { error } = await supabase
+        .from("reviews")
+        .update({ status })
+        .eq("id", reviewId);
+      if (error) throw error;
+      showToast(`Review ${status}`);
+      loadReviews();
+    } catch (err) {
+      showToast(`Error: ${err.message}`);
+    }
+  }
+
+  async function deleteReview(reviewId) {
+    if (!confirm("Delete this review permanently?")) return;
+    try {
+      const { error } = await supabase
+        .from("reviews")
+        .delete()
+        .eq("id", reviewId);
+      if (error) throw error;
+      showToast("Review deleted");
+      loadReviews();
+    } catch (err) {
+      showToast(`Error: ${err.message}`);
+    }
+  }
+
+  // Expose review actions globally for inline onclick handlers
+  window._adminApproveReview = (id) => updateReviewStatus(id, "approved");
+  window._adminRejectReview = (id) => updateReviewStatus(id, "rejected");
+  window._adminDeleteReview = (id) => deleteReview(id);
+
+  // Review filter event listeners
+  function bindReviewFilters() {
+    const statusFilter = $("#reviewsFilterStatus");
+    const ratingFilter = $("#reviewsFilterRating");
+    if (statusFilter)
+      statusFilter.addEventListener("change", filterAndRenderReviews);
+    if (ratingFilter)
+      ratingFilter.addEventListener("change", filterAndRenderReviews);
+  }
+
+  /* =========================
     Init
   ========================= */
   async function init() {
@@ -4996,6 +5437,7 @@
 
     bindPasswordToggles();
     bindNav();
+    bindReviewFilters();
     bindSizesDropdown();
     bindFormSelectDropdowns();
     bindStudioSlider();

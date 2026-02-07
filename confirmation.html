@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -32,289 +32,6 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
-
-    <style>
-      .confirmation-page {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .confirmation-main {
-        flex: 1;
-        padding: calc(var(--header-height) + var(--space-8)) 0 var(--space-16);
-      }
-
-      .confirmation-content {
-        max-width: 800px;
-        margin: 0 auto;
-      }
-
-      .confirmation-success {
-        text-align: center;
-        padding: var(--space-12) var(--space-6);
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        margin-bottom: var(--space-8);
-      }
-
-      .success-icon {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, var(--clr-success), #059669);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto var(--space-6);
-        animation:
-          scaleIn 0.5s ease-out,
-          pulse 2s infinite 0.5s;
-      }
-
-      .success-icon i {
-        font-size: 3rem;
-        color: white;
-      }
-
-      @keyframes scaleIn {
-        from {
-          transform: scale(0);
-          opacity: 0;
-        }
-        to {
-          transform: scale(1);
-          opacity: 1;
-        }
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
-        }
-        50% {
-          box-shadow: 0 0 0 20px rgba(16, 185, 129, 0);
-        }
-      }
-
-      .confirmation-success h1 {
-        font-family: var(--ff-display);
-        font-size: var(--fs-3xl);
-        font-weight: 700;
-        color: var(--text-primary);
-        margin-bottom: var(--space-2);
-      }
-
-      .confirmation-success p {
-        color: var(--text-secondary);
-        font-size: var(--fs-lg);
-        margin-bottom: var(--space-6);
-      }
-
-      .order-number {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-2);
-        background: var(--bg-muted);
-        padding: var(--space-3) var(--space-6);
-        border-radius: var(--radius-full);
-        font-family: var(--ff-mono, monospace);
-        font-size: var(--fs-lg);
-        font-weight: 600;
-        color: var(--clr-primary);
-      }
-
-      .order-details-card {
-        background: var(--bg-surface);
-        border-radius: var(--radius-2xl);
-        border: 2px solid var(--border-light);
-        overflow: hidden;
-        margin-bottom: var(--space-6);
-      }
-
-      .order-details-header {
-        background: var(--bg-muted);
-        padding: var(--space-4) var(--space-6);
-        border-bottom: 1px solid var(--border-light);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-      }
-
-      .order-details-header i {
-        color: var(--clr-primary);
-        font-size: 1.25rem;
-      }
-
-      .order-details-header h2 {
-        font-size: var(--fs-lg);
-        font-weight: 600;
-        color: var(--text-primary);
-        margin: 0;
-      }
-
-      .order-details-body {
-        padding: var(--space-6);
-      }
-
-      .detail-row {
-        display: flex;
-        justify-content: space-between;
-        padding: var(--space-3) 0;
-        border-bottom: 1px solid var(--border-light);
-      }
-
-      .detail-row:last-child {
-        border-bottom: none;
-      }
-
-      .detail-label {
-        color: var(--text-secondary);
-        font-size: var(--fs-sm);
-      }
-
-      .detail-value {
-        font-weight: 500;
-        color: var(--text-primary);
-        text-align: right;
-      }
-
-      .detail-row.total {
-        padding-top: var(--space-4);
-        margin-top: var(--space-2);
-        border-top: 2px solid var(--border-light);
-        border-bottom: none;
-      }
-
-      .detail-row.total .detail-label,
-      .detail-row.total .detail-value {
-        font-size: var(--fs-lg);
-        font-weight: 700;
-        color: var(--clr-primary);
-      }
-
-      .order-items-list {
-        margin-top: var(--space-4);
-      }
-
-      .order-item {
-        display: flex;
-        gap: var(--space-4);
-        padding: var(--space-4);
-        background: var(--bg-muted);
-        border-radius: var(--radius-lg);
-        margin-bottom: var(--space-3);
-      }
-
-      .order-item:last-child {
-        margin-bottom: 0;
-      }
-
-      .order-item-img {
-        width: 60px;
-        height: 75px;
-        border-radius: var(--radius-md);
-        overflow: hidden;
-        flex-shrink: 0;
-      }
-
-      .order-item-img img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .order-item-info {
-        flex: 1;
-      }
-
-      .order-item-name {
-        font-weight: 600;
-        color: var(--text-primary);
-        margin-bottom: var(--space-1);
-      }
-
-      .order-item-meta {
-        font-size: var(--fs-sm);
-        color: var(--text-secondary);
-      }
-
-      .order-item-price {
-        font-weight: 600;
-        color: var(--text-primary);
-        text-align: right;
-      }
-
-      .delivery-info {
-        display: grid;
-        gap: var(--space-4);
-      }
-
-      @media (min-width: 640px) {
-        .delivery-info {
-          grid-template-columns: 1fr 1fr;
-        }
-      }
-
-      .delivery-block h4 {
-        font-size: var(--fs-sm);
-        font-weight: 600;
-        color: var(--text-secondary);
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: var(--space-2);
-      }
-
-      .delivery-block p {
-        color: var(--text-primary);
-        line-height: 1.6;
-      }
-
-      .confirmation-actions {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-4);
-        margin-top: var(--space-8);
-      }
-
-      @media (min-width: 480px) {
-        .confirmation-actions {
-          flex-direction: row;
-          justify-content: center;
-        }
-      }
-
-      .confirmation-actions .btn {
-        flex: 1;
-        max-width: 250px;
-      }
-
-      .email-notice {
-        text-align: center;
-        padding: var(--space-4);
-        background: rgba(var(--clr-info-rgb, 59, 130, 246), 0.1);
-        border-radius: var(--radius-lg);
-        margin-top: var(--space-6);
-      }
-
-      .email-notice i {
-        color: var(--clr-info, #3b82f6);
-        margin-right: var(--space-2);
-      }
-
-      .email-notice p {
-        color: var(--text-secondary);
-        font-size: var(--fs-sm);
-        margin: 0;
-      }
-
-      /* Progress bar showing completed */
-      .checkout-progress-step.completed .step-circle {
-        background: linear-gradient(135deg, var(--clr-success), #059669);
-      }
-    </style>
   </head>
 
   <body class="confirmation-page">
@@ -780,7 +497,181 @@
       </div>
     </div>
 
+    <!-- Auth Modal -->
+    <div class="modal-backdrop" id="authBackdrop"></div>
+    <div class="modal auth-modal" id="authModal">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-heart" style="color: var(--clr-primary)"></i>
+          Welcome
+        </h3>
+        <button
+          type="button"
+          class="modal-close"
+          id="authClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="auth-tab active" data-tab="login">
+            Login
+          </button>
+          <button type="button" class="auth-tab" data-tab="signup">
+            Register
+          </button>
+        </div>
+
+        <form class="auth-form active" id="loginForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email Address</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              class="form-input"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Sign In
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="form-group">
+            <label class="form-label" for="signupName">Full Name</label>
+            <input
+              type="text"
+              id="signupName"
+              name="fullName"
+              class="form-input"
+              placeholder="Enter your full name"
+              autocomplete="name"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email Address</label>
+            <input
+              type="email"
+              id="signupEmail"
+              name="email"
+              class="form-input"
+              placeholder="Enter your email"
+              autocomplete="email"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password</label>
+            <input
+              type="password"
+              id="signupPassword"
+              name="password"
+              class="form-input"
+              placeholder="Create a password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signupConfirm"
+              >Confirm Password</label
+            >
+            <input
+              type="password"
+              id="signupConfirm"
+              name="confirmPassword"
+              class="form-input"
+              placeholder="Confirm your password"
+              autocomplete="new-password"
+              required
+              minlength="6"
+            />
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary w-full btn-disabled"
+            disabled
+          >
+            Create Account
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button
+            type="button"
+            class="btn btn-secondary w-full google-login-btn"
+          >
+            <i class="fa-brands fa-google"></i> Google
+          </button>
+        </form>
+
+        <p
+          style="
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: var(--space-4);
+          "
+        >
+          By continuing, you agree to our
+          <a href="terms.html" style="color: var(--clr-primary)">Terms</a> and
+          <a href="privacy.html" style="color: var(--clr-primary)"
+            >Privacy Policy</a
+          >
+        </p>
+      </div>
+    </div>
+
     <!-- Scripts -->
+    <script src="assets/js/recaptcha.js"></script>
+    <script
+      src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
+      async
+      defer
+    ></script>
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
@@ -791,103 +682,6 @@
     <script defer src="assets/js/app.js"></script>
     <script defer src="assets/js/auth.js"></script>
 
-    <script>
-      // Confirmation page logic
-      (function () {
-        "use strict";
-
-        function formatNaira(amount) {
-          return "₦" + Number(amount || 0).toLocaleString("en-NG");
-        }
-
-        function init() {
-          // Get order data from sessionStorage
-          const orderDataStr = sessionStorage.getItem("LBS_CONFIRMED_ORDER");
-
-          if (!orderDataStr) {
-            // No order data, redirect to shop
-            window.location.href = "shop.html";
-            return;
-          }
-
-          try {
-            const order = JSON.parse(orderDataStr);
-
-            // Populate order number
-            document.getElementById("orderNumber").textContent =
-              order.reference;
-
-            // Populate items
-            const itemsHtml = order.items
-              .map(
-                (item) => `
-              <div class="order-item">
-                <div class="order-item-img">
-                  <img src="${item.image || "assets/img/placeholder.png"}" alt="${item.name}" loading="lazy">
-                </div>
-                <div class="order-item-info">
-                  <div class="order-item-name">${item.name}</div>
-                  <div class="order-item-meta">
-                    ${item.selectedSize || "One Size"}${item.selectedColor ? " • " + item.selectedColor : ""} × ${item.qty}
-                  </div>
-                </div>
-                <div class="order-item-price">${formatNaira(item.price_ngn * item.qty)}</div>
-              </div>
-            `,
-              )
-              .join("");
-            document.getElementById("orderItems").innerHTML = itemsHtml;
-
-            // Populate totals
-            document.getElementById("orderSubtotal").textContent = formatNaira(
-              order.subtotal,
-            );
-            document.getElementById("orderDelivery").textContent = formatNaira(
-              order.deliveryFee,
-            );
-            document.getElementById("orderTotal").textContent = formatNaira(
-              order.total,
-            );
-
-            // Populate delivery address
-            document.getElementById("deliveryAddress").innerHTML = `
-              ${order.delivery.address}<br>
-              ${order.delivery.city}, ${order.delivery.state}<br>
-              ${order.delivery.landmark ? order.delivery.landmark : ""}
-            `;
-
-            // Populate contact info
-            document.getElementById("contactInfo").innerHTML = `
-              ${order.customer.firstName} ${order.customer.lastName}<br>
-              ${order.customer.email}<br>
-              ${order.customer.phone}
-            `;
-
-            // Populate customer email
-            document.getElementById("customerEmail").textContent =
-              order.customer.email;
-
-            // Clear order data from session (one-time view)
-            // Uncomment below to clear after viewing:
-            // sessionStorage.removeItem('LBS_CONFIRMED_ORDER');
-            // sessionStorage.removeItem('LBS_PENDING_ORDER');
-          } catch (err) {
-            console.error("Error parsing order data:", err);
-            window.location.href = "shop.html";
-          }
-        }
-
-        // Run on DOM ready
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", init);
-        } else {
-          init();
-        }
-
-        // Set current year
-        const yearEl = document.getElementById("currentYear");
-        if (yearEl) yearEl.textContent = new Date().getFullYear();
-      })();
-    </script>
+    <script src="assets/js/confirmation.js"></script>
   </body>
 </html>

@@ -25,18 +25,11 @@
     return "₦" + Number(amount || 0).toLocaleString("en-NG");
   }
 
-  // Calculate delivery fee based on state (SW Nigeria + Abuja only)
+  // Calculate delivery fee based on state — reads from config.js
   function getDeliveryFee(state) {
-    const fees = {
-      Lagos: 2000,
-      Ogun: 2000,
-      Oyo: 2500,
-      Osun: 2500,
-      Ondo: 2500,
-      Ekiti: 3000,
-      Abuja: 3500,
-    };
-    return fees[state] || 2500;
+    const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
+    const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT || 2500;
+    return fees[state] || fallback;
   }
 
   // Update progress steps
@@ -302,6 +295,50 @@
     };
   }
 
+  // Save completed order to Supabase (fires the email trigger)
+  async function saveOrderToDatabase(orderData) {
+    const c = window.DB?.client;
+    if (!c) {
+      console.warn(
+        "CHECKOUT: Supabase client not available, order not saved to DB",
+      );
+      return null;
+    }
+
+    try {
+      const { data, error } = await c
+        .from("orders")
+        .insert({
+          customer_name:
+            `${orderData.customer.firstName} ${orderData.customer.lastName}`.trim(),
+          customer_email: orderData.customer.email || null,
+          customer_phone: orderData.customer.phone,
+          delivery_address: orderData.delivery.address,
+          delivery_city: orderData.delivery.city,
+          delivery_state: orderData.delivery.state,
+          items: orderData.items,
+          subtotal: orderData.subtotal,
+          shipping_cost: orderData.deliveryFee,
+          discount_amount: orderData.discountAmount || 0,
+          promo_code: orderData.promoCode || null,
+          total: orderData.total,
+          status: "pending",
+          payment_method: orderData.paymentMethod || "card",
+          payment_status: orderData.paymentStatus || "paid",
+          notes: orderData.delivery.notes || null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      console.log("CHECKOUT: Order saved to DB:", data?.order_number);
+      return data;
+    } catch (e) {
+      console.error("CHECKOUT: Failed to save order to DB:", e);
+      return null;
+    }
+  }
+
   // Handle place order
   function handlePlaceOrder() {
     if (!validateForm()) {
@@ -345,9 +382,6 @@
         ? ["CARD", "ACCOUNT_TRANSFER"]
         : ["ACCOUNT_TRANSFER", "CARD"];
 
-    // Store order data for confirmation page
-    sessionStorage.setItem("LBS_PENDING_ORDER", JSON.stringify(orderData));
-
     MonnifySDK.initialize({
       amount: orderData.total,
       currency: "NGN",
@@ -365,7 +399,7 @@
         items: orderData.items.length,
         deliveryState: orderData.delivery.state,
       },
-      onComplete: function (response) {
+      onComplete: async function (response) {
         console.log("Monnify payment complete:", response);
 
         if (
@@ -381,7 +415,13 @@
             paidAt: new Date().toISOString(),
           };
 
-          // Store confirmed order
+          // Save order to Supabase (triggers confirmation email)
+          const dbOrder = await saveOrderToDatabase(confirmedOrder);
+          if (dbOrder?.order_number) {
+            confirmedOrder.reference = dbOrder.order_number;
+          }
+
+          // Store confirmed order for confirmation page
           sessionStorage.setItem(
             "LBS_CONFIRMED_ORDER",
             JSON.stringify(confirmedOrder),

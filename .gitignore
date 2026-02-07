@@ -28,3 +28,13 @@ build/
 *.pem
 *.key
 .vercel
+
+# Documentation containing API keys / secrets
+SERVICES_SETUP.md
+EDGE_FUNCTION_DEPLOY.md
+EMAIL_NOTIFICATIONS_SETUP.md
+GOOGLE_LOGIN_SETUP.md
+
+# Supabase local temp files
+supabase/.temp/
+supabase/config.toml
