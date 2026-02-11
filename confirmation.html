@@ -10,6 +10,7 @@
     />
     <meta name="robots" content="noindex, follow" />
     <meta name="theme-color" content="#be185d" />
+    <meta name="color-scheme" content="light dark" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
@@ -36,6 +37,12 @@
 
   <body class="confirmation-page">
     <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader-inner">
+        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <p class="page-loader-text"><span></span></p>
+      </div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
        HEADER
@@ -43,14 +50,14 @@
     <header class="header" id="siteHeader">
       <div class="header-inner">
         <!-- Logo -->
-        <a href="/" class="logo">
+        <a href="/home" class="logo">
           <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
         <!-- Desktop Navigation -->
         <nav class="nav" id="mainNav">
-          <a href="/" class="nav-link">Home</a>
+          <a href="/home" class="nav-link">Home</a>
           <a href="/shop" class="nav-link">Shop</a>
           <a href="/shop?gender=Women" class="nav-link">Women</a>
           <a href="/shop?gender=Men" class="nav-link">Men</a>
@@ -104,7 +111,7 @@
       <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
       <div class="mobile-drawer-panel">
         <div class="drawer-header">
-          <a href="/" class="drawer-logo">
+          <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
               ><i class="fa-solid fa-heart"></i
             ></span>
@@ -133,7 +140,7 @@
           <nav class="drawer-nav">
             <span class="drawer-nav-title">Menu</span>
             <div class="drawer-nav-list">
-              <a href="/" class="drawer-nav-link">
+              <a href="/home" class="drawer-nav-link">
                 <span class="drawer-nav-icon"
                   ><i class="fa-solid fa-home"></i
                 ></span>
@@ -227,6 +234,7 @@
               class="drawer-theme-toggle theme-btn"
               id="themeSlider"
               role="switch"
+              aria-checked="false"
               aria-label="Toggle dark mode"
               data-theme="toggle"
             ></button>
@@ -237,42 +245,35 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
-       CHECKOUT PROGRESS
-       ═══════════════════════════════════════════════════════════════════════ -->
-    <section class="checkout-progress-section">
-      <div class="container">
-        <div class="checkout-progress">
-          <div class="checkout-progress-step completed" data-step="1">
-            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-            <span class="step-label">Review Cart</span>
-          </div>
-          <div class="checkout-progress-connector completed"></div>
-          <div class="checkout-progress-step completed" data-step="2">
-            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-            <span class="step-label">Shipping</span>
-          </div>
-          <div class="checkout-progress-connector completed"></div>
-          <div class="checkout-progress-step completed" data-step="3">
-            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-            <span class="step-label">Payment</span>
-          </div>
-          <div class="checkout-progress-connector completed"></div>
-          <div class="checkout-progress-step completed" data-step="4">
-            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-            <span class="step-label">Complete Order</span>
-          </div>
-          <div class="checkout-progress-connector completed"></div>
-          <div class="checkout-progress-step active completed" data-step="5">
-            <div class="step-circle"><i class="fa-solid fa-check"></i></div>
-            <span class="step-label">Confirmation</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══════════════════════════════════════════════════════════════════════
        MAIN CONTENT
        ═══════════════════════════════════════════════════════════════════════ -->
+    <!-- Step Progress — all complete -->
+    <div class="ck-progress">
+      <div class="container">
+        <div class="ck-steps">
+          <span class="ck-step done">
+            <span class="ck-step-num"><i class="fa-solid fa-check"></i></span>
+            <span class="ck-step-text">Cart</span>
+          </span>
+          <span class="ck-step-line done"></span>
+          <span class="ck-step done">
+            <span class="ck-step-num"><i class="fa-solid fa-check"></i></span>
+            <span class="ck-step-text">Shipping</span>
+          </span>
+          <span class="ck-step-line done"></span>
+          <span class="ck-step done">
+            <span class="ck-step-num"><i class="fa-solid fa-check"></i></span>
+            <span class="ck-step-text">Payment</span>
+          </span>
+          <span class="ck-step-line done"></span>
+          <span class="ck-step done">
+            <span class="ck-step-num"><i class="fa-solid fa-check"></i></span>
+            <span class="ck-step-text">Done</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
     <main class="confirmation-main" id="main">
       <div class="container">
         <div class="confirmation-content">
@@ -373,29 +374,46 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a
-              href="/"
-              class="logo"
-             
-            >
+            <a href="/home" class="logo">
               <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
-              <span class="logo-text"
-                >Lingerie by Sisioyin</span
-              >
+              <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
             <p>
               Luxe essentials defined by comfort and confidence. Premium
               lingerie and loungewear for the modern woman.
             </p>
+            <div class="footer-social">
+              <a
+                href="https://instagram.com/lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a
+                href="https://tiktok.com/@lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                ><i class="fa-brands fa-tiktok"></i
+              ></a>
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                ><i class="fa-brands fa-whatsapp"></i
+              ></a>
+            </div>
           </div>
 
           <div>
             <h4 class="footer-title">Shop</h4>
             <nav class="footer-links">
               <a href="/shop">All Products</a>
-              <a href="/shop?gender=Women">Women</a>
-              <a href="/shop?gender=Men">Men</a>
-              <a href="/shop?gender=Kids">Kids</a>
+              <a href="/shop?category=Lingerie">Lingerie</a>
+              <a href="/shop?category=Loungewear">Loungewear</a>
+              <a href="/shop?is_new=true">New Arrivals</a>
             </nav>
           </div>
 
@@ -424,6 +442,32 @@
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
+          <div id="themeToggle">
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="light"
+              aria-label="Light mode"
+            >
+              <i class="fa-solid fa-sun"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="system"
+              aria-label="System theme"
+            >
+              <i class="fa-solid fa-desktop"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="dark"
+              aria-label="Dark mode"
+            >
+              <i class="fa-solid fa-moon"></i>
+            </button>
+          </div>
         </div>
       </div>
     </footer>
@@ -456,7 +500,7 @@
             <a href="/shop" class="btn btn-primary">Start Shopping</a>
           </div>
         </div>
-        <div class="cd-footer u-hidden" id="cartDrawerFooter" >
+        <div class="cd-footer u-hidden" id="cartDrawerFooter">
           <div class="cd-subtotal">
             <span class="cd-subtotal-label">Subtotal</span>
             <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
@@ -501,7 +545,12 @@
     <!-- Auth Modal -->
     <div class="modal-backdrop" id="authBackdrop"></div>
     <div class="modal auth-modal" id="authModal">
-      <button type="button" class="auth-modal-close" id="authClose" aria-label="Close">
+      <button
+        type="button"
+        class="auth-modal-close"
+        id="authClose"
+        aria-label="Close"
+      >
         <i class="fa-solid fa-xmark"></i>
       </button>
 
@@ -509,7 +558,9 @@
       <div class="auth-hero">
         <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
-        <p class="auth-hero-sub" id="authHeroSub">Sign in to your account to continue</p>
+        <p class="auth-hero-sub" id="authHeroSub">
+          Sign in to your account to continue
+        </p>
       </div>
 
       <div class="modal-body">
@@ -554,8 +605,17 @@
               />
             </div>
           </div>
+          <div class="auth-forgot">
+            <a href="#" id="forgotPasswordLink" class="auth-forgot-link"
+              >Forgot password?</a
+            >
+          </div>
           <div class="form-group recaptcha-field">
-            <div class="g-recaptcha" id="loginRecaptcha" data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"></div>
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
           </div>
           <button type="submit" class="auth-submit-btn btn-disabled" disabled>
             <span>Sign In</span>
@@ -564,10 +624,22 @@
           <div class="auth-divider">or continue with</div>
           <button type="button" class="auth-google-btn google-login-btn">
             <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
             Continue with Google
           </button>
@@ -620,7 +692,7 @@
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
-              <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+              <i class="fa-solid fa-lock auth-input-icon"></i>
               <input
                 type="password"
                 id="signupConfirm"
@@ -634,7 +706,11 @@
             </div>
           </div>
           <div class="form-group recaptcha-field">
-            <div class="g-recaptcha" id="signupRecaptcha" data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"></div>
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
           </div>
           <button type="submit" class="auth-submit-btn btn-disabled" disabled>
             <span>Create Account</span>
@@ -643,10 +719,22 @@
           <div class="auth-divider">or continue with</div>
           <button type="button" class="auth-google-btn google-login-btn">
             <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
             Continue with Google
           </button>
@@ -658,6 +746,78 @@
           <a href="/privacy">Privacy Policy</a>
           >
         </p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FORGOT PASSWORD MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="forgot-modal-backdrop" id="forgotBackdrop"></div>
+    <div class="forgot-modal" id="forgotModal">
+      <div class="forgot-modal-hero">
+        <button
+          type="button"
+          class="forgot-modal-close"
+          id="forgotClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="forgot-modal-icon"><i class="fa-solid fa-key"></i></div>
+        <h2 class="forgot-modal-title">Reset Password</h2>
+        <p class="forgot-modal-sub">We'll send you a reset link</p>
+      </div>
+      <div class="forgot-modal-body">
+        <div class="forgot-form-view">
+          <form id="forgotForm" novalidate>
+            <div class="forgot-modal-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-envelope auth-input-icon"></i>
+                <input
+                  type="email"
+                  id="forgotEmail"
+                  class="form-input"
+                  placeholder="Enter your email address"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" class="forgot-modal-submit">
+              <i class="fa-solid fa-paper-plane"></i> Send Reset Link
+            </button>
+          </form>
+          <button type="button" class="forgot-modal-back" id="forgotBack">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+          </button>
+        </div>
+        <div class="forgot-success-view">
+          <div class="forgot-success">
+            <div class="forgot-success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3>Check your email</h3>
+            <p>
+              We've sent a password reset link to
+              <strong id="forgotSuccessEmail"></strong>. Check your inbox and
+              follow the instructions.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="forgot-modal-back"
+            onclick="
+              document
+                .getElementById('forgotBackdrop')
+                ?.classList.remove('active');
+              document
+                .getElementById('forgotModal')
+                ?.classList.remove('active');
+            "
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
       </div>
     </div>
 

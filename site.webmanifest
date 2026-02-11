@@ -1,7 +1,7 @@
 {
-  "name": "Lingerie by Sisi Oyin",
-  "short_name": "LSO",
-  "start_url": "/index.html",
+  "name": "Lingerie by Sisioyin",
+  "short_name": "LBS",
+  "start_url": "/home",
   "display": "standalone",
   "background_color": "#0b0b0f",
   "theme_color": "#0b0b0f",

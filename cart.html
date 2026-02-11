@@ -10,6 +10,7 @@
     />
     <meta name="robots" content="noindex, follow" />
     <meta name="theme-color" content="#be185d" />
+    <meta name="color-scheme" content="light dark" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
@@ -37,6 +38,12 @@
   <body>
     <!-- Skip Link -->
     <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader-inner">
+        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <p class="page-loader-text"><span></span></p>
+      </div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
        HEADER
@@ -44,14 +51,14 @@
     <header class="header" id="siteHeader">
       <div class="header-inner">
         <!-- Logo -->
-        <a href="/" class="logo">
+        <a href="/home" class="logo">
           <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
         <!-- Desktop Navigation -->
         <nav class="nav" id="mainNav">
-          <a href="/" class="nav-link">Home</a>
+          <a href="/home" class="nav-link">Home</a>
           <a href="/shop" class="nav-link">Shop</a>
           <a href="/shop?gender=Women" class="nav-link">Women</a>
           <a href="/shop?gender=Men" class="nav-link">Men</a>
@@ -105,7 +112,7 @@
       <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
       <div class="mobile-drawer-panel">
         <div class="drawer-header">
-          <a href="/" class="drawer-logo">
+          <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
               ><i class="fa-solid fa-heart"></i
             ></span>
@@ -134,7 +141,7 @@
           <nav class="drawer-nav">
             <span class="drawer-nav-title">Menu</span>
             <div class="drawer-nav-list">
-              <a href="/" class="drawer-nav-link">
+              <a href="/home" class="drawer-nav-link">
                 <span class="drawer-nav-icon"
                   ><i class="fa-solid fa-home"></i
                 ></span>
@@ -228,6 +235,7 @@
               class="drawer-theme-toggle theme-btn"
               id="themeSlider"
               role="switch"
+              aria-checked="false"
               aria-label="Toggle dark mode"
               data-theme="toggle"
             ></button>
@@ -241,141 +249,109 @@
        MAIN CONTENT
        ═══════════════════════════════════════════════════════════════════════ -->
 
-    <!-- Page Header -->
-    <section class="page-header">
+    <!-- Step Progress -->
+    <div class="ck-progress">
       <div class="container">
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="/shop">Shop</a>
-          <i class="fa-solid fa-chevron-right"></i>
-          <span>Cart</span>
-          <i class="fa-solid fa-chevron-right"></i>
-          <a href="/checkout" class="breadcrumb-muted">Checkout</a>
-        </nav>
-        <h1 class="page-title">
-          <i class="fa-solid fa-bag-shopping"></i>
-          Shopping Cart
-        </h1>
-      </div>
-    </section>
-
-    <!-- Cart Progress -->
-    <section class="checkout-progress-section">
-      <div class="container">
-        <div class="checkout-progress">
-          <div class="checkout-progress-step active" data-step="1">
-            <div class="step-circle">1</div>
-            <span class="step-label">Review Cart</span>
-          </div>
-          <div class="checkout-progress-connector"></div>
-          <div class="checkout-progress-step" data-step="2">
-            <div class="step-circle">2</div>
-            <span class="step-label">Shipping</span>
-          </div>
-          <div class="checkout-progress-connector"></div>
-          <div class="checkout-progress-step" data-step="3">
-            <div class="step-circle">3</div>
-            <span class="step-label">Payment</span>
-          </div>
-          <div class="checkout-progress-connector"></div>
-          <div class="checkout-progress-step" data-step="4">
-            <div class="step-circle">4</div>
-            <span class="step-label">Complete Order</span>
-          </div>
-          <div class="checkout-progress-connector"></div>
-          <div class="checkout-progress-step" data-step="5">
-            <div class="step-circle">5</div>
-            <span class="step-label">Confirmation</span>
-          </div>
+        <div class="ck-steps">
+          <a href="/cart" class="ck-step active">
+            <span class="ck-step-num">1</span>
+            <span class="ck-step-text">Cart</span>
+          </a>
+          <span class="ck-step-line"></span>
+          <a href="/checkout" class="ck-step">
+            <span class="ck-step-num">2</span>
+            <span class="ck-step-text">Shipping</span>
+          </a>
+          <span class="ck-step-line"></span>
+          <span class="ck-step">
+            <span class="ck-step-num">3</span>
+            <span class="ck-step-text">Payment</span>
+          </span>
+          <span class="ck-step-line"></span>
+          <span class="ck-step">
+            <span class="ck-step-num">4</span>
+            <span class="ck-step-text">Done</span>
+          </span>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Main Cart Content -->
-    <main class="checkout-main" id="main">
+    <main class="ck-main" id="main">
       <div class="container">
-        <!-- Empty State - JS will show if cart is empty -->
-        <div class="checkout-empty-state" id="cartPageEmpty" class="u-hidden">
-          <div class="empty-icon">
+        <!-- Breadcrumb -->
+        <nav class="ck-breadcrumb" aria-label="Breadcrumb">
+          <a href="/home"><i class="fa-solid fa-house"></i></a>
+          <span class="ck-breadcrumb-sep"
+            ><i class="fa-solid fa-chevron-right"></i
+          ></span>
+          <a href="/shop">Shop</a>
+          <span class="ck-breadcrumb-sep"
+            ><i class="fa-solid fa-chevron-right"></i
+          ></span>
+          <span class="ck-breadcrumb-current">Cart</span>
+        </nav>
+
+        <!-- Empty State -->
+        <div class="ck-empty" id="cartPageEmpty" style="display: none">
+          <div class="ck-empty-icon">
             <i class="fa-solid fa-bag-shopping"></i>
           </div>
           <h2>Your cart is empty</h2>
           <p>Looks like you haven't added any items to your cart yet.</p>
-          <a href="/shop" class="btn btn-primary">
-            <i class="fa-solid fa-arrow-left"></i>
-            Continue Shopping
+          <a href="/shop" class="ck-btn-primary">
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
           </a>
         </div>
 
-        <!-- Cart Wrapper - JS will show if cart has items -->
-        <div class="checkout-wrapper u-hidden" id="cartWrapper">
-          <!-- Cart Items Section -->
-          <div class="checkout-forms">
-            <!-- Cart Items Card -->
-            <div class="checkout-card active" id="cartItemsCard">
-              <div class="checkout-card-header">
-                <div class="card-icon">
-                  <i class="fa-solid fa-bag-shopping"></i>
-                </div>
-                <div class="card-title">
-                  <h3>Your Items</h3>
-                  <p id="itemCount">0 items in your cart</p>
-                </div>
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-sm"
-                  id="clearCartBtn"
-                  class="u-hidden"
-                >
-                  <i class="fa-solid fa-trash"></i> Clear All
+        <!-- Cart Content -->
+        <div class="ck-grid u-hidden" id="cartWrapper">
+          <!-- Left: Items -->
+          <div class="ck-col-main">
+            <div class="ck-panel">
+              <div class="ck-panel-head">
+                <h2>
+                  <i class="fa-solid fa-bag-shopping"></i> Your Items
+                  <span class="ck-badge" id="itemCount">0</span>
+                </h2>
+                <button type="button" class="ck-link-btn" id="clearCartBtn">
+                  <i class="fa-solid fa-trash-can"></i> Clear
                 </button>
               </div>
-              <div class="checkout-card-body">
-                <div class="cart-items-list" id="cartItemsList">
-                  <!-- Cart items rendered by JS -->
-                </div>
+              <div class="ck-items" id="cartItemsList">
+                <!-- JS renders cart items here -->
               </div>
             </div>
 
-            <!-- Promo Code Card -->
-            <div class="checkout-card" id="promoCard">
-              <div class="checkout-card-header">
-                <div class="card-icon promo-icon-gradient">
-                  <i class="fa-solid fa-tag"></i>
-                </div>
-                <div class="card-title">
-                  <h3>Discount Code</h3>
-                  <p>Have a promo code? Enter it here</p>
-                </div>
+            <!-- Promo -->
+            <div class="ck-panel ck-promo" id="promoCard">
+              <div class="ck-panel-head">
+                <h3><i class="fa-solid fa-tag"></i> Discount Code</h3>
               </div>
-              <div class="checkout-card-body">
+              <div class="ck-panel-body">
                 <div id="promoFormContainer">
-                  <div class="promo-input-group">
+                  <div class="ck-promo-row">
                     <input
                       type="text"
                       id="promoInput"
-                      class="promo-input"
+                      class="ck-input"
                       placeholder="Enter promo code"
                       autocomplete="off"
                     />
-                    <button
-                      type="button"
-                      class="promo-apply-btn"
-                      id="applyPromoBtn"
-                    >
+                    <button type="button" class="ck-btn-sm" id="applyPromoBtn">
                       Apply
                     </button>
                   </div>
                 </div>
-                <div id="promoApplied" class="promo-applied" class="u-hidden">
-                  <div class="promo-badge">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <span id="promoAppliedText">CODE10 (-10%)</span>
-                  </div>
-                  <button
-                    type="button"
-                    class="btn btn-ghost btn-sm"
-                    id="removePromo"
+                <div
+                  id="promoApplied"
+                  class="ck-promo-applied"
+                  style="display: none"
+                >
+                  <span class="ck-promo-badge"
+                    ><i class="fa-solid fa-check-circle"></i>
+                    <span id="promoAppliedText">CODE10</span></span
                   >
+                  <button type="button" class="ck-link-btn" id="removePromo">
                     <i class="fa-solid fa-xmark"></i> Remove
                   </button>
                 </div>
@@ -383,61 +359,51 @@
             </div>
           </div>
 
-          <!-- Order Summary Sidebar -->
-          <aside class="order-summary">
-            <div class="summary-card">
-              <div class="summary-header">
-                <h3><i class="fa-solid fa-receipt"></i> Order Summary</h3>
-              </div>
+          <!-- Right: Summary -->
+          <aside class="ck-col-side">
+            <div class="ck-summary">
+              <h3 class="ck-summary-title">
+                <i class="fa-solid fa-receipt"></i> Order Summary
+              </h3>
 
-              <!-- Delivery Selection -->
-              <div class="summary-delivery">
-                <label class="summary-delivery-label" for="deliveryArea">
-                  <i class="fa-solid fa-truck"></i> Delivery Location
-                </label>
-                <select id="deliveryArea" class="summary-delivery-select">
-                  <!-- Populated from config.js DELIVERY_FEES -->
-                </select>
-              </div>
-
-              <div class="summary-totals">
-                <div class="summary-row">
-                  <span>Subtotal</span>
-                  <span id="summarySubtotal">₦0</span>
-                </div>
-                <div class="summary-row u-hidden" id="discountRow">
-                  <span>Discount</span>
-                  <span class="discount" id="summaryDiscount">-₦0</span>
-                </div>
-                <div class="summary-row">
-                  <span>Delivery</span>
-                  <span id="summaryDelivery">₦2,000</span>
-                </div>
-                <div class="summary-row total">
-                  <span>Total</span>
-                  <span id="summaryTotal">₦0</span>
-                </div>
-              </div>
-
-              <div class="summary-actions">
-                <a
-                  href="/checkout"
-                  class="place-order-btn"
-                  id="proceedCheckoutBtn"
+              <div class="ck-summary-delivery">
+                <label for="deliveryArea"
+                  ><i class="fa-solid fa-truck"></i> Delivery Location</label
                 >
-                  <i class="fa-solid fa-arrow-right"></i>
-                  <span>Proceed to Checkout</span>
-                </a>
+                <select id="deliveryArea" class="ck-select"></select>
               </div>
 
-              <a href="/shop" class="continue-shopping-link">
-                <i class="fa-solid fa-arrow-left"></i>
-                Continue Shopping
+              <div class="ck-summary-rows">
+                <div class="ck-row">
+                  <span>Subtotal</span><span id="summarySubtotal">₦0</span>
+                </div>
+                <div class="ck-row u-hidden" id="discountRow">
+                  <span>Discount</span
+                  ><span class="ck-discount" id="summaryDiscount">-₦0</span>
+                </div>
+                <div class="ck-row">
+                  <span>Delivery</span><span id="summaryDelivery">₦2,000</span>
+                </div>
+                <div class="ck-row ck-row-total">
+                  <span>Total</span><span id="summaryTotal">₦0</span>
+                </div>
+              </div>
+
+              <a
+                href="/checkout"
+                class="ck-btn-primary ck-btn-block"
+                id="proceedCheckoutBtn"
+              >
+                Proceed to Checkout <i class="fa-solid fa-arrow-right"></i>
               </a>
 
-              <div class="summary-trust">
-                <i class="fa-solid fa-shield-check"></i>
-                <span>Secure checkout powered by Moniepoint</span>
+              <a href="/shop" class="ck-back-link"
+                ><i class="fa-solid fa-arrow-left"></i> Continue Shopping</a
+              >
+
+              <div class="ck-trust">
+                <i class="fa-solid fa-shield-halved"></i> Secure checkout
+                powered by Moniepoint
               </div>
             </div>
           </aside>
@@ -500,7 +466,7 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a href="/" class="logo">
+            <a href="/home" class="logo">
               <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
@@ -526,6 +492,7 @@
               <a
                 href="https://wa.me/2349033344860"
                 target="_blank"
+                rel="noopener noreferrer"
                 aria-label="WhatsApp"
               >
                 <i class="fa-brands fa-whatsapp"></i>
@@ -565,7 +532,7 @@
 
         <div class="footer-bottom">
           <p class="footer-copyright">
-            &copy; <span id="currentYear">2025</span> Lingerie by Sisioyin. All
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
 
@@ -665,6 +632,11 @@
               />
             </div>
           </div>
+          <div class="auth-forgot">
+            <a href="#" id="forgotPasswordLink" class="auth-forgot-link"
+              >Forgot password?</a
+            >
+          </div>
           <div class="form-group recaptcha-field">
             <div
               class="g-recaptcha"
@@ -747,7 +719,7 @@
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
-              <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+              <i class="fa-solid fa-lock auth-input-icon"></i>
               <input
                 type="password"
                 id="signupConfirm"
@@ -801,6 +773,78 @@
           <a href="/privacy">Privacy Policy</a>
           >
         </p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FORGOT PASSWORD MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="forgot-modal-backdrop" id="forgotBackdrop"></div>
+    <div class="forgot-modal" id="forgotModal">
+      <div class="forgot-modal-hero">
+        <button
+          type="button"
+          class="forgot-modal-close"
+          id="forgotClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="forgot-modal-icon"><i class="fa-solid fa-key"></i></div>
+        <h2 class="forgot-modal-title">Reset Password</h2>
+        <p class="forgot-modal-sub">We'll send you a reset link</p>
+      </div>
+      <div class="forgot-modal-body">
+        <div class="forgot-form-view">
+          <form id="forgotForm" novalidate>
+            <div class="forgot-modal-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-envelope auth-input-icon"></i>
+                <input
+                  type="email"
+                  id="forgotEmail"
+                  class="form-input"
+                  placeholder="Enter your email address"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" class="forgot-modal-submit">
+              <i class="fa-solid fa-paper-plane"></i> Send Reset Link
+            </button>
+          </form>
+          <button type="button" class="forgot-modal-back" id="forgotBack">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+          </button>
+        </div>
+        <div class="forgot-success-view">
+          <div class="forgot-success">
+            <div class="forgot-success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3>Check your email</h3>
+            <p>
+              We've sent a password reset link to
+              <strong id="forgotSuccessEmail"></strong>. Check your inbox and
+              follow the instructions.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="forgot-modal-back"
+            onclick="
+              document
+                .getElementById('forgotBackdrop')
+                ?.classList.remove('active');
+              document
+                .getElementById('forgotModal')
+                ?.classList.remove('active');
+            "
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
       </div>
     </div>
 

@@ -177,8 +177,21 @@
    * ───────────────────────────────────────────── */
   function showLoading() {
     console.log("🏠 HOME: showLoading()");
-    if (loader) loader.style.display = "flex";
-    grid.innerHTML = "";
+    if (loader) loader.style.display = "none";
+    // Show skeleton placeholders matching shop skeleton style
+    grid.innerHTML = Array.from(
+      { length: 4 },
+      () => `
+      <div class="product-skeleton">
+        <div class="skeleton-img"></div>
+        <div class="skeleton-body">
+          <div class="skeleton-line w-40"></div>
+          <div class="skeleton-line w-80"></div>
+          <div class="skeleton-line w-60"></div>
+        </div>
+      </div>
+    `,
+    ).join("");
   }
 
   function hideLoading() {
@@ -493,23 +506,8 @@
     if (quickAddBtn || quickViewBtn) {
       e.preventDefault();
       e.stopPropagation();
-      console.log("🏠 HOME: Quick action clicked for product:", productId);
-      console.log("🏠 HOME: window.APP available:", !!window.APP);
-      console.log(
-        "🏠 HOME: window.APP.openModal available:",
-        !!window.APP?.openModal,
-      );
-
-      // Check if APP is available
-      if (window.APP?.openModal) {
-        console.log("🏠 HOME: Calling window.APP.openModal with:", productId);
-        window.APP.openModal(productId);
-      } else {
-        console.warn(
-          "🏠 HOME: window.APP.openModal not available, redirecting to shop",
-        );
-        // Fallback - redirect to shop with product
-        window.location.href = `/shop?product=${productId}`;
+      if (window.SHOP?.openModal) {
+        window.SHOP.openModal(productId);
       }
     }
   });

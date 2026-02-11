@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page Not Found | Lingerie by Sisioyin</title>
+    <meta
+      name="description"
+      content="The page you're looking for doesn't exist."
+    />
+    <meta name="theme-color" content="#be185d" />
+    <meta name="robots" content="noindex" />
+
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <style>
+      .error-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-base);
+        padding: var(--space-6);
+        text-align: center;
+      }
+      .error-content {
+        max-width: 480px;
+      }
+      .error-code {
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(5rem, 12vw, 8rem);
+        font-weight: 700;
+        line-height: 1;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: var(--space-2);
+      }
+      .error-title {
+        font-size: clamp(1.25rem, 3vw, 1.75rem);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: var(--space-3);
+      }
+      .error-text {
+        font-size: var(--text-base);
+        color: var(--text-muted);
+        line-height: 1.7;
+        margin-bottom: var(--space-6);
+      }
+      .error-illustration {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto var(--space-6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(190, 24, 93, 0.08);
+        border-radius: var(--radius-full);
+        color: var(--clr-primary);
+        font-size: 3rem;
+      }
+      .error-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-3);
+        justify-content: center;
+      }
+      .error-btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-6);
+        background: var(--gradient-primary);
+        color: #fff;
+        font-weight: 600;
+        font-size: var(--text-sm);
+        border-radius: var(--radius-full);
+        text-decoration: none;
+        transition:
+          filter 0.2s,
+          box-shadow 0.2s;
+      }
+      .error-btn-primary:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 4px 16px rgba(190, 24, 93, 0.35);
+      }
+      .error-btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-6);
+        background: var(--bg-surface);
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: var(--text-sm);
+        border-radius: var(--radius-full);
+        border: 1px solid var(--border-light);
+        text-decoration: none;
+        transition: all 0.2s;
+      }
+      .error-btn-secondary:hover {
+        border-color: var(--clr-primary);
+        color: var(--clr-primary);
+      }
+      .error-links {
+        margin-top: var(--space-8);
+        padding-top: var(--space-6);
+        border-top: 1px solid var(--border-light);
+      }
+      .error-links-title {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: var(--space-3);
+      }
+      .error-links-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        justify-content: center;
+      }
+      .error-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: var(--space-2) var(--space-3);
+        font-size: var(--text-xs);
+        color: var(--text-muted);
+        background: var(--bg-surface-alt);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        transition:
+          color 0.2s,
+          background 0.2s;
+      }
+      .error-link:hover {
+        color: var(--clr-primary);
+        background: rgba(190, 24, 93, 0.06);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="error-page">
+      <div class="error-content">
+        <div class="error-illustration">
+          <i class="fa-solid fa-heart-crack"></i>
+        </div>
+        <div class="error-code">404</div>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-text">
+          Oops! The page you're looking for doesn't exist or has been moved.
+          Let's get you back to shopping.
+        </p>
+        <div class="error-actions">
+          <a href="/home" class="error-btn-primary">
+            <i class="fa-solid fa-home"></i> Go Home
+          </a>
+          <a href="/shop" class="error-btn-secondary">
+            <i class="fa-solid fa-store"></i> Browse Shop
+          </a>
+        </div>
+
+        <div class="error-links">
+          <p class="error-links-title">Popular Pages</p>
+          <div class="error-links-grid">
+            <a href="/shop?is_new=true" class="error-link">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> New Arrivals
+            </a>
+            <a href="/shop?category=Lingerie" class="error-link">
+              <i class="fa-solid fa-gem"></i> Lingerie
+            </a>
+            <a href="/faq" class="error-link">
+              <i class="fa-solid fa-circle-question"></i> FAQs
+            </a>
+            <a href="/contact" class="error-link">
+              <i class="fa-solid fa-envelope"></i> Contact Us
+            </a>
+            <a href="/track" class="error-link">
+              <i class="fa-solid fa-truck"></i> Track Order
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Apply saved theme
+      (function () {
+        const saved = localStorage.getItem("LBS_THEME");
+        if (saved === "dark")
+          document.documentElement.setAttribute("data-theme", "dark");
+        else if (saved === "light")
+          document.documentElement.setAttribute("data-theme", "light");
+        else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+          document.documentElement.setAttribute("data-theme", "dark");
+        }
+      })();
+    </script>
+  </body>
+</html>

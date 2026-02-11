@@ -29,13 +29,30 @@ build/
 *.key
 .vercel
 
-# Documentation containing API keys / secrets
+# Documentation containing API keys / secrets / setup instructions
 SERVICES_SETUP.md
 EDGE_FUNCTION_DEPLOY.md
 EMAIL_NOTIFICATIONS_SETUP.md
 GOOGLE_LOGIN_SETUP.md
+DEPLOYMENT.md
+ROLE_PERMISSIONS.md
+
+# Database schema / SQL dumps
+*.sql
+supabase/order_email_trigger.sql
+
+# Environment examples
+.env.example
 
 # Supabase local temp files
 supabase/.temp/
 supabase/config.toml
 nul
+
+# Local dev server config
+serve.json
+serve_output.txt
+
+# Build / migration helpers
+_*.css
+_*.js

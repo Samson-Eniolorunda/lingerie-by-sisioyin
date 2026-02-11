@@ -10,9 +10,9 @@ window.APP_CONFIG = {
   // Monnify Payment Gateway Configuration
   // Get your keys from: https://app.monnify.com/
   MONNIFY: {
-    apiKey: "MK_TEST_5YHDBUKFTB", // TODO: Replace with your LIVE Monnify API Key (MK_PROD_...)
-    contractCode: "1485715893", // TODO: Replace with your LIVE Monnify Contract Code
-    isTestMode: false, // LIVE mode — ensure live keys above before accepting payments
+    apiKey: "MK_TEST_5YHDBUKFTB",
+    contractCode: "1485715893",
+    isTestMode: true,
   },
 
   // Brand Name
@@ -50,5 +50,5 @@ window.APP_CONFIG = {
   FB_PIXEL_ID: "3483388498501534",
 
   // Google Maps Places API Key (for address autocomplete)
-  GOOGLE_MAPS_API_KEY: "AIzaSyBFQM1DFdxZRPTLOmj0lP2SWNbJ5eZ1eTU",
+  GOOGLE_MAPS_API_KEY: "AIzaSyBl2_EQgNCC53Z-jRx64ONm6lTxrB6Ak_0",
 };

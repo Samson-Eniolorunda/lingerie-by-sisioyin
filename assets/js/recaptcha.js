@@ -1,72 +1,38 @@
 /**
  * reCAPTCHA Initialization
  * Moved from inline scripts for better code organization
+ * reCAPTCHA is now rendered on-demand (on first form submit), not on page load.
+ * These callbacks are still needed for when reCAPTCHA is rendered by auth.js.
  */
 
-// Callback when login reCAPTCHA is completed
+// Callback when login reCAPTCHA is completed — hide widget smoothly
 function onLoginRecaptchaSuccess() {
-  const loginBtn = document.querySelector('#loginForm button[type="submit"]');
-  if (loginBtn) {
-    loginBtn.disabled = false;
-    loginBtn.classList.remove("btn-disabled");
-  }
+  const field = document.querySelector("#loginForm .recaptcha-field");
+  if (field) field.classList.add("verified");
 }
 
-// Callback when login reCAPTCHA expires
+// Callback when login reCAPTCHA expires — show widget again
 function onLoginRecaptchaExpired() {
-  const loginBtn = document.querySelector('#loginForm button[type="submit"]');
-  if (loginBtn) {
-    loginBtn.disabled = true;
-    loginBtn.classList.add("btn-disabled");
-  }
+  const field = document.querySelector("#loginForm .recaptcha-field");
+  if (field) field.classList.remove("verified");
 }
 
-// Callback when signup reCAPTCHA is completed
+// Callback when signup reCAPTCHA is completed — hide widget smoothly
 function onSignupRecaptchaSuccess() {
-  const signupBtn = document.querySelector('#signupForm button[type="submit"]');
-  if (signupBtn) {
-    signupBtn.disabled = false;
-    signupBtn.classList.remove("btn-disabled");
-  }
+  const field = document.querySelector("#signupForm .recaptcha-field");
+  if (field) field.classList.add("verified");
 }
 
-// Callback when signup reCAPTCHA expires
+// Callback when signup reCAPTCHA expires — show widget again
 function onSignupRecaptchaExpired() {
-  const signupBtn = document.querySelector('#signupForm button[type="submit"]');
-  if (signupBtn) {
-    signupBtn.disabled = true;
-    signupBtn.classList.add("btn-disabled");
-  }
+  const field = document.querySelector("#signupForm .recaptcha-field");
+  if (field) field.classList.remove("verified");
 }
 
 // reCAPTCHA initialization callback - called when reCAPTCHA script loads
+// No longer renders immediately — auth.js renders on first submit attempt
 function onRecaptchaLoad() {
-  const loginRecaptcha = document.getElementById("loginRecaptcha");
-  const signupRecaptcha = document.getElementById("signupRecaptcha");
-
-  if (loginRecaptcha) {
-    try {
-      window.loginRecaptchaWidgetId = grecaptcha.render("loginRecaptcha", {
-        sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
-        callback: onLoginRecaptchaSuccess,
-        "expired-callback": onLoginRecaptchaExpired,
-      });
-    } catch (e) {
-      console.log("Login reCAPTCHA already rendered or error:", e);
-    }
-  }
-
-  if (signupRecaptcha) {
-    try {
-      window.signupRecaptchaWidgetId = grecaptcha.render("signupRecaptcha", {
-        sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
-        callback: onSignupRecaptchaSuccess,
-        "expired-callback": onSignupRecaptchaExpired,
-      });
-    } catch (e) {
-      console.log("Signup reCAPTCHA already rendered or error:", e);
-    }
-  }
+  console.log("reCAPTCHA API loaded and ready");
 }
 
 // Make functions globally available

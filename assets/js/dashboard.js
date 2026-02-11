@@ -13,9 +13,11 @@
   /* ── DOM refs ─────────────────────────────── */
   const gate = $("#authRequired");
   const shell = $("#dashboardLayout");
+  const loading = $("#dashLoading");
   const signInBtn = $("#signInPromptBtn");
   const logoutBtn = $("#logoutBtn");
-  const tabs = $$(".dash-tab[data-section]");
+  const navItems = $$(".dash-tab[data-section]");
+  const bbItems = $$(".dash-bb-item[data-section]");
   const panels = $$(".dash-panel");
   const profileForm = $("#profileForm");
   const orderFilter = $("#orderFilter");
@@ -40,15 +42,27 @@
     return window.DB?.client || null;
   }
 
-  /* ── Pre-check: hide gate instantly if we have a session cookie ── */
+  /* helper: hide loading skeleton */
+  function hideLoading() {
+    if (loading) loading.hidden = true;
+  }
+
+  /* ── Pre-check: hide loading & show shell instantly if we have a session token ── */
   (function preCheck() {
     try {
-      const stored = localStorage.getItem("sb-oriojylsilcsvcsefuux-auth-token");
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed?.currentSession || parsed?.access_token) {
-          gate.style.display = "none";
-          shell.style.display = "block";
+      // Scan for any Supabase auth token in localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("sb-") && key.endsWith("-auth-token")) {
+          const stored = localStorage.getItem(key);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            if (parsed?.currentSession || parsed?.access_token) {
+              hideLoading();
+              shell.hidden = false;
+              return;
+            }
+          }
         }
       }
     } catch (_) {
@@ -99,7 +113,12 @@
 
   /* ── Tab Navigation ──────────────────────── */
   function switchTab(id) {
-    tabs.forEach((t) => t.classList.toggle("active", t.dataset.section === id));
+    navItems.forEach((t) =>
+      t.classList.toggle("active", t.dataset.section === id),
+    );
+    bbItems.forEach((t) =>
+      t.classList.toggle("active", t.dataset.section === id),
+    );
     panels.forEach((p) =>
       p.classList.toggle("active", p.id === `section-${id}`),
     );
@@ -110,31 +129,26 @@
     const id = o.id?.substring(0, 8) || "N/A";
     const status = o.status || "pending";
     const items = Array.isArray(o.items) ? o.items : [];
-    const thumbs = items
-      .slice(0, 4)
-      .map((it) => {
-        const img =
-          it.image ||
-          (Array.isArray(it.images) ? it.images[0] : "") ||
-          "assets/img/placeholder.png";
-        return `<img src="${img}" alt="${it.name || "Item"}" loading="lazy" />`;
-      })
-      .join("");
-    const extra =
-      items.length > 4
-        ? `<span class="dash-order-more">+${items.length - 4}</span>`
-        : "";
+    const count = items.reduce((s, it) => s + (it.quantity || it.qty || 1), 0);
+    const statusIcon = {
+      delivered: "fa-box-open",
+      shipped: "fa-truck-fast",
+      processing: "fa-boxes-stacked",
+      confirmed: "fa-circle-check",
+      pending: "fa-receipt",
+      cancelled: "fa-ban",
+    };
 
     return `
       <article class="dash-order-card">
-        <div class="dash-order-top">
+        <div class="dash-order-icon"><i class="fa-solid ${statusIcon[status] || "fa-receipt"}"></i></div>
+        <div class="dash-order-info">
           <span class="dash-order-id">#${id}</span>
-          <span class="dash-order-date">${fmtDate(o.created_at)}</span>
+          <span class="dash-order-meta">${fmtDate(o.created_at)} · ${count} item${count !== 1 ? "s" : ""}</span>
         </div>
-        <div class="dash-order-thumbs">${thumbs}${extra}</div>
-        <div class="dash-order-bottom">
-          <span class="dash-order-total">${fmtPrice(o.total || 0)}</span>
-          <span class="dash-order-status" data-status="${statusClass(status)}">${status}</span>
+        <div class="dash-order-right">
+          <span class="dash-order-price">${fmtPrice(o.total || 0)}</span>
+          <span class="dash-order-status ${status}">${status}</span>
         </div>
       </article>`;
   }
@@ -182,16 +196,38 @@
   function emptyHTML(icon, msg, shopLink) {
     return `
       <div class="dash-empty">
-        <i class="fa-solid ${icon}"></i>
-        <p>${msg}</p>
-        ${shopLink ? '<a href="/shop" class="dash-empty-btn">Start Shopping</a>' : ""}
+        <div class="dash-empty-icon"><i class="fa-solid ${icon}"></i></div>
+        <h3>${msg}</h3>
+        <p>${shopLink ? "Browse our collection and place your first order." : ""}</p>
+        ${shopLink ? '<a href="/shop" class="dash-btn-primary">Start Shopping</a>' : ""}
       </div>`;
+  }
+
+  /* ── Order/Address skeleton helpers ─── */
+  function orderSkeleton(count) {
+    count = count || 3;
+    var html = "";
+    for (var i = 0; i < count; i++) {
+      html +=
+        '<div class="dash-order-card dash-skel-pulse" style="pointer-events:none">' +
+        '<div style="width:38px;height:38px;border-radius:10px;background:var(--bg-surface-alt)"></div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;gap:6px">' +
+        '<div style="height:12px;width:50%;border-radius:6px;background:var(--bg-surface-alt)"></div>' +
+        '<div style="height:10px;width:35%;border-radius:6px;background:var(--bg-surface-alt)"></div></div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">' +
+        '<div style="height:12px;width:60px;border-radius:6px;background:var(--bg-surface-alt)"></div>' +
+        '<div style="height:10px;width:40px;border-radius:6px;background:var(--bg-surface-alt)"></div></div></div>';
+    }
+    return html;
   }
 
   /* ── Data Loading ────────────────────────── */
   async function loadOrders() {
     const c = client();
     if (!c || !currentUser) return;
+    // Show skeleton on both recent + all orders while loading
+    if (elRecentOrders) elRecentOrders.innerHTML = orderSkeleton(3);
+    if (elAllOrders) elAllOrders.innerHTML = orderSkeleton(4);
     try {
       const { data, error } = await c
         .from("orders")
@@ -229,6 +265,8 @@
     set("profileLastName", parts.slice(1).join(" ") || "");
     set("profileEmail", currentUser.email || "");
     set("profilePhone", meta.phone || "");
+    set("profileDob", meta.dob || "");
+    set("profileGender", meta.gender || "");
   }
 
   async function saveProfile(fd) {
@@ -236,7 +274,12 @@
     if (!c || !currentUser) return;
     try {
       const { error } = await c.auth.updateUser({
-        data: { full_name: fd.fullName, phone: fd.phone },
+        data: {
+          full_name: fd.fullName,
+          phone: fd.phone,
+          dob: fd.dob,
+          gender: fd.gender,
+        },
       });
       if (error) throw error;
       window.UTILS?.toast?.("Profile updated!", "success");
@@ -270,9 +313,10 @@
     if (!addrs.length) {
       grid.innerHTML = `
         <div class="dash-empty">
-          <i class="fa-solid fa-map-marker-alt"></i>
-          <p>No saved addresses</p>
-          <button type="button" class="dash-empty-btn" id="addFirstAddressBtn">Add Address</button>
+          <div class="dash-empty-icon"><i class="fa-regular fa-map"></i></div>
+          <h3>No saved addresses</h3>
+          <p>Add a delivery address for faster checkout.</p>
+          <button type="button" class="dash-empty-add" id="addFirstAddressBtn" title="Add Address"><i class="fa-solid fa-plus"></i></button>
         </div>`;
       // Re-bind the empty-state button
       $("#addFirstAddressBtn")?.addEventListener("click", promptAddress);
@@ -407,13 +451,13 @@
 
   function promptAddress() {
     const overlay = document.createElement("div");
-    overlay.className = "dash-detail-overlay active";
+    overlay.className = "dash-modal-overlay active";
     overlay.innerHTML = `
-      <div class="dash-detail-modal addr-modal">
+      <div class="dash-modal addr-modal">
         <div class="addr-modal-header">
           <div class="addr-modal-icon"><i class="fa-solid fa-map-location-dot"></i></div>
           <h3>Add New Address</h3>
-          <p>Start typing for location suggestions</p>
+          <p>Enter your delivery address details below</p>
           <button type="button" class="addr-modal-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="addr-modal-body">
@@ -434,13 +478,13 @@
               <div class="addr-field">
                 <label><i class="fa-solid fa-city"></i> City *</label>
                 <div class="addr-input-wrap">
-                  <input type="text" id="addrCity" required placeholder="Start typing..." autocomplete="address-level2" />
+                  <input type="text" id="addrCity" required placeholder="e.g. Ikeja" autocomplete="address-level2" />
                 </div>
               </div>
               <div class="addr-field">
                 <label><i class="fa-solid fa-map"></i> State</label>
                 <div class="addr-input-wrap">
-                  <input type="text" id="addrState" placeholder="Start typing..." autocomplete="address-level1" />
+                  <input type="text" id="addrState" placeholder="e.g. Lagos" autocomplete="address-level1" />
                 </div>
               </div>
             </div>
@@ -476,14 +520,39 @@
         autocomplete.addListener("place_changed", () => {
           const place = autocomplete.getPlace();
           if (!place.address_components) return;
-          streetInput.value = place.formatted_address || "";
-          let city = "",
+
+          let streetNumber = "",
+            route = "",
+            neighborhood = "",
+            sublocality = "",
+            city = "",
             state = "";
           place.address_components.forEach((c) => {
-            if (c.types.includes("locality")) city = c.long_name;
-            if (c.types.includes("administrative_area_level_1"))
-              state = c.long_name;
+            const t = c.types;
+            if (t.includes("street_number")) streetNumber = c.long_name;
+            if (t.includes("route")) route = c.long_name;
+            if (t.includes("neighborhood")) neighborhood = c.long_name;
+            if (t.includes("sublocality_level_1") || t.includes("sublocality"))
+              sublocality = c.long_name;
+            if (t.includes("locality")) city = c.long_name;
+            if (t.includes("administrative_area_level_2") && !city)
+              city = c.long_name;
+            if (t.includes("administrative_area_level_1")) state = c.long_name;
           });
+
+          // Build street: number + route, fallback to neighborhood/sublocality
+          let street = "";
+          if (route) {
+            street = streetNumber ? `${streetNumber} ${route}` : route;
+          }
+          if (neighborhood && !street.includes(neighborhood)) {
+            street = street ? `${street}, ${neighborhood}` : neighborhood;
+          }
+          if (sublocality && !street.includes(sublocality)) {
+            street = street ? `${street}, ${sublocality}` : sublocality;
+          }
+
+          if (street) streetInput.value = street;
           if (city) overlay.querySelector("#addrCity").value = city;
           if (state) overlay.querySelector("#addrState").value = state;
         });
@@ -539,25 +608,375 @@
 
   function show(user) {
     currentUser = user;
-    gate.style.display = "none";
-    shell.style.display = "block";
+    // Show a brief login spinner before revealing the dashboard
+    if (loading && !loading.hidden) {
+      loading.innerHTML =
+        '<div class="dash-login-spinner"><div class="dash-login-spinner-ring"></div><p>Setting up your dashboard…</p></div>';
+      setTimeout(function () {
+        hideLoading();
+        gate.hidden = true;
+        shell.hidden = false;
+        finishShow(user);
+      }, 600);
+    } else {
+      hideLoading();
+      gate.hidden = true;
+      shell.hidden = false;
+      finishShow(user);
+    }
+  }
 
+  function finishShow(user) {
     const name =
       user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
     if (elUserName) elUserName.textContent = name;
     if (elUserEmail) elUserEmail.textContent = user.email || "";
-    if (elUserAvatar) elUserAvatar.textContent = (name[0] || "U").toUpperCase();
+    // Avatar: first + last initial
+    const parts = name.trim().split(/\s+/);
+    const initials =
+      parts.length > 1
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : (name[0] || "U").toUpperCase();
+    if (elUserAvatar) elUserAvatar.textContent = initials;
 
     loadProfile();
     loadOrders();
     loadWishlist();
     renderAddresses();
+    initSettings();
+    updateGreeting(name);
   }
 
   function hide() {
     currentUser = null;
-    gate.style.display = "";
-    shell.style.display = "none";
+    hideLoading();
+    gate.hidden = false;
+    shell.hidden = true;
+  }
+
+  /* ── Greeting ────────────────────────── */
+  function updateGreeting(name) {
+    const el = $("#dashGreeting");
+    if (!el) return;
+    const h = new Date().getHours();
+    const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
+    el.textContent = `Good ${tod}, ${name.split(" ")[0]}! Here's your account at a glance.`;
+  }
+
+  /* ── Settings ─────────────────────────── */
+  const SETTINGS_KEY = "LBS_DASH_SETTINGS";
+
+  function getSettings() {
+    try {
+      return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+    } catch (_) {
+      return {};
+    }
+  }
+  function saveSettings(obj) {
+    const merged = { ...getSettings(), ...obj };
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
+  }
+
+  function initSettings() {
+    const prefs = getSettings();
+
+    /* ─── 1. Appearance — Theme dropdown ─── */
+    const themeSelect = $("#dashThemeSelect");
+    if (themeSelect) {
+      const saved = localStorage.getItem("theme") || "system";
+      themeSelect.value = saved;
+      themeSelect.addEventListener("change", () => {
+        const theme = themeSelect.value;
+        if (theme === "system") {
+          localStorage.removeItem("theme");
+          const sys = window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+          document.documentElement.setAttribute("data-theme", sys);
+        } else {
+          localStorage.setItem("theme", theme);
+          document.documentElement.setAttribute("data-theme", theme);
+        }
+        saveSettings({ theme });
+      });
+    }
+
+    /* ─── 1b. Appearance — Text size picker ─── */
+    const sizePicker = $("#dashSizePicker");
+    if (sizePicker) {
+      const currentSize = prefs.textSize || "medium";
+      const sizeMap = { small: "14px", medium: "16px", large: "18px" };
+      document.documentElement.style.fontSize = sizeMap[currentSize] || "16px";
+      sizePicker.querySelectorAll(".dash-size-opt").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.size === currentSize);
+        btn.addEventListener("click", () => {
+          const size = btn.dataset.size;
+          sizePicker
+            .querySelectorAll(".dash-size-opt")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          document.documentElement.style.fontSize = sizeMap[size] || "16px";
+          saveSettings({ textSize: size });
+        });
+      });
+    }
+
+    /* ─── 2. Notification toggles ─── */
+    const notifMap = {
+      notifOrders: { key: "notifOrders", defaultOn: true },
+      notifShipping: { key: "notifShipping", defaultOn: true },
+      notifPromos: { key: "notifPromos", defaultOn: false },
+      notifPriceDrop: { key: "notifPriceDrop", defaultOn: false },
+      notifNewArrivals: { key: "notifNewArrivals", defaultOn: false },
+    };
+    Object.entries(notifMap).forEach(([id, { key, defaultOn }]) => {
+      const el = $(`#${id}`);
+      if (!el) return;
+      el.checked = prefs[key] !== undefined ? prefs[key] : defaultOn;
+      el.addEventListener("change", () => saveSettings({ [key]: el.checked }));
+    });
+
+    /* ─── 3. Communication toggles ─── */
+    const commMap = {
+      commEmail: { key: "commEmail", defaultOn: true },
+      commWhatsApp: { key: "commWhatsApp", defaultOn: false },
+      commSMS: { key: "commSMS", defaultOn: false },
+    };
+    Object.entries(commMap).forEach(([id, { key, defaultOn }]) => {
+      const el = $(`#${id}`);
+      if (!el) return;
+      el.checked = prefs[key] !== undefined ? prefs[key] : defaultOn;
+      el.addEventListener("change", () => saveSettings({ [key]: el.checked }));
+    });
+
+    /* ─── 4. Privacy & Data ─── */
+    const privacyMap = {
+      privacyRecs: { key: "privacyRecs", defaultOn: true },
+      privacyMarketing: { key: "privacyMarketing", defaultOn: false },
+    };
+    Object.entries(privacyMap).forEach(([id, { key, defaultOn }]) => {
+      const el = $(`#${id}`);
+      if (!el) return;
+      el.checked = prefs[key] !== undefined ? prefs[key] : defaultOn;
+      el.addEventListener("change", () => saveSettings({ [key]: el.checked }));
+    });
+
+    // Clear browsing history
+    $("#clearHistoryBtn")?.addEventListener("click", () => {
+      const keys = Object.keys(localStorage).filter(
+        (k) =>
+          k.startsWith("LBS_RECENT") ||
+          k.startsWith("LBS_SEARCH") ||
+          k.startsWith("LBS_BROWSE"),
+      );
+      keys.forEach((k) => localStorage.removeItem(k));
+      window.UTILS?.toast?.("Browsing history cleared", "success");
+    });
+
+    /* ─── 5. Security ─── */
+    // Change password
+    $("#changePasswordBtn")?.addEventListener("click", async () => {
+      const c = client();
+      if (!c || !currentUser?.email) return;
+      const btn = $("#changePasswordBtn");
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+      try {
+        const { error } = await c.auth.resetPasswordForEmail(
+          currentUser.email,
+          {
+            redirectTo: window.location.origin + "/dashboard",
+          },
+        );
+        if (error) throw error;
+        window.UTILS?.toast?.(
+          "Password reset email sent! Check your inbox.",
+          "success",
+        );
+      } catch (e) {
+        window.UTILS?.toast?.(
+          e.message || "Failed to send reset email",
+          "error",
+        );
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    });
+
+    /* ─── 6. Account Management ─── */
+    // Download my data — as a readable text file
+    $("#downloadDataBtn")?.addEventListener("click", async () => {
+      const btn = $("#downloadDataBtn");
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing…';
+      try {
+        const profile = currentUser?.user_metadata || {};
+        const email = currentUser?.email || "";
+        const settings = getSettings();
+        const addresses = JSON.parse(
+          localStorage.getItem("LBS_ADDRESSES") || "[]",
+        );
+        const date = new Date().toLocaleDateString("en-NG", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+        let txt = "╔══════════════════════════════════════════╗\n";
+        txt += "║    LINGERIE BY SISIOYIN — MY DATA        ║\n";
+        txt += "╚══════════════════════════════════════════╝\n\n";
+        txt += "Exported: " + date + "\n\n";
+
+        txt += "── PROFILE ──────────────────────────────\n";
+        txt += "Name:    " + (profile.full_name || "N/A") + "\n";
+        txt += "Email:   " + email + "\n";
+        txt += "Phone:   " + (profile.phone || "N/A") + "\n";
+        txt += "DOB:     " + (profile.dob || "N/A") + "\n";
+        txt += "Gender:  " + (profile.gender || "N/A") + "\n\n";
+
+        txt += "── SETTINGS ─────────────────────────────\n";
+        Object.entries(settings).forEach(function (pair) {
+          txt += pair[0] + ": " + pair[1] + "\n";
+        });
+        txt += "\n";
+
+        txt += "── SAVED ADDRESSES (" + addresses.length + ") ──────────────\n";
+        addresses.forEach(function (a, i) {
+          txt += "\n  Address " + (i + 1) + ":\n";
+          txt += "    Label:   " + (a.label || "N/A") + "\n";
+          txt += "    Street:  " + (a.street || "N/A") + "\n";
+          txt += "    City:    " + (a.city || "N/A") + "\n";
+          txt += "    State:   " + (a.state || "N/A") + "\n";
+          txt += "    Phone:   " + (a.phone || "N/A") + "\n";
+        });
+        txt += "\n";
+
+        txt += "── ORDERS (" + orders.length + ") ───────────────────────\n";
+        orders.forEach(function (o) {
+          txt +=
+            "\n  Order #" + (o.order_number || o.id?.substring(0, 8)) + "\n";
+          txt += "    Status:  " + (o.status || "pending") + "\n";
+          txt += "    Date:    " + fmtDate(o.created_at) + "\n";
+          txt += "    Total:   " + fmtPrice(o.total || 0) + "\n";
+          var items = Array.isArray(o.items) ? o.items : [];
+          items.forEach(function (it) {
+            txt +=
+              "    - " +
+              (it.name || "Item") +
+              " x" +
+              (it.quantity || it.qty || 1) +
+              "\n";
+          });
+        });
+
+        txt += "\n── END OF DATA ──────────────────────────\n";
+
+        var blob = new Blob([txt], { type: "text/plain" });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url;
+        a.download =
+          "LBS_MyData_" + new Date().toISOString().slice(0, 10) + ".txt";
+        a.click();
+        URL.revokeObjectURL(url);
+        window.UTILS?.toast?.("Data downloaded successfully", "success");
+      } catch (e) {
+        window.UTILS?.toast?.("Failed to export data", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    });
+
+    // Deactivate account
+    $("#deactivateBtn")?.addEventListener("click", async () => {
+      const ok = confirm(
+        "Are you sure you want to deactivate your account?\n\nYour account will be disabled but your data will be preserved. You can reactivate by signing in again.",
+      );
+      if (!ok) return;
+      const c = client();
+      if (!c) return;
+      try {
+        await c.auth.updateUser({
+          data: { deactivated: true, deactivated_at: new Date().toISOString() },
+        });
+        window.UTILS?.toast?.(
+          "Account deactivated. You can reactivate by signing in.",
+          "info",
+        );
+        if (window.AUTH?.logout) {
+          await window.AUTH.logout();
+          hide();
+        }
+      } catch (e) {
+        window.UTILS?.toast?.(
+          e.message || "Failed to deactivate account",
+          "error",
+        );
+      }
+    });
+
+    /* ─── 7. Danger Zone ─── */
+    // Sign out (second button in settings)
+    $("#logoutBtn2")?.addEventListener("click", async () => {
+      if (window.AUTH?.logout) {
+        await window.AUTH.logout();
+        hide();
+      }
+    });
+
+    // Delete account
+    $("#deleteAccountBtn")?.addEventListener("click", async () => {
+      const ok = confirm(
+        "⚠️ DELETE ACCOUNT PERMANENTLY\n\nThis will permanently delete your account and all associated data. This action CANNOT be undone.\n\nAre you absolutely sure?",
+      );
+      if (!ok) return;
+      const doubleConfirm = prompt(
+        'Type "DELETE" to confirm permanent account deletion:',
+      );
+      if (doubleConfirm !== "DELETE") {
+        window.UTILS?.toast?.("Account deletion cancelled", "info");
+        return;
+      }
+      const c = client();
+      if (!c) return;
+      const btn = $("#deleteAccountBtn");
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting…';
+      try {
+        // Mark account for deletion in metadata
+        await c.auth.updateUser({
+          data: {
+            deletion_requested: true,
+            deletion_requested_at: new Date().toISOString(),
+          },
+        });
+        // Clear all local data
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("LBS_"))
+          .forEach((k) => localStorage.removeItem(k));
+        window.UTILS?.toast?.(
+          "Account deletion requested. You will receive a confirmation email.",
+          "success",
+        );
+        setTimeout(async () => {
+          if (window.AUTH?.logout) {
+            await window.AUTH.logout();
+            hide();
+          }
+          window.location.href = "/home";
+        }, 2000);
+      } catch (e) {
+        window.UTILS?.toast?.(e.message || "Failed to delete account", "error");
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    });
   }
 
   /* ── Live Order Tracking UI ──────────── */
@@ -763,7 +1182,10 @@
       }
     });
 
-    tabs.forEach((t) =>
+    navItems.forEach((t) =>
+      t.addEventListener("click", () => switchTab(t.dataset.section)),
+    );
+    bbItems.forEach((t) =>
       t.addEventListener("click", () => switchTab(t.dataset.section)),
     );
 
@@ -786,6 +1208,8 @@
         fullName:
           `${$("#profileFirstName")?.value || ""} ${$("#profileLastName")?.value || ""}`.trim(),
         phone: $("#profilePhone")?.value || "",
+        dob: $("#profileDob")?.value || "",
+        gender: $("#profileGender")?.value || "",
       });
       btn.disabled = false;
       btn.innerHTML = orig;

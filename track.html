@@ -10,6 +10,7 @@
     />
     <meta name="robots" content="noindex, follow" />
     <meta name="theme-color" content="#be185d" />
+    <meta name="color-scheme" content="light dark" />
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
@@ -36,17 +37,23 @@
 
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader-inner">
+        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <p class="page-loader-text"><span></span></p>
+      </div>
+    </div>
 
     <!-- HEADER -->
     <header class="header" id="siteHeader">
       <div class="header-inner">
-        <a href="/" class="logo">
+        <a href="/home" class="logo">
           <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
         <nav class="nav" id="mainNav">
-          <a href="/" class="nav-link">Home</a>
+          <a href="/home" class="nav-link">Home</a>
           <a href="/shop" class="nav-link">Shop</a>
           <a href="/shop?gender=Women" class="nav-link">Women</a>
           <a href="/shop?gender=Men" class="nav-link">Men</a>
@@ -122,12 +129,58 @@
       </div>
     </main>
 
+    <!-- Cart Drawer -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="/shop" class="btn btn-primary">Start Shopping</a>
+          </div>
+        </div>
+        <div class="cd-footer u-hidden" id="cartDrawerFooter">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="/checkout" class="cd-checkout-btn"
+            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
+          >
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- FOOTER -->
     <footer class="footer">
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a href="/" class="logo">
+            <a href="/home" class="logo">
               <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
@@ -135,6 +188,29 @@
               Luxe essentials defined by comfort and confidence. Premium
               lingerie and loungewear for the modern woman.
             </p>
+            <div class="footer-social">
+              <a
+                href="https://instagram.com/lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a
+                href="https://tiktok.com/@lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                ><i class="fa-brands fa-tiktok"></i
+              ></a>
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                ><i class="fa-brands fa-whatsapp"></i
+              ></a>
+            </div>
           </div>
           <div>
             <h4 class="footer-title">Shop</h4>
@@ -168,6 +244,32 @@
             &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
             rights reserved.
           </p>
+          <div id="themeToggle">
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="light"
+              aria-label="Light mode"
+            >
+              <i class="fa-solid fa-sun"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="system"
+              aria-label="System theme"
+            >
+              <i class="fa-solid fa-desktop"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="dark"
+              aria-label="Dark mode"
+            >
+              <i class="fa-solid fa-moon"></i>
+            </button>
+          </div>
         </div>
       </div>
     </footer>

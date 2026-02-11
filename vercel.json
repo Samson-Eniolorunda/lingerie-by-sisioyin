@@ -1,9 +1,9 @@
 {
+  "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
-  "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" }
-  ],
+  "redirects": [{ "source": "/", "destination": "/home", "permanent": true }],
+  "rewrites": [{ "source": "/admin", "destination": "/admin.html" }],
   "headers": [
     {
       "source": "/(.*)",
@@ -19,6 +19,22 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=(self), payment=(self)"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "X-DNS-Prefetch-Control",
+          "value": "on"
         }
       ]
     },

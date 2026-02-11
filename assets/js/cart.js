@@ -107,9 +107,7 @@
     }
 
     // Toggle checkout progress visibility + breadcrumb link
-    const progressSection = document.querySelector(
-      ".checkout-progress-section",
-    );
+    const progressSection = document.querySelector(".ck-progress");
     const breadcrumbCheckout = document.querySelector(
       '.breadcrumb a[href="/checkout"]',
     );
@@ -167,7 +165,7 @@
         const vid = window.UTILS?.safeText?.(item.variantId) || item.variantId;
 
         return `
-        <article class="cart-item" data-variant-id="${vid}">
+        <article class="cart-item" data-variant-id="${vid}" data-product-id="${item.id || ""}">
           <div class="cart-item-image">
             <img src="${img}" alt="${name}" loading="lazy">
           </div>
@@ -181,9 +179,12 @@
                   ${color ? `<span><i class="fa-solid fa-palette"></i> ${color}</span>` : ""}
                 </div>
               </div>
-              <button type="button" class="cart-item-remove" data-action="remove" aria-label="Remove item">
-                <i class="fas fa-trash-alt"></i>
-              </button>
+              <div class="cart-item-header-actions">
+                <a href="/shop?product=${item.id || ""}" class="cart-item-edit" data-action="edit" aria-label="Edit item"><i class="fa-solid fa-pen-to-square"></i></a>
+                <button type="button" class="cart-item-remove" data-action="remove" aria-label="Remove item">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
             </div>
             
             <div class="cart-item-footer">

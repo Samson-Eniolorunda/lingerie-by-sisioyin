@@ -40,6 +40,7 @@
   let modalSelectedColor = "";
   let modalQty = 1;
   let modalImages = [];
+  let modalEditIdx = null; // Index of cart item being edited (null = add mode)
   let currentImageIndex = 0;
   let isInitializing = true; // Flag to ignore change events during init
   let activeFilters = {
@@ -484,12 +485,47 @@
   }
 
   // Modal
-  function openModal(product) {
-    if (!productModal || !product) return;
+  async function openModal(productOrId) {
+    if (!productModal) return;
+
+    let product = productOrId;
+
+    // If passed a productId (string/number), fetch the product
+    if (typeof productOrId === "string" || typeof productOrId === "number") {
+      const client = window.supabaseClient || window.DB?.client;
+      if (!client) {
+        console.error("SHOP: No database client for fetching product");
+        return;
+      }
+      const { data, error } = await client
+        .from("products")
+        .select("*")
+        .eq("id", productOrId)
+        .maybeSingle();
+      if (error || !data) {
+        console.error("SHOP: Failed to fetch product:", error);
+        return;
+      }
+      product = data;
+    }
+
+    if (!product) return;
     modalProduct = product;
-    modalSelectedSize = "";
-    modalSelectedColor = "";
-    modalQty = 1;
+
+    // Check for edit mode
+    const editRaw = sessionStorage.getItem("LBS_EDIT_ITEM");
+    let editItem = null;
+    if (editRaw) {
+      try {
+        editItem = JSON.parse(editRaw);
+      } catch (_) {}
+      sessionStorage.removeItem("LBS_EDIT_ITEM");
+    }
+
+    modalSelectedSize = editItem?.selectedSize || "";
+    modalSelectedColor = editItem?.selectedColor || "";
+    modalQty = editItem?.qty || 1;
+    modalEditIdx = editItem ? editItem.idx : null;
     currentImageIndex = 0;
 
     modalImages = parseArray(product.images);
@@ -614,20 +650,14 @@
               <div class="qm-qty-row">
                 <div class="qm-qty">
                   <button id="qmQtyMinus"><i class="fa-solid fa-minus"></i></button>
-                  <input type="number" id="qmQtyInput" value="1" min="1" max="99" />
+                  <input type="number" id="qmQtyInput" value="${modalQty}" min="1" max="99" />
                   <button id="qmQtyPlus"><i class="fa-solid fa-plus"></i></button>
                 </div>
-                <button class="qm-scroll-indicator" id="qmScrollIndicator" title="Scroll for more">
-                  <i class="fa-solid fa-chevron-down"></i>
-                </button>
-                <button class="qm-scroll-top" id="qmScrollTop" title="Scroll to Top">
-                  <i class="fa-solid fa-chevron-down"></i>
-                </button>
               </div>
             </div>
 
             <div class="qm-actions">
-              <button class="qm-add-cart" id="qmAddCart" ${!inStock ? "disabled" : ""}><i class="fa-solid fa-bag-shopping"></i> Add to Cart</button>
+              <button class="qm-add-cart" id="qmAddCart" ${!inStock ? "disabled" : ""}><i class="fa-solid fa-bag-shopping"></i> ${editItem ? "Update Cart" : "Add to Cart"}</button>
               <button class="qm-wish" id="qmWish"><i class="fa-regular fa-heart"></i></button>
             </div>
 
@@ -676,13 +706,40 @@
       </div>
     `;
 
-    if (showColors && colors.length) {
+    if (showColors && colors.length && !editItem) {
       // No pre-selection — user must choose a color
       modalSelectedColor = "";
     }
     productModal.hidden = false;
     document.body.style.overflow = "hidden";
     setupModalEvents();
+
+    // Pre-select size/color in edit mode
+    if (editItem) {
+      if (modalSelectedSize) {
+        const sizeBtn = productModal.querySelector(
+          `.qm-size[data-size="${modalSelectedSize}"]`,
+        );
+        if (sizeBtn) {
+          productModal
+            .querySelectorAll(".qm-size")
+            .forEach((s) => s.classList.remove("active"));
+          sizeBtn.classList.add("active");
+        }
+      }
+      if (modalSelectedColor) {
+        const colorBtn = productModal.querySelector(
+          `.qm-color[data-color="${modalSelectedColor}"]`,
+        );
+        if (colorBtn) {
+          productModal
+            .querySelectorAll(".qm-color")
+            .forEach((c) => c.classList.remove("active"));
+          colorBtn.classList.add("active");
+        }
+      }
+    }
+
     loadProductReviews(product.id);
     checkCanReview(product.id);
   }
@@ -868,56 +925,8 @@
     const addCart = $("#qmAddCart");
     const wish = $("#qmWish");
     const copyLink = $("#qmCopyLink");
-    const scrollTop = $("#qmScrollTop");
-    const scrollIndicator = $("#qmScrollIndicator");
-    const details = productModal?.querySelector(".qm-details");
 
     close?.addEventListener("click", closeModal);
-
-    // Scroll-to-top button functionality (desktop only)
-    if (scrollTop && details) {
-      scrollTop.addEventListener("click", () => {
-        details.scrollTo({ top: 0, behavior: "smooth" });
-      });
-
-      const checkScrollForTop = () => {
-        if (details.scrollTop > 100) {
-          scrollTop.classList.add("visible");
-        } else {
-          scrollTop.classList.remove("visible");
-        }
-      };
-
-      details.addEventListener("scroll", checkScrollForTop);
-      setTimeout(checkScrollForTop, 100);
-    }
-
-    // Scroll indicator functionality
-    if (scrollIndicator && details) {
-      // Click to scroll down
-      scrollIndicator.addEventListener("click", () => {
-        details.scrollBy({ top: 150, behavior: "smooth" });
-      });
-
-      // Hide when scrolled near bottom or if no scroll needed
-      const checkScroll = () => {
-        const isScrollable = details.scrollHeight > details.clientHeight;
-        const isNearBottom =
-          details.scrollTop + details.clientHeight >= details.scrollHeight - 50;
-
-        if (!isScrollable || isNearBottom) {
-          scrollIndicator.style.opacity = "0";
-          scrollIndicator.style.pointerEvents = "none";
-        } else {
-          scrollIndicator.style.opacity = "1";
-          scrollIndicator.style.pointerEvents = "auto";
-        }
-      };
-
-      details.addEventListener("scroll", checkScroll);
-      // Initial check after a short delay to allow content to render
-      setTimeout(checkScroll, 100);
-    }
 
     const updateImage = () => {
       if (mainImg) mainImg.src = modalImages[currentImageIndex];
@@ -1128,7 +1137,20 @@
         image: getFirstImage(modalProduct.images),
         qty: modalQty,
       };
-      window.APP?.addToCart?.(item);
+
+      if (modalEditIdx !== null) {
+        // Update mode — replace item at the stored index
+        const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
+        if (cart[modalEditIdx]) {
+          cart[modalEditIdx] = item;
+          localStorage.setItem("LBS_CART_V1", JSON.stringify(cart));
+          window.dispatchEvent(new Event("cartUpdated"));
+          toast("Cart updated!", "success");
+        }
+        modalEditIdx = null;
+      } else {
+        window.APP?.addToCart?.(item);
+      }
       closeModal();
       openCartDrawer();
     });
@@ -1439,8 +1461,11 @@
               <button type="button" class="cd-qty-btn cd-qty-plus" data-idx="${idx}"><i class="fa-solid fa-plus"></i></button>
             </div>
           </div>
+          <div class="cd-item-actions">
+            <button type="button" class="cd-item-edit" data-idx="${idx}" data-product-id="${item.id || ""}" aria-label="Edit item" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button type="button" class="cd-item-remove" data-idx="${idx}" aria-label="Remove item" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
         </div>
-        <button type="button" class="cd-item-remove" data-idx="${idx}" aria-label="Remove item"><i class="fa-solid fa-trash-can"></i></button>
       `;
       cartDrawerBody?.insertBefore(itemEl, cartEmpty);
     });
@@ -1489,6 +1514,7 @@
     const minusBtn = e.target.closest(".cd-qty-minus");
     const plusBtn = e.target.closest(".cd-qty-plus");
     const removeBtn = e.target.closest(".cd-item-remove");
+    const editBtn = e.target.closest(".cd-item-edit");
 
     if (minusBtn) {
       updateCartItemQty(parseInt(minusBtn.dataset.idx, 10), -1);
@@ -1496,6 +1522,18 @@
       updateCartItemQty(parseInt(plusBtn.dataset.idx, 10), 1);
     } else if (removeBtn) {
       removeCartItem(parseInt(removeBtn.dataset.idx, 10));
+    } else if (editBtn) {
+      const idx = parseInt(editBtn.dataset.idx, 10);
+      const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
+      const item = cart[idx];
+      if (!item) return;
+      // Store edit info so openModal can pre-fill
+      sessionStorage.setItem("LBS_EDIT_ITEM", JSON.stringify({ idx, ...item }));
+      closeCartDrawer();
+      const productId = editBtn.dataset.productId || item.id;
+      if (productId) {
+        openModal(productId);
+      }
     }
   });
 
@@ -1867,6 +1905,9 @@
     applyURLParams();
     syncCheckboxesToFilters();
 
+    // Export openModal globally so other pages (home, wishlist) can use it
+    window.SHOP = { openModal, closeModal };
+
     let attempts = 0;
     while (!window.DB?.isReady && attempts < 20) {
       await new Promise((r) => setTimeout(r, 200));
@@ -1888,6 +1929,14 @@
       syncCheckboxesToFilters();
       applyFilters();
     }, 100);
+
+    // Auto-open product modal if ?product= param is present (from cart/drawer edit links)
+    const urlProduct = new URLSearchParams(window.location.search).get(
+      "product",
+    );
+    if (urlProduct) {
+      setTimeout(() => openModal(urlProduct), 400);
+    }
 
     console.log("✅ SHOP: Ready");
   }

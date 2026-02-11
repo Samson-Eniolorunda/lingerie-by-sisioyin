@@ -4976,6 +4976,7 @@ html[data-theme="dark"] {
   font-weight: 500;
   transition: all var(--transition-fast);
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* Remove browser default number spinners */
@@ -5332,6 +5333,7 @@ html[data-theme="dark"] {
   font-size: var(--text-sm);
   background: var(--bg-surface);
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .variant-qty-control .variant-qty-input::-webkit-outer-spin-button,
@@ -6304,9 +6306,9 @@ html[data-theme="dark"] {
 /* ── #23: Admin dropdown overflow + unified arrow style ── */
 .form-select,
 select {
-  appearance: none;
   -webkit-appearance: none;
   -moz-appearance: none;
+  appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
@@ -6552,7 +6554,6 @@ select {
 .analytics-table-wrap,
 .table-responsive {
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* Customers view */
@@ -6687,8 +6688,8 @@ select {
   background-position: right 12px center;
   background-repeat: no-repeat;
   padding-right: 36px;
-  appearance: none;
   -webkit-appearance: none;
+  appearance: none;
 }
 
 /* =============================================================================
@@ -7000,6 +7001,10 @@ select {
    ============================================================================= */
 .export-dropdown {
   position: relative;
+}
+.export-chevron {
+  font-size: 10px;
+  margin-left: 4px;
 }
 .export-menu {
   position: absolute;

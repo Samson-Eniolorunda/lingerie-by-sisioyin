@@ -11,6 +11,11 @@
   const $ = (sel) => document.querySelector(sel);
   const $$ = (sel) => document.querySelectorAll(sel);
 
+  /** Validate email format */
+  function isValidEmail(email) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  }
+
   /* ─────────────────────────────────────────────
    * DOM Elements
    * ───────────────────────────────────────────── */
@@ -63,7 +68,7 @@
     if (!group) return;
 
     const reqBox = document.createElement("div");
-    reqBox.className = "password-requirements visible"; // Always visible when on signup tab
+    reqBox.className = "password-requirements"; // Hidden by default, shown on typing
     reqBox.innerHTML = `
       <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwStrengthFill"></div></div>
       <ul class="pw-rules">
@@ -75,12 +80,21 @@
       </ul>`;
     group.after(reqBox);
 
-    // Live validation as user types
-    pwField.addEventListener("input", () =>
-      checkPasswordStrength(pwField.value),
-    );
-    // Always show requirements when signup tab is active
-    pwField.addEventListener("focus", () => reqBox.classList.add("visible"));
+    // Live validation as user types — show requirements only while typing
+    pwField.addEventListener("input", () => {
+      if (pwField.value.length > 0) {
+        reqBox.classList.add("visible");
+      } else {
+        reqBox.classList.remove("visible");
+      }
+      checkPasswordStrength(pwField.value);
+    });
+    pwField.addEventListener("blur", () => {
+      // Hide after a short delay if password meets all requirements or is empty
+      setTimeout(() => {
+        if (!pwField.value.length) reqBox.classList.remove("visible");
+      }, 200);
+    });
   }
 
   function checkPasswordStrength(pw) {
@@ -122,53 +136,31 @@
     document.body.style.overflow = "hidden";
     switchTab(tab);
 
-    // Disable submit buttons initially
-    const loginBtn = document.querySelector('#loginForm button[type="submit"]');
-    const signupBtn = document.querySelector(
+    // Reset reCAPTCHA visibility — hidden by CSS, shown via .visible class
+    const loginRecaptchaField = loginForm?.querySelector(".recaptcha-field");
+    const signupRecaptchaField = signupForm?.querySelector(".recaptcha-field");
+    if (loginRecaptchaField) {
+      loginRecaptchaField.classList.remove("visible", "verified");
+    }
+    if (signupRecaptchaField) {
+      signupRecaptchaField.classList.remove("visible", "verified");
+    }
+
+    // Enable submit buttons
+    const loginSubmitBtn = document.querySelector(
+      '#loginForm button[type="submit"]',
+    );
+    const signupSubmitBtn = document.querySelector(
       '#signupForm button[type="submit"]',
     );
-    if (loginBtn) {
-      loginBtn.disabled = true;
-      loginBtn.classList.add("btn-disabled");
+    if (loginSubmitBtn) {
+      loginSubmitBtn.disabled = false;
+      loginSubmitBtn.classList.remove("btn-disabled");
     }
-    if (signupBtn) {
-      signupBtn.disabled = true;
-      signupBtn.classList.add("btn-disabled");
+    if (signupSubmitBtn) {
+      signupSubmitBtn.disabled = false;
+      signupSubmitBtn.classList.remove("btn-disabled");
     }
-
-    // Re-render reCAPTCHA after modal is visible
-    setTimeout(() => {
-      if (window.grecaptcha) {
-        try {
-          const loginRecaptcha = document.getElementById("loginRecaptcha");
-          const signupRecaptcha = document.getElementById("signupRecaptcha");
-
-          // Only render if not already rendered
-          if (loginRecaptcha && !loginRecaptcha.hasChildNodes()) {
-            window.loginRecaptchaWidgetId = grecaptcha.render(
-              "loginRecaptcha",
-              {
-                sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
-                callback: window.onLoginRecaptchaSuccess,
-                "expired-callback": window.onLoginRecaptchaExpired,
-              },
-            );
-          }
-          if (signupRecaptcha && !signupRecaptcha.hasChildNodes()) {
-            window.signupRecaptchaWidgetId = grecaptcha.render(
-              "signupRecaptcha",
-              {
-                sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
-                callback: window.onSignupRecaptchaSuccess,
-                "expired-callback": window.onSignupRecaptchaExpired,
-              },
-            );
-          }
-        } catch (e) {
-          console.log("🔐 AUTH: reCAPTCHA render error:", e);
-        }
-      }
-    }, 100);
   }
 
   function closeAuthModal() {
@@ -261,6 +253,19 @@
 
       if (error) throw error;
 
+      // Supabase returns a user with empty identities if the email is already registered
+      if (
+        data?.user &&
+        (!data.user.identities || data.user.identities.length === 0)
+      ) {
+        window.UTILS?.toast?.(
+          "An account with this email already exists. Please sign in instead.",
+          "error",
+        );
+        switchTab("login");
+        return;
+      }
+
       console.log("🔐 AUTH: Signup successful");
       window.UTILS?.toast?.(
         "Account created! Please check your email to verify.",
@@ -300,9 +305,6 @@
         provider: "google",
         options: {
           redirectTo: window.location.origin,
-          queryParams: {
-            prompt: "select_account",
-          },
         },
       });
 
@@ -314,25 +316,43 @@
   }
 
   /* ─────────────────────────────────────────────
-   * Forgot Password
+   * Forgot Password Modal
    * ───────────────────────────────────────────── */
-  async function handleForgotPassword() {
-    const email = loginForm?.querySelector('[name="email"]')?.value?.trim();
-    if (!email) {
-      window.UTILS?.toast?.("Please enter your email address first", "warning");
-      return;
-    }
+  function openForgotModal() {
+    const backdrop = document.getElementById("forgotBackdrop");
+    const modal = document.getElementById("forgotModal");
+    if (!backdrop || !modal) return;
 
+    // Reset to form state (not success)
+    const formView = modal.querySelector(".forgot-form-view");
+    const successView = modal.querySelector(".forgot-success-view");
+    if (formView) formView.style.display = "";
+    if (successView) successView.style.display = "none";
+
+    // Pre-fill email from login form if available
+    const loginEmail = loginForm
+      ?.querySelector('[name="email"]')
+      ?.value?.trim();
+    const forgotEmail = document.getElementById("forgotEmail");
+    if (forgotEmail && loginEmail) forgotEmail.value = loginEmail;
+
+    backdrop.classList.add("active");
+    modal.classList.add("active");
+    setTimeout(() => forgotEmail?.focus(), 300);
+  }
+
+  function closeForgotModal() {
+    const backdrop = document.getElementById("forgotBackdrop");
+    const modal = document.getElementById("forgotModal");
+    backdrop?.classList.remove("active");
+    modal?.classList.remove("active");
+  }
+
+  async function handleForgotPassword(email) {
     const client = getClient();
     if (!client) {
       window.UTILS?.toast?.("Authentication service unavailable", "error");
-      return;
-    }
-
-    const forgotBtn = document.getElementById("forgotPasswordLink");
-    if (forgotBtn) {
-      forgotBtn.textContent = "Sending...";
-      forgotBtn.style.pointerEvents = "none";
+      return false;
     }
 
     try {
@@ -341,22 +361,14 @@
       });
 
       if (error) throw error;
-
-      window.UTILS?.toast?.(
-        "Password reset link sent! Check your email.",
-        "success",
-      );
+      return true;
     } catch (err) {
       console.error("🔐 AUTH: Forgot password error:", err);
       window.UTILS?.toast?.(
         err.message || "Failed to send reset link",
         "error",
       );
-    } finally {
-      if (forgotBtn) {
-        forgotBtn.textContent = "Forgot password?";
-        forgotBtn.style.pointerEvents = "";
-      }
+      return false;
     }
   }
 
@@ -513,21 +525,119 @@
       tab.addEventListener("click", () => switchTab(tab.dataset.tab));
     });
 
-    // Login form
+    // ─── Login reCAPTCHA: show when user interacts or has saved credentials ───
+    let loginRecaptchaRendered = false;
+    const loginPasswordInput = loginForm?.querySelector('[name="password"]');
+
+    function showLoginRecaptcha() {
+      if (!loginForm) return;
+      const field = loginForm.querySelector(".recaptcha-field");
+      if (field) {
+        field.classList.add("visible");
+        field.classList.remove("verified");
+      }
+      // Render reCAPTCHA widget on first reveal
+      if (!loginRecaptchaRendered) {
+        const el = document.getElementById("loginRecaptcha");
+        if (el && !el.hasChildNodes() && window.grecaptcha) {
+          try {
+            window.loginRecaptchaWidgetId = grecaptcha.render(
+              "loginRecaptcha",
+              {
+                sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
+                callback: window.onLoginRecaptchaSuccess,
+                "expired-callback": window.onLoginRecaptchaExpired,
+              },
+            );
+          } catch (err) {
+            console.log("reCAPTCHA render error:", err);
+          }
+        }
+        loginRecaptchaRendered = true;
+      }
+    }
+
+    // Show reCAPTCHA on any interaction with login fields
+    if (loginPasswordInput) {
+      loginPasswordInput.addEventListener("input", () => {
+        if (loginPasswordInput.value.length > 0) showLoginRecaptcha();
+      });
+      loginPasswordInput.addEventListener("focus", showLoginRecaptcha);
+    }
+    if (loginEmailInput) {
+      loginEmailInput.addEventListener("focus", () => {
+        // Delayed check — if password already has autofilled value
+        setTimeout(() => {
+          if (loginPasswordInput?.value?.length > 0) showLoginRecaptcha();
+        }, 100);
+      });
+    }
+
+    // Detect browser-autofilled credentials and show reCAPTCHA
+    function checkAutofill() {
+      if (!loginForm) return;
+      try {
+        const pwAutoFilled = loginPasswordInput?.matches?.(":-webkit-autofill");
+        if (pwAutoFilled) {
+          showLoginRecaptcha();
+          return;
+        }
+      } catch (_) {
+        /* selector not supported */
+      }
+      if (loginPasswordInput?.value?.length > 0) {
+        showLoginRecaptcha();
+      }
+    }
+
+    // Check multiple times since autofill timing varies by browser
+    if (loginForm) {
+      const autofillTimers = [100, 300, 600, 1200, 2500];
+      autofillTimers.forEach((ms) => setTimeout(checkAutofill, ms));
+      // Also check when modal opens
+      const origOpen = openAuthModal;
+      openAuthModal = function (tab) {
+        origOpen(tab);
+        if (tab === "login" || !tab) {
+          autofillTimers.forEach((ms) => setTimeout(checkAutofill, ms));
+        }
+      };
+    }
+
+    // Login form submit
     if (loginForm) {
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const email = loginForm.querySelector('[name="email"]')?.value;
+        const email = loginForm.querySelector('[name="email"]')?.value?.trim();
         const password = loginForm.querySelector('[name="password"]')?.value;
+
+        if (!email || !isValidEmail(email)) {
+          window.UTILS?.toast?.("Please enter a valid email address", "error");
+          return;
+        }
+
+        if (!password) {
+          window.UTILS?.toast?.("Please enter your password", "error");
+          return;
+        }
 
         // Developer bypass - skip recaptcha for specific accounts
         if (!isDevEmail(email)) {
-          // Verify reCAPTCHA for non-dev accounts
+          // If reCAPTCHA hasn't been shown yet, show it and prompt user
+          if (!loginRecaptchaRendered) {
+            showLoginRecaptcha();
+            window.UTILS?.toast?.(
+              "Please complete the reCAPTCHA verification",
+              "error",
+            );
+            return;
+          }
           const recaptchaResponse = window.grecaptcha?.getResponse(
             window.loginRecaptchaWidgetId,
           );
           if (!recaptchaResponse) {
+            showLoginRecaptcha();
             window.UTILS?.toast?.(
               "Please complete the reCAPTCHA verification",
               "error",
@@ -543,36 +653,83 @@
             '<i class="fa-solid fa-spinner fa-spin"></i> Signing in...';
           await handleLogin(email, password);
           btn.disabled = false;
-          btn.innerHTML = "Sign In";
-          // Reset reCAPTCHA after submission
+          btn.innerHTML =
+            '<span>Sign In</span><i class="fa-solid fa-arrow-right"></i>';
           window.grecaptcha?.reset(window.loginRecaptchaWidgetId);
         }
       });
     }
 
-    // Signup form
+    // ─── Signup reCAPTCHA: show when user types in confirm password ───
+    let signupRecaptchaRendered = false;
+    const signupConfirmInput = signupForm?.querySelector(
+      '[name="confirmPassword"]',
+    );
+    if (signupConfirmInput) {
+      signupConfirmInput.addEventListener("input", () => {
+        if (signupConfirmInput.value.length > 0) {
+          // Hide password requirements
+          const reqBox = document.querySelector(".password-requirements");
+          if (reqBox) reqBox.classList.remove("visible");
+
+          // Show reCAPTCHA with animation
+          const field = signupForm.querySelector(".recaptcha-field");
+          if (field && !field.classList.contains("visible")) {
+            field.classList.add("visible");
+            if (!signupRecaptchaRendered) {
+              const el = document.getElementById("signupRecaptcha");
+              if (el && !el.hasChildNodes() && window.grecaptcha) {
+                try {
+                  window.signupRecaptchaWidgetId = grecaptcha.render(
+                    "signupRecaptcha",
+                    {
+                      sitekey: "6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l",
+                      callback: window.onSignupRecaptchaSuccess,
+                      "expired-callback": window.onSignupRecaptchaExpired,
+                    },
+                  );
+                } catch (err) {
+                  console.log("reCAPTCHA render error:", err);
+                }
+              }
+              signupRecaptchaRendered = true;
+            }
+          }
+        }
+      });
+    }
+
+    // Signup form submit
     if (signupForm) {
       signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        // Verify reCAPTCHA
-        const recaptchaResponse = window.grecaptcha?.getResponse(
-          window.signupRecaptchaWidgetId,
-        );
-        if (!recaptchaResponse) {
-          window.UTILS?.toast?.(
-            "Please complete the reCAPTCHA verification",
-            "error",
-          );
-          return;
-        }
-
         const fullName = signupForm.querySelector('[name="fullName"]')?.value;
-        const email = signupForm.querySelector('[name="email"]')?.value;
+        const email = signupForm.querySelector('[name="email"]')?.value?.trim();
         const password = signupForm.querySelector('[name="password"]')?.value;
         const confirmPassword = signupForm.querySelector(
           '[name="confirmPassword"]',
         )?.value;
+
+        if (!fullName?.trim()) {
+          window.UTILS?.toast?.("Please enter your full name", "error");
+          return;
+        }
+
+        if (!email || !isValidEmail(email)) {
+          window.UTILS?.toast?.("Please enter a valid email address", "error");
+          return;
+        }
+
+        if (!password) {
+          window.UTILS?.toast?.("Please enter a password", "error");
+          return;
+        }
+
+        if (!confirmPassword) {
+          window.UTILS?.toast?.("Please confirm your password", "error");
+          return;
+        }
 
         if (password !== confirmPassword) {
           window.UTILS?.toast?.("Passwords do not match", "error");
@@ -587,6 +744,22 @@
           return;
         }
 
+        // Verify reCAPTCHA
+        const recaptchaResponse = window.grecaptcha?.getResponse(
+          window.signupRecaptchaWidgetId,
+        );
+        if (!recaptchaResponse) {
+          window.UTILS?.toast?.(
+            "Please complete the reCAPTCHA verification",
+            "error",
+          );
+          return;
+        }
+
+        // Hide password requirements on submit
+        const reqBox = document.querySelector(".password-requirements");
+        if (reqBox) reqBox.classList.remove("visible");
+
         if (email && password) {
           const btn = signupForm.querySelector('button[type="submit"]');
           btn.disabled = true;
@@ -594,8 +767,8 @@
             '<i class="fa-solid fa-spinner fa-spin"></i> Creating account...';
           await handleSignup(email, password, fullName);
           btn.disabled = false;
-          btn.innerHTML = "Create Account";
-          // Reset reCAPTCHA after submission
+          btn.innerHTML =
+            '<span>Create Account</span><i class="fa-solid fa-arrow-right"></i>';
           window.grecaptcha?.reset(window.signupRecaptchaWidgetId);
         }
       });
@@ -613,14 +786,71 @@
       btn.addEventListener("click", handleGoogleLogin);
     });
 
-    // Forgot password link
+    // Forgot password link — opens dedicated modal
     const forgotLink = document.getElementById("forgotPasswordLink");
     if (forgotLink) {
       forgotLink.addEventListener("click", (e) => {
         e.preventDefault();
-        handleForgotPassword();
+        openForgotModal();
       });
     }
+
+    // Forgot modal event listeners
+    const forgotBackdrop = document.getElementById("forgotBackdrop");
+    const forgotModal = document.getElementById("forgotModal");
+    const forgotClose = document.getElementById("forgotClose");
+    const forgotBack = document.getElementById("forgotBack");
+    const forgotForm = document.getElementById("forgotForm");
+
+    forgotClose?.addEventListener("click", closeForgotModal);
+    forgotBackdrop?.addEventListener("click", closeForgotModal);
+    forgotBack?.addEventListener("click", () => {
+      closeForgotModal();
+      // Small delay then reopen auth modal
+      setTimeout(() => openAuthModal("login"), 200);
+    });
+
+    forgotForm?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const emailInput = document.getElementById("forgotEmail");
+      const email = emailInput?.value?.trim();
+      if (!email || !isValidEmail(email)) {
+        window.UTILS?.toast?.("Please enter a valid email address", "error");
+        return;
+      }
+
+      const btn = forgotForm.querySelector("button[type='submit']");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+      }
+
+      const success = await handleForgotPassword(email);
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML =
+          '<i class="fa-solid fa-paper-plane"></i> Send Reset Link';
+      }
+
+      if (success) {
+        // Show success view
+        const formView = forgotModal?.querySelector(".forgot-form-view");
+        const successView = forgotModal?.querySelector(".forgot-success-view");
+        const successEmail = document.getElementById("forgotSuccessEmail");
+        if (formView) formView.style.display = "none";
+        if (successView) successView.style.display = "block";
+        if (successEmail) successEmail.textContent = email;
+      }
+    });
+
+    // Escape key closes forgot modal
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && forgotModal?.classList.contains("active")) {
+        closeForgotModal();
+      }
+    });
 
     // Password toggle buttons
     $$(".pw-toggle").forEach((btn) => {

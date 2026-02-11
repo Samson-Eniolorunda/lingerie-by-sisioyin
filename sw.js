@@ -5,10 +5,10 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v5";
+const CACHE_NAME = "lbs-cache-v9";
 const STATIC_ASSETS = [
-  "/",
-  "/index.html",
+  "/home",
+  "/home.html",
   "/shop",
   "/cart",
   "/checkout",
@@ -95,6 +95,9 @@ self.addEventListener("fetch", (event) => {
   // Skip non-GET requests
   if (request.method !== "GET") return;
 
+  // Skip caching entirely on localhost (dev environment)
+  if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return;
+
   // Skip external requests (CDNs, APIs)
   if (!url.origin.includes(self.location.origin)) return;
 
@@ -109,16 +112,46 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      // Return cached response if available
+    (async () => {
+      // Clean URL support — rewrite /page to /page.html for local dev
+      let req = request;
+      if (request.mode === "navigate" && url.origin === self.location.origin) {
+        const path = url.pathname;
+        if (path !== "/" && !path.includes(".") && !path.endsWith("/")) {
+          const htmlUrl = new URL(path + ".html", url.origin);
+          req = new Request(htmlUrl.href, {
+            mode: request.mode,
+            credentials: request.credentials,
+          });
+        }
+      }
+
+      // Network-first for navigations (HTML pages) — always show fresh content
+      if (request.mode === "navigate") {
+        try {
+          const networkResponse = await fetch(req);
+          if (networkResponse && networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(req, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch {
+          const cached =
+            (await caches.match(req)) || (await caches.match(request));
+          return cached || caches.match("/home");
+        }
+      }
+
+      // Stale-while-revalidate for static assets (CSS, JS, images)
+      const cachedResponse =
+        (await caches.match(req)) || (await caches.match(request));
       if (cachedResponse) {
-        // Fetch fresh copy in background
         event.waitUntil(
-          fetch(request)
+          fetch(req)
             .then((networkResponse) => {
               if (networkResponse && networkResponse.status === 200) {
                 caches.open(CACHE_NAME).then((cache) => {
-                  cache.put(request, networkResponse.clone());
+                  cache.put(req, networkResponse.clone());
                 });
               }
             })
@@ -127,26 +160,19 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      // Otherwise fetch from network
-      return fetch(request)
-        .then((networkResponse) => {
-          // Cache successful responses
-          if (networkResponse && networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(() => {
-          // Return offline page for navigation requests
-          if (request.mode === "navigate") {
-            return caches.match("/index.html");
-          }
-          return new Response("Offline", { status: 503 });
-        });
-    }),
+      try {
+        const networkResponse = await fetch(req);
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(req, responseClone);
+          });
+        }
+        return networkResponse;
+      } catch {
+        return new Response("Offline", { status: 503 });
+      }
+    })(),
   );
 });
 
@@ -161,7 +187,7 @@ self.addEventListener("push", (event) => {
     badge: "/assets/img/favicon.png",
     vibrate: [100, 50, 100],
     data: {
-      url: data.url || "/",
+      url: data.url || "/home",
     },
   };
 
@@ -177,7 +203,7 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const url = event.notification.data?.url || "/";
+  const url = event.notification.data?.url || "/home";
   event.waitUntil(
     clients.matchAll({ type: "window" }).then((clientList) => {
       // Focus existing window if open

@@ -2,10 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Admin | Lingerie by Sisioyin</title>
@@ -696,7 +693,7 @@
             <span>Invite Admin</span>
           </button>
 
-          <a href="/" class="nav-item">
+          <a href="/home" class="nav-item">
             <i class="fa-solid fa-store"></i>
             <span>View Store</span>
           </a>
@@ -760,10 +757,7 @@
               >
                 <i class="fa-solid fa-file-export"></i>
                 <span>Export</span>
-                <i
-                  class="fa-solid fa-chevron-down"
-                  style="font-size: 10px; margin-left: 4px"
-                ></i>
+                <i class="fa-solid fa-chevron-down export-chevron"></i>
               </button>
               <div class="export-menu" id="exportMenu" hidden>
                 <button
@@ -1232,7 +1226,7 @@
                   </div>
 
                   <!-- Size Type - kept for backwards compatibility -->
-                  <div class="form-group" style="display: none">
+                  <div class="form-group admin-compat-hidden">
                     <label for="pSizeName">Available Sizes</label>
                     <div class="size-stock-list" id="sizeStockList"></div>
                     <input type="hidden" id="pSizeName" value="" />
@@ -1916,10 +1910,7 @@
                 >
                   <i class="fa-solid fa-file-export"></i>
                   <span>Export</span>
-                  <i
-                    class="fa-solid fa-chevron-down"
-                    style="font-size: 10px; margin-left: 4px"
-                  ></i>
+                  <i class="fa-solid fa-chevron-down export-chevron"></i>
                 </button>
                 <div class="export-menu" id="customerExportMenu" hidden>
                   <button
@@ -1984,6 +1975,52 @@
         </section>
       </div>
     </main>
+
+    <!-- Cart Drawer -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="/shop" class="btn btn-primary">Start Shopping</a>
+          </div>
+        </div>
+        <div class="cd-footer u-hidden" id="cartDrawerFooter">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="/checkout" class="cd-checkout-btn"
+            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
+          >
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Scripts -->
     <script

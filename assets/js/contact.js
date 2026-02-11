@@ -56,6 +56,9 @@
         form.style.display = "none";
         formSuccess.style.display = "block";
         window.UTILS?.toast?.("Message sent successfully!", "success");
+        try {
+          sessionStorage.removeItem("LBS_FORM__contact");
+        } catch {}
       } catch (err) {
         console.error("Contact form error:", err);
 

@@ -9,6 +9,7 @@
       content="Get in touch with Lingerie by Sisioyin. We're here to help with orders, sizing questions, or any inquiries."
     />
     <meta name="theme-color" content="#be185d" />
+    <meta name="color-scheme" content="light dark" />
 
     <!-- Open Graph -->
     <meta property="og:title" content="Contact Us | Lingerie by Sisioyin" />
@@ -41,19 +42,25 @@
 
   <body class="contact-page">
     <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader-inner">
+        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <p class="page-loader-text"><span></span></p>
+      </div>
+    </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
        HEADER
        ═══════════════════════════════════════════════════════════════════════ -->
     <header class="header" id="siteHeader">
       <div class="header-inner">
-        <a href="/" class="logo">
+        <a href="/home" class="logo">
           <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
         <nav class="nav" id="mainNav">
-          <a href="/" class="nav-link">Home</a>
+          <a href="/home" class="nav-link">Home</a>
           <a href="/shop" class="nav-link">Shop</a>
           <a href="/shop?gender=Women" class="nav-link">Women</a>
           <a href="/shop?gender=Men" class="nav-link">Men</a>
@@ -106,7 +113,7 @@
       <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
       <div class="mobile-drawer-panel">
         <div class="drawer-header">
-          <a href="/" class="drawer-logo">
+          <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
               ><i class="fa-solid fa-heart"></i
             ></span>
@@ -135,7 +142,7 @@
           <nav class="drawer-nav">
             <span class="drawer-nav-title">Menu</span>
             <div class="drawer-nav-list">
-              <a href="/" class="drawer-nav-link">
+              <a href="/home" class="drawer-nav-link">
                 <span class="drawer-nav-icon"
                   ><i class="fa-solid fa-home"></i
                 ></span>
@@ -229,6 +236,7 @@
               class="drawer-theme-toggle theme-btn"
               id="themeSlider"
               role="switch"
+              aria-checked="false"
               aria-label="Toggle dark mode"
               data-theme="toggle"
             ></button>
@@ -409,22 +417,32 @@
               </div>
 
               <div class="social-links">
-                <a href="#" class="social-link" aria-label="Instagram">
+                <a
+                  href="https://instagram.com/lingeries_bysisioyin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="social-link"
+                  aria-label="Instagram"
+                >
                   <i class="fa-brands fa-instagram"></i>
                 </a>
-                <a href="#" class="social-link" aria-label="TikTok">
+                <a
+                  href="https://tiktok.com/@lingeries_bysisioyin"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="social-link"
+                  aria-label="TikTok"
+                >
                   <i class="fa-brands fa-tiktok"></i>
                 </a>
                 <a
                   href="https://wa.me/2349033344860"
                   target="_blank"
+                  rel="noopener noreferrer"
                   class="social-link"
                   aria-label="WhatsApp"
                 >
                   <i class="fa-brands fa-whatsapp"></i>
-                </a>
-                <a href="#" class="social-link" aria-label="Facebook">
-                  <i class="fa-brands fa-facebook-f"></i>
                 </a>
               </div>
             </div>
@@ -482,7 +500,7 @@
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a href="/" class="logo">
+            <a href="/home" class="logo">
               <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
@@ -508,6 +526,7 @@
               <a
                 href="https://wa.me/2349033344860"
                 target="_blank"
+                rel="noopener noreferrer"
                 aria-label="WhatsApp"
                 ><i class="fa-brands fa-whatsapp"></i
               ></a>
@@ -723,6 +742,11 @@
               />
             </div>
           </div>
+          <div class="auth-forgot">
+            <a href="#" id="forgotPasswordLink" class="auth-forgot-link"
+              >Forgot password?</a
+            >
+          </div>
           <div class="form-group recaptcha-field">
             <div
               class="g-recaptcha"
@@ -805,7 +829,7 @@
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
-              <i class="fa-solid fa-shield-halved auth-input-icon"></i>
+              <i class="fa-solid fa-lock auth-input-icon"></i>
               <input
                 type="password"
                 id="signupConfirm"
@@ -859,6 +883,78 @@
           <a href="/privacy">Privacy Policy</a>
           >
         </p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FORGOT PASSWORD MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="forgot-modal-backdrop" id="forgotBackdrop"></div>
+    <div class="forgot-modal" id="forgotModal">
+      <div class="forgot-modal-hero">
+        <button
+          type="button"
+          class="forgot-modal-close"
+          id="forgotClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="forgot-modal-icon"><i class="fa-solid fa-key"></i></div>
+        <h2 class="forgot-modal-title">Reset Password</h2>
+        <p class="forgot-modal-sub">We'll send you a reset link</p>
+      </div>
+      <div class="forgot-modal-body">
+        <div class="forgot-form-view">
+          <form id="forgotForm" novalidate>
+            <div class="forgot-modal-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-envelope auth-input-icon"></i>
+                <input
+                  type="email"
+                  id="forgotEmail"
+                  class="form-input"
+                  placeholder="Enter your email address"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" class="forgot-modal-submit">
+              <i class="fa-solid fa-paper-plane"></i> Send Reset Link
+            </button>
+          </form>
+          <button type="button" class="forgot-modal-back" id="forgotBack">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+          </button>
+        </div>
+        <div class="forgot-success-view">
+          <div class="forgot-success">
+            <div class="forgot-success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3>Check your email</h3>
+            <p>
+              We've sent a password reset link to
+              <strong id="forgotSuccessEmail"></strong>. Check your inbox and
+              follow the instructions.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="forgot-modal-back"
+            onclick="
+              document
+                .getElementById('forgotBackdrop')
+                ?.classList.remove('active');
+              document
+                .getElementById('forgotModal')
+                ?.classList.remove('active');
+            "
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
       </div>
     </div>
 

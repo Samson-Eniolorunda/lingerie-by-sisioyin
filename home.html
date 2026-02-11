@@ -3,30 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Shop | Lingerie by Sisioyin</title>
+    <title>Lingerie by Sisioyin | Premium Lingerie & Loungewear</title>
     <meta
       name="description"
-      content="Shop premium lingerie, loungewear, and underwear. Curated collections for the modern woman. Lingerie by Sisioyin."
+      content="Lingerie by Sisioyin — luxe essentials defined by comfort and confidence. Premium lingerie and loungewear for the modern woman."
     />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#be185d" />
     <meta name="color-scheme" content="light dark" />
+    <meta name="author" content="Lingerie by Sisioyin" />
+    <meta
+      name="keywords"
+      content="lingerie, loungewear, underwear, bra, panties, nightwear, Nigeria, Lagos, premium lingerie, comfortable underwear, women lingerie"
+    />
+    <link rel="canonical" href="https://lingeriebysisioyin.store/" />
 
     <!-- Open Graph -->
-    <meta property="og:title" content="Shop | Lingerie by Sisioyin" />
+    <meta
+      property="og:title"
+      content="Lingerie by Sisioyin | Premium Lingerie & Loungewear"
+    />
     <meta
       property="og:description"
-      content="Shop premium lingerie and loungewear."
+      content="Luxe essentials defined by comfort and confidence. Premium lingerie and loungewear."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="assets/img/og-image.png" />
+    <meta property="og:url" content="https://lingeriebysisioyin.store/" />
+    <meta
+      property="og:image"
+      content="https://lingeriebysisioyin.store/assets/img/og-image.png"
+    />
+    <meta property="og:site_name" content="Lingerie by Sisioyin" />
+    <meta property="og:locale" content="en_NG" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Shop | Lingerie by Sisioyin" />
+    <meta name="twitter:title" content="Lingerie by Sisioyin" />
     <meta
       name="twitter:description"
-      content="Shop premium lingerie and loungewear."
+      content="Luxe essentials defined by comfort and confidence. Premium lingerie and loungewear."
     />
     <meta name="twitter:image" content="assets/img/og-image.png" />
 
@@ -51,6 +66,38 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Lingerie by Sisioyin",
+          "url": "https://lingeriebysisioyin.store",
+          "logo": "https://lingeriebysisioyin.store/assets/img/logo.png",
+          "description": "Premium lingerie and loungewear curated for comfort and confidence.",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+234-903-334-4860",
+            "contactType": "customer service",
+            "availableLanguage": "English"
+          },
+          "sameAs": ["https://instagram.com/lingeriebysissioyin"]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Lingerie by Sisioyin",
+          "url": "https://lingeriebysisioyin.store",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://lingeriebysisioyin.store/shop?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    </script>
   </head>
 
   <body>
@@ -76,8 +123,8 @@
 
         <!-- Desktop Navigation -->
         <nav class="nav" id="mainNav">
-          <a href="/home" class="nav-link">Home</a>
-          <a href="/shop" class="nav-link active">Shop</a>
+          <a href="/home" class="nav-link active">Home</a>
+          <a href="/shop" class="nav-link">Shop</a>
           <a href="/shop?gender=Women" class="nav-link">Women</a>
           <a href="/shop?gender=Men" class="nav-link">Men</a>
           <a href="/shop?gender=Kids" class="nav-link">Kids</a>
@@ -165,13 +212,13 @@
           <nav class="drawer-nav">
             <span class="drawer-nav-title">Menu</span>
             <div class="drawer-nav-list">
-              <a href="/home" class="drawer-nav-link">
+              <a href="/home" class="drawer-nav-link active">
                 <span class="drawer-nav-icon"
                   ><i class="fa-solid fa-home"></i
                 ></span>
                 Home
               </a>
-              <a href="/shop" class="drawer-nav-link active">
+              <a href="/shop" class="drawer-nav-link">
                 <span class="drawer-nav-icon"
                   ><i class="fa-solid fa-store"></i
                 ></span>
@@ -278,415 +325,295 @@
     <!-- ═══════════════════════════════════════════════════════════════════════
        MAIN CONTENT
        ═══════════════════════════════════════════════════════════════════════ -->
+    <main id="main">
+      <!-- ─── NEW HERO SECTION ─── -->
+      <section class="hero-new">
+        <div class="hero-decor-circle c1"></div>
+        <div class="hero-decor-circle c2"></div>
 
-    <!-- Page Header -->
-    <section class="page-header">
-      <div class="container">
-        <h1 class="page-title">Explore Our Collection</h1>
-        <nav class="breadcrumb" aria-label="Breadcrumb">
-          <a href="/home"><i class="fa-solid fa-house"></i> Home</a>
-          <span class="breadcrumb-separator">/</span>
-          <span>Shop</span>
-        </nav>
-      </div>
-    </section>
-
-    <main id="main" class="shop-main">
-      <div class="shop-layout">
-        <!-- Sidebar Filter Panel (Desktop) -->
-        <aside class="shop-sidebar" id="shopSidebar" autocomplete="off">
-          <div class="sidebar-header">
-            <h3><i class="fa-solid fa-sliders"></i> Filters</h3>
-            <button type="button" class="sidebar-reset" id="resetAllFilters">
-              <i class="fa-solid fa-rotate-left"></i> Reset
-            </button>
-          </div>
-
-          <div class="sidebar-body">
-            <!-- Categories -->
-            <div class="filter-section">
-              <h4 class="filter-section-title">
-                <i class="fa-solid fa-tags"></i> Category
-              </h4>
-              <div class="filter-checkboxes" data-filter-key="category">
-                <label class="filter-checkbox">
-                  <input
-                    type="checkbox"
-                    name="noRestore1"
-                    value="Lingerie"
-                    autocomplete="off"
-                  />
-                  <span class="checkmark"></span>
-                  <span>Lingerie</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input
-                    type="checkbox"
-                    name="noRestore2"
-                    value="Loungewear"
-                    autocomplete="off"
-                  />
-                  <span class="checkmark"></span>
-                  <span>Loungewear</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input
-                    type="checkbox"
-                    name="noRestore3"
-                    value="Underwear"
-                    autocomplete="off"
-                  />
-                  <span class="checkmark"></span>
-                  <span>Underwear</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input
-                    type="checkbox"
-                    name="noRestore4"
-                    value="Accessories"
-                    autocomplete="off"
-                  />
-                  <span class="checkmark"></span>
-                  <span>Accessories</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Gender -->
-            <div class="filter-section">
-              <h4 class="filter-section-title">
-                <i class="fa-solid fa-venus-mars"></i> Gender
-              </h4>
-              <div class="filter-checkboxes" data-filter-key="gender">
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Women" autocomplete="off" />
-                  <span class="checkmark"></span>
-                  <span>Women</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Men" autocomplete="off" />
-                  <span class="checkmark"></span>
-                  <span>Men</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Kids" autocomplete="off" />
-                  <span class="checkmark"></span>
-                  <span>Kids</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="Unisex" autocomplete="off" />
-                  <span class="checkmark"></span>
-                  <span>Unisex</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Price Range -->
-            <div class="filter-section">
-              <h4 class="filter-section-title">
-                <i class="fa-solid fa-naira-sign"></i> Price Range
-              </h4>
-              <div class="price-slider-wrap">
-                <div class="price-slider-values">
-                  <span id="priceMinDisplay">₦0</span>
-                  <span id="priceMaxDisplay">₦500,000</span>
-                </div>
-                <div class="price-slider-track">
-                  <input
-                    type="range"
-                    id="priceMinSlider"
-                    min="0"
-                    max="500000"
-                    step="5000"
-                    value="0"
-                    aria-label="Minimum price"
-                  />
-                  <input
-                    type="range"
-                    id="priceMaxSlider"
-                    min="0"
-                    max="500000"
-                    step="5000"
-                    value="500000"
-                    aria-label="Maximum price"
-                  />
-                </div>
-                <div class="price-inputs">
-                  <div class="price-input-group">
-                    <span class="price-input-prefix">₦</span>
-                    <input
-                      type="number"
-                      id="priceMinInput"
-                      min="0"
-                      max="500000"
-                      step="1000"
-                      value="0"
-                      placeholder="Min"
-                    />
-                  </div>
-                  <span class="price-input-sep">—</span>
-                  <div class="price-input-group">
-                    <span class="price-input-prefix">₦</span>
-                    <input
-                      type="number"
-                      id="priceMaxInput"
-                      min="0"
-                      max="500000"
-                      step="1000"
-                      value="500000"
-                      placeholder="Max"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Delivery Type -->
-            <div class="filter-section">
-              <h4 class="filter-section-title">
-                <i class="fa-solid fa-truck-fast"></i> Delivery
-              </h4>
-              <div class="filter-checkboxes" data-filter-key="deliveryType">
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="express" autocomplete="off" />
-                  <span class="checkmark"></span>
-                  <span><i class="fa-solid fa-bolt"></i> Same-day</span>
-                </label>
-                <label class="filter-checkbox">
-                  <input type="checkbox" value="standard" autocomplete="off" />
-                  <span class="checkmark"></span>
-                  <span><i class="fa-solid fa-truck"></i> Standard</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Stock & Availability -->
-            <div class="filter-section">
-              <h4 class="filter-section-title">
-                <i class="fa-solid fa-box"></i> Availability
-              </h4>
-              <div class="filter-toggles">
-                <label class="filter-toggle">
-                  <input
-                    type="checkbox"
-                    id="filterInStock"
-                    autocomplete="off"
-                  />
-                  <span class="toggle-switch"></span>
-                  <span>In Stock Only</span>
-                </label>
-                <label class="filter-toggle">
-                  <input
-                    type="checkbox"
-                    id="filterNewArrivals"
-                    autocomplete="off"
-                  />
-                  <span class="toggle-switch"></span>
-                  <span>New Arrivals</span>
-                </label>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- Main Content Area -->
-        <div class="shop-content">
-          <!-- Top Filter Bar -->
-          <div class="filter-bar" id="filterBar">
-            <div class="filter-bar-left">
-              <button
-                type="button"
-                class="filter-toggle-btn"
-                id="filterToggleBtn"
-              >
-                <i class="fa-solid fa-sliders"></i>
-                <span>Filters</span>
-                <span class="filter-count" id="activeFilterCount" hidden
-                  >0</span
-                >
-              </button>
-              <div class="search-box">
-                <i class="fa-solid fa-search"></i>
-                <input
-                  type="text"
-                  id="shopSearchInput"
-                  placeholder="Search products..."
-                  autocomplete="off"
-                />
-              </div>
-            </div>
-            <div class="filter-bar-right">
-              <span class="results-count" id="resultsCount">0 products</span>
-              <select
-                id="sortSelect"
-                class="sort-dropdown"
-                aria-label="Sort products"
-              >
-                <option value="newest">Newest</option>
-                <option value="popular">Popular</option>
-                <option value="price-low">Price: Low → High</option>
-                <option value="price-high">Price: High → Low</option>
-                <option value="name">Name: A → Z</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Active Filters Chips -->
-          <div class="active-filters" id="activeFiltersBar" hidden>
-            <div class="active-chips" id="activeChips"></div>
-            <button type="button" class="clear-all-btn" id="clearAllFilters">
-              <i class="fa-solid fa-xmark"></i> Clear All
-            </button>
-          </div>
-
-          <!-- Products Grid Section -->
-          <section class="shop-grid-section">
-            <!-- Skeleton Loading -->
-            <div class="products-grid" id="skeletonGrid">
-              <div class="product-skeleton">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                  <div class="skeleton-line w-40"></div>
-                  <div class="skeleton-line w-80"></div>
-                  <div class="skeleton-line w-60"></div>
-                </div>
-              </div>
-              <div class="product-skeleton">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                  <div class="skeleton-line w-40"></div>
-                  <div class="skeleton-line w-80"></div>
-                  <div class="skeleton-line w-60"></div>
-                </div>
-              </div>
-              <div class="product-skeleton">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                  <div class="skeleton-line w-40"></div>
-                  <div class="skeleton-line w-80"></div>
-                  <div class="skeleton-line w-60"></div>
-                </div>
-              </div>
-              <div class="product-skeleton">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                  <div class="skeleton-line w-40"></div>
-                  <div class="skeleton-line w-80"></div>
-                  <div class="skeleton-line w-60"></div>
-                </div>
-              </div>
-              <div class="product-skeleton">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                  <div class="skeleton-line w-40"></div>
-                  <div class="skeleton-line w-80"></div>
-                  <div class="skeleton-line w-60"></div>
-                </div>
-              </div>
-              <div class="product-skeleton">
-                <div class="skeleton-img"></div>
-                <div class="skeleton-body">
-                  <div class="skeleton-line w-40"></div>
-                  <div class="skeleton-line w-80"></div>
-                  <div class="skeleton-line w-60"></div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Products Grid -->
-            <div class="products-grid" id="productsGrid" hidden></div>
-
-            <!-- Modern Empty State -->
-            <div class="empty-state-modern" id="noResults" hidden>
-              <div class="empty-illustration">
-                <svg
-                  width="160"
-                  height="160"
-                  viewBox="0 0 160 160"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <!-- Shopping bag outline -->
-                  <path
-                    d="M40 55C40 51.6863 42.6863 49 46 49H114C117.314 49 120 51.6863 120 55V130C120 133.314 117.314 136 114 136H46C42.6863 136 40 133.314 40 130V55Z"
-                    fill="var(--clr-primary-light)"
-                    stroke="var(--clr-primary)"
-                    stroke-width="2"
-                  />
-                  <!-- Bag handles -->
-                  <path
-                    d="M60 49V35C60 27.268 66.268 21 74 21H86C93.732 21 100 27.268 100 35V49"
-                    stroke="var(--clr-primary)"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                  />
-                  <!-- Sad face -->
-                  <circle cx="70" cy="82" r="4" fill="var(--clr-primary)" />
-                  <circle cx="90" cy="82" r="4" fill="var(--clr-primary)" />
-                  <path
-                    d="M65 105C65 105 72 98 80 98C88 98 95 105 95 105"
-                    stroke="var(--clr-primary)"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                  />
-                  <!-- Decorative sparkles -->
-                  <circle
-                    cx="30"
-                    cy="40"
-                    r="3"
-                    fill="var(--clr-gold)"
-                    opacity="0.6"
-                  />
-                  <circle
-                    cx="130"
-                    cy="45"
-                    r="4"
-                    fill="var(--clr-primary)"
-                    opacity="0.4"
-                  />
-                  <circle
-                    cx="135"
-                    cy="120"
-                    r="2"
-                    fill="var(--clr-gold)"
-                    opacity="0.5"
-                  />
-                  <circle
-                    cx="25"
-                    cy="100"
-                    r="2.5"
-                    fill="var(--clr-primary)"
-                    opacity="0.3"
-                  />
-                </svg>
-              </div>
-              <h3 class="empty-title">No products found</h3>
-              <p class="empty-text">
-                We couldn't find what you're looking for. Try adjusting your
-                filters or browse our full collection.
+        <div class="container">
+          <div class="hero-grid">
+            <!-- Text Content -->
+            <div class="hero-text">
+              <span class="hero-eyebrow">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                New Collection 2026
+              </span>
+              <h1 class="hero-heading">
+                Confidence in
+                <span class="hero-heading-highlight">Every Stitch</span>
+              </h1>
+              <p class="hero-subtext">
+                Premium lingerie and loungewear curated for comfort. Experience
+                luxury that celebrates your unique beauty and empowers your
+                confidence.
               </p>
-              <div class="empty-actions">
-                <button
-                  type="button"
-                  class="empty-btn-primary"
-                  id="clearFiltersBtn"
-                >
-                  <i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters
-                </button>
-                <a href="/shop" class="empty-btn-secondary">
-                  <i class="fa-solid fa-store"></i> View All Products
+              <div class="hero-buttons">
+                <a href="/shop" class="hero-btn-primary">
+                  Shop Collection <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="/shop?is_new=true" class="hero-btn-secondary">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> New Arrivals
                 </a>
               </div>
             </div>
-          </section>
-        </div>
-        <!-- /.shop-content -->
-      </div>
-      <!-- /.shop-layout -->
-    </main>
 
-    <!-- Filter Sidebar Overlay (Mobile) -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+            <!-- Hero Image -->
+            <div class="hero-media">
+              <div class="hero-image-container">
+                <div class="hero-image-frame">
+                  <div class="hero-skeleton" id="heroSkeleton"></div>
+                  <img
+                    id="heroImage"
+                    src=""
+                    alt="Premium lingerie collection"
+                    class="hero-main-image"
+                    loading="eager"
+                    data-dynamic="hero"
+                    style="opacity: 0; transition: opacity 0.5s"
+                    onload="
+                      this.style.opacity = 1;
+                      var s = document.getElementById('heroSkeleton');
+                      if (s) s.style.display = 'none';
+                    "
+                  />
+                </div>
+
+                <!-- Floating Cards -->
+                <div class="hero-float-card top">
+                  <span class="hero-float-icon"
+                    ><i class="fa-solid fa-heart"></i
+                  ></span>
+                  <div class="hero-float-content">
+                    <span class="hero-float-label">Quality</span>
+                    <span class="hero-float-value">Premium</span>
+                  </div>
+                </div>
+
+                <div class="hero-float-card bottom">
+                  <span class="hero-float-icon"
+                    ><i class="fa-solid fa-star"></i
+                  ></span>
+                  <div class="hero-float-content">
+                    <span class="hero-float-label">Happy Customers</span>
+                    <span class="hero-float-value">500+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TRUST BADGES ─── -->
+      <section class="trust-section scroll-fade-up">
+        <div class="container">
+          <div class="trust-grid scroll-stagger">
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-solid fa-truck-fast"></i>
+              </div>
+              <h3 class="trust-title">Fast Delivery</h3>
+              <p class="trust-text">Nationwide shipping</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-solid fa-certificate"></i>
+              </div>
+              <h3 class="trust-title">Quality Assured</h3>
+              <p class="trust-text">Premium materials</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-solid fa-rotate-left"></i>
+              </div>
+              <h3 class="trust-title">Easy Returns</h3>
+              <p class="trust-text">7-day return policy</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-brands fa-whatsapp"></i>
+              </div>
+              <h3 class="trust-title">24/7 Support</h3>
+              <p class="trust-text">WhatsApp care</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── NEW ARRIVALS SECTION ─── -->
+      <section class="products-section section">
+        <div class="container">
+          <div class="section-header scroll-fade-up">
+            <div>
+              <span class="section-label">Fresh Picks</span>
+              <h2 class="section-title">New Arrivals</h2>
+              <p class="section-subtitle">
+                Discover our latest collection of premium lingerie
+              </p>
+            </div>
+            <div class="section-actions">
+              <a href="/shop?is_new=true" class="btn btn-outline">
+                View All <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="products-grid" id="newArrivalsGrid" data-home-products>
+            <!-- Products loaded dynamically -->
+          </div>
+
+          <div class="loading-state" id="homeLoading">
+            <div class="arrivals-loader">
+              <span></span><span></span><span></span>
+            </div>
+            <p>Curating your picks…</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── NEW CATEGORIES SECTION ─── -->
+      <section class="categories-new">
+        <div class="container">
+          <div class="categories-header scroll-fade-up">
+            <span class="categories-label">Browse By</span>
+            <h2 class="categories-title">Shop Categories</h2>
+            <p class="categories-subtitle">
+              Explore our curated collections designed for every occasion
+            </p>
+          </div>
+
+          <div class="categories-showcase scroll-stagger">
+            <a href="/shop?category=Lingerie" class="category-showcase-card">
+              <div class="category-showcase-image">
+                <div class="category-skeleton" id="catSkelLingerie"></div>
+                <img
+                  id="categoryLingerieImage"
+                  src=""
+                  alt="Lingerie Collection"
+                  loading="lazy"
+                  data-dynamic="category-lingerie"
+                  style="opacity: 0; transition: opacity 0.5s"
+                  onload="
+                    this.style.opacity = 1;
+                    var s = document.getElementById('catSkelLingerie');
+                    if (s) s.style.display = 'none';
+                  "
+                />
+              </div>
+              <div class="category-showcase-overlay"></div>
+              <div class="category-showcase-content">
+                <h3 class="category-showcase-name">Lingerie</h3>
+                <p class="category-showcase-count">Elegant & Sensual</p>
+                <span class="category-showcase-btn">
+                  Explore <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </a>
+
+            <a href="/shop?category=Loungewear" class="category-showcase-card">
+              <div class="category-showcase-image">
+                <div class="category-skeleton" id="catSkelLoungewear"></div>
+                <img
+                  id="categoryLoungewearImage"
+                  src=""
+                  alt="Loungewear Collection"
+                  loading="lazy"
+                  data-dynamic="category-loungewear"
+                  style="opacity: 0; transition: opacity 0.5s"
+                  onload="
+                    this.style.opacity = 1;
+                    var s = document.getElementById('catSkelLoungewear');
+                    if (s) s.style.display = 'none';
+                  "
+                />
+              </div>
+              <div class="category-showcase-overlay"></div>
+              <div class="category-showcase-content">
+                <h3 class="category-showcase-name">Loungewear</h3>
+                <p class="category-showcase-count">Comfort & Style</p>
+                <span class="category-showcase-btn">
+                  Explore <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </a>
+
+            <a href="/shop?category=Underwear" class="category-showcase-card">
+              <div class="category-showcase-image">
+                <div class="category-skeleton" id="catSkelUnderwear"></div>
+                <img
+                  id="categoryUnderwearImage"
+                  src=""
+                  alt="Underwear Collection"
+                  loading="lazy"
+                  data-dynamic="category-underwear"
+                  style="opacity: 0; transition: opacity 0.5s"
+                  onload="
+                    this.style.opacity = 1;
+                    var s = document.getElementById('catSkelUnderwear');
+                    if (s) s.style.display = 'none';
+                  "
+                />
+              </div>
+              <div class="category-showcase-overlay"></div>
+              <div class="category-showcase-content">
+                <h3 class="category-showcase-name">Underwear</h3>
+                <p class="category-showcase-count">Everyday Essentials</p>
+                <span class="category-showcase-btn">
+                  Explore <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TESTIMONIALS SECTION ─── -->
+      <section class="testimonials section">
+        <div class="container">
+          <div class="section-header scroll-fade-up">
+            <div class="section-header-centered">
+              <span class="section-label">What Our Customers Say</span>
+              <h2 class="section-title">Customer Reviews</h2>
+              <p class="section-subtitle">
+                Real reviews from our valued customers
+              </p>
+            </div>
+          </div>
+
+          <div class="testimonials-grid" id="testimonialsGrid">
+            <div class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading reviews...</p>
+            </div>
+          </div>
+
+          <div class="wishlist-empty" id="testimonialsEmpty" class="u-hidden">
+            <div class="wishlist-empty-icon">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <h3>No Reviews Yet</h3>
+            <p>Be the first to share your experience!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── CTA SECTION ─── -->
+      <section class="cta section scroll-scale">
+        <div class="container">
+          <div class="cta-inner">
+            <h2 class="cta-title">Ready to Feel Confident?</h2>
+            <p class="cta-text">
+              Explore our complete collection of premium lingerie and loungewear
+              designed for the modern woman.
+            </p>
+            <a href="/shop" class="btn btn-lg">
+              Explore Collection <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
        QUICK VIEW MODAL - Content is dynamically generated by shop.js
@@ -739,8 +666,6 @@
       </div>
     </div>
 
-    <!-- Page Overlay -->
-
     <!-- Toast Notification -->
     <div class="toast" data-toast></div>
 
@@ -780,8 +705,9 @@
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="WhatsApp"
-                ><i class="fa-brands fa-whatsapp"></i
-              ></a>
+              >
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
             </div>
           </div>
 
@@ -1059,7 +985,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>
@@ -1186,5 +1111,7 @@
     <script src="assets/js/app.js" defer></script>
     <script src="assets/js/auth.js" defer></script>
     <script src="assets/js/shop.js" defer></script>
+    <script src="assets/js/analytics.js" defer></script>
+    <script src="assets/js/home.js" defer></script>
   </body>
 </html>

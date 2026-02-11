@@ -325,8 +325,11 @@
                 <button type="button" class="cd-qty-btn cd-qty-plus" data-idx="${idx}"><i class="fa-solid fa-plus"></i></button>
               </div>
             </div>
+            <div class="cd-item-actions">
+              <button type="button" class="cd-item-edit" data-idx="${idx}" data-product-id="${item.id || ""}" aria-label="Edit item" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+              <button type="button" class="cd-item-remove" data-idx="${idx}" aria-label="Remove item" title="Remove"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
           </div>
-          <button type="button" class="cd-item-remove" data-idx="${idx}" aria-label="Remove item"><i class="fa-solid fa-trash-can"></i></button>
         `;
         cartDrawerBody.appendChild(itemEl);
       });
@@ -532,6 +535,11 @@
     return colorMap[key] || key || "#cccccc";
   }
 
+  /* Prevent background scroll when touching modal overlay */
+  function preventOverlayScroll(e) {
+    if (!e.target.closest(".quick-modal")) e.preventDefault();
+  }
+
   function openModal(productOrId) {
     console.log("🔍 APP: openModal()", productOrId);
     // Try new overlay or old modal
@@ -687,6 +695,10 @@
       // Show modal
       if (overlay) {
         overlay.classList.add("active");
+        // Prevent background scroll on touch devices
+        overlay.addEventListener("touchmove", preventOverlayScroll, {
+          passive: false,
+        });
       }
       if (modal) {
         modal.setAttribute("aria-hidden", "false");
@@ -725,6 +737,11 @@
       modal.setAttribute("aria-hidden", "true");
     }
 
+    // Remove touch scroll prevention
+    if (overlay) {
+      overlay.removeEventListener("touchmove", preventOverlayScroll);
+    }
+
     // Also hide old backdrop if exists
     const backdrop = $("#modalBackdrop");
     if (backdrop) backdrop.classList.remove("active");
@@ -754,6 +771,13 @@
       actualTheme = mode;
     }
     document.documentElement.setAttribute("data-theme", actualTheme);
+    // Update aria-checked on theme switch toggles
+    const themeSwitch = document.getElementById("themeSlider");
+    if (themeSwitch)
+      themeSwitch.setAttribute(
+        "aria-checked",
+        actualTheme === "dark" ? "true" : "false",
+      );
   }
 
   function setTheme(mode) {
@@ -905,12 +929,13 @@
       });
     }
 
-    // Modern cart drawer body - handle qty/remove actions
+    // Modern cart drawer body - handle qty/remove/edit actions
     const cartDrawerBody = $("#cartDrawerBody");
     cartDrawerBody?.addEventListener("click", (e) => {
       const minusBtn = e.target.closest(".cd-qty-minus");
       const plusBtn = e.target.closest(".cd-qty-plus");
       const removeBtn = e.target.closest(".cd-item-remove");
+      const editBtn = e.target.closest(".cd-item-edit");
 
       if (minusBtn) {
         updateCartItemQty(parseInt(minusBtn.dataset.idx, 10), -1);
@@ -918,6 +943,24 @@
         updateCartItemQty(parseInt(plusBtn.dataset.idx, 10), 1);
       } else if (removeBtn) {
         removeCartItemByIndex(parseInt(removeBtn.dataset.idx, 10));
+      } else if (editBtn) {
+        const idx = parseInt(editBtn.dataset.idx, 10);
+        const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
+        const item = cart[idx];
+        const productId = editBtn.dataset.productId || item?.id;
+        if (item) {
+          sessionStorage.setItem(
+            "LBS_EDIT_ITEM",
+            JSON.stringify({ idx, ...item }),
+          );
+        }
+        closeDrawer();
+        // Navigate to shop page — openModal will detect edit data
+        if (productId) {
+          setTimeout(() => {
+            window.location.href = `/shop?product=${productId}`;
+          }, 300);
+        }
       }
     });
 
@@ -1369,6 +1412,24 @@
         toggleBtn.setAttribute("aria-expanded", "false");
       }
     });
+
+    // Shift WhatsApp float up when footer is visible so it doesn't block theme toggle
+    const footer = document.querySelector(".footer-bottom");
+    if (footer && "IntersectionObserver" in window) {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              widget.style.bottom = entry.intersectionRect.height + 24 + "px";
+            } else {
+              widget.style.bottom = "";
+            }
+          });
+        },
+        { threshold: [0, 0.25, 0.5, 0.75, 1] },
+      );
+      obs.observe(footer);
+    }
   }
 
   /* ─────────────────────────────────────────────
@@ -2025,8 +2086,11 @@
   function initNavActiveState() {
     console.log("🔗 APP: initNavActiveState()");
     const pathPart = window.location.pathname.split("/").pop() || "";
-    const currentPage = pathPart.replace(/\.html$/, "") || "index";
+    const currentPage = pathPart.replace(/\.html$/, "") || "home";
     const currentSearch = window.location.search;
+
+    // Build a normalised "page + query" key for the current URL
+    const currentKey = currentPage + currentSearch;
 
     // Remove all existing active classes
     $$(".nav-link.active").forEach((el) => el.classList.remove("active"));
@@ -2034,28 +2098,26 @@
       el.classList.remove("active"),
     );
 
+    // Helper: match nav link href to current page + query
+    function matchLink(href) {
+      const clean = href.replace(/^\//, "").replace(/\.html$/, "");
+      const [page, qs] = clean.split("?");
+      const hrefPage = page || "home";
+      const hrefSearch = qs ? "?" + qs : "";
+      const hrefKey = hrefPage + hrefSearch;
+      return hrefKey === currentKey;
+    }
+
     // Set active state for desktop nav
     $$(".nav-link").forEach((link) => {
-      const href = link.getAttribute("href") || "";
-      const hrefPage =
-        href
-          .replace(/^\//, "")
-          .replace(/\.html$/, "")
-          .split("?")[0] || "index";
-      if (hrefPage === currentPage) {
+      if (matchLink(link.getAttribute("href") || "")) {
         link.classList.add("active");
       }
     });
 
     // Set active state for mobile nav tiles
     $$(".mobile-nav-tile").forEach((tile) => {
-      const href = tile.getAttribute("href") || "";
-      const hrefPage =
-        href
-          .replace(/^\//, "")
-          .replace(/\.html$/, "")
-          .split("?")[0] || "index";
-      if (hrefPage === currentPage) {
+      if (matchLink(tile.getAttribute("href") || "")) {
         tile.classList.add("active");
       }
     });
@@ -2391,6 +2453,94 @@
    * ───────────────────────────────────────────── */
   console.log("🚀 APP: Bootstrap started");
   initTheme();
+
+  // Remove page loading state — reveal the page
+  document.body.classList.remove("page-loading");
+  const pageLoaderEl = document.getElementById("pageLoader");
+  if (pageLoaderEl) {
+    pageLoaderEl.classList.add("fade-out");
+    setTimeout(() => pageLoaderEl.remove(), 400);
+  }
+
+  // Apply saved text size globally across all pages
+  (function applyGlobalTextSize() {
+    try {
+      const prefs = JSON.parse(
+        localStorage.getItem("LBS_DASH_SETTINGS") || "{}",
+      );
+      const sizeMap = { small: "14px", medium: "16px", large: "18px" };
+      if (prefs.textSize && sizeMap[prefs.textSize]) {
+        document.documentElement.style.fontSize = sizeMap[prefs.textSize];
+      }
+    } catch (_) {
+      /* ignore */
+    }
+  })();
+
+  // ── Form Persistence (sessionStorage) ──────────────────────────
+  // Saves form inputs on change and restores on reload so users don't lose data.
+  function initFormPersistence() {
+    const key = "LBS_FORM_" + location.pathname.replace(/[^a-zA-Z0-9]/g, "_");
+    const saved = (() => {
+      try {
+        return JSON.parse(sessionStorage.getItem(key) || "{}");
+      } catch {
+        return {};
+      }
+    })();
+
+    // Restore saved values
+    Object.entries(saved).forEach(([id, val]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.type === "radio" || el.type === "checkbox") {
+        el.checked = val === el.value || val === true;
+      } else {
+        el.value = val;
+      }
+      // Trigger change so any dependent logic runs
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Save on user input
+    function save(e) {
+      const el = e.target;
+      if (
+        !el.id ||
+        !(
+          el.tagName === "INPUT" ||
+          el.tagName === "SELECT" ||
+          el.tagName === "TEXTAREA"
+        )
+      )
+        return;
+      // Skip password and sensitive fields
+      if (el.type === "password") return;
+      const data = (() => {
+        try {
+          return JSON.parse(sessionStorage.getItem(key) || "{}");
+        } catch {
+          return {};
+        }
+      })();
+      if (el.type === "radio") {
+        data[el.name + "__radio__" + el.id] = el.checked ? el.value : null;
+        // Also store by name for simpler restore
+        data[el.id] = el.value;
+      } else if (el.type === "checkbox") {
+        data[el.id] = el.checked;
+      } else {
+        data[el.id] = el.value;
+      }
+      try {
+        sessionStorage.setItem(key, JSON.stringify(data));
+      } catch {}
+    }
+
+    document.addEventListener("input", save);
+    document.addEventListener("change", save);
+  }
+
   initHeader();
   initMobileNav();
   initNavActiveState();
@@ -2411,5 +2561,6 @@
   registerServiceWorker();
   initTermsBanner();
   initPostDeliveryReview();
+  initFormPersistence();
   console.log("✅ APP: Bootstrap complete");
 })();
