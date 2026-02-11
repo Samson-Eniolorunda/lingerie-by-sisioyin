@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v9";
+const CACHE_NAME = "lbs-cache-v10";
 const STATIC_ASSETS = [
   "/home",
   "/home.html",

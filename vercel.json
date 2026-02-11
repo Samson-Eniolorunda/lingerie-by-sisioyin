@@ -6,8 +6,12 @@
   "rewrites": [{ "source": "/admin", "destination": "/admin.html" }],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        },
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
@@ -35,6 +39,19 @@
         {
           "key": "X-DNS-Prefetch-Control",
           "value": "on"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
         }
       ]
     },
