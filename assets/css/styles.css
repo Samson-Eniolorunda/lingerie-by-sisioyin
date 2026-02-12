@@ -254,7 +254,6 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  scrollbar-gutter: stable;
 }
 
 body {
@@ -12850,6 +12849,12 @@ html[data-theme="dark"] .wa-popup-msg {
 .testimonials,
 .cta,
 .footer {
+  overflow: hidden;
+}
+
+.trust-grid,
+.products-grid,
+.categories-showcase {
   overflow: hidden;
 }
 
