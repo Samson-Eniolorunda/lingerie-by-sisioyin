@@ -2,12 +2,1116 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="refresh" content="0;url=/home" />
-    <title>Redirecting...</title>
-    <link rel="canonical" href="/home" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lingerie by Sisioyin | Premium Lingerie & Loungewear</title>
+    <meta
+      name="description"
+      content="Lingerie by Sisioyin — luxe essentials defined by comfort and confidence. Premium lingerie and loungewear for the modern woman."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="theme-color" content="#be185d" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="author" content="Lingerie by Sisioyin" />
+    <meta
+      name="keywords"
+      content="lingerie, loungewear, underwear, bra, panties, nightwear, Nigeria, Lagos, premium lingerie, comfortable underwear, women lingerie"
+    />
+    <link rel="canonical" href="https://lingeriebysisioyin.store/" />
+
+    <!-- Open Graph -->
+    <meta
+      property="og:title"
+      content="Lingerie by Sisioyin | Premium Lingerie & Loungewear"
+    />
+    <meta
+      property="og:description"
+      content="Luxe essentials defined by comfort and confidence. Premium lingerie and loungewear."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://lingeriebysisioyin.store/" />
+    <meta
+      property="og:image"
+      content="https://lingeriebysisioyin.store/assets/img/og-image.png"
+    />
+    <meta property="og:site_name" content="Lingerie by Sisioyin" />
+    <meta property="og:locale" content="en_NG" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Lingerie by Sisioyin" />
+    <meta
+      name="twitter:description"
+      content="Luxe essentials defined by comfort and confidence. Premium lingerie and loungewear."
+    />
+    <meta name="twitter:image" content="assets/img/og-image.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/img/favicon.png" />
+    <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
+    <link rel="manifest" href="site.webmanifest" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/styles.css" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+      [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Lingerie by Sisioyin",
+          "url": "https://lingeriebysisioyin.store",
+          "logo": "https://lingeriebysisioyin.store/assets/img/logo.png",
+          "description": "Premium lingerie and loungewear curated for comfort and confidence.",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+234-903-334-4860",
+            "contactType": "customer service",
+            "availableLanguage": "English"
+          },
+          "sameAs": ["https://instagram.com/lingeriebysissioyin"]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "Lingerie by Sisioyin",
+          "url": "https://lingeriebysisioyin.store",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://lingeriebysisioyin.store/shop?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          }
+        }
+      ]
+    </script>
   </head>
+
   <body>
-    <p>Redirecting to <a href="/home">home</a>...</p>
+    <!-- Skip Link -->
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page-loader" id="pageLoader">
+      <div class="page-loader-inner">
+        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <p class="page-loader-text"><span></span></p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       HEADER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <header class="header" id="siteHeader">
+      <div class="header-inner">
+        <!-- Logo -->
+        <a href="/home" class="logo">
+          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-text">Lingerie by Sisioyin</span>
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav class="nav" id="mainNav">
+          <a href="/home" class="nav-link active">Home</a>
+          <a href="/shop" class="nav-link">Shop</a>
+          <a href="/shop?gender=Women" class="nav-link">Women</a>
+          <a href="/shop?gender=Men" class="nav-link">Men</a>
+          <a href="/shop?gender=Kids" class="nav-link">Kids</a>
+        </nav>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+          <button
+            type="button"
+            class="header-btn"
+            id="searchToggle"
+            aria-label="Search"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="loginBtn"
+            aria-label="Sign in"
+          >
+            <i class="fa-solid fa-user"></i>
+          </button>
+          <button
+            type="button"
+            class="header-btn"
+            id="cartToggle"
+            data-cart-drawer
+            aria-label="Shopping cart"
+          >
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="badge" data-cart-count>0</span>
+          </button>
+          <button
+            type="button"
+            class="header-btn menu-toggle"
+            id="mobileToggle"
+            aria-label="Menu"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       NEW MOBILE NAVIGATION DRAWER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="mobile-drawer" id="mobileNav">
+      <div class="mobile-drawer-backdrop" id="mobileNavBackdrop"></div>
+      <div class="mobile-drawer-panel">
+        <!-- Drawer Header -->
+        <div class="drawer-header">
+          <a href="/home" class="drawer-logo">
+            <span class="drawer-logo-icon"
+              ><i class="fa-solid fa-heart"></i
+            ></span>
+            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+          </a>
+          <button
+            type="button"
+            class="drawer-close"
+            id="mobileNavClose"
+            aria-label="Close menu"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Drawer Content -->
+        <div class="drawer-content">
+          <!-- User Section -->
+          <a href="/dashboard" class="drawer-user">
+            <span class="drawer-user-avatar"
+              ><i class="fa-solid fa-user"></i
+            ></span>
+            <span class="drawer-user-info">
+              <span class="drawer-user-name">My Account</span>
+              <span class="drawer-user-email">Sign in for best experience</span>
+            </span>
+            <i class="fa-solid fa-chevron-right drawer-user-arrow"></i>
+          </a>
+
+          <!-- Main Navigation -->
+          <nav class="drawer-nav">
+            <span class="drawer-nav-title">Menu</span>
+            <div class="drawer-nav-list">
+              <a href="/home" class="drawer-nav-link active">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-home"></i
+                ></span>
+                Home
+              </a>
+              <a href="/shop" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-store"></i
+                ></span>
+                Shop All
+              </a>
+              <a href="/shop?is_new=true" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-wand-magic-sparkles"></i
+                ></span>
+                New Arrivals
+                <span class="drawer-nav-badge">New</span>
+              </a>
+              <a href="/cart" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-bag-shopping"></i
+                ></span>
+                Cart
+                <span class="drawer-nav-badge" data-cart-count>0</span>
+              </a>
+              <a href="/wishlist" class="drawer-nav-link">
+                <span class="drawer-nav-icon"
+                  ><i class="fa-solid fa-heart"></i
+                ></span>
+                Wishlist
+              </a>
+            </div>
+          </nav>
+
+          <!-- Categories -->
+          <div class="drawer-categories">
+            <span class="drawer-nav-title">Categories</span>
+            <div class="drawer-categories-grid">
+              <a href="/shop?gender=Women" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-venus"></i
+                ></span>
+                <span class="drawer-category-label">Women</span>
+              </a>
+              <a href="/shop?gender=Men" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-mars"></i
+                ></span>
+                <span class="drawer-category-label">Men</span>
+              </a>
+              <a href="/shop?gender=Kids" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-child"></i
+                ></span>
+                <span class="drawer-category-label">Kids</span>
+              </a>
+              <a href="/shop?category=Lingerie" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-gem"></i
+                ></span>
+                <span class="drawer-category-label">Lingerie</span>
+              </a>
+              <a href="/shop?category=Loungewear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-couch"></i
+                ></span>
+                <span class="drawer-category-label">Lounge</span>
+              </a>
+              <a href="/shop?category=Underwear" class="drawer-category">
+                <span class="drawer-category-icon"
+                  ><i class="fa-solid fa-shirt"></i
+                ></span>
+                <span class="drawer-category-label">Underwear</span>
+              </a>
+            </div>
+          </div>
+
+          <!-- Support Links -->
+          <div class="drawer-support">
+            <span class="drawer-nav-title">Support</span>
+            <div class="drawer-support-links">
+              <a href="/faq" class="drawer-support-link">FAQs</a>
+              <a href="/size" class="drawer-support-link">Size Guide</a>
+              <a href="/contact" class="drawer-support-link">Contact</a>
+              <a href="/terms" class="drawer-support-link">Terms</a>
+              <a href="/privacy" class="drawer-support-link">Privacy</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="drawer-footer">
+          <div class="drawer-theme" id="mobileThemeToggle">
+            <i class="fa-solid fa-sun"></i>
+            <button
+              type="button"
+              class="drawer-theme-toggle theme-btn"
+              id="themeSlider"
+              role="switch"
+              aria-checked="false"
+              aria-label="Toggle dark mode"
+              data-theme="toggle"
+            ></button>
+            <i class="fa-solid fa-moon"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <main id="main">
+      <!-- ─── NEW HERO SECTION ─── -->
+      <section class="hero-new">
+        <div class="hero-decor-circle c1"></div>
+        <div class="hero-decor-circle c2"></div>
+
+        <div class="container">
+          <div class="hero-grid">
+            <!-- Text Content -->
+            <div class="hero-text">
+              <span class="hero-eyebrow">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                New Collection 2026
+              </span>
+              <h1 class="hero-heading">
+                Confidence in
+                <span class="hero-heading-highlight">Every Stitch</span>
+              </h1>
+              <p class="hero-subtext">
+                Premium lingerie and loungewear curated for comfort. Experience
+                luxury that celebrates your unique beauty and empowers your
+                confidence.
+              </p>
+              <div class="hero-buttons">
+                <a href="/shop" class="hero-btn-primary">
+                  Shop Collection <i class="fa-solid fa-arrow-right"></i>
+                </a>
+                <a href="/shop?is_new=true" class="hero-btn-secondary">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i> New Arrivals
+                </a>
+              </div>
+            </div>
+
+            <!-- Hero Image -->
+            <div class="hero-media">
+              <div class="hero-image-container">
+                <div class="hero-image-frame">
+                  <div class="hero-skeleton" id="heroSkeleton"></div>
+                  <img
+                    id="heroImage"
+                    src=""
+                    alt="Premium lingerie collection"
+                    class="hero-main-image"
+                    loading="eager"
+                    data-dynamic="hero"
+                    style="opacity: 0; transition: opacity 0.5s"
+                    onload="
+                      this.style.opacity = 1;
+                      var s = document.getElementById('heroSkeleton');
+                      if (s) s.style.display = 'none';
+                    "
+                  />
+                </div>
+
+                <!-- Floating Cards -->
+                <div class="hero-float-card top">
+                  <span class="hero-float-icon"
+                    ><i class="fa-solid fa-heart"></i
+                  ></span>
+                  <div class="hero-float-content">
+                    <span class="hero-float-label">Quality</span>
+                    <span class="hero-float-value">Premium</span>
+                  </div>
+                </div>
+
+                <div class="hero-float-card bottom">
+                  <span class="hero-float-icon"
+                    ><i class="fa-solid fa-star"></i
+                  ></span>
+                  <div class="hero-float-content">
+                    <span class="hero-float-label">Happy Customers</span>
+                    <span class="hero-float-value">500+</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TRUST BADGES ─── -->
+      <section class="trust-section scroll-fade-up">
+        <div class="container">
+          <div class="trust-grid scroll-stagger">
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-solid fa-truck-fast"></i>
+              </div>
+              <h3 class="trust-title">Fast Delivery</h3>
+              <p class="trust-text">Nationwide shipping</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-solid fa-certificate"></i>
+              </div>
+              <h3 class="trust-title">Quality Assured</h3>
+              <p class="trust-text">Premium materials</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-solid fa-rotate-left"></i>
+              </div>
+              <h3 class="trust-title">Easy Returns</h3>
+              <p class="trust-text">7-day return policy</p>
+            </div>
+            <div class="trust-item">
+              <div class="trust-icon">
+                <i class="fa-brands fa-whatsapp"></i>
+              </div>
+              <h3 class="trust-title">24/7 Support</h3>
+              <p class="trust-text">WhatsApp care</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── NEW ARRIVALS SECTION ─── -->
+      <section class="products-section section">
+        <div class="container">
+          <div class="section-header scroll-fade-up">
+            <div>
+              <span class="section-label">Fresh Picks</span>
+              <h2 class="section-title">New Arrivals</h2>
+              <p class="section-subtitle">
+                Discover our latest collection of premium lingerie
+              </p>
+            </div>
+            <div class="section-actions">
+              <a href="/shop?is_new=true" class="btn btn-outline">
+                View All <i class="fa-solid fa-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="products-grid" id="newArrivalsGrid" data-home-products>
+            <!-- Products loaded dynamically -->
+          </div>
+
+          <div class="loading-state" id="homeLoading">
+            <div class="arrivals-loader">
+              <span></span><span></span><span></span>
+            </div>
+            <p>Curating your picks…</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── NEW CATEGORIES SECTION ─── -->
+      <section class="categories-new">
+        <div class="container">
+          <div class="categories-header scroll-fade-up">
+            <span class="categories-label">Browse By</span>
+            <h2 class="categories-title">Shop Categories</h2>
+            <p class="categories-subtitle">
+              Explore our curated collections designed for every occasion
+            </p>
+          </div>
+
+          <div class="categories-showcase scroll-stagger">
+            <a href="/shop?category=Lingerie" class="category-showcase-card">
+              <div class="category-showcase-image">
+                <div class="category-skeleton" id="catSkelLingerie"></div>
+                <img
+                  id="categoryLingerieImage"
+                  src=""
+                  alt="Lingerie Collection"
+                  loading="lazy"
+                  data-dynamic="category-lingerie"
+                  style="opacity: 0; transition: opacity 0.5s"
+                  onload="
+                    this.style.opacity = 1;
+                    var s = document.getElementById('catSkelLingerie');
+                    if (s) s.style.display = 'none';
+                  "
+                />
+              </div>
+              <div class="category-showcase-overlay"></div>
+              <div class="category-showcase-content">
+                <h3 class="category-showcase-name">Lingerie</h3>
+                <p class="category-showcase-count">Elegant & Sensual</p>
+                <span class="category-showcase-btn">
+                  Explore <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </a>
+
+            <a href="/shop?category=Loungewear" class="category-showcase-card">
+              <div class="category-showcase-image">
+                <div class="category-skeleton" id="catSkelLoungewear"></div>
+                <img
+                  id="categoryLoungewearImage"
+                  src=""
+                  alt="Loungewear Collection"
+                  loading="lazy"
+                  data-dynamic="category-loungewear"
+                  style="opacity: 0; transition: opacity 0.5s"
+                  onload="
+                    this.style.opacity = 1;
+                    var s = document.getElementById('catSkelLoungewear');
+                    if (s) s.style.display = 'none';
+                  "
+                />
+              </div>
+              <div class="category-showcase-overlay"></div>
+              <div class="category-showcase-content">
+                <h3 class="category-showcase-name">Loungewear</h3>
+                <p class="category-showcase-count">Comfort & Style</p>
+                <span class="category-showcase-btn">
+                  Explore <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </a>
+
+            <a href="/shop?category=Underwear" class="category-showcase-card">
+              <div class="category-showcase-image">
+                <div class="category-skeleton" id="catSkelUnderwear"></div>
+                <img
+                  id="categoryUnderwearImage"
+                  src=""
+                  alt="Underwear Collection"
+                  loading="lazy"
+                  data-dynamic="category-underwear"
+                  style="opacity: 0; transition: opacity 0.5s"
+                  onload="
+                    this.style.opacity = 1;
+                    var s = document.getElementById('catSkelUnderwear');
+                    if (s) s.style.display = 'none';
+                  "
+                />
+              </div>
+              <div class="category-showcase-overlay"></div>
+              <div class="category-showcase-content">
+                <h3 class="category-showcase-name">Underwear</h3>
+                <p class="category-showcase-count">Everyday Essentials</p>
+                <span class="category-showcase-btn">
+                  Explore <i class="fa-solid fa-arrow-right"></i>
+                </span>
+              </div>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── TESTIMONIALS SECTION ─── -->
+      <section class="testimonials section">
+        <div class="container">
+          <div class="section-header scroll-fade-up">
+            <div class="section-header-centered">
+              <span class="section-label">What Our Customers Say</span>
+              <h2 class="section-title">Customer Reviews</h2>
+              <p class="section-subtitle">
+                Real reviews from our valued customers
+              </p>
+            </div>
+          </div>
+
+          <div class="testimonials-grid" id="testimonialsGrid">
+            <div class="loading-state">
+              <div class="loading-spinner"></div>
+              <p>Loading reviews...</p>
+            </div>
+          </div>
+
+          <div class="wishlist-empty" id="testimonialsEmpty" class="u-hidden">
+            <div class="wishlist-empty-icon">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <h3>No Reviews Yet</h3>
+            <p>Be the first to share your experience!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ─── CTA SECTION ─── -->
+      <section class="cta section scroll-scale">
+        <div class="container">
+          <div class="cta-inner">
+            <h2 class="cta-title">Ready to Feel Confident?</h2>
+            <p class="cta-text">
+              Explore our complete collection of premium lingerie and loungewear
+              designed for the modern woman.
+            </p>
+            <a href="/shop" class="btn btn-lg">
+              Explore Collection <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       QUICK VIEW MODAL - Content is dynamically generated by shop.js
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div id="productModal" hidden></div>
+
+    <!-- Cart Drawer -->
+    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
+      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+        <div class="cd-header">
+          <h3 class="cd-title">
+            <i class="fa-solid fa-bag-shopping"></i> Your Cart
+          </h3>
+          <button
+            type="button"
+            class="cd-close"
+            id="closeCartDrawer"
+            aria-label="Close cart"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="cd-body" id="cartDrawerBody">
+          <div class="cd-empty" id="cartEmpty">
+            <div class="cd-empty-icon">
+              <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h3>Your cart is empty</h3>
+            <p>Add items to your cart to checkout</p>
+            <a href="/shop" class="btn btn-primary">Start Shopping</a>
+          </div>
+        </div>
+        <div class="cd-footer u-hidden" id="cartDrawerFooter">
+          <div class="cd-subtotal">
+            <span class="cd-subtotal-label">Subtotal</span>
+            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
+          </div>
+          <p class="cd-note">Shipping calculated at checkout</p>
+          <a href="/checkout" class="cd-checkout-btn">
+            <i class="fa-solid fa-lock"></i> Proceed to Checkout
+          </a>
+          <button
+            type="button"
+            class="cd-continue-btn"
+            id="continueShoppingBtn"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" data-toast></div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FOOTER
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <!-- Brand -->
+          <div class="footer-brand">
+            <a href="/home" class="logo">
+              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-text">Lingerie by Sisioyin</span>
+            </a>
+            <p>
+              Luxe essentials defined by comfort and confidence. Premium
+              lingerie and loungewear for the modern woman.
+            </p>
+            <div class="footer-social">
+              <a
+                href="https://instagram.com/lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                ><i class="fa-brands fa-instagram"></i
+              ></a>
+              <a
+                href="https://tiktok.com/@lingeriebysissioyin"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                ><i class="fa-brands fa-tiktok"></i
+              ></a>
+              <a
+                href="https://wa.me/2349033344860"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+              >
+                <i class="fa-brands fa-whatsapp"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Shop Links -->
+          <div>
+            <h4 class="footer-title">Shop</h4>
+            <nav class="footer-links">
+              <a href="/shop">All Products</a>
+              <a href="/shop?category=Lingerie">Lingerie</a>
+              <a href="/shop?category=Loungewear">Loungewear</a>
+              <a href="/shop?is_new=true">New Arrivals</a>
+            </nav>
+          </div>
+
+          <!-- Help Links -->
+          <div>
+            <h4 class="footer-title">Help</h4>
+            <nav class="footer-links">
+              <a href="/dashboard">My Account</a>
+              <a href="/track">Track Order</a>
+              <a href="/faq">FAQs</a>
+              <a href="/size">Size Guide</a>
+              <a href="/contact">Contact Us</a>
+            </nav>
+          </div>
+
+          <!-- Legal Links -->
+          <div>
+            <h4 class="footer-title">Legal</h4>
+            <nav class="footer-links">
+              <a href="/terms">Terms of Service</a>
+              <a href="/privacy">Privacy Policy</a>
+            </nav>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p class="footer-copyright">
+            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            rights reserved.
+          </p>
+
+          <!-- Theme Toggle -->
+          <div id="themeToggle">
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="light"
+              aria-label="Light mode"
+            >
+              <i class="fa-solid fa-sun"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="system"
+              aria-label="System theme"
+            >
+              <i class="fa-solid fa-desktop"></i>
+            </button>
+            <button
+              type="button"
+              class="btn btn-icon btn-ghost theme-btn"
+              data-theme="dark"
+              aria-label="Dark mode"
+            >
+              <i class="fa-solid fa-moon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       AUTH MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="modal-backdrop" id="authBackdrop"></div>
+    <div class="modal auth-modal" id="authModal">
+      <button
+        type="button"
+        class="auth-modal-close"
+        id="authClose"
+        aria-label="Close"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+
+      <!-- Decorative header -->
+      <div class="auth-hero">
+        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
+        <p class="auth-hero-sub" id="authHeroSub">
+          Sign in to your account to continue
+        </p>
+      </div>
+
+      <div class="modal-body">
+        <!-- Auth Tabs -->
+        <div class="auth-tabs" id="authTabs">
+          <button type="button" class="auth-tab active" data-tab="login">
+            <i class="fa-solid fa-right-to-bracket"></i> Login
+          </button>
+          <button type="button" class="auth-tab" data-tab="signup">
+            <i class="fa-solid fa-user-plus"></i> Register
+          </button>
+          <span class="auth-tab-indicator"></span>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth-form active" id="loginForm" novalidate>
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input
+                type="email"
+                id="loginEmail"
+                name="email"
+                class="form-input"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                class="form-input"
+                placeholder="Password"
+                autocomplete="current-password"
+                required
+              />
+            </div>
+          </div>
+          <div class="auth-forgot">
+            <a href="#" id="forgotPasswordLink" class="auth-forgot-link"
+              >Forgot password?</a
+            >
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
+          </div>
+          <button type="submit" class="auth-submit-btn btn-disabled" disabled>
+            <span>Sign In</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button type="button" class="auth-google-btn google-login-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
+            </svg>
+            Continue with Google
+          </button>
+        </form>
+
+        <!-- Signup Form -->
+        <form class="auth-form" id="signupForm" novalidate>
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-user auth-input-icon"></i>
+              <input
+                type="text"
+                id="signupName"
+                name="fullName"
+                class="form-input"
+                placeholder="Full Name"
+                autocomplete="name"
+                required
+              />
+            </div>
+          </div>
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-envelope auth-input-icon"></i>
+              <input
+                type="email"
+                id="signupEmail"
+                name="email"
+                class="form-input"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+              />
+            </div>
+          </div>
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                class="form-input"
+                placeholder="Create Password"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
+            </div>
+          </div>
+          <div class="auth-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="signupConfirm"
+                name="confirmPassword"
+                class="form-input"
+                placeholder="Confirm Password"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
+            </div>
+          </div>
+          <div class="form-group recaptcha-field">
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
+          </div>
+          <button type="submit" class="auth-submit-btn btn-disabled" disabled>
+            <span>Create Account</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          <div class="auth-divider">or continue with</div>
+          <button type="button" class="auth-google-btn google-login-btn">
+            <svg viewBox="0 0 24 24" width="18" height="18">
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
+            </svg>
+            Continue with Google
+          </button>
+        </form>
+
+        <p class="auth-legal">
+          By continuing, you agree to our
+          <a href="/terms">Terms</a> and
+          <a href="/privacy">Privacy Policy</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       FORGOT PASSWORD MODAL
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="forgot-modal-backdrop" id="forgotBackdrop"></div>
+    <div class="forgot-modal" id="forgotModal">
+      <div class="forgot-modal-hero">
+        <button
+          type="button"
+          class="forgot-modal-close"
+          id="forgotClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="forgot-modal-icon"><i class="fa-solid fa-key"></i></div>
+        <h2 class="forgot-modal-title">Reset Password</h2>
+        <p class="forgot-modal-sub">We'll send you a reset link</p>
+      </div>
+      <div class="forgot-modal-body">
+        <div class="forgot-form-view">
+          <form id="forgotForm" novalidate>
+            <div class="forgot-modal-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-envelope auth-input-icon"></i>
+                <input
+                  type="email"
+                  id="forgotEmail"
+                  class="form-input"
+                  placeholder="Enter your email address"
+                  autocomplete="email"
+                  required
+                />
+              </div>
+            </div>
+            <button type="submit" class="forgot-modal-submit">
+              <i class="fa-solid fa-paper-plane"></i> Send Reset Link
+            </button>
+          </form>
+          <button type="button" class="forgot-modal-back" id="forgotBack">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sign In
+          </button>
+        </div>
+        <div class="forgot-success-view">
+          <div class="forgot-success">
+            <div class="forgot-success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <h3>Check your email</h3>
+            <p>
+              We've sent a password reset link to
+              <strong id="forgotSuccessEmail"></strong>. Check your inbox and
+              follow the instructions.
+            </p>
+          </div>
+          <button
+            type="button"
+            class="forgot-modal-back"
+            onclick="
+              document
+                .getElementById('forgotBackdrop')
+                ?.classList.remove('active');
+              document
+                .getElementById('forgotModal')
+                ?.classList.remove('active');
+            "
+          >
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SEARCH OVERLAY
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="search-overlay" id="searchOverlay">
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for products..."
+            autocomplete="off"
+          />
+          <button
+            type="button"
+            class="search-close"
+            id="searchClose"
+            aria-label="Close search"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="search-results" id="searchResults">
+          <div class="search-placeholder">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <p>Start typing to search products...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       SCRIPTS
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <script src="assets/js/recaptcha.js"></script>
+    <script
+      src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
+      async
+      defer
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      defer
+    ></script>
+    <script src="assets/js/config.js" defer></script>
+    <script src="assets/js/utils.js" defer></script>
+    <script src="assets/js/supabase.js" defer></script>
+    <script src="assets/js/app.js" defer></script>
+    <script src="assets/js/auth.js" defer></script>
+    <script src="assets/js/shop.js" defer></script>
+    <script src="assets/js/analytics.js" defer></script>
+    <script src="assets/js/home.js" defer></script>
   </body>
 </html>
