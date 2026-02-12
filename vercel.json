@@ -2,8 +2,11 @@
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [{ "source": "/", "destination": "/home", "permanent": false }],
-  "rewrites": [{ "source": "/admin", "destination": "/admin.html" }],
+  "redirects": [],
+  "rewrites": [
+    { "source": "/", "destination": "/home" },
+    { "source": "/admin", "destination": "/admin.html" }
+  ],
   "headers": [
     {
       "source": "/((?!assets/).*)",
