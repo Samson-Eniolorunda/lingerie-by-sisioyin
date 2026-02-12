@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Python virtual environment
+.venv/
+
 # Environment files - NEVER commit these
 .env
 .env.local
@@ -39,14 +42,12 @@ ROLE_PERMISSIONS.md
 
 # Database schema / SQL dumps
 *.sql
-supabase/order_email_trigger.sql
 
 # Environment examples
 .env.example
 
-# Supabase local temp files
-supabase/.temp/
-supabase/config.toml
+# Supabase (edge functions, config, SQL, temp files)
+supabase/
 nul
 
 # Local dev server config
