@@ -2,7 +2,7 @@
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [{ "source": "/", "destination": "/home", "permanent": true }],
+  "redirects": [{ "source": "/", "destination": "/home", "permanent": false }],
   "rewrites": [{ "source": "/admin", "destination": "/admin.html" }],
   "headers": [
     {
