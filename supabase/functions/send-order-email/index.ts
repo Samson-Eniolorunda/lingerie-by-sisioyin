@@ -12,7 +12,6 @@ const ADMIN_EMAIL = "adelugbaoyindamola@lingeriebysisioyin.store";
 const FROM_EMAIL = "orders@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
-const REPLY_DOMAIN = "reply.lingeriebysisioyin.store";
 const SUPABASE_URL =
   Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -710,7 +709,7 @@ serve(async (req: Request) => {
     }
 
     // 2. Send confirmation email to customer with tagged reply-to
-    const orderReplyTo = `reply+${orderMsgId}@${REPLY_DOMAIN}`;
+    const orderReplyTo = `support+${orderMsgId}@lingeriebysisioyin.store`;
     if (order.customer_email) {
       const customerResult = await sendEmail(
         order.customer_email,

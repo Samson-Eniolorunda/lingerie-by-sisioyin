@@ -11,7 +11,6 @@ const FROM_EMAIL = "contact@lingeriebysisioyin.store";
 const ADMIN_EMAIL = "support@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
-const REPLY_DOMAIN = "reply.lingeriebysisioyin.store";
 
 interface ContactMessage {
   id: string;
@@ -205,7 +204,9 @@ serve(async (req: Request) => {
 
     // Build tagged reply-to so customer replies route back to the thread
     const msgId = msg.id || "";
-    const replyTo = msgId ? `reply+${msgId}@${REPLY_DOMAIN}` : ADMIN_EMAIL;
+    const replyTo = msgId
+      ? `support+${msgId}@lingeriebysisioyin.store`
+      : ADMIN_EMAIL;
 
     // 1) Send auto-reply to customer
     const replyRes = await fetch("https://api.resend.com/emails", {

@@ -1,0 +1,16 @@
+{
+  "name": "lbs-email-reply-worker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cloudflare Email Worker — catches customer email replies and forwards to Supabase",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "dependencies": {
+    "postal-mime": "^2.3.2"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}
