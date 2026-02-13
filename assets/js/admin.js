@@ -6736,6 +6736,7 @@
     on($("#msgDeleteBtn"), "click", deleteMessage);
     on($("#msgMarkUnreadBtn"), "click", markAsUnread);
     on($("#inboxBackBtn"), "click", inboxGoBack);
+  }
 
   document.addEventListener("DOMContentLoaded", init);
 })();
