@@ -80,6 +80,10 @@ function replyEmailHTML(payload: ReplyPayload): string {
                 &#128172; Chat on WhatsApp
               </a>
             </p>
+            <p style="margin:16px 0 0;text-align:center;color:#94a3b8;font-size:11.5px;line-height:1.5;">
+              For the fastest response, please use WhatsApp or our
+              <a href="${SITE_URL}/contact.html" style="color:#be185d;text-decoration:none;">contact form</a>.
+            </p>
           </td>
         </tr>
 

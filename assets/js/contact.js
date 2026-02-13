@@ -40,16 +40,35 @@
         '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
       try {
-        // Try to save to Supabase if available
+        // Save to Supabase
+        let savedRecord = null;
         if (window.DB?.client) {
-          const { error } = await window.DB.client
+          const { data, error } = await window.DB.client
             .from("contact_messages")
-            .insert([formData]);
+            .insert([formData])
+            .select()
+            .single();
 
           if (error) {
             console.error("Supabase error:", error);
-            // Fall through to WhatsApp fallback
+          } else {
+            savedRecord = data;
           }
+        }
+
+        // Trigger email auto-reply + admin notification (fire-and-forget)
+        try {
+          const edgePayload = savedRecord || formData;
+          fetch(
+            "https://oriojylsilcsvcsefuux.supabase.co/functions/v1/send-contact-email",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(edgePayload),
+            },
+          ).catch((e) => console.warn("Edge function call failed:", e));
+        } catch (e) {
+          console.warn("Edge function error:", e);
         }
 
         // Show success
