@@ -9,6 +9,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const DEFAULT_FROM_EMAIL = "support@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
+const REPLY_DOMAIN = "reply.lingeriebysisioyin.store";
 
 const ALLOWED_FROM_EMAILS = [
   "support@lingeriebysisioyin.store",
@@ -146,7 +147,9 @@ serve(async (req: Request) => {
         to: [payload.recipientEmail],
         subject: `Re: ${payload.originalSubject} — ${BRAND}`,
         html: replyEmailHTML(payload),
-        reply_to: fromEmail,
+        reply_to: payload.messageId
+          ? `reply+${payload.messageId}@${REPLY_DOMAIN}`
+          : fromEmail,
       }),
     });
 

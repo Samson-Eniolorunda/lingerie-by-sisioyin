@@ -12,6 +12,7 @@ const ADMIN_EMAIL = "adelugbaoyindamola@lingeriebysisioyin.store";
 const FROM_EMAIL = "orders@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
+const REPLY_DOMAIN = "reply.lingeriebysisioyin.store";
 const SUPABASE_URL =
   Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -518,20 +519,24 @@ async function sendEmail(
   to: string,
   subject: string,
   html: string,
+  replyTo?: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    const payload: Record<string, unknown> = {
+      from: `${BRAND} <${FROM_EMAIL}>`,
+      to: [to],
+      subject,
+      html,
+    };
+    if (replyTo) payload.reply_to = replyTo;
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: `${BRAND} <${FROM_EMAIL}>`,
-        to: [to],
-        subject,
-        html,
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -621,7 +626,9 @@ serve(async (req: Request) => {
       try {
         if (SUPABASE_SERVICE_KEY) {
           const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+          const statusMsgId = crypto.randomUUID();
           await sb.from("contact_messages").insert({
+            id: statusMsgId,
             name: order.customer_name,
             email: order.customer_email || "no-email@order.local",
             phone: order.customer_phone || "",
@@ -675,33 +682,10 @@ serve(async (req: Request) => {
 
     // ── NEW ORDER (INSERT) ──
 
-    // 1. Send confirmation email to customer (if they provided an email)
-    if (order.customer_email) {
-      const customerResult = await sendEmail(
-        order.customer_email,
-        `Order Confirmed – ${order.order_number} | ${BRAND}`,
-        customerEmailHTML(order),
-      );
-      results.customer = customerResult.success
-        ? "sent"
-        : `failed: ${customerResult.error}`;
-    } else {
-      results.customer = "skipped (no email)";
-    }
+    // Generate ID for contact_messages first (needed for reply-to tagging)
+    const orderMsgId = crypto.randomUUID();
 
-    // 2. Send notification email to admin
-    const adminResult = await sendEmail(
-      ADMIN_EMAIL,
-      `🛒 New Order ${order.order_number} – ${formatNaira(order.total)}`,
-      adminEmailHTML(order),
-    );
-    results.admin = adminResult.success
-      ? "sent"
-      : `failed: ${adminResult.error}`;
-
-    console.log("Email results:", results);
-
-    // 3. Save order notification to contact_messages (appears in admin Messages tab)
+    // 1. Save order notification to contact_messages (appears in admin Messages tab)
     try {
       if (SUPABASE_SERVICE_KEY) {
         const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
@@ -709,6 +693,7 @@ serve(async (req: Request) => {
           .map((i: OrderItem) => `${i.name} x${i.qty}`)
           .join(", ");
         await sb.from("contact_messages").insert({
+          id: orderMsgId,
           name: order.customer_name,
           email: order.customer_email || "no-email@order.local",
           phone: order.customer_phone || "",
@@ -723,6 +708,34 @@ serve(async (req: Request) => {
     } catch (e) {
       console.warn("Failed to save order to contact_messages:", e);
     }
+
+    // 2. Send confirmation email to customer with tagged reply-to
+    const orderReplyTo = `reply+${orderMsgId}@${REPLY_DOMAIN}`;
+    if (order.customer_email) {
+      const customerResult = await sendEmail(
+        order.customer_email,
+        `Order Confirmed – ${order.order_number} | ${BRAND}`,
+        customerEmailHTML(order),
+        orderReplyTo,
+      );
+      results.customer = customerResult.success
+        ? "sent"
+        : `failed: ${customerResult.error}`;
+    } else {
+      results.customer = "skipped (no email)";
+    }
+
+    // 3. Send notification email to admin
+    const adminResult = await sendEmail(
+      ADMIN_EMAIL,
+      `🛒 New Order ${order.order_number} – ${formatNaira(order.total)}`,
+      adminEmailHTML(order),
+    );
+    results.admin = adminResult.success
+      ? "sent"
+      : `failed: ${adminResult.error}`;
+
+    console.log("Email results:", results);
 
     // 4. Send WhatsApp notification to admin (fire-and-forget)
     try {

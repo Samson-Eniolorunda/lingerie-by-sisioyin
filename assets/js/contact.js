@@ -40,6 +40,10 @@
         '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
 
       try {
+        // Generate a stable UUID so reply-to tagging works
+        const messageId = crypto.randomUUID();
+        formData.id = messageId;
+
         // Save to Supabase
         let savedRecord = null;
         if (window.DB?.client) {

@@ -6617,16 +6617,30 @@
       }
 
       container.innerHTML = data
-        .map(
-          (r) => `
-        <div class="inbox-bubble inbox-bubble--admin">
+        .map((r) => {
+          const isCustomer = r.sender_type === "customer";
+          const bubbleClass = isCustomer
+            ? "inbox-bubble--customer"
+            : "inbox-bubble--admin";
+          const icon = isCustomer
+            ? '<i class="fa-solid fa-envelope" style="margin-right:4px;font-size:10px"></i>'
+            : '<i class="fa-solid fa-reply" style="margin-right:4px;font-size:10px"></i>';
+          const authorName = isCustomer ? r.sender_name || "Customer" : "Admin";
+          const timeStr = new Date(r.created_at).toLocaleString("en-NG", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return `
+        <div class="inbox-bubble ${bubbleClass}">
           <div class="inbox-bubble__meta">
-            <span class="inbox-bubble__author"><i class="fa-solid fa-reply" style="margin-right:4px;font-size:10px"></i>Admin</span>
-            <span class="inbox-bubble__time">${new Date(r.created_at).toLocaleString("en-NG", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+            <span class="inbox-bubble__author">${icon}${escapeHtml(authorName)}</span>
+            <span class="inbox-bubble__time">${timeStr}</span>
           </div>
           <div class="inbox-bubble__text">${escapeHtml(r.reply_text || r.body || "")}</div>
-        </div>`,
-        )
+        </div>`;
+        })
         .join("");
     } catch (err) {
       console.error("[loadReplyThread]", err);
