@@ -2397,8 +2397,19 @@
                   <!-- Original message -->
                   <div
                     class="inbox-bubble inbox-bubble--customer"
-                    id="msgDetailBody"
-                  ></div>
+                    id="msgDetailBubble"
+                  >
+                    <div class="inbox-bubble__meta">
+                      <span class="inbox-bubble__author" id="msgBubbleAuthor"
+                        >Customer</span
+                      >
+                      <span
+                        class="inbox-bubble__time"
+                        id="msgBubbleTime"
+                      ></span>
+                    </div>
+                    <div class="inbox-bubble__text" id="msgDetailBody"></div>
+                  </div>
                   <!-- Reply thread populated by JS -->
                   <div id="msgReplyThread"></div>
                 </div>
@@ -2425,8 +2436,8 @@
                     <textarea
                       class="inbox-compose-textarea"
                       id="msgReplyText"
-                      rows="4"
-                      placeholder="Write your reply..."
+                      rows="2"
+                      placeholder="Type a message..."
                     ></textarea>
                   </div>
                   <div class="inbox-compose-footer">

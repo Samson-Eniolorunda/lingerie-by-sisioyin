@@ -3539,6 +3539,24 @@ html[data-theme="dark"] {
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.4);
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
+/* Dark mode overrides for chat */
+html[data-theme="dark"] .inbox-thread,
+html[data-theme="dark"] .inbox-compose {
+  background: #0d1117;
+}
+html[data-theme="dark"] .inbox-bubble--customer {
+  background: #1a1a24;
+  border-color: #2d2d3a;
+  color: #f8fafc;
+}
+html[data-theme="dark"] .inbox-compose-textarea {
+  background: #1a1a24;
+  color: #f8fafc;
+  border-color: #2d2d3a;
+}
+html[data-theme="dark"] .inbox-compose-textarea:focus {
+  background: #1a1a24;
+}
 
 /* =============================================================================
    19. RESPONSIVE BREAKPOINTS
@@ -7787,35 +7805,36 @@ select {
   color: var(--clr-primary);
 }
 
-/* Conversation Thread */
+/* Conversation Thread — WhatsApp style */
 .inbox-thread {
   flex: 1;
   overflow-y: auto;
-  padding: 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 6px;
   min-height: 0;
+  background: #f0f2f5;
   scrollbar-width: thin;
   scrollbar-color: rgba(190, 24, 93, 0.1) transparent;
 }
 
-/* Chat Bubbles */
+/* Chat Bubbles — WhatsApp Style */
 .inbox-bubble {
-  max-width: 80%;
-  padding: 12px 16px;
-  border-radius: 14px;
-  line-height: 1.6;
+  max-width: 65%;
+  padding: 6px 10px 8px;
+  border-radius: 8px;
+  line-height: 1.45;
   font-size: 13px;
   white-space: pre-wrap;
   word-break: break-word;
   position: relative;
-  animation: bubbleIn 0.2s ease;
+  animation: bubbleIn 0.15s ease;
 }
 @keyframes bubbleIn {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -7824,55 +7843,56 @@ select {
 }
 .inbox-bubble--customer {
   align-self: flex-start;
-  background: var(--bg-surface);
+  background: #fff;
   color: var(--text-primary);
-  border: 1px solid var(--border-light);
-  border-bottom-left-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e5e7eb;
+  border-top-left-radius: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
 }
 .inbox-bubble--admin {
   align-self: flex-end;
   background: var(--clr-primary);
   color: #fff;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 2px 6px rgba(190, 24, 93, 0.15);
+  border-top-right-radius: 2px;
+  box-shadow: 0 1px 2px rgba(190, 24, 93, 0.12);
 }
 .inbox-bubble__meta {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 .inbox-bubble__author {
-  font-weight: 700;
-  font-size: 11.5px;
+  font-weight: 600;
+  font-size: 11px;
 }
 .inbox-bubble--customer .inbox-bubble__author {
-  color: var(--text-primary);
+  color: var(--clr-primary);
 }
 .inbox-bubble--admin .inbox-bubble__author {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.75);
 }
 .inbox-bubble__time {
   font-size: 10px;
-  opacity: 0.55;
+  opacity: 0.5;
 }
 .inbox-bubble__text {
   word-break: break-word;
+  font-size: 13.5px;
 }
 
-/* Compose Area */
+/* Compose Area — compact like WhatsApp */
 .inbox-compose {
   border-top: 1px solid var(--border-light);
-  background: var(--bg-surface);
-  padding: 12px 20px;
+  background: #f0f2f5;
+  padding: 8px 12px;
   flex-shrink: 0;
 }
 .inbox-compose-from {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 .inbox-compose-from label {
   font-size: 11px;
@@ -7899,48 +7919,49 @@ select {
   cursor: pointer;
 }
 .inbox-compose-editor {
-  margin-bottom: 8px;
+  margin-bottom: 0;
 }
 .inbox-compose-textarea {
   width: 100%;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border: 1px solid var(--border-light);
-  border-radius: 10px;
+  border-radius: 20px;
   font-size: 13px;
   font-family: inherit;
   color: var(--text-primary);
-  background: var(--bg-surface-alt);
+  background: #fff;
   resize: none;
-  min-height: 64px;
-  max-height: 140px;
-  line-height: 1.55;
+  min-height: 40px;
+  max-height: 100px;
+  line-height: 1.45;
   transition: all var(--transition-fast);
 }
 .inbox-compose-textarea:focus {
   outline: none;
   border-color: var(--clr-primary);
-  background: var(--bg-surface);
-  box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.06);
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(190, 24, 93, 0.06);
 }
 .inbox-compose-footer {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 8px;
+  margin-top: 6px;
 }
 .inbox-send-btn {
-  padding: 8px 20px !important;
-  border-radius: var(--radius-full) !important;
+  padding: 7px 16px !important;
+  border-radius: 50px !important;
   font-weight: 600;
-  font-size: 12.5px;
-  box-shadow: 0 2px 6px rgba(190, 24, 93, 0.18);
+  font-size: 12px;
+  box-shadow: 0 1px 3px rgba(190, 24, 93, 0.15);
   transition: all 0.2s ease;
 }
 .inbox-send-btn:hover {
-  box-shadow: 0 4px 14px rgba(190, 24, 93, 0.25);
+  box-shadow: 0 3px 10px rgba(190, 24, 93, 0.2);
   transform: translateY(-1px);
 }
 .inbox-compose-hint {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--text-muted);
 }
 
