@@ -686,6 +686,12 @@
             <span>Customers</span>
           </button>
 
+          <button class="nav-item" data-view-target="messages" type="button">
+            <i class="fa-solid fa-envelope"></i>
+            <span>Messages</span>
+            <span class="nav-badge" id="unreadMessagesBadge" hidden>0</span>
+          </button>
+
           <div class="nav-divider"></div>
 
           <button class="nav-item" id="openInviteModalBtn" type="button">
@@ -1973,6 +1979,116 @@
             </table>
           </div>
         </section>
+        <!-- ═══════════════════════════════════════════════════════════════
+             MESSAGES VIEW
+             ═══════════════════════════════════════════════════════════════ -->
+        <section class="content-view" id="viewMessages">
+          <div class="section-header">
+            <div>
+              <h3>Messages</h3>
+              <p class="text-muted">Contact form submissions &amp; customer inquiries</p>
+            </div>
+            <div class="section-header-actions">
+              <button class="btn btn-outline" id="refreshMessagesBtn" type="button">
+                <i class="fa-solid fa-rotate"></i> Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages Stats -->
+          <div class="messages-stats" id="messagesStats">
+            <div class="stat-card stat-card--mini">
+              <span class="stat-value" id="msgTotalCount">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-card stat-card--mini stat-card--unread">
+              <span class="stat-value" id="msgUnreadCount">0</span>
+              <span class="stat-label">Unread</span>
+            </div>
+            <div class="stat-card stat-card--mini">
+              <span class="stat-value" id="msgRepliedCount">0</span>
+              <span class="stat-label">Replied</span>
+            </div>
+          </div>
+
+          <!-- Messages Filter -->
+          <div class="messages-filter-bar">
+            <div class="filter-group">
+              <select class="form-select" id="msgStatusFilter">
+                <option value="">All Messages</option>
+                <option value="unread">Unread</option>
+                <option value="read">Read</option>
+                <option value="replied">Replied</option>
+              </select>
+              <select class="form-select" id="msgSubjectFilter">
+                <option value="">All Subjects</option>
+                <option value="general">General Inquiry</option>
+                <option value="order">Order Issue</option>
+                <option value="returns">Returns & Exchanges</option>
+                <option value="sizing">Sizing Help</option>
+                <option value="wholesale">Wholesale/Partnerships</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <input type="search" class="form-input" id="msgSearchInput" placeholder="Search messages..." />
+            </div>
+          </div>
+
+          <!-- Messages List -->
+          <div class="messages-list" id="messagesList">
+            <div class="text-center text-muted" style="padding:2rem;">Loading messages...</div>
+          </div>
+
+          <!-- Messages Pagination -->
+          <div class="messages-pagination" id="messagesPagination"></div>
+        </section>
+
+        <!-- ═══ Message Detail / Reply Modal ═══ -->
+        <div class="modal-overlay" id="messageModal" hidden>
+          <div class="modal-box modal-message">
+            <button class="modal-close-x" id="messageModalCloseX" type="button" aria-label="Close">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="message-detail" id="messageDetail">
+              <!-- Header -->
+              <div class="msg-detail-header">
+                <div class="msg-detail-subject" id="msgDetailSubject">Subject</div>
+                <div class="msg-detail-meta">
+                  <span class="msg-detail-date" id="msgDetailDate"></span>
+                  <span class="msg-detail-status" id="msgDetailStatus"></span>
+                </div>
+              </div>
+              <!-- Sender info -->
+              <div class="msg-detail-sender">
+                <div class="msg-sender-avatar" id="msgSenderAvatar">?</div>
+                <div class="msg-sender-info">
+                  <span class="msg-sender-name" id="msgSenderName">Name</span>
+                  <span class="msg-sender-email" id="msgSenderEmail">email@example.com</span>
+                </div>
+                <div class="msg-sender-extras">
+                  <span id="msgSenderPhone"></span>
+                  <span id="msgSenderOrderId"></span>
+                </div>
+              </div>
+              <!-- Original message -->
+              <div class="msg-detail-body" id="msgDetailBody"></div>
+              <!-- Reply thread -->
+              <div class="msg-reply-thread" id="msgReplyThread"></div>
+              <!-- Reply compose -->
+              <div class="msg-reply-compose">
+                <h4><i class="fa-solid fa-reply"></i> Reply</h4>
+                <textarea class="form-textarea" id="msgReplyText" rows="5" placeholder="Type your reply..."></textarea>
+                <div class="msg-reply-actions">
+                  <button class="btn btn-primary" id="msgSendReplyBtn" type="button">
+                    <i class="fa-solid fa-paper-plane"></i> Send Reply
+                  </button>
+                  <span class="msg-reply-note">Reply will be sent as a branded email via Resend</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
 
