@@ -135,6 +135,22 @@ serve(async (req: Request) => {
       console.log("✅ Auto-reply sent to", msg.email);
     }
 
+    // Send WhatsApp notification to admin (fire-and-forget)
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
+      fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "new_message",
+          sender_name: msg.name,
+          sender_email: msg.email,
+          subject: msg.subject,
+          message_preview: (msg.message || "").slice(0, 200),
+        }),
+      }).catch(e => console.warn("WhatsApp notification failed (non-blocking):", e));
+    } catch (e) { console.warn("WhatsApp error:", e); }
+
     return new Response(
       JSON.stringify({ success: true }),
       {

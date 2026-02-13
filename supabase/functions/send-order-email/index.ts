@@ -583,6 +583,21 @@ serve(async (req: Request) => {
         ? "sent"
         : `failed: ${adminResult.error}`;
 
+      // WhatsApp notification for status change (fire-and-forget)
+      try {
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
+        fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "order_status",
+            order_number: order.order_number,
+            customer_name: order.customer_name,
+            status: newStatus,
+          }),
+        }).catch(e => console.warn("WhatsApp status notification failed:", e));
+      } catch (e) { console.warn("WhatsApp error:", e); }
+
       return new Response(
         JSON.stringify({ success: true, event: "status_update", results }),
         {
@@ -619,6 +634,23 @@ serve(async (req: Request) => {
       : `failed: ${adminResult.error}`;
 
     console.log("Email results:", results);
+
+    // 3. Send WhatsApp notification to admin (fire-and-forget)
+    try {
+      const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
+      fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "new_order",
+          order_number: order.order_number,
+          customer_name: order.customer_name,
+          total: order.total,
+          items_count: (order.items || []).length,
+          payment_method: order.payment_method,
+        }),
+      }).catch(e => console.warn("WhatsApp notification failed (non-blocking):", e));
+    } catch (e) { console.warn("WhatsApp fire-and-forget error:", e); }
 
     return new Response(
       JSON.stringify({ success: true, event: "new_order", results }),

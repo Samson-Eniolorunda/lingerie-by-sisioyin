@@ -2141,222 +2141,136 @@
           </div>
         </section>
         <!-- ═══════════════════════════════════════════════════════════════
-             MESSAGES VIEW
+             MESSAGES VIEW — Split-pane Inbox
              ═══════════════════════════════════════════════════════════════ -->
         <section class="content-view" id="viewMessages">
-          <div class="section-header">
-            <div>
-              <h3><i class="fa-solid fa-envelope"></i> Messages</h3>
-              <p class="text-muted">
-                Contact form submissions &amp; customer inquiries
-              </p>
+          <!-- Top Bar -->
+          <div class="inbox-topbar">
+            <div class="inbox-topbar__left">
+              <h3 class="inbox-title"><i class="fa-solid fa-inbox"></i> Inbox</h3>
+              <div class="inbox-stats">
+                <span class="inbox-stat" id="msgTotalCount" title="Total"><i class="fa-solid fa-envelope"></i> <b>0</b></span>
+                <span class="inbox-stat inbox-stat--unread" id="msgUnreadCount" title="Unread"><i class="fa-solid fa-circle-dot"></i> <b>0</b></span>
+                <span class="inbox-stat inbox-stat--replied" id="msgRepliedCount" title="Replied"><i class="fa-solid fa-check-double"></i> <b>0</b></span>
+              </div>
             </div>
-            <div class="section-header-actions">
-              <button
-                class="btn btn-outline"
-                id="refreshMessagesBtn"
-                type="button"
-              >
-                <i class="fa-solid fa-rotate"></i> Refresh
-              </button>
+            <div class="inbox-topbar__right">
+              <button class="inbox-icon-btn" id="refreshMessagesBtn" type="button" title="Refresh"><i class="fa-solid fa-arrows-rotate"></i></button>
             </div>
           </div>
 
-          <!-- Messages Stats -->
-          <div class="messages-stats" id="messagesStats">
-            <div class="stat-card stat-card--mini">
-              <span class="stat-value" id="msgTotalCount">0</span>
-              <span class="stat-label">Total</span>
+          <!-- Split Pane Container -->
+          <div class="inbox-container">
+            <!-- LEFT: Message List Panel -->
+            <div class="inbox-list-panel" id="inboxListPanel">
+              <!-- Search & Filters -->
+              <div class="inbox-search-bar">
+                <div class="inbox-search-wrap">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="search" class="inbox-search-input" id="msgSearchInput" placeholder="Search messages..." />
+                </div>
+              </div>
+              <div class="inbox-filters">
+                <button class="inbox-filter-chip active" data-filter="" type="button">All</button>
+                <button class="inbox-filter-chip" data-filter="unread" type="button"><i class="fa-solid fa-circle" style="font-size:6px;vertical-align:middle;margin-right:4px;color:var(--clr-primary)"></i>Unread</button>
+                <button class="inbox-filter-chip" data-filter="replied" type="button"><i class="fa-solid fa-check" style="font-size:10px;margin-right:4px;color:var(--clr-success)"></i>Replied</button>
+                <button class="inbox-filter-chip" data-filter="read" type="button">Read</button>
+                <select class="inbox-category-select" id="msgSubjectFilter">
+                  <option value="">All Categories</option>
+                  <option value="general">General</option>
+                  <option value="order">Order Issue</option>
+                  <option value="returns">Returns</option>
+                  <option value="sizing">Sizing</option>
+                  <option value="wholesale">Wholesale</option>
+                  <option value="other">Other</option>
+                  <option value="order_notification">Orders</option>
+                </select>
+              </div>
+              <!-- Message Cards -->
+              <div class="inbox-messages-scroll" id="messagesList">
+                <div class="inbox-skeleton">
+                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
+                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
+                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
+                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
+                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
+                </div>
+              </div>
+              <!-- Pagination -->
+              <div class="inbox-pagination" id="messagesPagination"></div>
             </div>
-            <div class="stat-card stat-card--mini stat-card--unread">
-              <span class="stat-value" id="msgUnreadCount">0</span>
-              <span class="stat-label">Unread</span>
-            </div>
-            <div class="stat-card stat-card--mini">
-              <span class="stat-value" id="msgRepliedCount">0</span>
-              <span class="stat-label">Replied</span>
+
+            <!-- RIGHT: Conversation Detail Panel -->
+            <div class="inbox-detail-panel" id="inboxDetailPanel">
+              <!-- Empty state -->
+              <div class="inbox-detail-empty" id="inboxDetailEmpty">
+                <div class="inbox-detail-empty__icon">
+                  <i class="fa-regular fa-envelope-open"></i>
+                </div>
+                <h4>Select a conversation</h4>
+                <p>Choose a message from the left to view details and reply</p>
+              </div>
+              <!-- Detail content (hidden until a message is selected) -->
+              <div class="inbox-detail-content" id="inboxDetailContent" hidden>
+                <!-- Detail Header -->
+                <div class="inbox-detail-header">
+                  <button class="inbox-back-btn" id="inboxBackBtn" type="button" title="Back to list"><i class="fa-solid fa-arrow-left"></i></button>
+                  <div class="inbox-detail-header__info">
+                    <h4 class="inbox-detail-subject" id="msgDetailSubject">Subject</h4>
+                    <div class="inbox-detail-meta">
+                      <span class="inbox-detail-date" id="msgDetailDate"></span>
+                      <span class="inbox-detail-badge" id="msgDetailStatus"></span>
+                    </div>
+                  </div>
+                  <div class="inbox-detail-header__actions">
+                    <button class="inbox-icon-btn" id="msgMarkUnreadBtn" type="button" title="Mark as unread"><i class="fa-solid fa-envelope"></i></button>
+                    <button class="inbox-icon-btn inbox-icon-btn--danger" id="msgDeleteBtn" type="button" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                  </div>
+                </div>
+                <!-- Sender Card -->
+                <div class="inbox-sender-card">
+                  <div class="inbox-sender-avatar" id="msgSenderAvatar">?</div>
+                  <div class="inbox-sender-info">
+                    <span class="inbox-sender-name" id="msgSenderName">Name</span>
+                    <span class="inbox-sender-email" id="msgSenderEmail">email</span>
+                  </div>
+                  <div class="inbox-sender-tags">
+                    <span class="inbox-tag" id="msgSenderPhone" hidden><i class="fa-solid fa-phone"></i> <span></span></span>
+                    <span class="inbox-tag" id="msgSenderOrderId" hidden><i class="fa-solid fa-receipt"></i> <span></span></span>
+                  </div>
+                </div>
+                <!-- Conversation Thread -->
+                <div class="inbox-thread" id="inboxThread">
+                  <!-- Original message -->
+                  <div class="inbox-bubble inbox-bubble--customer" id="msgDetailBody"></div>
+                  <!-- Reply thread populated by JS -->
+                  <div id="msgReplyThread"></div>
+                </div>
+                <!-- Compose Area -->
+                <div class="inbox-compose" id="inboxCompose">
+                  <div class="inbox-compose-from">
+                    <label><i class="fa-solid fa-at"></i> From:</label>
+                    <select class="inbox-compose-select" id="msgFromEmail">
+                      <option value="support@lingeriebysisioyin.store">support@</option>
+                      <option value="info@lingeriebysisioyin.store">info@</option>
+                      <option value="orders@lingeriebysisioyin.store">orders@</option>
+                      <option value="contact@lingeriebysisioyin.store">contact@</option>
+                    </select>
+                  </div>
+                  <div class="inbox-compose-editor">
+                    <textarea class="inbox-compose-textarea" id="msgReplyText" rows="4" placeholder="Write your reply..."></textarea>
+                  </div>
+                  <div class="inbox-compose-footer">
+                    <button class="btn btn-primary inbox-send-btn" id="msgSendReplyBtn" type="button">
+                      <i class="fa-solid fa-paper-plane"></i> Send Reply
+                    </button>
+                    <span class="inbox-compose-hint">Sent as branded email via Resend</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-
-          <!-- Messages Filter -->
-          <div class="messages-filter-bar">
-            <div class="filter-group">
-              <select class="form-select" id="msgStatusFilter">
-                <option value="">All Messages</option>
-                <option value="unread">Unread</option>
-                <option value="read">Read</option>
-                <option value="replied">Replied</option>
-              </select>
-              <select class="form-select" id="msgSubjectFilter">
-                <option value="">All Subjects</option>
-                <option value="general">General Inquiry</option>
-                <option value="order">Order Issue</option>
-                <option value="returns">Returns & Exchanges</option>
-                <option value="sizing">Sizing Help</option>
-                <option value="wholesale">Wholesale/Partnerships</option>
-                <option value="other">Other</option>
-                <option value="order_notification">Order Notifications</option>
-              </select>
-            </div>
-            <div class="filter-group">
-              <input
-                type="search"
-                class="form-input"
-                id="msgSearchInput"
-                placeholder="Search messages..."
-              />
-            </div>
-          </div>
-
-          <!-- Messages List -->
-          <div class="messages-list" id="messagesList">
-            <div class="skeleton-table-rows">
-              <div class="skeleton-row">
-                <div class="skeleton skeleton-circle"></div>
-                <div style="flex: 1">
-                  <div class="skeleton skeleton-text skeleton-text--med"></div>
-                  <div class="skeleton skeleton-text skeleton-text--long"></div>
-                </div>
-                <div
-                  class="skeleton skeleton-text skeleton-text--short"
-                  style="width: 60px"
-                ></div>
-              </div>
-              <div class="skeleton-row">
-                <div class="skeleton skeleton-circle"></div>
-                <div style="flex: 1">
-                  <div class="skeleton skeleton-text skeleton-text--med"></div>
-                  <div class="skeleton skeleton-text skeleton-text--long"></div>
-                </div>
-                <div
-                  class="skeleton skeleton-text skeleton-text--short"
-                  style="width: 60px"
-                ></div>
-              </div>
-              <div class="skeleton-row">
-                <div class="skeleton skeleton-circle"></div>
-                <div style="flex: 1">
-                  <div class="skeleton skeleton-text skeleton-text--med"></div>
-                  <div class="skeleton skeleton-text skeleton-text--long"></div>
-                </div>
-                <div
-                  class="skeleton skeleton-text skeleton-text--short"
-                  style="width: 60px"
-                ></div>
-              </div>
-              <div class="skeleton-row">
-                <div class="skeleton skeleton-circle"></div>
-                <div style="flex: 1">
-                  <div class="skeleton skeleton-text skeleton-text--med"></div>
-                  <div class="skeleton skeleton-text skeleton-text--long"></div>
-                </div>
-                <div
-                  class="skeleton skeleton-text skeleton-text--short"
-                  style="width: 60px"
-                ></div>
-              </div>
-              <div class="skeleton-row">
-                <div class="skeleton skeleton-circle"></div>
-                <div style="flex: 1">
-                  <div class="skeleton skeleton-text skeleton-text--med"></div>
-                  <div class="skeleton skeleton-text skeleton-text--long"></div>
-                </div>
-                <div
-                  class="skeleton skeleton-text skeleton-text--short"
-                  style="width: 60px"
-                ></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Messages Pagination -->
-          <div class="messages-pagination" id="messagesPagination"></div>
         </section>
-
-        <!-- ═══ Message Detail / Reply Modal ═══ -->
-        <div class="modal-overlay" id="messageModal" hidden>
-          <div class="modal-box modal-message">
-            <button
-              class="modal-close-x"
-              id="messageModalCloseX"
-              type="button"
-              aria-label="Close"
-            >
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-            <div class="message-detail" id="messageDetail">
-              <!-- Header -->
-              <div class="msg-detail-header">
-                <div class="msg-detail-subject" id="msgDetailSubject">
-                  Subject
-                </div>
-                <div class="msg-detail-meta">
-                  <span class="msg-detail-date" id="msgDetailDate"></span>
-                  <span class="msg-detail-status" id="msgDetailStatus"></span>
-                </div>
-              </div>
-              <!-- Sender info -->
-              <div class="msg-detail-sender">
-                <div class="msg-sender-avatar" id="msgSenderAvatar">?</div>
-                <div class="msg-sender-info">
-                  <span class="msg-sender-name" id="msgSenderName">Name</span>
-                  <span class="msg-sender-email" id="msgSenderEmail"
-                    >email@example.com</span
-                  >
-                </div>
-                <div class="msg-sender-extras">
-                  <span id="msgSenderPhone"></span>
-                  <span id="msgSenderOrderId"></span>
-                </div>
-              </div>
-              <!-- Original message -->
-              <div class="msg-detail-body" id="msgDetailBody"></div>
-              <!-- Reply thread -->
-              <div class="msg-reply-thread" id="msgReplyThread"></div>
-              <!-- Reply compose -->
-              <div class="msg-reply-compose">
-                <h4><i class="fa-solid fa-reply"></i> Reply</h4>
-                <div class="msg-from-selector">
-                  <label for="msgFromEmail"
-                    ><i class="fa-solid fa-at"></i> Send from:</label
-                  >
-                  <select class="form-select" id="msgFromEmail">
-                    <option value="support@lingeriebysisioyin.store">
-                      support@lingeriebysisioyin.store
-                    </option>
-                    <option value="info@lingeriebysisioyin.store">
-                      info@lingeriebysisioyin.store
-                    </option>
-                    <option value="orders@lingeriebysisioyin.store">
-                      orders@lingeriebysisioyin.store
-                    </option>
-                    <option value="contact@lingeriebysisioyin.store">
-                      contact@lingeriebysisioyin.store
-                    </option>
-                  </select>
-                </div>
-                <textarea
-                  class="form-textarea"
-                  id="msgReplyText"
-                  rows="5"
-                  placeholder="Type your reply..."
-                ></textarea>
-                <div class="msg-reply-actions">
-                  <button
-                    class="btn btn-primary"
-                    id="msgSendReplyBtn"
-                    type="button"
-                  >
-                    <i class="fa-solid fa-paper-plane"></i> Send Reply
-                  </button>
-                  <span class="msg-reply-note"
-                    >Reply will be sent as a branded email via Resend</span
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </main>
 

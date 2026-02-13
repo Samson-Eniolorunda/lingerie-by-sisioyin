@@ -6291,12 +6291,12 @@
   }
 
   /* ========================================================================
-     MESSAGES MODULE — Load, display, reply to contact form messages
+     MESSAGES MODULE — Split-pane Inbox
      ======================================================================== */
 
   let messagesCache = [];
   let currentMessagesPage = 1;
-  const MESSAGES_PER_PAGE = 15;
+  const MESSAGES_PER_PAGE = 20;
   let currentMsgStatusFilter = "";
   let currentMsgSubjectFilter = "";
   let currentMsgSearch = "";
@@ -6312,13 +6312,13 @@
     order_notification: "Order Notification",
   };
 
+  /* ── Data Loading ── */
   async function loadMessages() {
     try {
       const { data, error } = await supabase
         .from("contact_messages")
         .select("*")
         .order("created_at", { ascending: false });
-
       if (error) throw error;
       messagesCache = data || [];
       updateMessagesStats();
@@ -6326,68 +6326,64 @@
       renderMessagesList();
     } catch (err) {
       console.error("[loadMessages]", err);
-      $("#messagesList").innerHTML =
-        '<div class="text-center text-muted" style="padding:2rem;">Failed to load messages</div>';
+      const el = $("#messagesList");
+      if (el) el.innerHTML = '<div class="inbox-list-empty"><i class="fa-solid fa-exclamation-circle"></i><h4>Failed to load</h4><p>Check connection and retry</p></div>';
     }
   }
 
   function updateMessagesStats() {
     const total = messagesCache.length;
-    const unread = messagesCache.filter(
-      (m) => m.status === "unread" || !m.status,
-    ).length;
-    const replied = messagesCache.filter((m) => m.status === "replied").length;
-    const el = (id) => $("#" + id);
-    if (el("msgTotalCount")) el("msgTotalCount").textContent = total;
-    if (el("msgUnreadCount")) el("msgUnreadCount").textContent = unread;
-    if (el("msgRepliedCount")) el("msgRepliedCount").textContent = replied;
+    const unread = messagesCache.filter(m => m.status === "unread" || !m.status).length;
+    const replied = messagesCache.filter(m => m.status === "replied").length;
+    const totalEl = $("#msgTotalCount");
+    const unreadEl = $("#msgUnreadCount");
+    const repliedEl = $("#msgRepliedCount");
+    if (totalEl) totalEl.querySelector("b").textContent = total;
+    if (unreadEl) unreadEl.querySelector("b").textContent = unread;
+    if (repliedEl) repliedEl.querySelector("b").textContent = replied;
   }
 
   function updateUnreadBadge() {
     const badge = $("#unreadMessagesBadge");
     if (!badge) return;
-    const unread = messagesCache.filter(
-      (m) => m.status === "unread" || !m.status,
-    ).length;
+    const unread = messagesCache.filter(m => m.status === "unread" || !m.status).length;
     badge.textContent = unread;
     badge.hidden = unread === 0;
   }
 
+  /* ── Filtering ── */
   function getFilteredMessages() {
     let filtered = [...messagesCache];
     if (currentMsgStatusFilter) {
       if (currentMsgStatusFilter === "unread") {
-        filtered = filtered.filter((m) => m.status === "unread" || !m.status);
+        filtered = filtered.filter(m => m.status === "unread" || !m.status);
       } else {
-        filtered = filtered.filter((m) => m.status === currentMsgStatusFilter);
+        filtered = filtered.filter(m => m.status === currentMsgStatusFilter);
       }
     }
     if (currentMsgSubjectFilter) {
-      filtered = filtered.filter((m) => m.subject === currentMsgSubjectFilter);
+      filtered = filtered.filter(m => m.subject === currentMsgSubjectFilter);
     }
     if (currentMsgSearch) {
       const q = currentMsgSearch.toLowerCase();
-      filtered = filtered.filter(
-        (m) =>
-          (m.name || "").toLowerCase().includes(q) ||
-          (m.email || "").toLowerCase().includes(q) ||
-          (m.message || "").toLowerCase().includes(q) ||
-          (m.order_id || m.orderId || "").toLowerCase().includes(q),
+      filtered = filtered.filter(m =>
+        (m.name || "").toLowerCase().includes(q) ||
+        (m.email || "").toLowerCase().includes(q) ||
+        (m.message || "").toLowerCase().includes(q) ||
+        (m.order_id || m.orderId || "").toLowerCase().includes(q)
       );
     }
     return filtered;
   }
 
+  /* ── Render List ── */
   function renderMessagesList() {
     const container = $("#messagesList");
     const pagContainer = $("#messagesPagination");
     if (!container) return;
 
     const filtered = getFilteredMessages();
-    const totalPages = Math.max(
-      1,
-      Math.ceil(filtered.length / MESSAGES_PER_PAGE),
-    );
+    const totalPages = Math.max(1, Math.ceil(filtered.length / MESSAGES_PER_PAGE));
     if (currentMessagesPage > totalPages) currentMessagesPage = totalPages;
 
     const start = (currentMessagesPage - 1) * MESSAGES_PER_PAGE;
@@ -6395,46 +6391,40 @@
 
     if (page.length === 0) {
       container.innerHTML = `
-        <div class="messages-empty">
+        <div class="inbox-list-empty">
           <i class="fa-solid fa-envelope-open"></i>
-          <h4>No messages${currentMsgStatusFilter || currentMsgSubjectFilter || currentMsgSearch ? " match your filters" : " yet"}</h4>
+          <h4>No messages${(currentMsgStatusFilter || currentMsgSubjectFilter || currentMsgSearch) ? " match your filters" : " yet"}</h4>
           <p>Contact form submissions will appear here</p>
         </div>`;
       if (pagContainer) pagContainer.innerHTML = "";
       return;
     }
 
-    container.innerHTML = page
-      .map((m) => {
-        const status = m.status || "unread";
-        const initials = (m.name || "?")
-          .split(" ")
-          .map((w) => w[0])
-          .join("")
-          .toUpperCase()
-          .slice(0, 2);
-        const date = formatMsgDate(m.timestamp || m.created_at);
-        const subjectLabel =
-          SUBJECT_LABELS[m.subject] || m.subject || "General";
-        const preview = (m.message || "").slice(0, 100);
+    container.innerHTML = page.map(m => {
+      const status = m.status || "unread";
+      const initials = (m.name || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+      const date = formatMsgDate(m.timestamp || m.created_at);
+      const subjectLabel = SUBJECT_LABELS[m.subject] || m.subject || "General";
+      const preview = (m.message || "").slice(0, 90);
+      const isActive = String(m.id) === String(openMessageId);
+      const statusText = status === "replied" ? '<i class="fa-solid fa-check"></i> Replied' : status === "read" ? "Read" : "New";
 
-        return `
-          <div class="msg-card ${status === "unread" ? "unread" : ""}" data-msg-id="${m.id}">
-            <div class="msg-avatar">${escapeHtml(initials)}</div>
-            <div class="msg-content">
-              <div class="msg-top">
-                <span class="msg-sender">${escapeHtml(m.name || "Unknown")}</span>
-                <span class="msg-subject-label" data-subject="${m.subject || "general"}">${escapeHtml(subjectLabel)}</span>
-              </div>
-              <div class="msg-preview">${escapeHtml(preview)}</div>
+      return `
+        <div class="inbox-msg-card ${status === "unread" ? "unread" : ""} ${isActive ? "active" : ""}" data-msg-id="${m.id}">
+          <div class="inbox-msg-avatar">${escapeHtml(initials)}</div>
+          <div class="inbox-msg-body">
+            <div class="inbox-msg-row1">
+              <span class="inbox-msg-name">${escapeHtml(m.name || "Unknown")}</span>
+              <span class="inbox-msg-time">${date}</span>
             </div>
-            <div class="msg-meta">
-              <span class="msg-time">${date}</span>
-              <span class="msg-status-dot ${status}">${status === "replied" ? '<i class="fa-solid fa-check"></i> Replied' : status === "read" ? "Read" : "New"}</span>
+            <div class="inbox-msg-row2">
+              <span class="inbox-msg-category" data-cat="${m.subject || "general"}">${escapeHtml(subjectLabel)}</span>
+              <span class="inbox-msg-status-badge ${status}">${statusText}</span>
             </div>
-          </div>`;
-      })
-      .join("");
+            <div class="inbox-msg-preview">${escapeHtml(preview)}</div>
+          </div>
+        </div>`;
+    }).join("");
 
     // Pagination
     if (pagContainer) {
@@ -6443,22 +6433,16 @@
       } else {
         pagContainer.innerHTML = `
           <button ${currentMessagesPage <= 1 ? "disabled" : ""} id="msgPrevPage"><i class="fa-solid fa-chevron-left"></i></button>
-          <span class="page-info">Page ${currentMessagesPage} of ${totalPages}</span>
+          <span class="page-info">${currentMessagesPage} / ${totalPages}</span>
           <button ${currentMessagesPage >= totalPages ? "disabled" : ""} id="msgNextPage"><i class="fa-solid fa-chevron-right"></i></button>`;
-        on($("#msgPrevPage"), "click", () => {
-          currentMessagesPage--;
-          renderMessagesList();
-        });
-        on($("#msgNextPage"), "click", () => {
-          currentMessagesPage++;
-          renderMessagesList();
-        });
+        on($("#msgPrevPage"), "click", () => { currentMessagesPage--; renderMessagesList(); });
+        on($("#msgNextPage"), "click", () => { currentMessagesPage++; renderMessagesList(); });
       }
     }
 
     // Bind card clicks
-    $$("[data-msg-id]", container).forEach((card) =>
-      on(card, "click", () => openMessage(card.dataset.msgId)),
+    $$("[data-msg-id]", container).forEach(card =>
+      on(card, "click", () => openMessage(card.dataset.msgId))
     );
   }
 
@@ -6468,82 +6452,93 @@
       const d = new Date(dateStr);
       const now = new Date();
       const diff = now - d;
-      if (diff < 60000) return "Just now";
-      if (diff < 3600000) return Math.floor(diff / 60000) + "m ago";
-      if (diff < 86400000) return Math.floor(diff / 3600000) + "h ago";
-      if (diff < 604800000) return Math.floor(diff / 86400000) + "d ago";
+      if (diff < 60000) return "Now";
+      if (diff < 3600000) return Math.floor(diff / 60000) + "m";
+      if (diff < 86400000) return Math.floor(diff / 3600000) + "h";
+      if (diff < 604800000) return Math.floor(diff / 86400000) + "d";
       return d.toLocaleDateString("en-NG", { month: "short", day: "numeric" });
-    } catch {
-      return dateStr;
-    }
+    } catch { return dateStr; }
   }
 
+  /* ── Open Message (Detail Panel) ── */
   async function openMessage(id) {
-    const msg = messagesCache.find((m) => String(m.id) === String(id));
+    const msg = messagesCache.find(m => String(m.id) === String(id));
     if (!msg) return;
     openMessageId = id;
 
-    // Mark as read if unread
+    // On mobile: show detail, hide list
+    const listPanel = $("#inboxListPanel");
+    const detailPanel = $("#inboxDetailPanel");
+    if (window.innerWidth <= 900) {
+      listPanel?.classList.add("hide");
+      detailPanel?.classList.add("show");
+    }
+
+    // Mark as read
     if (!msg.status || msg.status === "unread") {
       try {
-        await supabase
-          .from("contact_messages")
-          .update({ status: "read" })
-          .eq("id", id);
+        await supabase.from("contact_messages").update({ status: "read" }).eq("id", id);
         msg.status = "read";
         updateMessagesStats();
         updateUnreadBadge();
-        renderMessagesList();
-      } catch (e) {
-        console.error("[openMessage] mark read failed", e);
-      }
+      } catch (e) { console.error("[openMessage] mark read failed", e); }
     }
 
-    // Populate modal
-    const subjectLabel =
-      SUBJECT_LABELS[msg.subject] || msg.subject || "General Inquiry";
+    // Show detail content, hide empty
+    $("#inboxDetailEmpty").hidden = true;
+    const content = $("#inboxDetailContent");
+    content.hidden = false;
+
+    // Populate header
+    const subjectLabel = SUBJECT_LABELS[msg.subject] || msg.subject || "General Inquiry";
     $("#msgDetailSubject").textContent = subjectLabel;
-    $("#msgDetailDate").textContent = new Date(
-      msg.timestamp || msg.created_at,
-    ).toLocaleString("en-NG", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
+    $("#msgDetailDate").textContent = new Date(msg.timestamp || msg.created_at).toLocaleString("en-NG", {
+      year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit"
     });
 
     const status = msg.status || "unread";
     const statusEl = $("#msgDetailStatus");
     statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
-    statusEl.className = "msg-detail-status " + status;
+    statusEl.className = "inbox-detail-badge " + status;
 
-    const initials = (msg.name || "?")
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
+    // Sender
+    const initials = (msg.name || "?").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
     $("#msgSenderAvatar").textContent = initials;
     $("#msgSenderName").textContent = msg.name || "Unknown";
     $("#msgSenderEmail").textContent = msg.email || "";
-    $("#msgSenderPhone").innerHTML = msg.phone
-      ? `<i class="fa-solid fa-phone"></i> ${escapeHtml(msg.phone)}`
-      : "";
+
+    // Tags
+    const phoneTag = $("#msgSenderPhone");
+    if (msg.phone) {
+      phoneTag.hidden = false;
+      phoneTag.querySelector("span").textContent = msg.phone;
+    } else { phoneTag.hidden = true; }
+
+    const orderTag = $("#msgSenderOrderId");
     const orderId = msg.order_id || msg.orderId;
-    $("#msgSenderOrderId").innerHTML = orderId
-      ? `<i class="fa-solid fa-receipt"></i> ${escapeHtml(orderId)}`
-      : "";
+    if (orderId) {
+      orderTag.hidden = false;
+      orderTag.querySelector("span").textContent = orderId;
+    } else { orderTag.hidden = true; }
+
+    // Original message bubble
     $("#msgDetailBody").textContent = msg.message || "";
+
+    // Reset reply textarea
     $("#msgReplyText").value = "";
 
     // Load reply thread
     await loadReplyThread(id);
 
-    // Show modal
-    $("#messageModal").hidden = false;
+    // Re-render list to highlight active card
+    renderMessagesList();
+
+    // Scroll thread to bottom
+    const thread = $("#inboxThread");
+    if (thread) thread.scrollTop = thread.scrollHeight;
   }
 
+  /* ── Reply Thread ── */
   async function loadReplyThread(messageId) {
     const container = $("#msgReplyThread");
     if (!container) return;
@@ -6555,36 +6550,29 @@
         .order("created_at", { ascending: true });
 
       if (error) throw error;
-      if (!data || data.length === 0) {
-        container.innerHTML = "";
-        return;
-      }
-      container.innerHTML = data
-        .map(
-          (r) => `
-        <div class="msg-reply-item">
-          <div class="msg-reply-item-header">
-            <span class="reply-author"><i class="fa-solid fa-reply"></i> Admin</span>
-            <span class="reply-date">${new Date(r.created_at).toLocaleString("en-NG", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+      if (!data || data.length === 0) { container.innerHTML = ""; return; }
+
+      container.innerHTML = data.map(r => `
+        <div class="inbox-bubble inbox-bubble--admin">
+          <div class="inbox-bubble__meta">
+            <span class="inbox-bubble__author"><i class="fa-solid fa-reply" style="margin-right:4px;font-size:10px"></i>Admin</span>
+            <span class="inbox-bubble__time">${new Date(r.created_at).toLocaleString("en-NG", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
           </div>
-          <div class="msg-reply-item-body">${escapeHtml(r.reply_text || r.body || "")}</div>
-        </div>`,
-        )
-        .join("");
+          <div class="inbox-bubble__text">${escapeHtml(r.reply_text || r.body || "")}</div>
+        </div>`).join("");
     } catch (err) {
       console.error("[loadReplyThread]", err);
       container.innerHTML = "";
     }
   }
 
+  /* ── Send Reply ── */
   async function sendReply() {
     const text = $("#msgReplyText")?.value?.trim();
     if (!text) return showToast("Please type a reply", "error");
     if (!openMessageId) return;
 
-    const msg = messagesCache.find(
-      (m) => String(m.id) === String(openMessageId),
-    );
+    const msg = messagesCache.find(m => String(m.id) === String(openMessageId));
     if (!msg) return;
 
     const btn = $("#msgSendReplyBtn");
@@ -6593,17 +6581,12 @@
     btn.disabled = true;
 
     try {
-      // 1. Call edge function to send branded email
+      // Get session token
       let { data: sessionData } = await supabase.auth.getSession();
       let token = sessionData?.session?.access_token;
-
-      // Refresh session if token is missing or expired
       if (!token) {
         const { data: refreshData } = await supabase.auth.refreshSession();
         token = refreshData?.session?.access_token;
-      }
-      if (!token) {
-        throw new Error("Session expired — please log in again.");
       }
 
       const res = await fetch(
@@ -6612,28 +6595,22 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             messageId: openMessageId,
             recipientEmail: msg.email,
             recipientName: msg.name,
-            originalSubject:
-              SUBJECT_LABELS[msg.subject] || msg.subject || "Your Inquiry",
+            originalSubject: SUBJECT_LABELS[msg.subject] || msg.subject || "Your Inquiry",
             originalMessage: msg.message,
             replyText: text,
-            fromEmail:
-              $("#msgFromEmail")?.value || "support@lingeriebysisioyin.store",
+            fromEmail: $("#msgFromEmail")?.value || "support@lingeriebysisioyin.store",
           }),
-        },
+        }
       );
+      if (!res.ok) { const err = await res.text(); throw new Error(err); }
 
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
-      }
-
-      // 2. Save reply to message_replies table
+      // Save reply
       await supabase.from("message_replies").insert({
         message_id: openMessageId,
         reply_text: text,
@@ -6641,75 +6618,124 @@
         sent_at: new Date().toISOString(),
       });
 
-      // 3. Update contact message status to replied
-      await supabase
-        .from("contact_messages")
-        .update({ status: "replied" })
-        .eq("id", openMessageId);
-
+      // Update status
+      await supabase.from("contact_messages").update({ status: "replied" }).eq("id", openMessageId);
       msg.status = "replied";
       $("#msgReplyText").value = "";
-      showToast("Reply sent successfully!", "success");
+      showToast("Reply sent!", "success");
 
-      // Refresh
       updateMessagesStats();
       updateUnreadBadge();
       renderMessagesList();
       await loadReplyThread(openMessageId);
 
-      // Update status in modal
+      // Update detail badge
       const statusEl = $("#msgDetailStatus");
       statusEl.textContent = "Replied";
-      statusEl.className = "msg-detail-status replied";
+      statusEl.className = "inbox-detail-badge replied";
+
+      // Scroll thread to bottom
+      const thread = $("#inboxThread");
+      if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
       console.error("[sendReply]", err);
-      showToast("Failed to send reply: " + err.message, "error");
+      showToast("Failed to send: " + err.message, "error");
     } finally {
       btn.innerHTML = origHTML;
       btn.disabled = false;
     }
   }
 
+  /* ── Delete Message ── */
+  async function deleteMessage() {
+    if (!openMessageId) return;
+    if (!confirm("Delete this message permanently?")) return;
+    try {
+      await supabase.from("message_replies").delete().eq("message_id", openMessageId);
+      await supabase.from("contact_messages").delete().eq("id", openMessageId);
+      messagesCache = messagesCache.filter(m => String(m.id) !== String(openMessageId));
+      openMessageId = null;
+      $("#inboxDetailContent").hidden = true;
+      $("#inboxDetailEmpty").hidden = false;
+      updateMessagesStats();
+      updateUnreadBadge();
+      renderMessagesList();
+      showToast("Message deleted", "success");
+    } catch (err) {
+      console.error("[deleteMessage]", err);
+      showToast("Delete failed", "error");
+    }
+  }
+
+  /* ── Mark as Unread ── */
+  async function markAsUnread() {
+    if (!openMessageId) return;
+    const msg = messagesCache.find(m => String(m.id) === String(openMessageId));
+    if (!msg) return;
+    try {
+      await supabase.from("contact_messages").update({ status: "unread" }).eq("id", openMessageId);
+      msg.status = "unread";
+      const statusEl = $("#msgDetailStatus");
+      statusEl.textContent = "Unread";
+      statusEl.className = "inbox-detail-badge unread";
+      updateMessagesStats();
+      updateUnreadBadge();
+      renderMessagesList();
+      showToast("Marked as unread", "success");
+    } catch (err) {
+      console.error("[markAsUnread]", err);
+      showToast("Failed", "error");
+    }
+  }
+
+  /* ── Back button (mobile) ── */
+  function inboxGoBack() {
+    const listPanel = $("#inboxListPanel");
+    const detailPanel = $("#inboxDetailPanel");
+    listPanel?.classList.remove("hide");
+    detailPanel?.classList.remove("show");
+    openMessageId = null;
+    renderMessagesList();
+  }
+
+  /* ── Bind All Actions ── */
   function bindMessagesActions() {
     on($("#refreshMessagesBtn"), "click", loadMessages);
 
-    on($("#msgStatusFilter"), "change", (e) => {
-      currentMsgStatusFilter = e.target.value;
-      currentMessagesPage = 1;
-      renderMessagesList();
+    // Filter chips
+    $$(".inbox-filter-chip").forEach(chip => {
+      on(chip, "click", () => {
+        $$(".inbox-filter-chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        currentMsgStatusFilter = chip.dataset.filter;
+        currentMessagesPage = 1;
+        renderMessagesList();
+      });
     });
 
-    on($("#msgSubjectFilter"), "change", (e) => {
+    // Category select
+    on($("#msgSubjectFilter"), "change", e => {
       currentMsgSubjectFilter = e.target.value;
       currentMessagesPage = 1;
       renderMessagesList();
     });
 
+    // Search
     let searchTimer;
-    on($("#msgSearchInput"), "input", (e) => {
+    on($("#msgSearchInput"), "input", e => {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
         currentMsgSearch = e.target.value.trim();
         currentMessagesPage = 1;
         renderMessagesList();
-      }, 300);
+      }, 250);
     });
 
-    // Modal close
-    on($("#messageModalCloseX"), "click", () => {
-      $("#messageModal").hidden = true;
-      openMessageId = null;
-    });
-    on($("#messageModal"), "click", (e) => {
-      if (e.target.id === "messageModal") {
-        $("#messageModal").hidden = true;
-        openMessageId = null;
-      }
-    });
-
-    // Send reply
+    // Detail actions
     on($("#msgSendReplyBtn"), "click", sendReply);
-  }
+    on($("#msgDeleteBtn"), "click", deleteMessage);
+    on($("#msgMarkUnreadBtn"), "click", markAsUnread);
+    on($("#inboxBackBtn"), "click", inboxGoBack);
 
   document.addEventListener("DOMContentLoaded", init);
 })();
