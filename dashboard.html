@@ -745,7 +745,7 @@
                         ><span class="dash-toggle-thumb"></span></span
                     ></label>
                   </div>
-                  <div class="dash-setting-row">
+                  <div class="dash-setting-row dash-setting-row--whatsapp">
                     <div class="dash-setting-info">
                       <h4>WhatsApp Updates</h4>
                       <p>Get order updates via WhatsApp messages.</p>
@@ -755,6 +755,20 @@
                         class="dash-toggle-track"
                         ><span class="dash-toggle-thumb"></span></span
                     ></label>
+                  </div>
+                  <!-- WhatsApp number input (shown when toggle is ON) -->
+                  <div class="dash-whatsapp-number-row" id="whatsappNumberRow" style="display:none;">
+                    <div class="dash-whatsapp-number-inner">
+                      <label for="whatsappNumber"><i class="fa-brands fa-whatsapp"></i> WhatsApp Number</label>
+                      <p class="dash-whatsapp-hint">Enter the number linked to your WhatsApp account (with country code).</p>
+                      <div class="dash-whatsapp-input-group">
+                        <input type="tel" id="whatsappNumber" placeholder="+234 800 000 0000" autocomplete="tel" />
+                        <button type="button" id="saveWhatsappBtn" class="dash-btn-primary dash-btn-sm">
+                          <i class="fa-solid fa-check"></i> Save
+                        </button>
+                      </div>
+                      <p class="dash-whatsapp-status" id="whatsappStatus"></p>
+                    </div>
                   </div>
                   <div class="dash-setting-row">
                     <div class="dash-setting-info">

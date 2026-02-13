@@ -740,7 +740,6 @@
     /* ─── 3. Communication toggles ─── */
     const commMap = {
       commEmail: { key: "commEmail", defaultOn: true },
-      commWhatsApp: { key: "commWhatsApp", defaultOn: false },
       commSMS: { key: "commSMS", defaultOn: false },
     };
     Object.entries(commMap).forEach(([id, { key, defaultOn }]) => {
@@ -749,6 +748,86 @@
       el.checked = prefs[key] !== undefined ? prefs[key] : defaultOn;
       el.addEventListener("change", () => saveSettings({ [key]: el.checked }));
     });
+
+    /* ─── 3b. WhatsApp opt-in (persisted to Supabase) ─── */
+    const waToggle = $("#commWhatsApp");
+    const waRow = $("#whatsappNumberRow");
+    const waInput = $("#whatsappNumber");
+    const waSaveBtn = $("#saveWhatsappBtn");
+    const waStatus = $("#whatsappStatus");
+
+    async function loadWhatsAppPrefs() {
+      const c = client();
+      if (!c || !currentUser) return;
+      try {
+        const { data } = await c
+          .from("profiles")
+          .select("whatsapp_opted_in, whatsapp_number")
+          .eq("id", currentUser.id)
+          .single();
+        if (data) {
+          if (waToggle) waToggle.checked = !!data.whatsapp_opted_in;
+          if (waInput) waInput.value = data.whatsapp_number || "";
+          if (waRow) waRow.style.display = data.whatsapp_opted_in ? "block" : "none";
+        }
+      } catch (_) { /* columns may not exist yet */ }
+    }
+
+    function showWaStatus(msg, type) {
+      if (!waStatus) return;
+      waStatus.textContent = msg;
+      waStatus.className = "dash-whatsapp-status " + type;
+      if (type === "success") setTimeout(() => { waStatus.textContent = ""; }, 3000);
+    }
+
+    if (waToggle) {
+      waToggle.addEventListener("change", async () => {
+        const on = waToggle.checked;
+        saveSettings({ commWhatsApp: on });
+        if (waRow) waRow.style.display = on ? "block" : "none";
+        const c = client();
+        if (!c || !currentUser) return;
+        try {
+          await c.from("profiles").update({ whatsapp_opted_in: on }).eq("id", currentUser.id);
+          if (!on) {
+            showWaStatus("WhatsApp updates disabled.", "success");
+          }
+        } catch (_) { /* ignore if col missing */ }
+      });
+    }
+
+    if (waSaveBtn) {
+      waSaveBtn.addEventListener("click", async () => {
+        const num = (waInput?.value || "").trim();
+        if (!num) { showWaStatus("Please enter a valid WhatsApp number.", "error"); return; }
+        // Basic validation: must start with + and have at least 10 digits
+        const cleaned = num.replace(/[\s\-()]/g, "");
+        if (!/^\+\d{10,15}$/.test(cleaned)) {
+          showWaStatus("Enter a valid number with country code, e.g. +2348012345678", "error");
+          return;
+        }
+        const c = client();
+        if (!c || !currentUser) return;
+        waSaveBtn.disabled = true;
+        waSaveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        try {
+          const { error } = await c
+            .from("profiles")
+            .update({ whatsapp_number: cleaned, whatsapp_opted_in: true })
+            .eq("id", currentUser.id);
+          if (error) throw error;
+          showWaStatus("WhatsApp number saved! You'll receive order updates.", "success");
+        } catch (e) {
+          showWaStatus(e.message || "Failed to save number.", "error");
+        } finally {
+          waSaveBtn.disabled = false;
+          waSaveBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save';
+        }
+      });
+    }
+
+    // Load WhatsApp prefs from DB when settings are initialized
+    loadWhatsAppPrefs();
 
     /* ─── 4. Privacy & Data ─── */
     const privacyMap = {

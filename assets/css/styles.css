@@ -15175,6 +15175,70 @@ html[data-theme="dark"]
   border: 1px solid rgba(139, 92, 246, 0.2);
   white-space: nowrap;
 }
+
+/* ── WhatsApp number opt-in row ── */
+.dash-whatsapp-number-row {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--border-light);
+  animation: whatsappSlideIn 0.3s ease;
+}
+@keyframes whatsappSlideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.dash-whatsapp-number-inner {
+  background: rgba(37, 211, 102, 0.05);
+  border: 1px solid rgba(37, 211, 102, 0.18);
+  border-radius: 12px;
+  padding: var(--space-4);
+}
+.dash-whatsapp-number-inner label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #25d366;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.dash-whatsapp-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+.dash-whatsapp-input-group {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+.dash-whatsapp-input-group input {
+  flex: 1;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-default);
+  border-radius: 10px;
+  font-size: 0.88rem;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  transition: border-color 0.2s;
+}
+.dash-whatsapp-input-group input:focus {
+  outline: none;
+  border-color: #25d366;
+  box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.12);
+}
+.dash-btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+.dash-whatsapp-status {
+  font-size: 0.78rem;
+  margin-top: var(--space-2);
+  min-height: 1.2em;
+}
+.dash-whatsapp-status.success { color: #25d366; }
+.dash-whatsapp-status.error   { color: var(--error); }
 .dash-setting-meta {
   font-size: 0.75rem;
   color: var(--text-secondary);

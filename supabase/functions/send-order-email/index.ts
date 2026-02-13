@@ -5,12 +5,45 @@
 // =============================================================
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const ADMIN_EMAIL = "adelugbaoyindamola@lingeriebysisioyin.store";
 const FROM_EMAIL = "orders@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+// ── Customer WhatsApp helper ──────────────────
+async function notifyCustomerWhatsApp(
+  customerEmail: string,
+  payload: Record<string, unknown>,
+) {
+  try {
+    if (!SUPABASE_SERVICE_KEY) return;
+    const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+    // Look up customer by email in profiles
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("whatsapp_opted_in, whatsapp_number")
+      .eq("email", customerEmail)
+      .single();
+    if (!profile?.whatsapp_opted_in || !profile?.whatsapp_number) return;
+
+    // Send WhatsApp via our notification edge function
+    fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...payload,
+        customer_whatsapp: profile.whatsapp_number,
+      }),
+    }).catch((e) => console.warn("Customer WhatsApp failed:", e));
+  } catch (e) {
+    console.warn("Customer WhatsApp lookup error:", e);
+  }
+}
 
 interface OrderItem {
   name: string;
@@ -585,7 +618,6 @@ serve(async (req: Request) => {
 
       // WhatsApp notification for status change (fire-and-forget)
       try {
-        const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
         fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -597,6 +629,16 @@ serve(async (req: Request) => {
           }),
         }).catch(e => console.warn("WhatsApp status notification failed:", e));
       } catch (e) { console.warn("WhatsApp error:", e); }
+
+      // Customer WhatsApp notification for status change
+      if (order.customer_email) {
+        notifyCustomerWhatsApp(order.customer_email, {
+          type: "customer_order_status",
+          order_number: order.order_number,
+          customer_name: order.customer_name,
+          status: newStatus,
+        });
+      }
 
       return new Response(
         JSON.stringify({ success: true, event: "status_update", results }),
@@ -637,7 +679,6 @@ serve(async (req: Request) => {
 
     // 3. Send WhatsApp notification to admin (fire-and-forget)
     try {
-      const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
       fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -651,6 +692,17 @@ serve(async (req: Request) => {
         }),
       }).catch(e => console.warn("WhatsApp notification failed (non-blocking):", e));
     } catch (e) { console.warn("WhatsApp fire-and-forget error:", e); }
+
+    // 4. Send WhatsApp to customer if opted in
+    if (order.customer_email) {
+      notifyCustomerWhatsApp(order.customer_email, {
+        type: "customer_order_confirmation",
+        order_number: order.order_number,
+        customer_name: order.customer_name,
+        total: order.total,
+        items_count: (order.items || []).length,
+      });
+    }
 
     return new Response(
       JSON.stringify({ success: true, event: "new_order", results }),
