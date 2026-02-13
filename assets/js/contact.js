@@ -43,16 +43,14 @@
         // Save to Supabase
         let savedRecord = null;
         if (window.DB?.client) {
-          const { data, error } = await window.DB.client
+          const { error } = await window.DB.client
             .from("contact_messages")
-            .insert([formData])
-            .select()
-            .single();
+            .insert([formData]);
 
           if (error) {
             console.error("Supabase error:", error);
           } else {
-            savedRecord = data;
+            savedRecord = formData;
           }
         }
 

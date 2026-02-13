@@ -2147,15 +2147,36 @@
           <!-- Top Bar -->
           <div class="inbox-topbar">
             <div class="inbox-topbar__left">
-              <h3 class="inbox-title"><i class="fa-solid fa-inbox"></i> Inbox</h3>
+              <h3 class="inbox-title">
+                <i class="fa-solid fa-inbox"></i> Inbox
+              </h3>
               <div class="inbox-stats">
-                <span class="inbox-stat" id="msgTotalCount" title="Total"><i class="fa-solid fa-envelope"></i> <b>0</b></span>
-                <span class="inbox-stat inbox-stat--unread" id="msgUnreadCount" title="Unread"><i class="fa-solid fa-circle-dot"></i> <b>0</b></span>
-                <span class="inbox-stat inbox-stat--replied" id="msgRepliedCount" title="Replied"><i class="fa-solid fa-check-double"></i> <b>0</b></span>
+                <span class="inbox-stat" id="msgTotalCount" title="Total"
+                  ><i class="fa-solid fa-envelope"></i> <b>0</b></span
+                >
+                <span
+                  class="inbox-stat inbox-stat--unread"
+                  id="msgUnreadCount"
+                  title="Unread"
+                  ><i class="fa-solid fa-circle-dot"></i> <b>0</b></span
+                >
+                <span
+                  class="inbox-stat inbox-stat--replied"
+                  id="msgRepliedCount"
+                  title="Replied"
+                  ><i class="fa-solid fa-check-double"></i> <b>0</b></span
+                >
               </div>
             </div>
             <div class="inbox-topbar__right">
-              <button class="inbox-icon-btn" id="refreshMessagesBtn" type="button" title="Refresh"><i class="fa-solid fa-arrows-rotate"></i></button>
+              <button
+                class="inbox-icon-btn"
+                id="refreshMessagesBtn"
+                type="button"
+                title="Refresh"
+              >
+                <i class="fa-solid fa-arrows-rotate"></i>
+              </button>
             </div>
           </div>
 
@@ -2167,33 +2188,131 @@
               <div class="inbox-search-bar">
                 <div class="inbox-search-wrap">
                   <i class="fa-solid fa-magnifying-glass"></i>
-                  <input type="search" class="inbox-search-input" id="msgSearchInput" placeholder="Search messages..." />
+                  <input
+                    type="search"
+                    class="inbox-search-input"
+                    id="msgSearchInput"
+                    placeholder="Search messages..."
+                  />
                 </div>
               </div>
               <div class="inbox-filters">
-                <button class="inbox-filter-chip active" data-filter="" type="button">All</button>
-                <button class="inbox-filter-chip" data-filter="unread" type="button"><i class="fa-solid fa-circle" style="font-size:6px;vertical-align:middle;margin-right:4px;color:var(--clr-primary)"></i>Unread</button>
-                <button class="inbox-filter-chip" data-filter="replied" type="button"><i class="fa-solid fa-check" style="font-size:10px;margin-right:4px;color:var(--clr-success)"></i>Replied</button>
-                <button class="inbox-filter-chip" data-filter="read" type="button">Read</button>
+                <button
+                  class="inbox-filter-chip active"
+                  data-filter=""
+                  type="button"
+                >
+                  All
+                </button>
+                <button
+                  class="inbox-filter-chip"
+                  data-filter="unread"
+                  type="button"
+                >
+                  <i
+                    class="fa-solid fa-circle"
+                    style="
+                      font-size: 5px;
+                      vertical-align: middle;
+                      margin-right: 3px;
+                      color: var(--clr-primary);
+                    "
+                  ></i
+                  >Unread
+                </button>
+                <button
+                  class="inbox-filter-chip"
+                  data-filter="replied"
+                  type="button"
+                >
+                  <i
+                    class="fa-solid fa-check"
+                    style="
+                      font-size: 9px;
+                      margin-right: 3px;
+                      color: var(--clr-success);
+                    "
+                  ></i
+                  >Replied
+                </button>
+                <button
+                  class="inbox-filter-chip"
+                  data-filter="read"
+                  type="button"
+                >
+                  Read
+                </button>
                 <select class="inbox-category-select" id="msgSubjectFilter">
                   <option value="">All Categories</option>
-                  <option value="general">General</option>
+                  <option value="general">General Inquiry</option>
                   <option value="order">Order Issue</option>
-                  <option value="returns">Returns</option>
-                  <option value="sizing">Sizing</option>
+                  <option value="returns">Returns & Exchanges</option>
+                  <option value="sizing">Sizing Help</option>
                   <option value="wholesale">Wholesale</option>
                   <option value="other">Other</option>
-                  <option value="order_notification">Orders</option>
+                  <option value="order_notification">
+                    Order Notifications
+                  </option>
                 </select>
               </div>
               <!-- Message Cards -->
               <div class="inbox-messages-scroll" id="messagesList">
                 <div class="inbox-skeleton">
-                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
-                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
-                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
-                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
-                  <div class="inbox-skeleton-card"><div class="skeleton skeleton-circle"></div><div style="flex:1"><div class="skeleton skeleton-text skeleton-text--med"></div><div class="skeleton skeleton-text skeleton-text--long"></div></div></div>
+                  <div class="inbox-skeleton-card">
+                    <div class="skeleton skeleton-circle"></div>
+                    <div style="flex: 1">
+                      <div
+                        class="skeleton skeleton-text skeleton-text--med"
+                      ></div>
+                      <div
+                        class="skeleton skeleton-text skeleton-text--long"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="inbox-skeleton-card">
+                    <div class="skeleton skeleton-circle"></div>
+                    <div style="flex: 1">
+                      <div
+                        class="skeleton skeleton-text skeleton-text--med"
+                      ></div>
+                      <div
+                        class="skeleton skeleton-text skeleton-text--long"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="inbox-skeleton-card">
+                    <div class="skeleton skeleton-circle"></div>
+                    <div style="flex: 1">
+                      <div
+                        class="skeleton skeleton-text skeleton-text--med"
+                      ></div>
+                      <div
+                        class="skeleton skeleton-text skeleton-text--long"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="inbox-skeleton-card">
+                    <div class="skeleton skeleton-circle"></div>
+                    <div style="flex: 1">
+                      <div
+                        class="skeleton skeleton-text skeleton-text--med"
+                      ></div>
+                      <div
+                        class="skeleton skeleton-text skeleton-text--long"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="inbox-skeleton-card">
+                    <div class="skeleton skeleton-circle"></div>
+                    <div style="flex: 1">
+                      <div
+                        class="skeleton skeleton-text skeleton-text--med"
+                      ></div>
+                      <div
+                        class="skeleton skeleton-text skeleton-text--long"
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               </div>
               <!-- Pagination -->
@@ -2214,35 +2333,72 @@
               <div class="inbox-detail-content" id="inboxDetailContent" hidden>
                 <!-- Detail Header -->
                 <div class="inbox-detail-header">
-                  <button class="inbox-back-btn" id="inboxBackBtn" type="button" title="Back to list"><i class="fa-solid fa-arrow-left"></i></button>
+                  <button
+                    class="inbox-back-btn"
+                    id="inboxBackBtn"
+                    type="button"
+                    title="Back to list"
+                  >
+                    <i class="fa-solid fa-arrow-left"></i>
+                  </button>
                   <div class="inbox-detail-header__info">
-                    <h4 class="inbox-detail-subject" id="msgDetailSubject">Subject</h4>
+                    <h4 class="inbox-detail-subject" id="msgDetailSubject">
+                      Subject
+                    </h4>
                     <div class="inbox-detail-meta">
                       <span class="inbox-detail-date" id="msgDetailDate"></span>
-                      <span class="inbox-detail-badge" id="msgDetailStatus"></span>
+                      <span
+                        class="inbox-detail-badge"
+                        id="msgDetailStatus"
+                      ></span>
                     </div>
                   </div>
                   <div class="inbox-detail-header__actions">
-                    <button class="inbox-icon-btn" id="msgMarkUnreadBtn" type="button" title="Mark as unread"><i class="fa-solid fa-envelope"></i></button>
-                    <button class="inbox-icon-btn inbox-icon-btn--danger" id="msgDeleteBtn" type="button" title="Delete"><i class="fa-solid fa-trash-can"></i></button>
+                    <button
+                      class="inbox-icon-btn"
+                      id="msgMarkUnreadBtn"
+                      type="button"
+                      title="Mark as unread"
+                    >
+                      <i class="fa-solid fa-envelope"></i>
+                    </button>
+                    <button
+                      class="inbox-icon-btn inbox-icon-btn--danger"
+                      id="msgDeleteBtn"
+                      type="button"
+                      title="Delete"
+                    >
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
                   </div>
                 </div>
                 <!-- Sender Card -->
                 <div class="inbox-sender-card">
                   <div class="inbox-sender-avatar" id="msgSenderAvatar">?</div>
                   <div class="inbox-sender-info">
-                    <span class="inbox-sender-name" id="msgSenderName">Name</span>
-                    <span class="inbox-sender-email" id="msgSenderEmail">email</span>
+                    <span class="inbox-sender-name" id="msgSenderName"
+                      >Name</span
+                    >
+                    <span class="inbox-sender-email" id="msgSenderEmail"
+                      >email</span
+                    >
                   </div>
                   <div class="inbox-sender-tags">
-                    <span class="inbox-tag" id="msgSenderPhone" hidden><i class="fa-solid fa-phone"></i> <span></span></span>
-                    <span class="inbox-tag" id="msgSenderOrderId" hidden><i class="fa-solid fa-receipt"></i> <span></span></span>
+                    <span class="inbox-tag" id="msgSenderPhone" hidden
+                      ><i class="fa-solid fa-phone"></i> <span></span
+                    ></span>
+                    <span class="inbox-tag" id="msgSenderOrderId" hidden
+                      ><i class="fa-solid fa-receipt"></i> <span></span
+                    ></span>
                   </div>
                 </div>
                 <!-- Conversation Thread -->
                 <div class="inbox-thread" id="inboxThread">
                   <!-- Original message -->
-                  <div class="inbox-bubble inbox-bubble--customer" id="msgDetailBody"></div>
+                  <div
+                    class="inbox-bubble inbox-bubble--customer"
+                    id="msgDetailBody"
+                  ></div>
                   <!-- Reply thread populated by JS -->
                   <div id="msgReplyThread"></div>
                 </div>
@@ -2251,20 +2407,39 @@
                   <div class="inbox-compose-from">
                     <label><i class="fa-solid fa-at"></i> From:</label>
                     <select class="inbox-compose-select" id="msgFromEmail">
-                      <option value="support@lingeriebysisioyin.store">support@</option>
-                      <option value="info@lingeriebysisioyin.store">info@</option>
-                      <option value="orders@lingeriebysisioyin.store">orders@</option>
-                      <option value="contact@lingeriebysisioyin.store">contact@</option>
+                      <option value="support@lingeriebysisioyin.store">
+                        support@
+                      </option>
+                      <option value="info@lingeriebysisioyin.store">
+                        info@
+                      </option>
+                      <option value="orders@lingeriebysisioyin.store">
+                        orders@
+                      </option>
+                      <option value="contact@lingeriebysisioyin.store">
+                        contact@
+                      </option>
                     </select>
                   </div>
                   <div class="inbox-compose-editor">
-                    <textarea class="inbox-compose-textarea" id="msgReplyText" rows="4" placeholder="Write your reply..."></textarea>
+                    <textarea
+                      class="inbox-compose-textarea"
+                      id="msgReplyText"
+                      rows="4"
+                      placeholder="Write your reply..."
+                    ></textarea>
                   </div>
                   <div class="inbox-compose-footer">
-                    <button class="btn btn-primary inbox-send-btn" id="msgSendReplyBtn" type="button">
+                    <button
+                      class="btn btn-primary inbox-send-btn"
+                      id="msgSendReplyBtn"
+                      type="button"
+                    >
                       <i class="fa-solid fa-paper-plane"></i> Send Reply
                     </button>
-                    <span class="inbox-compose-hint">Sent as branded email via Resend</span>
+                    <span class="inbox-compose-hint"
+                      >Sent as branded email via Resend</span
+                    >
                   </div>
                 </div>
               </div>
