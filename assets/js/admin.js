@@ -6318,7 +6318,7 @@
             <div class="msg-content">
               <div class="msg-top">
                 <span class="msg-sender">${escapeHtml(m.name || "Unknown")}</span>
-                <span class="msg-subject-label">${escapeHtml(subjectLabel)}</span>
+                <span class="msg-subject-label" data-subject="${m.subject || 'general'}">${escapeHtml(subjectLabel)}</span>
               </div>
               <div class="msg-preview">${escapeHtml(preview)}</div>
             </div>

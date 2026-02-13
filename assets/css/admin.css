@@ -83,6 +83,12 @@
   /* Layout */
   --sidebar-width: 260px;
   --topbar-height: 70px;
+
+  /* Aliases (compatibility) */
+  --bg-card: var(--bg-surface);
+  --border-color: var(--border-light);
+  --primary: var(--clr-primary);
+  --primary-hover: var(--clr-primary-hover);
 }
 
 /* =============================================================================
@@ -369,8 +375,12 @@ textarea {
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-5);
+  border: none;
   border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
   font-weight: 500;
+  cursor: pointer;
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
@@ -1896,8 +1906,12 @@ textarea {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
   background: var(--bg-surface-alt);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--text-sm);
+  font-weight: 500;
   transition: all var(--transition-fast);
 }
 
@@ -2731,21 +2745,26 @@ body.bulk-mode .product-card .select-checkbox {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
 }
 
-.data-table {
+.data-table,
+.table {
   width: 100%;
   border-collapse: collapse;
 }
 
 .data-table th,
-.data-table td {
+.data-table td,
+.table th,
+.table td {
   padding: var(--space-4);
   text-align: left;
   border-bottom: 1px solid var(--border-light);
 }
 
-.data-table th {
+.data-table th,
+.table th {
   background: var(--bg-surface-alt);
   font-weight: 600;
   font-size: var(--text-sm);
@@ -2753,11 +2772,13 @@ body.bulk-mode .product-card .select-checkbox {
   white-space: nowrap;
 }
 
-.data-table tbody tr:hover {
+.data-table tbody tr:hover,
+.table tbody tr:hover {
   background: var(--bg-surface-alt);
 }
 
-.data-table tbody tr:last-child td {
+.data-table tbody tr:last-child td,
+.table tbody tr:last-child td {
   border-bottom: none;
 }
 
@@ -2874,6 +2895,11 @@ body.bulk-mode .product-card .select-checkbox {
   font-size: var(--text-xl);
   font-weight: 600;
   margin-bottom: var(--space-1);
+}
+
+.section-header h3 i {
+  color: var(--clr-primary);
+  margin-right: var(--space-2);
 }
 
 .section-header p {
@@ -6568,15 +6594,23 @@ select {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-5);
   text-align: center;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.stat-card--mini:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--clr-primary-light);
 }
 
 .stat-card--mini .stat-value {
   display: block;
-  font-size: var(--text-xl);
+  font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--primary);
+  margin-bottom: 2px;
 }
 
 .stat-card--mini .stat-label {
@@ -6601,6 +6635,11 @@ select {
   font-weight: 700;
 }
 
+.view-header h2 i {
+  color: var(--clr-primary);
+  font-size: var(--text-xl);
+}
+
 .view-header-actions {
   display: flex;
   align-items: center;
@@ -6610,17 +6649,18 @@ select {
 
 .search-input {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
   font-size: var(--text-sm);
-  background: var(--bg-card);
+  background: var(--bg-surface);
   color: var(--text-primary);
   min-width: 180px;
+  transition: all var(--transition-fast);
 }
 
 .search-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--clr-primary);
   box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.1);
 }
 
@@ -7043,6 +7083,7 @@ select {
   cursor: pointer;
   transition: background 0.15s;
   text-align: left;
+  font-family: var(--font-sans);
 }
 .export-option:hover {
   background: var(--bg-surface-alt);
@@ -7087,10 +7128,13 @@ select {
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   color: var(--text-primary);
   font-size: var(--text-sm);
   min-width: 160px;
+}
+.messages-filter-bar .form-select {
+  padding-right: 44px;
 }
 .messages-filter-bar .form-input {
   min-width: 220px;
@@ -7105,6 +7149,7 @@ select {
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
 .msg-card {
@@ -7174,11 +7219,33 @@ select {
 }
 .msg-subject-label {
   font-size: var(--text-xs);
-  padding: 1px 8px;
+  padding: 2px 10px;
   border-radius: var(--radius-full);
   background: var(--bg-surface-alt);
   color: var(--text-muted);
   white-space: nowrap;
+  font-weight: 500;
+  border: 1px solid var(--border-light);
+}
+.msg-subject-label[data-subject="order"] {
+  background: rgba(59, 130, 246, 0.08);
+  color: var(--clr-info);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+.msg-subject-label[data-subject="order_notification"] {
+  background: rgba(245, 158, 11, 0.08);
+  color: var(--clr-warning);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+.msg-subject-label[data-subject="returns"] {
+  background: rgba(239, 68, 68, 0.08);
+  color: var(--clr-danger);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+.msg-subject-label[data-subject="wholesale"] {
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--clr-success);
+  border-color: rgba(34, 197, 94, 0.2);
 }
 .msg-preview {
   font-size: var(--text-sm);
@@ -7443,7 +7510,7 @@ select {
   font-family: var(--font-sans);
   font-size: var(--text-sm);
   color: var(--text-primary);
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
 }
 .msg-reply-compose .form-textarea {
   width: 100%;
