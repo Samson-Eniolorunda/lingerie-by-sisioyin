@@ -2129,7 +2129,7 @@
     if (!tbody) return;
 
     tbody.innerHTML =
-      '<tr><td colspan="7" class="text-center text-muted">Loading orders...</td></tr>';
+      '<tr><td colspan="7"><div class="skeleton skeleton-text" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="7"><div class="skeleton skeleton-text skeleton-text--long" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="7"><div class="skeleton skeleton-text skeleton-text--med" style="height:16px;margin:8px 0"></div></td></tr>';
 
     let query = supabase
       .from("orders")
@@ -5339,11 +5339,31 @@
       if (anTotalRevenue) anTotalRevenue.textContent = fmt(totalRevenue);
       if (anConversionRate) anConversionRate.textContent = conversionRate + "%";
 
+      // Fetch page views from site_visits
+      const { count: totalPageViews } = await supabase
+        .from("site_visits")
+        .select("id", { count: "exact", head: true });
+
+      const { data: periodVisits } = await supabase
+        .from("site_visits")
+        .select("page, created_at")
+        .gte("created_at", sinceISO)
+        .order("created_at", { ascending: true });
+
+      const anPageViews = $("#anPageViews");
+      if (anPageViews) anPageViews.textContent = totalPageViews || 0;
+
       // Revenue bar chart (daily totals for period)
       renderRevenueChart(orders || [], period);
 
       // Orders donut chart
       renderOrdersDonut(allOrders || []);
+
+      // Traffic bar chart (daily visits)
+      renderTrafficChart(periodVisits || [], period);
+
+      // Top pages table
+      renderTopPages(periodVisits || []);
 
       // Top products
       await renderTopProducts();
@@ -5454,6 +5474,84 @@
           )
           .join("")}
       </div>
+    `;
+  }
+
+  function renderTrafficChart(visits, period) {
+    const container = $("#trafficBarChart");
+    if (!container) return;
+
+    const daily = {};
+    visits.forEach((v) => {
+      const d = new Date(v.created_at).toLocaleDateString("en-GB", {
+        month: "short",
+        day: "numeric",
+      });
+      daily[d] = (daily[d] || 0) + 1;
+    });
+
+    const entries = Object.entries(daily);
+    if (!entries.length) {
+      container.innerHTML =
+        '<p class="text-muted text-center" style="padding:2rem">No traffic data for this period</p>';
+      return;
+    }
+
+    const maxVal = Math.max(...entries.map(([, v]) => v), 1);
+
+    container.innerHTML = entries
+      .map(([date, val]) => {
+        const pct = Math.max((val / maxVal) * 100, 4);
+        return `
+        <div class="bar-col">
+          <div class="bar-tooltip">${val} visits</div>
+          <div class="bar-fill bar-fill--traffic" style="height:${pct}%"></div>
+          <span class="bar-label">${date}</span>
+        </div>
+      `;
+      })
+      .join("");
+  }
+
+  function renderTopPages(visits) {
+    const container = $("#topPagesTable");
+    if (!container) return;
+
+    if (!visits.length) {
+      container.innerHTML =
+        '<p class="text-muted text-center" style="padding:2rem">No page data yet</p>';
+      return;
+    }
+
+    const pageCounts = {};
+    visits.forEach((v) => {
+      const pg = v.page || "/";
+      pageCounts[pg] = (pageCounts[pg] || 0) + 1;
+    });
+
+    const sorted = Object.entries(pageCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 15);
+    const total = visits.length;
+
+    container.innerHTML = `
+      <table class="table">
+        <thead><tr><th>#</th><th>Page</th><th>Views</th><th>%</th></tr></thead>
+        <tbody>
+          ${sorted
+            .map(
+              ([page, count], i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${escapeHtml(page)}</td>
+              <td>${count}</td>
+              <td>${((count / total) * 100).toFixed(1)}%</td>
+            </tr>
+          `,
+            )
+            .join("")}
+        </tbody>
+      </table>
     `;
   }
 
@@ -5650,7 +5748,7 @@
     if (!body) return;
 
     body.innerHTML =
-      '<tr><td colspan="7" class="text-center text-muted">Loading...</td></tr>';
+      '<tr><td colspan="7"><div class="skeleton skeleton-text" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="7"><div class="skeleton skeleton-text skeleton-text--long" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="7"><div class="skeleton skeleton-text skeleton-text--med" style="height:16px;margin:8px 0"></div></td></tr>';
 
     try {
       // Fetch all non-admin profiles
@@ -6235,7 +6333,9 @@
 
   function updateMessagesStats() {
     const total = messagesCache.length;
-    const unread = messagesCache.filter((m) => m.status === "unread" || !m.status).length;
+    const unread = messagesCache.filter(
+      (m) => m.status === "unread" || !m.status,
+    ).length;
     const replied = messagesCache.filter((m) => m.status === "replied").length;
     const el = (id) => $("#" + id);
     if (el("msgTotalCount")) el("msgTotalCount").textContent = total;
@@ -6246,7 +6346,9 @@
   function updateUnreadBadge() {
     const badge = $("#unreadMessagesBadge");
     if (!badge) return;
-    const unread = messagesCache.filter((m) => m.status === "unread" || !m.status).length;
+    const unread = messagesCache.filter(
+      (m) => m.status === "unread" || !m.status,
+    ).length;
     badge.textContent = unread;
     badge.hidden = unread === 0;
   }
@@ -6282,7 +6384,10 @@
     if (!container) return;
 
     const filtered = getFilteredMessages();
-    const totalPages = Math.max(1, Math.ceil(filtered.length / MESSAGES_PER_PAGE));
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filtered.length / MESSAGES_PER_PAGE),
+    );
     if (currentMessagesPage > totalPages) currentMessagesPage = totalPages;
 
     const start = (currentMessagesPage - 1) * MESSAGES_PER_PAGE;
@@ -6309,7 +6414,8 @@
           .toUpperCase()
           .slice(0, 2);
         const date = formatMsgDate(m.timestamp || m.created_at);
-        const subjectLabel = SUBJECT_LABELS[m.subject] || m.subject || "General";
+        const subjectLabel =
+          SUBJECT_LABELS[m.subject] || m.subject || "General";
         const preview = (m.message || "").slice(0, 100);
 
         return `
@@ -6318,7 +6424,7 @@
             <div class="msg-content">
               <div class="msg-top">
                 <span class="msg-sender">${escapeHtml(m.name || "Unknown")}</span>
-                <span class="msg-subject-label" data-subject="${m.subject || 'general'}">${escapeHtml(subjectLabel)}</span>
+                <span class="msg-subject-label" data-subject="${m.subject || "general"}">${escapeHtml(subjectLabel)}</span>
               </div>
               <div class="msg-preview">${escapeHtml(preview)}</div>
             </div>
@@ -6394,7 +6500,8 @@
     }
 
     // Populate modal
-    const subjectLabel = SUBJECT_LABELS[msg.subject] || msg.subject || "General Inquiry";
+    const subjectLabel =
+      SUBJECT_LABELS[msg.subject] || msg.subject || "General Inquiry";
     $("#msgDetailSubject").textContent = subjectLabel;
     $("#msgDetailDate").textContent = new Date(
       msg.timestamp || msg.created_at,
@@ -6475,7 +6582,9 @@
     if (!text) return showToast("Please type a reply", "error");
     if (!openMessageId) return;
 
-    const msg = messagesCache.find((m) => String(m.id) === String(openMessageId));
+    const msg = messagesCache.find(
+      (m) => String(m.id) === String(openMessageId),
+    );
     if (!msg) return;
 
     const btn = $("#msgSendReplyBtn");
@@ -6485,8 +6594,17 @@
 
     try {
       // 1. Call edge function to send branded email
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData?.session?.access_token;
+      let { data: sessionData } = await supabase.auth.getSession();
+      let token = sessionData?.session?.access_token;
+
+      // Refresh session if token is missing or expired
+      if (!token) {
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        token = refreshData?.session?.access_token;
+      }
+      if (!token) {
+        throw new Error("Session expired — please log in again.");
+      }
 
       const res = await fetch(
         "https://oriojylsilcsvcsefuux.supabase.co/functions/v1/send-admin-reply",
@@ -6500,10 +6618,12 @@
             messageId: openMessageId,
             recipientEmail: msg.email,
             recipientName: msg.name,
-            originalSubject: SUBJECT_LABELS[msg.subject] || msg.subject || "Your Inquiry",
+            originalSubject:
+              SUBJECT_LABELS[msg.subject] || msg.subject || "Your Inquiry",
             originalMessage: msg.message,
             replyText: text,
-            fromEmail: $("#msgFromEmail")?.value || "support@lingeriebysisioyin.store",
+            fromEmail:
+              $("#msgFromEmail")?.value || "support@lingeriebysisioyin.store",
           }),
         },
       );

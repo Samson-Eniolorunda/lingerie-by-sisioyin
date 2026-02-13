@@ -366,6 +366,79 @@ textarea {
 }
 
 /* =============================================================================
+   SKELETON LOADING
+   ============================================================================= */
+
+@keyframes skeletonShimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-alt) 25%,
+    #e8ecf1 37%,
+    var(--bg-surface-alt) 63%
+  );
+  background-size: 800px 100%;
+  animation: skeletonShimmer 1.4s ease infinite;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-text {
+  height: 14px;
+  margin-bottom: var(--space-2);
+  width: 100%;
+}
+
+.skeleton-text--short {
+  width: 40%;
+}
+.skeleton-text--med {
+  width: 65%;
+}
+.skeleton-text--long {
+  width: 85%;
+}
+
+.skeleton-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+}
+
+.skeleton-card {
+  height: 80px;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-stat {
+  height: 72px;
+  border-radius: var(--radius-lg);
+  min-width: 120px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.skeleton-table-rows {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+/* =============================================================================
    5. BUTTONS
    ============================================================================= */
 
@@ -5811,6 +5884,10 @@ html[data-theme="dark"] {
 
 .bar-col:hover .bar-fill {
   opacity: 0.8;
+}
+
+.bar-fill--traffic {
+  background: linear-gradient(180deg, var(--clr-info), #2563eb);
 }
 
 .bar-tooltip {

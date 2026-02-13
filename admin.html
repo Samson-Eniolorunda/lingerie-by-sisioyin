@@ -900,7 +900,15 @@
                 <a href="#" class="card-link" data-go-to="orders">View All</a>
               </div>
               <div class="card-body" id="recentOrdersList">
-                <p class="text-muted text-center">Loading...</p>
+                <div
+                  class="skeleton skeleton-card"
+                  style="margin-bottom: 8px"
+                ></div>
+                <div
+                  class="skeleton skeleton-card"
+                  style="margin-bottom: 8px"
+                ></div>
+                <div class="skeleton skeleton-card"></div>
               </div>
             </div>
 
@@ -914,7 +922,15 @@
                 >
               </div>
               <div class="card-body" id="lowStockList">
-                <p class="text-muted text-center">Loading...</p>
+                <div
+                  class="skeleton skeleton-card"
+                  style="margin-bottom: 8px"
+                ></div>
+                <div
+                  class="skeleton skeleton-card"
+                  style="margin-bottom: 8px"
+                ></div>
+                <div class="skeleton skeleton-card"></div>
               </div>
             </div>
           </div>
@@ -1469,7 +1485,24 @@
               </button>
             </div>
             <div class="activity-list" id="activityLogsList">
-              <p class="text-muted text-center">Loading...</p>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                </div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text"></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1494,7 +1527,24 @@
               </button>
             </div>
             <div class="admins-list" id="adminsList">
-              <p class="text-muted text-center">Loading...</p>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div
+                    class="skeleton skeleton-text skeleton-text--short"
+                  ></div>
+                </div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div
+                    class="skeleton skeleton-text skeleton-text--short"
+                  ></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1733,7 +1783,16 @@
               </button>
             </div>
             <div class="trash-list" id="trashProductsList">
-              <p class="text-muted text-center">Loading...</p>
+              <div class="skeleton-row">
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+              </div>
+              <div class="skeleton-row">
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -1824,6 +1883,11 @@
           <!-- Site Traffic Overview (from database) -->
           <div class="analytics-stats" id="analyticsStats">
             <div class="stat-box">
+              <div class="stat-box-icon"><i class="fa-solid fa-eye"></i></div>
+              <div class="stat-box-value" id="anPageViews">0</div>
+              <div class="stat-box-label">Page Views</div>
+            </div>
+            <div class="stat-box">
               <div class="stat-box-icon"><i class="fa-solid fa-users"></i></div>
               <div class="stat-box-value" id="anTotalCustomers">0</div>
               <div class="stat-box-label">Total Customers</div>
@@ -1867,13 +1931,51 @@
             </div>
           </div>
 
+          <!-- Traffic Chart -->
+          <div class="analytics-chart-card">
+            <h4><i class="fa-solid fa-chart-area"></i> Traffic Over Time</h4>
+            <div class="analytics-chart">
+              <div class="analytics-bar-chart" id="trafficBarChart"></div>
+            </div>
+          </div>
+
+          <!-- Top Pages -->
+          <div class="analytics-chart-card">
+            <h4><i class="fa-solid fa-file-lines"></i> Top Pages</h4>
+            <div class="analytics-table-wrap" id="topPagesTable">
+              <div
+                class="skeleton skeleton-text"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--long"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--med"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+            </div>
+          </div>
+
           <!-- Top Products -->
           <div class="analytics-chart-card">
             <h4>
               <i class="fa-solid fa-ranking-star"></i> Top Selling Products
             </h4>
             <div class="analytics-table-wrap" id="topProductsTable">
-              <p class="text-muted text-center">Loading...</p>
+              <div
+                class="skeleton skeleton-text"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--long"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--med"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
             </div>
           </div>
 
@@ -1881,7 +1983,18 @@
           <div class="analytics-chart-card">
             <h4><i class="fa-solid fa-globe"></i> Visits by Country</h4>
             <div class="analytics-table-wrap" id="geoCountryTable">
-              <p class="text-muted text-center">Loading...</p>
+              <div
+                class="skeleton skeleton-text"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--long"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--med"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
             </div>
           </div>
 
@@ -1891,7 +2004,18 @@
               State
             </h4>
             <div class="analytics-table-wrap" id="geoStateTable">
-              <p class="text-muted text-center">Loading...</p>
+              <div
+                class="skeleton skeleton-text"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--long"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
+              <div
+                class="skeleton skeleton-text skeleton-text--med"
+                style="height: 16px; margin: 12px 16px"
+              ></div>
             </div>
           </div>
         </section>
@@ -1973,7 +2097,44 @@
               </thead>
               <tbody id="customersBody">
                 <tr>
-                  <td colspan="7" class="text-center text-muted">Loading...</td>
+                  <td colspan="7">
+                    <div
+                      class="skeleton skeleton-text"
+                      style="height: 16px; margin: 8px 0"
+                    ></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="7">
+                    <div
+                      class="skeleton skeleton-text skeleton-text--long"
+                      style="height: 16px; margin: 8px 0"
+                    ></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="7">
+                    <div
+                      class="skeleton skeleton-text skeleton-text--med"
+                      style="height: 16px; margin: 8px 0"
+                    ></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="7">
+                    <div
+                      class="skeleton skeleton-text"
+                      style="height: 16px; margin: 8px 0"
+                    ></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td colspan="7">
+                    <div
+                      class="skeleton skeleton-text skeleton-text--long"
+                      style="height: 16px; margin: 8px 0"
+                    ></div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -1986,10 +2147,16 @@
           <div class="section-header">
             <div>
               <h3><i class="fa-solid fa-envelope"></i> Messages</h3>
-              <p class="text-muted">Contact form submissions &amp; customer inquiries</p>
+              <p class="text-muted">
+                Contact form submissions &amp; customer inquiries
+              </p>
             </div>
             <div class="section-header-actions">
-              <button class="btn btn-outline" id="refreshMessagesBtn" type="button">
+              <button
+                class="btn btn-outline"
+                id="refreshMessagesBtn"
+                type="button"
+              >
                 <i class="fa-solid fa-rotate"></i> Refresh
               </button>
             </div>
@@ -2032,13 +2199,74 @@
               </select>
             </div>
             <div class="filter-group">
-              <input type="search" class="form-input" id="msgSearchInput" placeholder="Search messages..." />
+              <input
+                type="search"
+                class="form-input"
+                id="msgSearchInput"
+                placeholder="Search messages..."
+              />
             </div>
           </div>
 
           <!-- Messages List -->
           <div class="messages-list" id="messagesList">
-            <div class="messages-empty">Loading messages...</div>
+            <div class="skeleton-table-rows">
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--short"
+                  style="width: 60px"
+                ></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--short"
+                  style="width: 60px"
+                ></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--short"
+                  style="width: 60px"
+                ></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--short"
+                  style="width: 60px"
+                ></div>
+              </div>
+              <div class="skeleton-row">
+                <div class="skeleton skeleton-circle"></div>
+                <div style="flex: 1">
+                  <div class="skeleton skeleton-text skeleton-text--med"></div>
+                  <div class="skeleton skeleton-text skeleton-text--long"></div>
+                </div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--short"
+                  style="width: 60px"
+                ></div>
+              </div>
+            </div>
           </div>
 
           <!-- Messages Pagination -->
@@ -2048,13 +2276,20 @@
         <!-- ═══ Message Detail / Reply Modal ═══ -->
         <div class="modal-overlay" id="messageModal" hidden>
           <div class="modal-box modal-message">
-            <button class="modal-close-x" id="messageModalCloseX" type="button" aria-label="Close">
+            <button
+              class="modal-close-x"
+              id="messageModalCloseX"
+              type="button"
+              aria-label="Close"
+            >
               <i class="fa-solid fa-xmark"></i>
             </button>
             <div class="message-detail" id="messageDetail">
               <!-- Header -->
               <div class="msg-detail-header">
-                <div class="msg-detail-subject" id="msgDetailSubject">Subject</div>
+                <div class="msg-detail-subject" id="msgDetailSubject">
+                  Subject
+                </div>
                 <div class="msg-detail-meta">
                   <span class="msg-detail-date" id="msgDetailDate"></span>
                   <span class="msg-detail-status" id="msgDetailStatus"></span>
@@ -2065,7 +2300,9 @@
                 <div class="msg-sender-avatar" id="msgSenderAvatar">?</div>
                 <div class="msg-sender-info">
                   <span class="msg-sender-name" id="msgSenderName">Name</span>
-                  <span class="msg-sender-email" id="msgSenderEmail">email@example.com</span>
+                  <span class="msg-sender-email" id="msgSenderEmail"
+                    >email@example.com</span
+                  >
                 </div>
                 <div class="msg-sender-extras">
                   <span id="msgSenderPhone"></span>
@@ -2080,20 +2317,41 @@
               <div class="msg-reply-compose">
                 <h4><i class="fa-solid fa-reply"></i> Reply</h4>
                 <div class="msg-from-selector">
-                  <label for="msgFromEmail"><i class="fa-solid fa-at"></i> Send from:</label>
+                  <label for="msgFromEmail"
+                    ><i class="fa-solid fa-at"></i> Send from:</label
+                  >
                   <select class="form-select" id="msgFromEmail">
-                    <option value="support@lingeriebysisioyin.store">support@lingeriebysisioyin.store</option>
-                    <option value="info@lingeriebysisioyin.store">info@lingeriebysisioyin.store</option>
-                    <option value="orders@lingeriebysisioyin.store">orders@lingeriebysisioyin.store</option>
-                    <option value="contact@lingeriebysisioyin.store">contact@lingeriebysisioyin.store</option>
+                    <option value="support@lingeriebysisioyin.store">
+                      support@lingeriebysisioyin.store
+                    </option>
+                    <option value="info@lingeriebysisioyin.store">
+                      info@lingeriebysisioyin.store
+                    </option>
+                    <option value="orders@lingeriebysisioyin.store">
+                      orders@lingeriebysisioyin.store
+                    </option>
+                    <option value="contact@lingeriebysisioyin.store">
+                      contact@lingeriebysisioyin.store
+                    </option>
                   </select>
                 </div>
-                <textarea class="form-textarea" id="msgReplyText" rows="5" placeholder="Type your reply..."></textarea>
+                <textarea
+                  class="form-textarea"
+                  id="msgReplyText"
+                  rows="5"
+                  placeholder="Type your reply..."
+                ></textarea>
                 <div class="msg-reply-actions">
-                  <button class="btn btn-primary" id="msgSendReplyBtn" type="button">
+                  <button
+                    class="btn btn-primary"
+                    id="msgSendReplyBtn"
+                    type="button"
+                  >
                     <i class="fa-solid fa-paper-plane"></i> Send Reply
                   </button>
-                  <span class="msg-reply-note">Reply will be sent as a branded email via Resend</span>
+                  <span class="msg-reply-note"
+                    >Reply will be sent as a branded email via Resend</span
+                  >
                 </div>
               </div>
             </div>
@@ -2101,52 +2359,6 @@
         </div>
       </div>
     </main>
-
-    <!-- Cart Drawer -->
-    <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
-        <div class="cd-header">
-          <h3 class="cd-title">
-            <i class="fa-solid fa-bag-shopping"></i> Your Cart
-          </h3>
-          <button
-            type="button"
-            class="cd-close"
-            id="closeCartDrawer"
-            aria-label="Close cart"
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-        <div class="cd-body" id="cartDrawerBody">
-          <div class="cd-empty" id="cartEmpty">
-            <div class="cd-empty-icon">
-              <i class="fa-solid fa-bag-shopping"></i>
-            </div>
-            <h3>Your cart is empty</h3>
-            <p>Add items to your cart to checkout</p>
-            <a href="/shop" class="btn btn-primary">Start Shopping</a>
-          </div>
-        </div>
-        <div class="cd-footer u-hidden" id="cartDrawerFooter">
-          <div class="cd-subtotal">
-            <span class="cd-subtotal-label">Subtotal</span>
-            <span class="cd-subtotal-value" id="cartSubtotal">₦0</span>
-          </div>
-          <p class="cd-note">Shipping calculated at checkout</p>
-          <a href="/checkout" class="cd-checkout-btn"
-            ><i class="fa-solid fa-lock"></i> Proceed to Checkout</a
-          >
-          <button
-            type="button"
-            class="cd-continue-btn"
-            id="continueShoppingBtn"
-          >
-            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
-          </button>
-        </div>
-      </div>
-    </div>
 
     <!-- Scripts -->
     <script
