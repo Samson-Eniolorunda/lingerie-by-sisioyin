@@ -624,6 +624,7 @@
         </div>
 
         <nav class="sidebar-nav">
+          <!-- ── Main ── -->
           <button
             class="nav-item active"
             data-view-target="dashboard"
@@ -633,10 +634,8 @@
             <span>Dashboard</span>
           </button>
 
-          <button class="nav-item" data-view-target="inventory" type="button">
-            <i class="fa-solid fa-layer-group"></i>
-            <span>Inventory</span>
-          </button>
+          <!-- ── Store ── -->
+          <p class="nav-section-label">Store</p>
 
           <button class="nav-item" data-view-target="orders" type="button">
             <i class="fa-solid fa-receipt"></i>
@@ -644,47 +643,18 @@
             <span class="nav-badge" id="pendingOrdersBadge" hidden>0</span>
           </button>
 
+          <button class="nav-item" data-view-target="inventory" type="button">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Inventory</span>
+          </button>
+
           <button class="nav-item" data-view-target="studio" type="button">
-            <i class="fa-solid fa-plus"></i>
+            <i class="fa-solid fa-plus-circle"></i>
             <span>Add Product</span>
           </button>
 
-          <div class="nav-divider"></div>
-
-          <button class="nav-item" data-view-target="activity" type="button">
-            <i class="fa-solid fa-clock-rotate-left"></i>
-            <span>Activity Logs</span>
-          </button>
-
-          <button class="nav-item" data-view-target="admins" type="button">
-            <i class="fa-solid fa-users-gear"></i>
-            <span>Manage Admins</span>
-          </button>
-
-          <button class="nav-item" data-view-target="siteImages" type="button">
-            <i class="fa-solid fa-images"></i>
-            <span>Site Images</span>
-          </button>
-
-          <button class="nav-item" data-view-target="trash" type="button">
-            <i class="fa-solid fa-trash-can"></i>
-            <span>Trash</span>
-          </button>
-
-          <button class="nav-item" data-view-target="reviews" type="button">
-            <i class="fa-solid fa-star-half-stroke"></i>
-            <span>Reviews</span>
-          </button>
-
-          <button class="nav-item" data-view-target="analytics" type="button">
-            <i class="fa-solid fa-chart-pie"></i>
-            <span>Analytics</span>
-          </button>
-
-          <button class="nav-item" data-view-target="customers" type="button">
-            <i class="fa-solid fa-users"></i>
-            <span>Customers</span>
-          </button>
+          <!-- ── Customers ── -->
+          <p class="nav-section-label">Customers</p>
 
           <button class="nav-item" data-view-target="messages" type="button">
             <i class="fa-solid fa-envelope"></i>
@@ -692,12 +662,53 @@
             <span class="nav-badge" id="unreadMessagesBadge" hidden>0</span>
           </button>
 
-          <div class="nav-divider"></div>
+          <button class="nav-item" data-view-target="customers" type="button">
+            <i class="fa-solid fa-users"></i>
+            <span>Customers</span>
+          </button>
+
+          <button class="nav-item" data-view-target="reviews" type="button">
+            <i class="fa-solid fa-star-half-stroke"></i>
+            <span>Reviews</span>
+          </button>
+
+          <!-- ── Insights ── -->
+          <p class="nav-section-label">Insights</p>
+
+          <button class="nav-item" data-view-target="analytics" type="button">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Analytics</span>
+          </button>
+
+          <button class="nav-item" data-view-target="activity" type="button">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>Activity Logs</span>
+          </button>
+
+          <!-- ── Settings ── -->
+          <p class="nav-section-label">Settings</p>
+
+          <button class="nav-item" data-view-target="siteImages" type="button">
+            <i class="fa-solid fa-images"></i>
+            <span>Site Images</span>
+          </button>
+
+          <button class="nav-item" data-view-target="admins" type="button">
+            <i class="fa-solid fa-users-gear"></i>
+            <span>Manage Admins</span>
+          </button>
 
           <button class="nav-item" id="openInviteModalBtn" type="button">
             <i class="fa-solid fa-user-plus"></i>
             <span>Invite Admin</span>
           </button>
+
+          <button class="nav-item" data-view-target="trash" type="button">
+            <i class="fa-solid fa-trash-can"></i>
+            <span>Trash</span>
+          </button>
+
+          <div class="nav-divider"></div>
 
           <a href="/home" class="nav-item">
             <i class="fa-solid fa-store"></i>
