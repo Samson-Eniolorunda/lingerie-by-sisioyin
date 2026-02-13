@@ -6211,6 +6211,7 @@
     sizing: "Sizing Help",
     wholesale: "Wholesale",
     other: "Other",
+    order_notification: "Order Notification",
   };
 
   async function loadMessages() {
@@ -6502,6 +6503,7 @@
             originalSubject: SUBJECT_LABELS[msg.subject] || msg.subject || "Your Inquiry",
             originalMessage: msg.message,
             replyText: text,
+            fromEmail: $("#msgFromEmail")?.value || "support@lingeriebysisioyin.store",
           }),
         },
       );

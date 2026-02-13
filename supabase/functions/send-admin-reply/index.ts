@@ -6,9 +6,16 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
-const FROM_EMAIL = "contact@lingeriebysisioyin.store";
+const DEFAULT_FROM_EMAIL = "support@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
+
+const ALLOWED_FROM_EMAILS = [
+  "support@lingeriebysisioyin.store",
+  "info@lingeriebysisioyin.store",
+  "orders@lingeriebysisioyin.store",
+  "contact@lingeriebysisioyin.store",
+];
 
 interface ReplyPayload {
   messageId: string;
@@ -17,6 +24,7 @@ interface ReplyPayload {
   originalSubject: string;
   originalMessage: string;
   replyText: string;
+  fromEmail?: string;
 }
 
 function replyEmailHTML(payload: ReplyPayload): string {
@@ -118,6 +126,11 @@ serve(async (req: Request) => {
 
     console.log(`📧 Sending admin reply to: ${payload.recipientEmail}`);
 
+    // Validate and use the selected FROM email
+    const fromEmail = ALLOWED_FROM_EMAILS.includes(payload.fromEmail || "")
+      ? payload.fromEmail!
+      : DEFAULT_FROM_EMAIL;
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -125,11 +138,11 @@ serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: `${BRAND} <${FROM_EMAIL}>`,
+        from: `${BRAND} <${fromEmail}>`,
         to: [payload.recipientEmail],
         subject: `Re: ${payload.originalSubject} — ${BRAND}`,
         html: replyEmailHTML(payload),
-        reply_to: FROM_EMAIL,
+        reply_to: fromEmail,
       }),
     });
 

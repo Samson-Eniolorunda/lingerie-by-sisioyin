@@ -2028,6 +2028,7 @@
                 <option value="sizing">Sizing Help</option>
                 <option value="wholesale">Wholesale/Partnerships</option>
                 <option value="other">Other</option>
+                <option value="order_notification">Order Notifications</option>
               </select>
             </div>
             <div class="filter-group">
@@ -2078,6 +2079,15 @@
               <!-- Reply compose -->
               <div class="msg-reply-compose">
                 <h4><i class="fa-solid fa-reply"></i> Reply</h4>
+                <div class="msg-from-selector">
+                  <label for="msgFromEmail"><i class="fa-solid fa-at"></i> Send from:</label>
+                  <select class="form-select" id="msgFromEmail">
+                    <option value="support@lingeriebysisioyin.store">support@lingeriebysisioyin.store</option>
+                    <option value="info@lingeriebysisioyin.store">info@lingeriebysisioyin.store</option>
+                    <option value="orders@lingeriebysisioyin.store">orders@lingeriebysisioyin.store</option>
+                    <option value="contact@lingeriebysisioyin.store">contact@lingeriebysisioyin.store</option>
+                  </select>
+                </div>
                 <textarea class="form-textarea" id="msgReplyText" rows="5" placeholder="Type your reply..."></textarea>
                 <div class="msg-reply-actions">
                   <button class="btn btn-primary" id="msgSendReplyBtn" type="button">
