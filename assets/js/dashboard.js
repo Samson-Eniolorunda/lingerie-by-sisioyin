@@ -282,6 +282,19 @@
         },
       });
       if (error) throw error;
+
+      // Also sync name + phone to profiles table so admin can see them
+      const nameParts = (fd.fullName || "").trim().split(" ");
+      await c
+        .from("profiles")
+        .update({
+          full_name: fd.fullName || null,
+          first_name: nameParts[0] || null,
+          last_name: nameParts.slice(1).join(" ") || null,
+          phone: fd.phone || null,
+        })
+        .eq("id", currentUser.id);
+
       window.UTILS?.toast?.("Profile updated!", "success");
       if (elUserName)
         elUserName.textContent =
@@ -768,16 +781,22 @@
         if (data) {
           if (waToggle) waToggle.checked = !!data.whatsapp_opted_in;
           if (waInput) waInput.value = data.whatsapp_number || "";
-          if (waRow) waRow.style.display = data.whatsapp_opted_in ? "block" : "none";
+          if (waRow)
+            waRow.style.display = data.whatsapp_opted_in ? "block" : "none";
         }
-      } catch (_) { /* columns may not exist yet */ }
+      } catch (_) {
+        /* columns may not exist yet */
+      }
     }
 
     function showWaStatus(msg, type) {
       if (!waStatus) return;
       waStatus.textContent = msg;
       waStatus.className = "dash-whatsapp-status " + type;
-      if (type === "success") setTimeout(() => { waStatus.textContent = ""; }, 3000);
+      if (type === "success")
+        setTimeout(() => {
+          waStatus.textContent = "";
+        }, 3000);
     }
 
     if (waToggle) {
@@ -788,22 +807,33 @@
         const c = client();
         if (!c || !currentUser) return;
         try {
-          await c.from("profiles").update({ whatsapp_opted_in: on }).eq("id", currentUser.id);
+          await c
+            .from("profiles")
+            .update({ whatsapp_opted_in: on })
+            .eq("id", currentUser.id);
           if (!on) {
             showWaStatus("WhatsApp updates disabled.", "success");
           }
-        } catch (_) { /* ignore if col missing */ }
+        } catch (_) {
+          /* ignore if col missing */
+        }
       });
     }
 
     if (waSaveBtn) {
       waSaveBtn.addEventListener("click", async () => {
         const num = (waInput?.value || "").trim();
-        if (!num) { showWaStatus("Please enter a valid WhatsApp number.", "error"); return; }
+        if (!num) {
+          showWaStatus("Please enter a valid WhatsApp number.", "error");
+          return;
+        }
         // Basic validation: must start with + and have at least 10 digits
         const cleaned = num.replace(/[\s\-()]/g, "");
         if (!/^\+\d{10,15}$/.test(cleaned)) {
-          showWaStatus("Enter a valid number with country code, e.g. +2348012345678", "error");
+          showWaStatus(
+            "Enter a valid number with country code, e.g. +2348012345678",
+            "error",
+          );
           return;
         }
         const c = client();
@@ -816,7 +846,10 @@
             .update({ whatsapp_number: cleaned, whatsapp_opted_in: true })
             .eq("id", currentUser.id);
           if (error) throw error;
-          showWaStatus("WhatsApp number saved! You'll receive order updates.", "success");
+          showWaStatus(
+            "WhatsApp number saved! You'll receive order updates.",
+            "success",
+          );
         } catch (e) {
           showWaStatus(e.message || "Failed to save number.", "error");
         } finally {

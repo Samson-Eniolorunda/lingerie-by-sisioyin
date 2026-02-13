@@ -36,12 +36,14 @@ build/
 SERVICES_SETUP.md
 EDGE_FUNCTION_DEPLOY.md
 EMAIL_NOTIFICATIONS_SETUP.md
+EMAIL_REPLY_WEBHOOK_SETUP.md
 GOOGLE_LOGIN_SETUP.md
 DEPLOYMENT.md
 ROLE_PERMISSIONS.md
 
 # Database schema / SQL dumps
 *.sql
+supabase_complete.sql
 
 # Environment examples
 .env.example
@@ -50,6 +52,9 @@ ROLE_PERMISSIONS.md
 supabase/
 nul
 
+# Cloudflare email worker (contains internal routing config)
+email-worker/
+
 # Local dev server config
 serve.json
 serve_output.txt
@@ -57,3 +62,7 @@ serve_output.txt
 # Build / migration helpers
 _*.css
 _*.js
+
+# Temp files
+clear_test_data.sh
+DocuMorph/

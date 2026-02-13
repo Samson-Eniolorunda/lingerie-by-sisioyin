@@ -40,8 +40,8 @@
   // Calculate delivery fee based on state — reads from config.js
   function getDeliveryFee(state) {
     const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
-    const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT || 2500;
-    return fees[state] || fallback;
+    const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT ?? 2500;
+    return state in fees ? fees[state] : fallback;
   }
 
   // Update progress steps — uses new ck-step markup

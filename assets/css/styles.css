@@ -12852,6 +12852,13 @@ html[data-theme="dark"] .wa-popup-msg {
   overflow: hidden;
 }
 
+.hero-new .container,
+.products-section .container,
+.categories-new .container,
+.trust-section .container {
+  overflow: hidden;
+}
+
 .trust-grid,
 .products-grid,
 .categories-showcase {
@@ -15183,8 +15190,14 @@ html[data-theme="dark"]
   animation: whatsappSlideIn 0.3s ease;
 }
 @keyframes whatsappSlideIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .dash-whatsapp-number-inner {
   background: rgba(37, 211, 102, 0.05);
@@ -15237,8 +15250,12 @@ html[data-theme="dark"]
   margin-top: var(--space-2);
   min-height: 1.2em;
 }
-.dash-whatsapp-status.success { color: #25d366; }
-.dash-whatsapp-status.error   { color: var(--error); }
+.dash-whatsapp-status.success {
+  color: #25d366;
+}
+.dash-whatsapp-status.error {
+  color: var(--error);
+}
 .dash-setting-meta {
   font-size: 0.75rem;
   color: var(--text-secondary);

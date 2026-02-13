@@ -30,7 +30,7 @@ window.APP_CONFIG = {
 
   // Delivery fees by area (NGN). Edit these to update cart + checkout automatically.
   DELIVERY_FEES: {
-    Lagos: 2000,
+    Lagos: 0,
     Ogun: 2000,
     Oyo: 2500,
     Osun: 2500,

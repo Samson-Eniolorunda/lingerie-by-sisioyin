@@ -31,8 +31,8 @@
     const selected = deliverySelect?.value;
     if (!selected) return 0;
     const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
-    const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT || 2500;
-    return fees[selected] || fallback;
+    const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT ?? 2500;
+    return selected in fees ? fees[selected] : fallback;
   }
 
   function generateOrderId() {
@@ -241,10 +241,14 @@
         discountRow.hidden = true;
       }
     }
-    if (deliveryEl)
-      deliveryEl.textContent = deliveryFee
-        ? formatMoney(deliveryFee)
+    if (deliveryEl) {
+      const areaSelected = $("#deliveryArea")?.value;
+      deliveryEl.textContent = areaSelected
+        ? deliveryFee === 0
+          ? "Free"
+          : formatMoney(deliveryFee)
         : "Select area";
+    }
     if (totalEl) totalEl.textContent = formatMoney(total);
   }
 
@@ -438,7 +442,7 @@
     const select = $("#deliveryArea");
     if (!select) return;
     const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
-    const fmt = (n) => "₦" + Number(n).toLocaleString();
+    const fmt = (n) => (n === 0 ? "Free" : "₦" + Number(n).toLocaleString());
     const abujaLabel = { Abuja: "Abuja (FCT)" };
     select.innerHTML = Object.entries(fees)
       .map(([state, fee]) => {

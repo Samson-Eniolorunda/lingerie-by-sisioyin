@@ -635,7 +635,9 @@
           </button>
 
           <!-- ── Store ── -->
-          <p class="nav-section-label">Store</p>
+          <p class="nav-section-label">
+            <i class="fa-solid fa-store"></i> Store
+          </p>
 
           <button class="nav-item" data-view-target="orders" type="button">
             <i class="fa-solid fa-receipt"></i>
@@ -654,7 +656,9 @@
           </button>
 
           <!-- ── Customers ── -->
-          <p class="nav-section-label">Customers</p>
+          <p class="nav-section-label">
+            <i class="fa-solid fa-people-group"></i> Customers
+          </p>
 
           <button class="nav-item" data-view-target="messages" type="button">
             <i class="fa-solid fa-envelope"></i>
@@ -673,7 +677,9 @@
           </button>
 
           <!-- ── Insights ── -->
-          <p class="nav-section-label">Insights</p>
+          <p class="nav-section-label">
+            <i class="fa-solid fa-magnifying-glass-chart"></i> Insights
+          </p>
 
           <button class="nav-item" data-view-target="analytics" type="button">
             <i class="fa-solid fa-chart-pie"></i>
@@ -686,7 +692,9 @@
           </button>
 
           <!-- ── Settings ── -->
-          <p class="nav-section-label">Settings</p>
+          <p class="nav-section-label">
+            <i class="fa-solid fa-gear"></i> Settings
+          </p>
 
           <button class="nav-item" data-view-target="siteImages" type="button">
             <i class="fa-solid fa-images"></i>
@@ -2101,6 +2109,7 @@
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
+                  <th>WhatsApp</th>
                   <th>Orders</th>
                   <th>Total Spent</th>
                   <th>Joined</th>
@@ -2108,7 +2117,7 @@
               </thead>
               <tbody id="customersBody">
                 <tr>
-                  <td colspan="7">
+                  <td colspan="8">
                     <div
                       class="skeleton skeleton-text"
                       style="height: 16px; margin: 8px 0"
@@ -2116,7 +2125,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="7">
+                  <td colspan="8">
                     <div
                       class="skeleton skeleton-text skeleton-text--long"
                       style="height: 16px; margin: 8px 0"
@@ -2124,7 +2133,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="7">
+                  <td colspan="8">
                     <div
                       class="skeleton skeleton-text skeleton-text--med"
                       style="height: 16px; margin: 8px 0"
@@ -2132,7 +2141,7 @@
                   </td>
                 </tr>
                 <tr>
-                  <td colspan="7">
+                  <td colspan="8">
                     <div
                       class="skeleton skeleton-text"
                       style="height: 16px; margin: 8px 0"
@@ -2454,7 +2463,10 @@
                     type="button"
                     title="Send Reply"
                   >
-                    <i class="fa-solid fa-paper-plane"></i>
+                    <i
+                      class="fa-solid fa-paper-plane fa-rotate-by"
+                      style="--fa-rotate-angle: -35deg"
+                    ></i>
                   </button>
                 </div>
               </div>

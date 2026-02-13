@@ -4807,6 +4807,34 @@
     await loadDashboardStats();
   }
 
+  /* ── Refresh All Sections (topbar refresh button) ── */
+  async function refreshAllSections() {
+    const btn = $("[data-refresh]");
+    if (btn) {
+      const icon = btn.querySelector("i");
+      if (icon) icon.classList.add("fa-spin");
+    }
+    try {
+      await Promise.all([
+        loadInventory(),
+        loadDashboardStats(),
+        typeof loadOrders === "function" ? loadOrders() : Promise.resolve(),
+        typeof loadAnalytics === "function" ? loadAnalytics() : Promise.resolve(),
+        typeof loadMessages === "function" ? loadMessages() : Promise.resolve(),
+        typeof loadActivityLogs === "function" ? loadActivityLogs() : Promise.resolve(),
+      ]);
+      showToast("All data refreshed", "success");
+    } catch (e) {
+      console.error("[refreshAllSections]", e);
+      showToast("Some sections failed to refresh", "error");
+    } finally {
+      if (btn) {
+        const icon = btn.querySelector("i");
+        if (icon) icon.classList.remove("fa-spin");
+      }
+    }
+  }
+
   async function gateWithSession(session, source) {
     console.log("[gateWithSession] Source:", source, "Session:", !!session);
     try {
@@ -5103,7 +5131,7 @@
       }
     });
 
-    on($("[data-refresh]"), "click", loadInventory);
+    on($("[data-refresh]"), "click", refreshAllSections);
     on($("[data-clear-form]"), "click", resetForm);
     on($("#pColorMode"), "change", () => {
       toggleColorUI();
@@ -5748,13 +5776,13 @@
     if (!body) return;
 
     body.innerHTML =
-      '<tr><td colspan="7"><div class="skeleton skeleton-text" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="7"><div class="skeleton skeleton-text skeleton-text--long" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="7"><div class="skeleton skeleton-text skeleton-text--med" style="height:16px;margin:8px 0"></div></td></tr>';
+      '<tr><td colspan="8"><div class="skeleton skeleton-text" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="8"><div class="skeleton skeleton-text skeleton-text--long" style="height:16px;margin:8px 0"></div></td></tr><tr><td colspan="8"><div class="skeleton skeleton-text skeleton-text--med" style="height:16px;margin:8px 0"></div></td></tr>';
 
     try {
       // Fetch all non-admin profiles
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, full_name, email, phone, created_at, is_admin")
+        .select("id, first_name, last_name, full_name, email, phone, whatsapp_number, whatsapp_opted_in, created_at, is_admin")
         .eq("is_admin", false)
         .order("created_at", { ascending: false });
 
@@ -5777,7 +5805,9 @@
       allCustomers = (profiles || []).map((p) => {
         const key = (p.email || "").toLowerCase();
         const stats = orderMap[key] || { count: 0, spent: 0 };
-        return { ...p, orderCount: stats.count, totalSpent: stats.spent };
+        // Build display name from available fields
+        const displayName = p.full_name || `${p.first_name || ""} ${p.last_name || ""}`.trim() || "";
+        return { ...p, full_name: displayName, orderCount: stats.count, totalSpent: stats.spent };
       });
 
       // Update stats
@@ -5799,7 +5829,7 @@
     } catch (err) {
       console.error("[loadCustomers] Error:", err);
       body.innerHTML =
-        '<tr><td colspan="7" class="text-center text-muted">Failed to load customers</td></tr>';
+        '<tr><td colspan="8" class="text-center text-muted">Failed to load customers</td></tr>';
     }
   }
 
@@ -5809,7 +5839,7 @@
 
     if (!customers.length) {
       body.innerHTML =
-        '<tr><td colspan="7" class="text-center text-muted">No customers found</td></tr>';
+        '<tr><td colspan="8" class="text-center text-muted">No customers found</td></tr>';
       return;
     }
 
@@ -5817,17 +5847,24 @@
       "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
     body.innerHTML = customers
       .map(
-        (c, i) => `
+        (c, i) => {
+          const phoneDisplay = c.phone || "—";
+          const waDisplay = c.whatsapp_number
+            ? `<span title="WhatsApp opted-in" style="color:#25d366"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(c.whatsapp_number)}</span>`
+            : "—";
+          return `
         <tr>
           <td>${i + 1}</td>
           <td>${escapeHtml(c.full_name || "—")}</td>
           <td>${escapeHtml(c.email || "—")}</td>
-          <td>${escapeHtml(c.phone || "—")}</td>
+          <td>${escapeHtml(phoneDisplay)}</td>
+          <td>${waDisplay}</td>
           <td>${c.orderCount}</td>
           <td>${fmt(c.totalSpent)}</td>
           <td>${c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : "—"}</td>
         </tr>
-      `,
+      `;
+        },
       )
       .join("");
   }
@@ -5840,7 +5877,7 @@
       return;
     }
     const filtered = allCustomers.filter((c) =>
-      [c.full_name, c.email, c.phone].some((f) =>
+      [c.full_name, c.email, c.phone, c.whatsapp_number].some((f) =>
         (f || "").toLowerCase().includes(q),
       ),
     );
@@ -5881,6 +5918,7 @@
       name: c.full_name || "",
       email: c.email || "",
       phone: c.phone || "",
+      whatsapp: c.whatsapp_number || "",
       orders: c.orderCount,
       total_spent: c.totalSpent,
       joined: c.created_at
@@ -5896,11 +5934,11 @@
       });
       downloadBlob(blob, `customers_${date}.json`);
     } else if (format === "txt") {
-      const header = "Name | Email | Phone | Orders | Total Spent | Joined";
-      const sep = "-".repeat(80);
+      const header = "Name | Email | Phone | WhatsApp | Orders | Total Spent | Joined";
+      const sep = "-".repeat(100);
       const lines = rows.map(
         (r) =>
-          `${r.name} | ${r.email} | ${r.phone} | ${r.orders} | ₦${r.total_spent.toLocaleString()} | ${r.joined}`,
+          `${r.name} | ${r.email} | ${r.phone} | ${r.whatsapp} | ${r.orders} | ₦${r.total_spent.toLocaleString()} | ${r.joined}`,
       );
       const text = [header, sep, ...lines].join("\n");
       const blob = new Blob([text], { type: "text/plain" });
@@ -6660,18 +6698,17 @@
     if (!msg) return;
 
     const btn = $("#msgSendReplyBtn");
-    const origHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
     btn.disabled = true;
 
     try {
-      // Get session token
-      let { data: sessionData } = await supabase.auth.getSession();
-      let token = sessionData?.session?.access_token;
+      // Get a fresh session token (refresh first to avoid expired JWT)
+      const { data: refreshData } = await supabase.auth.refreshSession();
+      let token = refreshData?.session?.access_token;
       if (!token) {
-        const { data: refreshData } = await supabase.auth.refreshSession();
-        token = refreshData?.session?.access_token;
+        const { data: sessionData } = await supabase.auth.getSession();
+        token = sessionData?.session?.access_token;
       }
+      if (!token) throw new Error("Not logged in — please sign in again");
 
       const res = await fetch(
         "https://oriojylsilcsvcsefuux.supabase.co/functions/v1/send-admin-reply",
@@ -6679,7 +6716,8 @@
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            Authorization: `Bearer ${token}`,
+            apikey: window.APP_CONFIG?.SUPABASE_ANON_KEY || "",
           },
           body: JSON.stringify({
             messageId: openMessageId,
@@ -6695,23 +6733,40 @@
         },
       );
       if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
+        const errBody = await res.text().catch(() => "");
+        let errMsg = `Server error (${res.status})`;
+        try {
+          const parsed = JSON.parse(errBody);
+          errMsg = parsed.error || parsed.details || errBody;
+        } catch {
+          if (errBody) errMsg = errBody;
+        }
+        throw new Error(errMsg);
       }
 
-      // Save reply
-      await supabase.from("message_replies").insert({
-        message_id: openMessageId,
-        reply_text: text,
-        sent_by: currentUserId,
-        sent_at: new Date().toISOString(),
-      });
+      // Save reply to database
+      const { error: insertErr } = await supabase
+        .from("message_replies")
+        .insert({
+          message_id: openMessageId,
+          reply_text: text,
+          sent_by: currentUserId,
+          sender_type: "admin",
+          sent_at: new Date().toISOString(),
+        });
+      if (insertErr) {
+        console.error("[sendReply] save reply failed:", insertErr);
+        // Email sent but reply not saved — don't block the user
+      }
 
-      // Update status
-      await supabase
+      // Update message status
+      const { error: updateErr } = await supabase
         .from("contact_messages")
         .update({ status: "replied" })
         .eq("id", openMessageId);
+      if (updateErr) {
+        console.error("[sendReply] update status failed:", updateErr);
+      }
       msg.status = "replied";
       $("#msgReplyText").value = "";
       showToast("Reply sent!", "success");
@@ -6731,9 +6786,12 @@
       if (thread) thread.scrollTop = thread.scrollHeight;
     } catch (err) {
       console.error("[sendReply]", err);
-      showToast("Failed to send: " + err.message, "error");
+      const msg =
+        err instanceof TypeError && err.message === "Failed to fetch"
+          ? "Network error — check that the edge function is deployed and try again"
+          : err.message || "Unknown error";
+      showToast("Failed to send: " + msg, "error");
     } finally {
-      btn.innerHTML = origHTML;
       btn.disabled = false;
     }
   }
