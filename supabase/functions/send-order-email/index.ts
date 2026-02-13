@@ -12,7 +12,8 @@ const ADMIN_EMAIL = "adelugbaoyindamola@lingeriebysisioyin.store";
 const FROM_EMAIL = "orders@lingeriebysisioyin.store";
 const BRAND = "Lingerie by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
+const SUPABASE_URL =
+  Deno.env.get("SUPABASE_URL") || "https://oriojylsilcsvcsefuux.supabase.co";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 // ── Customer WhatsApp helper ──────────────────
@@ -616,6 +617,25 @@ serve(async (req: Request) => {
         ? "sent"
         : `failed: ${adminResult.error}`;
 
+      // Save status update to contact_messages (appears in admin Messages tab)
+      try {
+        if (SUPABASE_SERVICE_KEY) {
+          const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+          await sb.from("contact_messages").insert({
+            name: order.customer_name,
+            email: order.customer_email || "no-email@order.local",
+            phone: order.customer_phone || "",
+            subject: "order_notification",
+            orderId: order.order_number,
+            message: `Order ${order.order_number} status updated: ${oldRecord.status} → ${newStatus}`,
+            timestamp: new Date().toISOString(),
+            status: "unread",
+          });
+        }
+      } catch (e) {
+        console.warn("Failed to save status update to contact_messages:", e);
+      }
+
       // WhatsApp notification for status change (fire-and-forget)
       try {
         fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
@@ -627,8 +647,12 @@ serve(async (req: Request) => {
             customer_name: order.customer_name,
             status: newStatus,
           }),
-        }).catch(e => console.warn("WhatsApp status notification failed:", e));
-      } catch (e) { console.warn("WhatsApp error:", e); }
+        }).catch((e) =>
+          console.warn("WhatsApp status notification failed:", e),
+        );
+      } catch (e) {
+        console.warn("WhatsApp error:", e);
+      }
 
       // Customer WhatsApp notification for status change
       if (order.customer_email) {
@@ -677,7 +701,30 @@ serve(async (req: Request) => {
 
     console.log("Email results:", results);
 
-    // 3. Send WhatsApp notification to admin (fire-and-forget)
+    // 3. Save order notification to contact_messages (appears in admin Messages tab)
+    try {
+      if (SUPABASE_SERVICE_KEY) {
+        const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+        const itemsList = (order.items || [])
+          .map((i: OrderItem) => `${i.name} x${i.qty}`)
+          .join(", ");
+        await sb.from("contact_messages").insert({
+          name: order.customer_name,
+          email: order.customer_email || "no-email@order.local",
+          phone: order.customer_phone || "",
+          subject: "order_notification",
+          orderId: order.order_number,
+          message: `New order ${order.order_number}\nTotal: ${formatNaira(order.total)}\nPayment: ${order.payment_method} (${order.payment_status})\nItems: ${itemsList}\nDelivery: ${order.delivery_address}, ${order.delivery_city}, ${order.delivery_state}${order.notes ? "\nNotes: " + order.notes : ""}`,
+          timestamp: new Date().toISOString(),
+          status: "unread",
+        });
+        console.log("Order notification saved to contact_messages");
+      }
+    } catch (e) {
+      console.warn("Failed to save order to contact_messages:", e);
+    }
+
+    // 4. Send WhatsApp notification to admin (fire-and-forget)
     try {
       fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp-notification`, {
         method: "POST",
@@ -690,10 +737,14 @@ serve(async (req: Request) => {
           items_count: (order.items || []).length,
           payment_method: order.payment_method,
         }),
-      }).catch(e => console.warn("WhatsApp notification failed (non-blocking):", e));
-    } catch (e) { console.warn("WhatsApp fire-and-forget error:", e); }
+      }).catch((e) =>
+        console.warn("WhatsApp notification failed (non-blocking):", e),
+      );
+    } catch (e) {
+      console.warn("WhatsApp fire-and-forget error:", e);
+    }
 
-    // 4. Send WhatsApp to customer if opted in
+    // 5. Send WhatsApp to customer if opted in
     if (order.customer_email) {
       notifyCustomerWhatsApp(order.customer_email, {
         type: "customer_order_confirmation",

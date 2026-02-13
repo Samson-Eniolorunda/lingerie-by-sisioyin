@@ -7821,15 +7821,16 @@ select {
 
 /* Chat Bubbles — WhatsApp Style */
 .inbox-bubble {
-  max-width: 65%;
-  padding: 6px 10px 8px;
-  border-radius: 8px;
-  line-height: 1.45;
-  font-size: 13px;
+  max-width: 50%;
+  padding: 5px 8px 6px;
+  border-radius: 7.5px;
+  line-height: 1.4;
+  font-size: 12.5px;
   white-space: pre-wrap;
   word-break: break-word;
   position: relative;
   animation: bubbleIn 0.15s ease;
+  width: fit-content;
 }
 @keyframes bubbleIn {
   from {
@@ -7848,6 +7849,7 @@ select {
   border: 1px solid #e5e7eb;
   border-top-left-radius: 2px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+  margin-right: auto;
 }
 .inbox-bubble--admin {
   align-self: flex-end;
@@ -7855,6 +7857,7 @@ select {
   color: #fff;
   border-top-right-radius: 2px;
   box-shadow: 0 1px 2px rgba(190, 24, 93, 0.12);
+  margin-left: auto;
 }
 .inbox-bubble__meta {
   display: flex;
@@ -7878,21 +7881,28 @@ select {
 }
 .inbox-bubble__text {
   word-break: break-word;
-  font-size: 13.5px;
+  font-size: 12.5px;
 }
 
 /* Compose Area — compact like WhatsApp */
 .inbox-compose {
   border-top: 1px solid var(--border-light);
   background: #f0f2f5;
-  padding: 8px 12px;
+  padding: 6px 10px;
   flex-shrink: 0;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.inbox-compose-inner {
+  flex: 1;
+  min-width: 0;
 }
 .inbox-compose-from {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
 }
 .inbox-compose-from label {
   font-size: 11px;
@@ -7923,17 +7933,17 @@ select {
 }
 .inbox-compose-textarea {
   width: 100%;
-  padding: 8px 12px;
+  padding: 6px 12px;
   border: 1px solid var(--border-light);
-  border-radius: 20px;
-  font-size: 13px;
+  border-radius: 18px;
+  font-size: 12.5px;
   font-family: inherit;
   color: var(--text-primary);
   background: #fff;
   resize: none;
-  min-height: 40px;
-  max-height: 100px;
-  line-height: 1.45;
+  min-height: 36px;
+  max-height: 80px;
+  line-height: 1.4;
   transition: all var(--transition-fast);
 }
 .inbox-compose-textarea:focus {
@@ -7943,18 +7953,25 @@ select {
   box-shadow: 0 0 0 2px rgba(190, 24, 93, 0.06);
 }
 .inbox-compose-footer {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
+  display: none;
 }
 .inbox-send-btn {
-  padding: 7px 16px !important;
-  border-radius: 50px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 14px;
   box-shadow: 0 1px 3px rgba(190, 24, 93, 0.15);
   transition: all 0.2s ease;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.inbox-send-btn i {
+  margin: 0;
 }
 .inbox-send-btn:hover {
   box-shadow: 0 3px 10px rgba(190, 24, 93, 0.2);
@@ -8041,13 +8058,6 @@ select {
     padding: 14px;
   }
   .inbox-compose {
-    padding: 10px 14px;
-  }
-  .inbox-compose-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .inbox-compose-hint {
-    text-align: center;
+    padding: 6px 10px;
   }
 }

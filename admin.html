@@ -2415,43 +2415,39 @@
                 </div>
                 <!-- Compose Area -->
                 <div class="inbox-compose" id="inboxCompose">
-                  <div class="inbox-compose-from">
-                    <label><i class="fa-solid fa-at"></i> From:</label>
-                    <select class="inbox-compose-select" id="msgFromEmail">
-                      <option value="support@lingeriebysisioyin.store">
-                        support@
-                      </option>
-                      <option value="info@lingeriebysisioyin.store">
-                        info@
-                      </option>
-                      <option value="orders@lingeriebysisioyin.store">
-                        orders@
-                      </option>
-                      <option value="contact@lingeriebysisioyin.store">
-                        contact@
-                      </option>
-                    </select>
-                  </div>
-                  <div class="inbox-compose-editor">
+                  <div class="inbox-compose-inner">
+                    <div class="inbox-compose-from">
+                      <label><i class="fa-solid fa-at"></i> From:</label>
+                      <select class="inbox-compose-select" id="msgFromEmail">
+                        <option value="support@lingeriebysisioyin.store">
+                          support@
+                        </option>
+                        <option value="info@lingeriebysisioyin.store">
+                          info@
+                        </option>
+                        <option value="orders@lingeriebysisioyin.store">
+                          orders@
+                        </option>
+                        <option value="contact@lingeriebysisioyin.store">
+                          contact@
+                        </option>
+                      </select>
+                    </div>
                     <textarea
                       class="inbox-compose-textarea"
                       id="msgReplyText"
-                      rows="2"
+                      rows="1"
                       placeholder="Type a message..."
                     ></textarea>
                   </div>
-                  <div class="inbox-compose-footer">
-                    <button
-                      class="btn btn-primary inbox-send-btn"
-                      id="msgSendReplyBtn"
-                      type="button"
-                    >
-                      <i class="fa-solid fa-paper-plane"></i> Send Reply
-                    </button>
-                    <span class="inbox-compose-hint"
-                      >Sent as branded email via Resend</span
-                    >
-                  </div>
+                  <button
+                    class="btn btn-primary inbox-send-btn"
+                    id="msgSendReplyBtn"
+                    type="button"
+                    title="Send Reply"
+                  >
+                    <i class="fa-solid fa-paper-plane"></i>
+                  </button>
                 </div>
               </div>
             </div>
