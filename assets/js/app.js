@@ -237,9 +237,8 @@
       return;
     }
 
-    // Remove inert/aria-hidden BEFORE rendering so focus can work
+    // Remove inert BEFORE rendering so focus can work
     drawer.removeAttribute("inert");
-    drawer.setAttribute("aria-hidden", "false");
 
     renderCartDrawer();
     drawer.classList.add("open");
@@ -263,8 +262,7 @@
     document.body.style.overflow = "";
     document.body.classList.remove("drawer-open");
 
-    // Set inert/aria-hidden AFTER removing focus
-    drawer.setAttribute("aria-hidden", "true");
+    // Set inert AFTER removing focus
     drawer.setAttribute("inert", "");
   }
 
@@ -310,12 +308,12 @@
         itemEl.className = "cd-item";
         itemEl.dataset.idx = idx;
         itemEl.innerHTML = `
-          <img src="${item.image || "https://placehold.co/72x90/f8fafc/be185d?text=No+Image"}" alt="${UTILS.safeText(item.name)}" class="cd-item-img">
+          <img src="${item.image || "https://placehold.co/72x90/f8fafc/be185d?text=No+Image"}" alt="${UTILS.safeText(item.name)}" class="cd-item-img" loading="lazy">
           <div class="cd-item-info">
             <h4 class="cd-item-name">${UTILS.safeText(item.name)}</h4>
             <div class="cd-item-variant">
-              ${item.selectedSize ? `<span class="cd-variant-tag">${item.selectedSize}</span>` : ""}
-              ${colorName ? `<span class="cd-variant-tag"><span class="cd-color-dot" style="background:${colorHex}"></span>${colorName}</span>` : ""}
+              ${item.selectedSize ? `<span class="cd-variant-tag">${UTILS.safeText(item.selectedSize)}</span>` : ""}
+              ${colorName ? `<span class="cd-variant-tag"><span class="cd-color-dot" style="background:${colorHex}"></span>${UTILS.safeText(colorName)}</span>` : ""}
             </div>
             <div class="cd-item-bottom">
               <p class="cd-item-price">${UTILS.formatNaira(price)}</p>
@@ -407,7 +405,7 @@
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     updateCartBadge();
     renderCartDrawer();
-    showToast("Item removed", "info");
+    UTILS.toast("Item removed", "info");
   }
 
   /* ─────────────────────────────────────────────
@@ -491,7 +489,7 @@
           a.remove();
           URL.revokeObjectURL(url);
         } catch {
-          showToast("Failed to download image", "error");
+          UTILS.toast("Failed to download image", "error");
         }
       }
     });
@@ -1130,9 +1128,18 @@
       }
 
       const colors = modalProduct.colors || [];
+      const inStockColors = colors.filter(c => {
+        const qty = typeof c === 'object' ? c.qty || 0 : 1;
+        return qty > 0;
+      });
+      const isAssorted = colors.length === 1 && (
+        (typeof colors[0] === 'string' ? colors[0] : colors[0]?.name || '')
+          .toLowerCase() === 'assorted'
+      );
       if (
         modalProduct.allow_color_selection &&
-        colors.length > 1 &&
+        inStockColors.length >= 1 &&
+        !isAssorted &&
         !modalSelectedColor
       ) {
         UTILS.toast("Please select a color", "warning");
@@ -1755,7 +1762,7 @@
               .map(
                 (product) => `
               <a href="/shop?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
-                <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" />
+                <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" loading="lazy" />
                 <div class="search-result-info">
                   <div class="search-result-name">${UTILS.safeText(product.name)}</div>
                   <div class="search-result-price">${UTILS.formatNaira(product.price_ngn)}</div>
@@ -1777,7 +1784,7 @@
             .map(
               (product) => `
           <a href="/shop?product=${product.id}" class="search-result-item" data-product-id="${product.id}">
-            <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" />
+            <img src="${getFirstImage(product.images)}" alt="${UTILS.safeText(product.name)}" class="search-result-img" loading="lazy" />
             <div class="search-result-info">
               <div class="search-result-name">${UTILS.safeText(product.name)}</div>
               <div class="search-result-price">${UTILS.formatNaira(product.price_ngn)}</div>
@@ -2198,17 +2205,15 @@
     overlay.innerHTML = `
       <div class="consent-modal">
         <div class="consent-icon"><i class="fa-solid fa-cookie-bite"></i></div>
-        <h3 class="consent-title">We value your privacy</h3>
+        <h3 class="consent-title">Cookie Preferences</h3>
         <p class="consent-text">
-          We use cookies to enhance your experience. Manage your preferences below
-          or read our <a href="/privacy">Privacy&nbsp;Policy</a> and
-          <a href="/terms">Terms&nbsp;of&nbsp;Service</a>.
+          We use cookies and local storage to save your cart, wishlist, and preferences. Adjust your choices below or see our <a href="/privacy">Privacy&nbsp;Policy</a>.
         </p>
         <div class="consent-toggles">
           <div class="consent-toggle-row">
             <div class="consent-toggle-info">
               <span class="consent-toggle-label">Essential</span>
-              <span class="consent-toggle-desc">Required for site functionality</span>
+              <span class="consent-toggle-desc">Cart, auth &amp; site functionality</span>
             </div>
             <label class="consent-switch disabled">
               <input type="checkbox" checked disabled />
@@ -2218,7 +2223,7 @@
           <div class="consent-toggle-row">
             <div class="consent-toggle-info">
               <span class="consent-toggle-label">Analytics</span>
-              <span class="consent-toggle-desc">Help us understand site usage</span>
+              <span class="consent-toggle-desc">Google Analytics &amp; page insights</span>
             </div>
             <label class="consent-switch">
               <input type="checkbox" id="consentAnalytics" checked />
@@ -2228,7 +2233,7 @@
           <div class="consent-toggle-row">
             <div class="consent-toggle-info">
               <span class="consent-toggle-label">Marketing</span>
-              <span class="consent-toggle-desc">Personalized ads &amp; recommendations</span>
+              <span class="consent-toggle-desc">Meta Pixel &amp; social ads</span>
             </div>
             <label class="consent-switch">
               <input type="checkbox" id="consentMarketing" />
@@ -2238,7 +2243,7 @@
           <div class="consent-toggle-row">
             <div class="consent-toggle-info">
               <span class="consent-toggle-label">Functional</span>
-              <span class="consent-toggle-desc">Remember preferences &amp; settings</span>
+              <span class="consent-toggle-desc">Theme, wishlist &amp; preferences</span>
             </div>
             <label class="consent-switch">
               <input type="checkbox" id="consentFunctional" checked />
@@ -2249,8 +2254,8 @@
         <div class="consent-actions">
           <button class="consent-btn consent-btn-accept" id="consentAcceptAll">Accept All</button>
           <button class="consent-btn consent-btn-save" id="consentSavePrefs">Save Preferences</button>
-          <button class="consent-btn consent-btn-essential" id="consentEssential">Essential Only</button>
         </div>
+        <button class="consent-btn consent-btn-essential consent-btn-full" id="consentEssential">Essential Only</button>
       </div>`;
     document.body.appendChild(overlay);
 
@@ -2399,7 +2404,7 @@
       .querySelector("#reviewPopupSubmit")
       .addEventListener("click", async () => {
         if (!selectedRating) {
-          showToast("Please select a rating", "warning");
+          UTILS.toast("Please select a rating", "warning");
           return;
         }
 
@@ -2424,9 +2429,9 @@
           });
 
           if (error) throw error;
-          showToast("Thank you for your review!", "success");
+          UTILS.toast("Thank you for your review!", "success");
         } catch (err) {
-          showToast("Failed to submit review", "error");
+          UTILS.toast("Failed to submit review", "error");
         }
 
         closePopup();
@@ -2454,6 +2459,37 @@
   console.log("🚀 APP: Bootstrap started");
   initTheme();
 
+  // Scroll behaviour: on normal navigation → start at top,
+  // on refresh (F5 / Ctrl-R) → restore previous position.
+  const _navType =
+    (performance.getEntriesByType("navigation")[0] || {}).type ||
+    (performance.navigation
+      ? ["navigate", "reload", "back_forward", "prerender"][
+          performance.navigation.type
+        ]
+      : "navigate");
+  const _isReload = _navType === "reload";
+  const _scrollKey = "LBS_SCROLL_" + location.pathname;
+
+  if (_isReload) {
+    const savedScroll = sessionStorage.getItem(_scrollKey);
+    if (savedScroll) {
+      requestAnimationFrame(() =>
+        window.scrollTo(0, parseInt(savedScroll, 10)),
+      );
+    }
+  } else {
+    // Normal navigation → always start at top
+    window.scrollTo(0, 0);
+  }
+  // Always clear after reading
+  sessionStorage.removeItem(_scrollKey);
+
+  // Save scroll position before unload (used on next reload)
+  window.addEventListener("beforeunload", () => {
+    sessionStorage.setItem(_scrollKey, String(window.scrollY));
+  });
+
   // Remove page loading state — reveal the page
   document.body.classList.remove("page-loading");
   const pageLoaderEl = document.getElementById("pageLoader");
@@ -2479,7 +2515,9 @@
 
   // ── Form Persistence (sessionStorage) ──────────────────────────
   // Saves form inputs on change and restores on reload so users don't lose data.
+  // Skipped on admin page — admin has its own form lifecycle.
   function initFormPersistence() {
+    if (location.pathname.includes("admin")) return;
     const key = "LBS_FORM_" + location.pathname.replace(/[^a-zA-Z0-9]/g, "_");
     const saved = (() => {
       try {
@@ -2562,5 +2600,26 @@
   initTermsBanner();
   initPostDeliveryReview();
   initFormPersistence();
+
+  // ── Mobile Keyboard: Scroll focused input into view ────────────
+  // Prevents virtual keyboard from covering the input field on mobile devices.
+  // Works as a fallback for browsers that don't support interactive-widget=resizes-content.
+  (function initMobileKeyboardScroll() {
+    if (!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) return;
+    document.addEventListener("focusin", function (e) {
+      const el = e.target;
+      if (
+        !el ||
+        !["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName) ||
+        el.readOnly
+      )
+        return;
+      // Small delay so keyboard finishes appearing
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 350);
+    });
+  })();
+
   console.log("✅ APP: Bootstrap complete");
 })();

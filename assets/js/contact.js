@@ -62,7 +62,7 @@
         try {
           const edgePayload = savedRecord || formData;
           fetch(
-            "https://oriojylsilcsvcsefuux.supabase.co/functions/v1/send-contact-email",
+            `${window.APP_CONFIG?.SUPABASE_URL || "https://oriojylsilcsvcsefuux.supabase.co"}/functions/v1/send-contact-email`,
             {
               method: "POST",
               headers: { "Content-Type": "application/json" },

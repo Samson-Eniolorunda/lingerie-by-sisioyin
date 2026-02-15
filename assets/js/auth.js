@@ -169,6 +169,34 @@
     document.body.style.overflow = "";
   }
 
+  /* ── Mobile keyboard: reposition auth modal when keyboard appears ── */
+  (function initAuthModalKeyboardHandler() {
+    if (!/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) return;
+    if (!window.visualViewport) return;
+
+    const adjustModal = () => {
+      if (!authModal || !authModal.classList.contains("active")) return;
+      const vv = window.visualViewport;
+      // When keyboard opens, visualViewport.height shrinks
+      const offsetTop = vv.offsetTop;
+      const viewH = vv.height;
+      authModal.style.top = offsetTop + viewH / 2 + "px";
+    };
+
+    const resetModal = () => {
+      if (!authModal) return;
+      authModal.style.top = "";
+    };
+
+    window.visualViewport.addEventListener("resize", adjustModal);
+    window.visualViewport.addEventListener("scroll", adjustModal);
+
+    // Reset when modal closes or no focus
+    document.addEventListener("focusout", () => {
+      setTimeout(resetModal, 100);
+    });
+  })();
+
   function switchTab(tab) {
     authTabs.forEach((t) => {
       t.classList.toggle("active", t.dataset.tab === tab);
@@ -221,6 +249,30 @@
 
       if (error) throw error;
 
+      // Check if account is suspended or banned
+      const { data: profile } = await client
+        .from("profiles")
+        .select("account_status")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profile?.account_status === "banned") {
+        await client.auth.signOut();
+        window.UTILS?.toast?.(
+          "Your account has been deactivated. Please contact support.",
+          "error",
+        );
+        return;
+      }
+      if (profile?.account_status === "suspended") {
+        await client.auth.signOut();
+        window.UTILS?.toast?.(
+          "Your account is temporarily suspended. Please contact support.",
+          "error",
+        );
+        return;
+      }
+
       // Admin accounts can now login to shop as well
       console.log("🔐 AUTH: Login successful");
       window.UTILS?.toast?.("Welcome back!", "success");
@@ -272,6 +324,25 @@
         "success",
       );
       closeAuthModal();
+
+      // Notify admin of new customer signup (fire-and-forget)
+      try {
+        fetch(
+          `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-contact-email`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: fullName || "New Customer",
+              email: email,
+              subject: "New Customer Signup Notification",
+              message: `A new customer has signed up!\n\nName: ${fullName || "Not provided"}\nEmail: ${email}\nDate: ${new Date().toLocaleString("en-GB")}\n\nYou can view this customer in your admin panel under the Customers section.`,
+            }),
+          },
+        );
+      } catch (_) {
+        /* non-critical */
+      }
     } catch (err) {
       console.error("🔐 AUTH: Signup error:", err);
       window.UTILS?.toast?.(err.message || "Signup failed", "error");
@@ -370,21 +441,6 @@
       );
       return false;
     }
-  }
-
-  /* ─────────────────────────────────────────────
-   * Developer Account Detection
-   * ───────────────────────────────────────────── */
-  const DEV_EMAILS = [
-    "dev@lingerie.com",
-    "admin@lingerie.com",
-    "test@test.com",
-  ];
-
-  function isDevEmail(email) {
-    return DEV_EMAILS.some(
-      (devEmail) => email?.toLowerCase().trim() === devEmail,
-    );
   }
 
   /* ─────────────────────────────────────────────
@@ -501,24 +557,24 @@
       if (e.target === authModal) closeAuthModal();
     });
 
+    // Scroll focused input into view inside modal on mobile
+    if (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+      authModal.addEventListener("focusin", (e) => {
+        const el = e.target;
+        if (!el || !["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName))
+          return;
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 350);
+      });
+    }
+
     // Escape key
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape" && authModal.classList.contains("active")) {
         closeAuthModal();
       }
     });
-
-    // Email field change - enable button for dev accounts
-    const loginEmailInput = loginForm?.querySelector('[name="email"]');
-    if (loginEmailInput) {
-      loginEmailInput.addEventListener("input", (e) => {
-        const submitBtn = loginForm.querySelector('button[type="submit"]');
-        if (isDevEmail(e.target.value)) {
-          submitBtn.disabled = false;
-          submitBtn.classList.remove("btn-disabled");
-        }
-      });
-    }
 
     // Tab switching
     authTabs.forEach((tab) => {
@@ -528,6 +584,7 @@
     // ─── Login reCAPTCHA: show when user interacts or has saved credentials ───
     let loginRecaptchaRendered = false;
     const loginPasswordInput = loginForm?.querySelector('[name="password"]');
+    const loginEmailInput = loginForm?.querySelector('[name="email"]');
 
     function showLoginRecaptcha() {
       if (!loginForm) return;
@@ -622,9 +679,8 @@
           return;
         }
 
-        // Developer bypass - skip recaptcha for specific accounts
-        if (!isDevEmail(email)) {
-          // If reCAPTCHA hasn't been shown yet, show it and prompt user
+        // reCAPTCHA verification
+        {
           if (!loginRecaptchaRendered) {
             showLoginRecaptcha();
             window.UTILS?.toast?.(
@@ -704,15 +760,23 @@
       signupForm.addEventListener("submit", async (e) => {
         e.preventDefault();
 
-        const fullName = signupForm.querySelector('[name="fullName"]')?.value;
+        const firstName = signupForm.querySelector('[name="firstName"]')?.value;
+        const lastName = signupForm.querySelector('[name="lastName"]')?.value;
+        const fullName =
+          `${(firstName || "").trim()} ${(lastName || "").trim()}`.trim();
         const email = signupForm.querySelector('[name="email"]')?.value?.trim();
         const password = signupForm.querySelector('[name="password"]')?.value;
         const confirmPassword = signupForm.querySelector(
           '[name="confirmPassword"]',
         )?.value;
 
-        if (!fullName?.trim()) {
-          window.UTILS?.toast?.("Please enter your full name", "error");
+        if (!firstName?.trim()) {
+          window.UTILS?.toast?.("Please enter your first name", "error");
+          return;
+        }
+
+        if (!lastName?.trim()) {
+          window.UTILS?.toast?.("Please enter your last name", "error");
           return;
         }
 

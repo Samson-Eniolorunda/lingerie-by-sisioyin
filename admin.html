@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content"
+    />
     <meta name="color-scheme" content="light dark" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Admin | Lingerie by Sisioyin</title>
@@ -13,6 +16,7 @@
     <meta name="theme-color" content="#be185d" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -33,6 +37,16 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/admin.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
   <body class="admin-body">
     <!-- =========================================================================
@@ -322,7 +336,7 @@
       <div class="auth-container">
         <div class="auth-brand">
           <div class="auth-logo">
-            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-gem"></i>
           </div>
           <h1>LBS Admin</h1>
           <p>Manage your store</p>
@@ -617,7 +631,7 @@
       <aside class="admin-sidebar" id="sidebar">
         <div class="sidebar-brand">
           <a href="/admin" class="sidebar-logo">
-            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-gem"></i>
             <span>LBS Admin</span>
           </a>
           <p class="sidebar-tagline">Store Management</p>
@@ -1503,6 +1517,24 @@
                 Refresh
               </button>
             </div>
+            <!-- Activity Filters -->
+            <div class="activity-filters">
+              <input
+                type="search"
+                class="search-input"
+                id="activitySearchInput"
+                placeholder="Search activity logs..."
+              />
+              <select class="form-select" id="activityActionFilter">
+                <option value="all">All Actions</option>
+                <option value="login">Login</option>
+                <option value="create">Create</option>
+                <option value="update">Update</option>
+                <option value="delete">Delete</option>
+                <option value="restore">Restore</option>
+                <option value="invite">Invite</option>
+              </select>
+            </div>
             <div class="activity-list" id="activityLogsList">
               <div class="skeleton-row">
                 <div class="skeleton skeleton-circle"></div>
@@ -1599,7 +1631,7 @@
                 Hero Image
               </h4>
               <p class="image-section-desc">
-                This is the main image displayed on the homepage hero section.
+                Main homepage hero image. Recommended: <strong>900 × 1200 px</strong> (3:4 portrait), max ~400 KB. Use WebP or JPEG.
               </p>
               <div class="image-upload-card" data-setting="hero_image">
                 <div class="image-preview" id="heroImagePreview">
@@ -1648,8 +1680,7 @@
                 Shop Category Images
               </h4>
               <p class="image-section-desc">
-                These images are displayed in the Shop Categories section on the
-                homepage.
+                Shop category showcase images. Recommended: <strong>900 × 1200 px</strong> (3:4 portrait), max ~300 KB.
               </p>
 
               <div class="category-images-grid">
@@ -1958,6 +1989,38 @@
             </div>
           </div>
 
+          <!-- Device Analytics -->
+          <div class="analytics-charts">
+            <div class="analytics-chart-card">
+              <h4>
+                <i class="fa-solid fa-mobile-screen"></i> Visits by Device
+              </h4>
+              <div class="analytics-table-wrap" id="deviceTypeTable">
+                <div
+                  class="skeleton skeleton-text"
+                  style="height: 16px; margin: 12px 16px"
+                ></div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--long"
+                  style="height: 16px; margin: 12px 16px"
+                ></div>
+              </div>
+            </div>
+            <div class="analytics-chart-card">
+              <h4><i class="fa-solid fa-globe"></i> Visits by Browser</h4>
+              <div class="analytics-table-wrap" id="browserTypeTable">
+                <div
+                  class="skeleton skeleton-text"
+                  style="height: 16px; margin: 12px 16px"
+                ></div>
+                <div
+                  class="skeleton skeleton-text skeleton-text--long"
+                  style="height: 16px; margin: 12px 16px"
+                ></div>
+              </div>
+            </div>
+          </div>
+
           <!-- Top Pages -->
           <div class="analytics-chart-card">
             <h4><i class="fa-solid fa-file-lines"></i> Top Pages</h4>
@@ -2102,7 +2165,7 @@
             </div>
           </div>
           <div class="table-responsive" id="customersTableWrap">
-            <table class="table" id="customersTable">
+            <table class="data-table" id="customersTable">
               <thead>
                 <tr>
                   <th>#</th>
@@ -2110,9 +2173,12 @@
                   <th>Email</th>
                   <th>Phone</th>
                   <th>WhatsApp</th>
+                  <th>DOB</th>
                   <th>Orders</th>
                   <th>Total Spent</th>
                   <th>Joined</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody id="customersBody">
@@ -2190,6 +2256,14 @@
             </div>
             <div class="inbox-topbar__right">
               <button
+                class="btn btn-primary btn-sm"
+                id="composeMessageBtn"
+                type="button"
+                title="Compose New Message"
+              >
+                <i class="fa-solid fa-pen-to-square"></i> <span>Compose</span>
+              </button>
+              <button
                 class="inbox-icon-btn"
                 id="refreshMessagesBtn"
                 type="button"
@@ -2197,6 +2271,107 @@
               >
                 <i class="fa-solid fa-arrows-rotate"></i>
               </button>
+            </div>
+          </div>
+
+          <!-- Compose Modal -->
+          <div class="compose-overlay" id="composeOverlay" hidden>
+            <div class="compose-modal">
+              <div class="compose-header">
+                <h3><i class="fa-solid fa-pen-to-square"></i> New Message</h3>
+                <button
+                  class="compose-close"
+                  id="composeCloseBtn"
+                  type="button"
+                >
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+              <div class="compose-body">
+                <div class="compose-field">
+                  <label>To (Customer)</label>
+                  <div class="compose-recipient-wrap">
+                    <input
+                      type="search"
+                      id="composeRecipientSearch"
+                      class="form-input"
+                      placeholder="Search customer by name or email..."
+                      autocomplete="off"
+                    />
+                    <div
+                      class="compose-recipient-dropdown"
+                      id="composeRecipientDropdown"
+                      hidden
+                    ></div>
+                  </div>
+                  <div
+                    class="compose-recipient-tag"
+                    id="composeRecipientTag"
+                    hidden
+                  >
+                    <span id="composeRecipientName"></span>
+                    <span id="composeRecipientEmail" class="text-muted"></span>
+                    <button
+                      type="button"
+                      class="compose-recipient-remove"
+                      id="composeRecipientRemove"
+                    >
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="compose-field">
+                  <label>From</label>
+                  <select class="form-select" id="composeFromEmail">
+                    <option value="support@lingeriebysisioyin.store">
+                      support@lingeriebysisioyin.store
+                    </option>
+                    <option value="info@lingeriebysisioyin.store">
+                      info@lingeriebysisioyin.store
+                    </option>
+                    <option value="orders@lingeriebysisioyin.store">
+                      orders@lingeriebysisioyin.store
+                    </option>
+                    <option value="contact@lingeriebysisioyin.store">
+                      contact@lingeriebysisioyin.store
+                    </option>
+                  </select>
+                </div>
+                <div class="compose-field">
+                  <label>Subject</label>
+                  <input
+                    type="text"
+                    id="composeSubject"
+                    class="form-input"
+                    placeholder="Message subject..."
+                  />
+                </div>
+                <div class="compose-field">
+                  <label>Message</label>
+                  <textarea
+                    id="composeMessage"
+                    class="form-textarea"
+                    rows="6"
+                    placeholder="Type your message..."
+                  ></textarea>
+                </div>
+              </div>
+              <div class="compose-footer">
+                <button
+                  class="btn btn-outline"
+                  id="composeCancelBtn"
+                  type="button"
+                >
+                  Cancel
+                </button>
+                <button
+                  class="btn btn-primary"
+                  id="composeSendBtn"
+                  type="button"
+                >
+                  <i class="fa-solid fa-paper-plane"></i> Send
+                </button>
+              </div>
             </div>
           </div>
 
@@ -2463,10 +2638,7 @@
                     type="button"
                     title="Send Reply"
                   >
-                    <i
-                      class="fa-solid fa-paper-plane fa-rotate-by"
-                      style="--fa-rotate-angle: -35deg"
-                    ></i>
+                    <i class="fa-solid fa-paper-plane"></i>
                   </button>
                 </div>
               </div>

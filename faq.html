@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title>FAQs | Lingerie by Sisioyin</title>
     <meta
       name="description"
@@ -23,6 +26,7 @@
     <meta property="og:url" content="https://lingeriebysisioyin.store/faq" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -43,13 +47,30 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
 
   <body class="faq-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="page-loader" id="pageLoader">
       <div class="page-loader-inner">
-        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <div class="page-loader-heart">
+          <img
+            src="assets/img/spinner-icon.svg"
+            alt=""
+            width="32"
+            height="32"
+          />
+        </div>
         <p class="page-loader-text"><span></span></p>
       </div>
     </div>
@@ -60,7 +81,9 @@
     <header class="header" id="siteHeader">
       <div class="header-inner">
         <a href="/home" class="logo">
-          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-icon"
+            ><img src="assets/img/monogram.svg" alt="LBS"
+          /></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
@@ -120,8 +143,8 @@
         <div class="drawer-header">
           <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
-              ><i class="fa-solid fa-heart"></i
-            ></span>
+              ><img src="assets/img/monogram.svg" alt="LBS"
+            /></span>
             <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
           <button
@@ -287,7 +310,7 @@
         <!-- Category Tabs -->
         <div class="faq-tabs">
           <button type="button" class="faq-tab active" data-category="all">
-            <i class="fa-solid fa-grid-2"></i>
+            <i class="fa-solid fa-border-all"></i>
             All
           </button>
           <button type="button" class="faq-tab" data-category="orders">
@@ -329,6 +352,35 @@
             <div class="faq-accordion">
               <div class="faq-item">
                 <button class="faq-question">
+                  <span>How do I place an order?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>Placing an order is simple:</p>
+                    <ul>
+                      <li>
+                        Browse our <a href="/shop">shop</a> and add items to
+                        your cart
+                      </li>
+                      <li>Click the cart icon and proceed to checkout</li>
+                      <li>
+                        Fill in your shipping details and select your state
+                      </li>
+                      <li>Transfer the total amount to our bank account</li>
+                      <li>Upload your payment receipt and confirm the order</li>
+                    </ul>
+                    <p>
+                      You'll receive an email confirmation once your order is
+                      placed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
                   <span>How do I track my order?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
@@ -337,8 +389,8 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Once your order ships, you'll receive an email with your
-                      tracking number. You can also track your order by:
+                      Once your order ships, you'll receive an email with a
+                      tracking update. You can also check your order status by:
                     </p>
                     <ul>
                       <li>
@@ -346,7 +398,10 @@
                         <a href="/dashboard">account dashboard</a>
                       </li>
                       <li>Clicking on the order in your order history</li>
-                      <li>Using the tracking link sent to your email</li>
+                      <li>
+                        Using the <a href="/track">Track Order</a> page with
+                        your order number
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -362,10 +417,11 @@
                   <div class="faq-answer-content">
                     <p>
                       Orders can be modified or cancelled within 1 hour of
-                      placing them. After this window, the order enters
+                      placing them. After that window, the order enters
                       processing and cannot be changed. Please
-                      <a href="/contact">contact us</a> immediately if you need
-                      to make changes.
+                      <a href="/contact">contact us</a> or send a WhatsApp
+                      message to <strong>+234 903 334 4860</strong> immediately
+                      if you need to make changes.
                     </p>
                   </div>
                 </div>
@@ -381,9 +437,9 @@
                   <div class="faq-answer-content">
                     <p>
                       If an item becomes unavailable after you place your order,
-                      we'll contact you immediately to offer alternatives. You
-                      can choose to wait for restock, select a different item,
-                      or receive a full refund for that item.
+                      we'll contact you via email or WhatsApp to offer
+                      alternatives. You can choose to wait for restock, select a
+                      different item, or receive a full refund.
                     </p>
                   </div>
                 </div>
@@ -402,7 +458,7 @@
             <div class="faq-accordion">
               <div class="faq-item">
                 <button class="faq-question">
-                  <span>What are the shipping options?</span>
+                  <span>Where do you deliver to?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
                   ></span>
@@ -410,40 +466,57 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      We offer the following shipping options within Nigeria:
+                      We currently deliver across Nigeria. Delivery fees vary by
+                      state and are calculated automatically at checkout when
+                      you select your state.
                     </p>
-                    <ul>
-                      <li>
-                        <strong>Standard Delivery:</strong> 3-5 business days -
-                        ₦2,500
-                      </li>
-                      <li>
-                        <strong>Express Delivery:</strong> 1-2 business days -
-                        ₦5,000
-                      </li>
-                      <li>
-                        <strong>Same Day Delivery:</strong> Available in Lagos -
-                        ₦7,500
-                      </li>
-                    </ul>
-                    <p>Free shipping on orders over ₦50,000!</p>
                   </div>
                 </div>
               </div>
               <div class="faq-item">
                 <button class="faq-question">
-                  <span>Do you ship internationally?</span>
+                  <span>What are the delivery fees?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
                   ></span>
                 </button>
                 <div class="faq-answer">
                   <div class="faq-answer-content">
+                    <p>Delivery fees depend on your location:</p>
+                    <ul>
+                      <li><strong>Lagos:</strong> Free delivery</li>
+                      <li><strong>Ogun:</strong> ₦2,000</li>
+                      <li><strong>Oyo, Osun, Ondo:</strong> ₦2,500</li>
+                      <li><strong>Ekiti:</strong> ₦3,000</li>
+                      <li><strong>Abuja (FCT):</strong> ₦3,500</li>
+                      <li><strong>Other states:</strong> ₦2,500</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How long does delivery take?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>Delivery times depend on your location:</p>
+                    <ul>
+                      <li><strong>Lagos:</strong> 1–3 business days</li>
+                      <li>
+                        <strong>South-West states:</strong> 2–4 business days
+                      </li>
+                      <li>
+                        <strong>Abuja &amp; other states:</strong> 3–5 business
+                        days
+                      </li>
+                    </ul>
                     <p>
-                      Currently, we only ship within Nigeria. We're working on
-                      expanding our delivery network. Sign up for our newsletter
-                      to be notified when international shipping becomes
-                      available.
+                      Please allow extra time during public holidays and peak
+                      periods.
                     </p>
                   </div>
                 </div>
@@ -458,10 +531,33 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      All orders are carefully packaged in discrete, unmarked
-                      boxes. Your items come wrapped in tissue paper and placed
-                      in our signature pink dust bags to ensure they arrive in
-                      perfect condition.
+                      All orders are carefully packaged in discreet, unmarked
+                      packaging for your privacy. Items are wrapped to ensure
+                      they arrive in perfect condition.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>Do you ship internationally?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      We currently only ship within Nigeria. We're working on
+                      expanding to international delivery. Follow us on
+                      <a
+                        href="https://instagram.com/lingeries_bysisioyin"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >Instagram</a
+                      >
+                      to be the first to know when we launch international
+                      shipping.
                     </p>
                   </div>
                 </div>
@@ -488,35 +584,37 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      We accept returns within 14 days of delivery for unworn
-                      items with original tags attached. Due to hygiene reasons,
-                      underwear and bodysuits cannot be returned unless they
-                      arrive damaged or defective.
+                      We accept returns within 7 days of delivery for unworn
+                      items with original tags and packaging intact. Due to
+                      hygiene reasons, underwear, panties, and bodysuits cannot
+                      be returned unless they arrive damaged or defective.
                     </p>
                   </div>
                 </div>
               </div>
               <div class="faq-item">
                 <button class="faq-question">
-                  <span>How do I initiate a return?</span>
+                  <span>How do I initiate a return or exchange?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
                   ></span>
                 </button>
                 <div class="faq-answer">
                   <div class="faq-answer-content">
-                    <p>To start a return:</p>
+                    <p>To start a return or exchange:</p>
                     <ul>
-                      <li>Log into your <a href="/dashboard">account</a></li>
-                      <li>Go to your order history</li>
-                      <li>Select the item(s) you want to return</li>
-                      <li>Choose your reason and submit the request</li>
+                      <li>
+                        Send us a message via our
+                        <a href="/contact">Contact page</a> or WhatsApp (<strong
+                          >+234 903 334 4860</strong
+                        >)
+                      </li>
+                      <li>
+                        Include your order number and the reason for the return
+                      </li>
+                      <li>Share clear photos of the item(s)</li>
+                      <li>Our team will review and respond within 24 hours</li>
                     </ul>
-                    <p>
-                      Alternatively,
-                      <a href="/contact">contact our support team</a> for
-                      assistance.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -530,10 +628,29 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Yes! We offer free exchanges for different sizes within 14
-                      days. Simply return your original item and we'll ship the
-                      new size at no extra cost. Check our
-                      <a href="/size">Size Guide</a> to find your perfect fit.
+                      Yes! We offer size exchanges within 7 days of delivery,
+                      subject to stock availability. Reach out to us via
+                      <a href="/contact">Contact</a> or WhatsApp and we'll sort
+                      it out. Check our
+                      <a href="/size">Size Guide</a> beforehand to find your
+                      perfect fit.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How long do refunds take?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>
+                      Once we receive and inspect the returned item, approved
+                      refunds are processed within 3–5 business days via bank
+                      transfer to the account you provide.
                     </p>
                   </div>
                 </div>
@@ -560,24 +677,28 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      We accept multiple payment methods for your convenience:
+                      We currently accept <strong>bank transfer</strong> as our
+                      payment method. Here are our account details:
                     </p>
                     <ul>
-                      <li>Debit/Credit Cards (Visa, Mastercard)</li>
-                      <li>Bank Transfer</li>
-                      <li>USSD Banking</li>
-                      <li>Mobile Money</li>
+                      <li><strong>Bank:</strong> Moniepoint MFB</li>
+                      <li><strong>Account Number:</strong> 6327082294</li>
+                      <li>
+                        <strong>Account Name:</strong> Oyindamola Adelugba
+                        (LingeriesBySisioyin)
+                      </li>
                     </ul>
                     <p>
-                      All payments are securely processed through our payment
-                      partner.
+                      After transferring, upload your payment receipt at
+                      checkout to confirm the order. Card payment (Visa,
+                      Mastercard, Verve) is coming soon!
                     </p>
                   </div>
                 </div>
               </div>
               <div class="faq-item">
                 <button class="faq-question">
-                  <span>Is my payment information secure?</span>
+                  <span>Is my payment secure?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
                   ></span>
@@ -585,18 +706,17 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Absolutely! We use industry-standard SSL encryption and
-                      partner with PCI-compliant payment processors. Your
-                      payment information is never stored on our servers. Read
-                      our <a href="/privacy">Privacy Policy</a> for more
-                      details.
+                      Yes. Our website uses SSL encryption to protect your data.
+                      Payment is made directly through your bank's transfer
+                      channels, so your banking details are never shared with
+                      us. We only receive the payment receipt you upload.
                     </p>
                   </div>
                 </div>
               </div>
               <div class="faq-item">
                 <button class="faq-question">
-                  <span>When will I be charged?</span>
+                  <span>What happens after I make a transfer?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
                   ></span>
@@ -604,9 +724,11 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      You'll be charged immediately when you place your order.
-                      If any items are unavailable, we'll process a refund for
-                      those items within 3-5 business days.
+                      After transferring, upload your payment receipt
+                      (screenshot or photo) at checkout. Once we verify the
+                      payment, your order will be confirmed and you'll receive
+                      an email notification. Verification usually takes a few
+                      hours during business hours.
                     </p>
                   </div>
                 </div>
@@ -633,15 +755,12 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Visit our comprehensive
-                      <a href="/size">Size Guide</a> for detailed measurement
-                      instructions and size charts. You'll find:
+                      We have a detailed <a href="/size">Size Guide</a> with
+                      measurement instructions, size charts for bras, panties,
+                      loungewear and bodysuits, plus a quick bra size
+                      calculator. Take your measurements and match them to our
+                      charts for the best fit.
                     </p>
-                    <ul>
-                      <li>How to take accurate measurements</li>
-                      <li>Size charts for all product categories</li>
-                      <li>Fit tips for different body types</li>
-                    </ul>
                   </div>
                 </div>
               </div>
@@ -656,10 +775,10 @@
                   <div class="faq-answer-content">
                     <p>
                       If you're between sizes, we generally recommend sizing up
-                      for comfort. For a more fitted look, size down. Each
-                      product page includes specific fit advice. You can also
-                      <a href="/contact">contact us</a> for personalized sizing
-                      recommendations.
+                      for comfort, especially for bras and bodysuits. For a more
+                      fitted look, size down. You can also reach out via
+                      WhatsApp (<strong>+234 903 334 4860</strong>) for
+                      personalized sizing advice.
                     </p>
                   </div>
                 </div>
@@ -674,10 +793,11 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Our sizing is designed to be true to standard Nigerian/UK
-                      sizing. However, different styles may fit differently.
-                      Check the product description for any specific fit notes
-                      and refer to customer reviews for real-world feedback.
+                      Our sizing is based on standard UK sizing. Different
+                      styles and fabrics may fit slightly differently — stretchy
+                      materials like lace and mesh tend to be more forgiving,
+                      while cotton pieces fit more true to size. Always check
+                      the product description for specific fit notes.
                     </p>
                   </div>
                 </div>
@@ -704,11 +824,10 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Creating an account is easy! Click the user icon in the
-                      header and select "Create Account". You'll need to provide
-                      your name, email, and create a password. Benefits include
-                      faster checkout, order tracking, and access to exclusive
-                      offers.
+                      Click the user icon in the header and select "Register".
+                      You'll need your name, email, and a password. Benefits
+                      include order tracking, saved addresses, wishlist, and
+                      faster checkout.
                     </p>
                   </div>
                 </div>
@@ -723,17 +842,16 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Click "Sign In" and then "Forgot Password". Enter your
-                      email address and we'll send you a link to reset your
-                      password. The link expires in 24 hours for security
-                      purposes.
+                      Click "Login", then "Forgot Password?" on the sign-in
+                      form. Enter your email and we'll send a password reset
+                      link. The link expires in 24 hours for security.
                     </p>
                   </div>
                 </div>
               </div>
               <div class="faq-item">
                 <button class="faq-question">
-                  <span>Can I shop without creating an account?</span>
+                  <span>Can I shop without an account?</span>
                   <span class="faq-question-icon"
                     ><i class="fa-solid fa-chevron-down"></i
                   ></span>
@@ -741,10 +859,49 @@
                 <div class="faq-answer">
                   <div class="faq-answer-content">
                     <p>
-                      Yes! You can checkout as a guest. However, we recommend
-                      creating an account to enjoy benefits like order history,
-                      saved addresses, wishlist, and exclusive member discounts.
+                      You can browse our products freely, but you'll need an
+                      account to complete a purchase. Creating one takes less
+                      than a minute and gives you access to order history, a
+                      personal wishlist, and faster future checkouts.
                     </p>
+                  </div>
+                </div>
+              </div>
+              <div class="faq-item">
+                <button class="faq-question">
+                  <span>How do I contact customer support?</span>
+                  <span class="faq-question-icon"
+                    ><i class="fa-solid fa-chevron-down"></i
+                  ></span>
+                </button>
+                <div class="faq-answer">
+                  <div class="faq-answer-content">
+                    <p>You can reach us through:</p>
+                    <ul>
+                      <li>
+                        Our <a href="/contact">Contact page</a> — fill out the
+                        form and we'll reply via email
+                      </li>
+                      <li>
+                        WhatsApp:
+                        <a
+                          href="https://wa.me/2349033344860"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          >+234 903 334 4860</a
+                        >
+                      </li>
+                      <li>
+                        Instagram DM:
+                        <a
+                          href="https://instagram.com/lingeries_bysisioyin"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          >@lingeries_bysisioyin</a
+                        >
+                      </li>
+                    </ul>
+                    <p>We aim to respond within 24 hours.</p>
                   </div>
                 </div>
               </div>
@@ -792,7 +949,9 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <a href="/home" class="logo">
-              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-icon"
+                ><img src="assets/img/monogram.svg" alt="LBS"
+              /></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
             <p>
@@ -889,7 +1048,7 @@
        CART DRAWER
        ═══════════════════════════════════════════════════════════════════════ -->
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+      <div class="cart-drawer" id="cartDrawer" inert>
         <div class="cd-header">
           <h3 class="cd-title">
             <i class="fa-solid fa-bag-shopping"></i> Your Cart
@@ -980,7 +1139,9 @@
 
       <!-- Decorative header -->
       <div class="auth-hero">
-        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="auth-hero-icon">
+          <img src="assets/img/monogram.svg" alt="LBS" />
+        </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
         <p class="auth-hero-sub" id="authHeroSub">
           Sign in to your account to continue
@@ -1168,7 +1329,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>

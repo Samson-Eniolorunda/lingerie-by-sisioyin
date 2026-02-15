@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title>Privacy Policy | Lingerie by Sisioyin</title>
     <meta
       name="description"
@@ -26,6 +29,7 @@
     />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -46,13 +50,30 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
 
   <body class="legal-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="page-loader" id="pageLoader">
       <div class="page-loader-inner">
-        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <div class="page-loader-heart">
+          <img
+            src="assets/img/spinner-icon.svg"
+            alt=""
+            width="32"
+            height="32"
+          />
+        </div>
         <p class="page-loader-text"><span></span></p>
       </div>
     </div>
@@ -60,7 +81,9 @@
     <header class="header" id="siteHeader">
       <div class="header-inner">
         <a href="/home" class="logo">
-          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-icon"
+            ><img src="assets/img/monogram.svg" alt="LBS"
+          /></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
         <nav class="nav" id="mainNav">
@@ -118,8 +141,8 @@
         <div class="drawer-header">
           <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
-              ><i class="fa-solid fa-heart"></i
-            ></span>
+              ><img src="assets/img/monogram.svg" alt="LBS"
+            /></span>
             <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
           <button
@@ -255,7 +278,7 @@
           <i class="fa-solid fa-shield-halved"></i>
         </div>
         <h1 class="legal-hero-title">Privacy Policy</h1>
-        <p class="legal-hero-updated">Last updated: January 1, 2026</p>
+        <p class="legal-hero-updated">Last updated: February 15, 2026</p>
       </div>
     </section>
 
@@ -297,15 +320,16 @@
           <div class="legal-content">
             <div class="legal-intro">
               <p>
-                At Lingerie by Sisioyin ("we," "us," or "our"), we are committed
-                to protecting your privacy. This Privacy Policy explains how we
-                collect, use, disclose, and safeguard your information when you
-                visit our website and make purchases from us.
+                At Lingerie by Sisioyin ("LBS," "we," "us," or "our"), we are
+                committed to protecting your privacy. This Privacy Policy
+                explains how we collect, use, disclose, and safeguard your
+                information when you visit our website at
+                <strong>lingeriebysisioyin.store</strong> and make purchases
+                from us.
               </p>
               <p>
                 Please read this privacy policy carefully. If you do not agree
-                with the terms of this privacy policy, please do not access the
-                site.
+                with the terms of this policy, please do not access our website.
               </p>
             </div>
 
@@ -319,28 +343,33 @@
               </p>
               <ul>
                 <li>
-                  <strong>Personal Information:</strong> Name, email address,
-                  phone number, and shipping/billing address when you make a
-                  purchase or create an account.
+                  <strong>Account Information:</strong> Full name, email
+                  address, phone number, and date of birth when you create an
+                  account (account registration is required to make purchases).
                 </li>
                 <li>
-                  <strong>Payment Information:</strong> Credit card details and
-                  billing information processed securely through our payment
-                  provider.
+                  <strong>Order Information:</strong> Shipping address, order
+                  details, and delivery preferences when you place an order.
                 </li>
                 <li>
-                  <strong>Account Information:</strong> Username, password, and
-                  profile preferences if you create an account.
+                  <strong>Payment Receipts:</strong> Screenshots or photos of
+                  bank transfer receipts that you upload during checkout to
+                  confirm payment. We do not collect or store credit card or
+                  debit card details.
                 </li>
                 <li>
-                  <strong>Communication Data:</strong> Any messages or inquiries
-                  you send to us via contact forms, email, or WhatsApp.
+                  <strong>Communication Data:</strong> Messages you send via our
+                  contact form or WhatsApp, including your name, email, and
+                  message content.
                 </li>
               </ul>
-              <p>
-                We also automatically collect device information, IP address,
-                pages visited, and referring website addresses.
-              </p>
+              <p>We also automatically collect:</p>
+              <ul>
+                <li>Device type, browser, and operating system</li>
+                <li>IP address and approximate location</li>
+                <li>Pages visited, time spent, and referring website</li>
+                <li>Screen resolution and viewport size</li>
+              </ul>
             </section>
 
             <section class="legal-section" id="how-we-use">
@@ -350,16 +379,26 @@
               <p>We use the information we collect to:</p>
               <ul>
                 <li>
-                  Process and fulfill your orders, including shipping and
-                  delivery
+                  Process and fulfil your orders, including verifying payment
+                  receipts and arranging delivery
+                </li>
+                <li>Create and manage your account</li>
+                <li>
+                  Communicate with you about orders, delivery updates, and
+                  customer support
+                </li>
+                <li>Respond to your inquiries and messages</li>
+                <li>
+                  Send order confirmation and shipping notification emails
                 </li>
                 <li>
-                  Communicate with you about orders, products, and promotions
+                  Improve our website, products, and services through analytics
                 </li>
-                <li>Provide customer support and respond to inquiries</li>
-                <li>Improve our website, products, and services</li>
-                <li>Personalize your shopping experience</li>
-                <li>Detect and prevent fraud</li>
+                <li>
+                  Personalise your shopping experience (e.g., wishlist, recently
+                  viewed)
+                </li>
+                <li>Detect and prevent fraudulent activity</li>
               </ul>
               <div class="legal-highlight">
                 <p>
@@ -376,17 +415,27 @@
               <p>We may share your information with:</p>
               <ul>
                 <li>
-                  <strong>Service Providers:</strong> Third-party companies that
-                  help us operate our business (payment processors, shipping
-                  companies, email services).
+                  <strong>Hosting & Database Provider:</strong> Our website
+                  data, including account and order information, is stored
+                  securely on Supabase, a cloud-based platform.
                 </li>
                 <li>
-                  <strong>Legal Requirements:</strong> When required by law,
-                  court order, or government regulation.
+                  <strong>Logistics Partners:</strong> Your name, phone number,
+                  and delivery address are shared with our shipping partners to
+                  fulfil your order.
                 </li>
                 <li>
-                  <strong>Business Transfers:</strong> In connection with any
-                  merger, sale, or acquisition of our company.
+                  <strong>Analytics Providers:</strong> We use Google Analytics
+                  and Meta (Facebook) Pixel to understand how visitors use our
+                  site. These services collect anonymised browsing data.
+                </li>
+                <li>
+                  <strong>Email Services:</strong> We use third-party email
+                  services to send order confirmations and notifications.
+                </li>
+                <li>
+                  <strong>Legal Requirements:</strong> When required by Nigerian
+                  law, court order, or government regulation.
                 </li>
               </ul>
             </section>
@@ -396,10 +445,36 @@
                 <i class="fa-solid fa-cookie-bite"></i>Cookies & Tracking
               </h2>
               <p>
-                We use cookies and similar tracking technologies to remember
-                your preferences, understand how you use our website, and
-                provide personalized content. You can control cookies through
-                your browser settings.
+                We use the following technologies to enhance your experience:
+              </p>
+              <ul>
+                <li>
+                  <strong>Local Storage:</strong> We store your theme preference
+                  (light/dark mode), shopping cart contents, wishlist items, and
+                  authentication session locally in your browser. This data
+                  stays on your device and is not transmitted to us.
+                </li>
+                <li>
+                  <strong>Google Analytics:</strong> We use Google Analytics to
+                  collect anonymised data about site traffic, page views, and
+                  user behaviour. This helps us understand which products and
+                  pages are most popular.
+                </li>
+                <li>
+                  <strong>Meta (Facebook) Pixel:</strong> We use the Meta Pixel
+                  to measure the effectiveness of our social media advertising
+                  and understand how visitors interact with our site after
+                  seeing an ad.
+                </li>
+                <li>
+                  <strong>Google reCAPTCHA:</strong> We use reCAPTCHA on login
+                  and registration forms to prevent automated abuse.
+                </li>
+              </ul>
+              <p>
+                You can control cookies and local storage through your browser
+                settings. Disabling these may affect some features of the
+                website, such as your saved cart or theme preference.
               </p>
             </section>
 
@@ -408,10 +483,38 @@
                 <i class="fa-solid fa-lock"></i>Data Security
               </h2>
               <p>
-                We implement appropriate technical and organizational security
-                measures including SSL encryption, secure payment processing
-                through PCI-compliant providers, and limited access to personal
-                information by authorized personnel only.
+                We take the security of your information seriously and implement
+                appropriate measures to protect it:
+              </p>
+              <ul>
+                <li>
+                  <strong>SSL Encryption:</strong> All data transmitted between
+                  your browser and our website is encrypted using SSL/TLS.
+                </li>
+                <li>
+                  <strong>Secure Hosting:</strong> Your data is stored on
+                  Supabase with row-level security policies that restrict access
+                  to authorised users only.
+                </li>
+                <li>
+                  <strong>No Card Data:</strong> We do not collect, process, or
+                  store any credit or debit card information. Payment is made
+                  directly via bank transfer to our Moniepoint MFB account
+                  (Account Name: Oyindamola Adelugba).
+                </li>
+                <li>
+                  <strong>Password Security:</strong> Account passwords are
+                  hashed and never stored in plain text.
+                </li>
+                <li>
+                  <strong>Access Control:</strong> Only authorised team members
+                  can access customer order and account data.
+                </li>
+              </ul>
+              <p>
+                While we strive to protect your information, no method of
+                transmission over the internet is 100% secure. We encourage you
+                to keep your account password confidential.
               </p>
             </section>
 
@@ -419,28 +522,42 @@
               <h2 class="legal-section-title">
                 <i class="fa-solid fa-user-shield"></i>Your Rights
               </h2>
-              <p>You have the right to:</p>
+              <p>
+                Under the Nigeria Data Protection Regulation (NDPR), you have
+                the right to:
+              </p>
               <ul>
                 <li>
                   <strong>Access:</strong> Request a copy of the personal
                   information we hold about you.
                 </li>
                 <li>
-                  <strong>Correction:</strong> Request correction of inaccurate
-                  or incomplete information.
+                  <strong>Correction:</strong> Update or correct inaccurate
+                  information in your account settings or by contacting us.
                 </li>
                 <li>
                   <strong>Deletion:</strong> Request deletion of your personal
-                  information.
+                  data, subject to legal retention requirements.
                 </li>
                 <li>
-                  <strong>Opt-out:</strong> Unsubscribe from marketing
-                  communications at any time.
+                  <strong>Data Portability:</strong> Request your data in a
+                  portable format.
+                </li>
+                <li>
+                  <strong>Objection:</strong> Object to the processing of your
+                  data for specific purposes.
                 </li>
               </ul>
               <p>
                 To exercise any of these rights, please
-                <a href="/contact">contact us</a>.
+                <a href="/contact">contact us</a> or send a message via WhatsApp
+                at
+                <a
+                  href="https://wa.me/2349033344860"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >+234 903 334 4860</a
+                >. We will respond within 30 days.
               </p>
             </section>
 
@@ -450,10 +567,31 @@
               </h2>
               <p>
                 We retain your personal information for as long as necessary to
-                fulfill the purposes described in this policy and comply with
-                legal obligations. Order records are typically retained for 7
-                years for tax and legal purposes.
+                fulfil the purposes described in this policy:
               </p>
+              <ul>
+                <li>
+                  <strong>Account data:</strong> Retained while your account is
+                  active. You can request deletion at any time.
+                </li>
+                <li>
+                  <strong>Order records:</strong> Retained for up to 7 years for
+                  tax, legal, and dispute resolution purposes.
+                </li>
+                <li>
+                  <strong>Payment receipts:</strong> Retained for the duration
+                  of order processing and verification, then archived.
+                </li>
+                <li>
+                  <strong>Messages & inquiries:</strong> Retained for up to 2
+                  years for customer service quality purposes.
+                </li>
+                <li>
+                  <strong>Analytics data:</strong> Anonymised analytics data is
+                  retained by Google and Meta according to their respective
+                  policies.
+                </li>
+              </ul>
             </section>
 
             <section class="legal-section" id="contact">
@@ -461,13 +599,31 @@
                 <i class="fa-solid fa-envelope"></i>Contact Us
               </h2>
               <p>
-                If you have any questions about this Privacy Policy, please
-                contact us:
+                If you have any questions about this Privacy Policy or how we
+                handle your data, please reach out:
               </p>
               <ul>
                 <li>
                   <strong>Contact Form:</strong>
                   <a href="/contact">Contact Page</a>
+                </li>
+                <li>
+                  <strong>WhatsApp:</strong>
+                  <a
+                    href="https://wa.me/2349033344860"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >+234 903 334 4860</a
+                  >
+                </li>
+                <li>
+                  <strong>Instagram:</strong>
+                  <a
+                    href="https://instagram.com/lingeries_bysisioyin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >@lingeries_bysisioyin</a
+                  >
                 </li>
               </ul>
             </section>
@@ -489,7 +645,8 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <a href="/home" class="logo"
-              ><span class="logo-icon"><i class="fa-solid fa-heart"></i></span
+              ><span class="logo-icon"
+                ><img src="assets/img/monogram.svg" alt="LBS" /></span
               ><span class="logo-text">Lingerie by Sisioyin</span></a
             >
             <p>
@@ -583,7 +740,7 @@
     </footer>
 
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+      <div class="cart-drawer" id="cartDrawer" inert>
         <div class="cd-header">
           <h3 class="cd-title">
             <i class="fa-solid fa-bag-shopping"></i> Your Cart
@@ -673,7 +830,9 @@
 
       <!-- Decorative header -->
       <div class="auth-hero">
-        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="auth-hero-icon">
+          <img src="assets/img/monogram.svg" alt="LBS" />
+        </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
         <p class="auth-hero-sub" id="authHeroSub">
           Sign in to your account to continue
@@ -861,7 +1020,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>

@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" fill="none">
+    <defs>
+        <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#be185d"/>
+            <stop offset="100%" stop-color="#9d174d"/>
+        </linearGradient>
+        <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#be185d" stop-opacity="0.1"/>
+            <stop offset="50%" stop-color="#be185d"/>
+            <stop offset="100%" stop-color="#be185d" stop-opacity="0.1"/>
+        </linearGradient>
+    </defs>
+
+    <!-- Elegant monogram icon -->
+    <g transform="translate(8, 8)">
+        <!-- Decorative ribbon/bow accent -->
+        <path d="M30 14 Q42 4 52 10 Q46 14 42 12 Q38 10 30 14Z" fill="url(#brandGrad)" opacity="0.6"/>
+        <path d="M52 10 Q62 4 74 14 Q66 10 62 12 Q58 14 52 10Z" fill="url(#brandGrad)" opacity="0.6"/>
+        <ellipse cx="52" cy="11" rx="3" ry="2.5" fill="#be185d"/>
+
+        <!-- Stylized LBS monogram -->
+        <text x="4" y="82" font-family="'Cormorant Garamond', Georgia, serif" font-size="68" font-weight="600" fill="url(#brandGrad)" letter-spacing="-1">L</text>
+        <text x="38" y="82" font-family="'Cormorant Garamond', Georgia, serif" font-size="68" font-weight="600" fill="url(#brandGrad)" letter-spacing="-1">B</text>
+        <text x="78" y="82" font-family="'Cormorant Garamond', Georgia, serif" font-size="68" font-weight="600" fill="url(#brandGrad)" font-style="italic" letter-spacing="-1">S</text>
+
+        <!-- Elegant underline -->
+        <path d="M4 92 Q52 98 104 92" stroke="url(#accentGrad)" stroke-width="1.5" fill="none"/>
+    </g>
+
+    <!-- Thin separator -->
+    <line x1="128" y1="28" x2="128" y2="92" stroke="#be185d" stroke-width="1" opacity="0.25"/>
+
+    <!-- Brand Name -->
+    <text x="145" y="50" font-family="'Cormorant Garamond', Georgia, serif" font-size="28" font-weight="600" fill="url(#brandGrad)" letter-spacing="3">LINGERIE</text>
+    <text x="145" y="78" font-family="'Cormorant Garamond', Georgia, serif" font-size="16" font-weight="400" fill="#be185d" opacity="0.7" letter-spacing="8">BY SISIOYIN</text>
+
+    <!-- Subtle underline flourish -->
+    <path d="M145 88 Q210 94 280 88" stroke="url(#accentGrad)" stroke-width="1" fill="none"/>
+</svg>

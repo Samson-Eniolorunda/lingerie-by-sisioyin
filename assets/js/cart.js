@@ -103,7 +103,7 @@
 
     // Update item count text
     if (countEl) {
-      countEl.textContent = `${count} item${count !== 1 ? "s" : ""} in your cart`;
+      countEl.textContent = count;
     }
 
     // Toggle checkout progress visibility + breadcrumb link
@@ -200,7 +200,7 @@
               
               <div class="cart-item-price">
                 <span class="line-total">${formatMoney(lineTotal)}</span>
-                <span class="unit-price">${formatMoney(price)} each</span>
+                ${qty > 1 ? `<span class="unit-price">${formatMoney(price)} each</span>` : ""}
               </div>
             </div>
           </div>

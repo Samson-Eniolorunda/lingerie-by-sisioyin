@@ -325,8 +325,8 @@
   function init() {
     initGoogleAnalytics();
     initFacebookPixel();
-    trackVisitorLocation();
     trackDeviceType();
+    trackVisitorLocation();
     console.log("✅ ANALYTICS: Module initialized");
   }
 
@@ -344,19 +344,19 @@
       else if (/Tablet|iPad/i.test(ua) || (width >= 768 && width < 1024))
         deviceType = "tablet";
 
-      const browser = (function () {
-        if (ua.includes("Firefox")) return "Firefox";
+      const browser = (() => {
         if (ua.includes("Edg")) return "Edge";
-        if (ua.includes("OPR") || ua.includes("Opera")) return "Opera";
-        if (ua.includes("Chrome")) return "Chrome";
-        if (ua.includes("Safari")) return "Safari";
+        if (ua.includes("Chrome") && !ua.includes("Edg")) return "Chrome";
+        if (ua.includes("Firefox")) return "Firefox";
+        if (ua.includes("Safari") && !ua.includes("Chrome")) return "Safari";
+        if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
         return "Other";
       })();
 
-      const os = (function () {
+      const os = (() => {
         if (ua.includes("Windows")) return "Windows";
-        if (ua.includes("Mac OS")) return "macOS";
-        if (ua.includes("Linux")) return "Linux";
+        if (ua.includes("Mac")) return "macOS";
+        if (ua.includes("Linux") && !ua.includes("Android")) return "Linux";
         if (ua.includes("Android")) return "Android";
         if (/iPhone|iPad|iPod/.test(ua)) return "iOS";
         return "Other";
@@ -373,24 +373,10 @@
         });
       }
 
-      // Store in Supabase site_visits if available
-      const c = window.supabaseClient || window.DB?.client;
-      if (c) {
-        c.from("site_visits")
-          .update({
-            device_type: deviceType,
-            browser: browser,
-            os: os,
-          })
-          .eq("page", window.location.pathname)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .then(() => {})
-          .catch(() => {});
-      }
+      // Store device info in window for geo tracking to pick up
+      window._lbsDeviceInfo = { device_type: deviceType, browser, os };
 
       sessionStorage.setItem("lbs_device_tracked", "1");
-      console.log("📊 ANALYTICS: Device tracked:", deviceType, browser, os);
     } catch (err) {
       console.log("📊 ANALYTICS: Device tracking skipped:", err.message);
     }
@@ -405,19 +391,16 @@
       // Avoid duplicate tracking within the same session
       if (sessionStorage.getItem("lbs_geo_tracked")) return;
 
-      const res = await fetch(
-        "http://ip-api.com/json/?fields=status,country,countryCode,regionName,city",
-        { cache: "no-store" },
-      );
+      const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
       if (!res.ok) return;
 
       const geo = await res.json();
-      if (geo.status !== "success") return;
+      if (geo.error) return;
 
       const locationData = {
-        country: geo.country || "Unknown",
-        country_code: geo.countryCode || "",
-        region: geo.regionName || "",
+        country: geo.country_name || "Unknown",
+        country_code: geo.country_code || "",
+        region: geo.region || "",
         city: geo.city || "",
       };
 
@@ -440,9 +423,10 @@
         }
       }
 
-      // Store in Supabase analytics_events table if available
-      const c = window.supabaseClient || window.DB?.client;
+      // Store in Supabase site_visits table if available
+      const c = window.DB?.client;
       if (c) {
+        const dev = window._lbsDeviceInfo || {};
         c.from("site_visits")
           .insert({
             country: locationData.country,
@@ -451,6 +435,9 @@
             city: locationData.city,
             page: window.location.pathname,
             referrer: document.referrer || null,
+            device_type: dev.device_type || null,
+            browser: dev.browser || null,
+            os: dev.os || null,
           })
           .then(() => {})
           .catch(() => {});

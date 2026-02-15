@@ -50,5 +50,7 @@ window.APP_CONFIG = {
   FB_PIXEL_ID: "3483388498501534",
 
   // Google Maps Places API Key (for address autocomplete)
-  GOOGLE_MAPS_API_KEY: "AIzaSyBl2_EQgNCC53Z-jRx64ONm6lTxrB6Ak_0",
+  // Disabled until billing is activated — uncomment when ready
+  // GOOGLE_MAPS_API_KEY: "AIzaSyBl2_EQgNCC53Z-jRx64ONm6lTxrB6Ak_0",
+  GOOGLE_MAPS_API_KEY: "",
 };

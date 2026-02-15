@@ -5,7 +5,16 @@
 
 (function (global) {
   "use strict";
-  console.log("🔧 UTILS: Module initializing");
+
+  // ── Production log suppressor ──
+  // Silences console.log in production; keeps warn/error for debugging
+  const IS_DEV =
+    location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  if (!IS_DEV) {
+    const noop = () => {};
+    console.log = noop;
+    console.debug = noop;
+  }
 
   const UTILS = {};
 
@@ -190,7 +199,7 @@
    * @param {string} type - Toast type (success, error, warning, info)
    * @param {number} duration - Duration in ms
    */
-  UTILS.toast = function (message, type = "success", duration = 3000) {
+  UTILS.toast = function (message, type = "success", duration = 10000) {
     console.log("🔧 UTILS: toast()", type, message);
     // Try multiple selectors for compatibility
     let toastEl =

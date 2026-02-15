@@ -1,6 +1,6 @@
 /**
  * Checkout Page JavaScript
- * Handles accordion sections, payment methods, and Moniepoint integration
+ * Handles accordion sections, payment methods, and bank transfer flow
  */
 (function () {
   "use strict";
@@ -52,57 +52,63 @@
 
     const sectionOrder = ["contact", "delivery", "payment"];
     const currentIndex = sectionOrder.indexOf(currentSection);
+    const receiptConfirmed = document.getElementById("paymentSentBtn")?.classList.contains("confirmed");
 
-    // Step 0 = Cart (always done), steps 1-2 = contact/delivery
-    // Step 3 = Payment — only marks green after actual payment (not method selection)
-    // Step 4 = Done — only marks on confirmation page
+    // Step 0 = Cart (always done)
+    // Step 1 = Shipping — green when delivery address is completed
+    // Step 2 = Payment — green only when receipt is confirmed
+    // Step 3 = Done — stays neutral on checkout (only green on confirmation page)
     steps.forEach((step, i) => {
       step.classList.remove("active", "done");
       if (i === 0) {
         // Cart step — always completed
         step.classList.add("done");
-      } else if (i <= 2) {
-        // Contact (1) and Delivery (2)
-        const sectionIdx = i - 1;
-        if (completedSections.includes(sectionOrder[sectionIdx])) {
+      } else if (i === 1) {
+        // Shipping step — green when delivery is done
+        if (completedSections.includes("delivery")) {
           step.classList.add("done");
           const num = step.querySelector(".ck-step-num");
           if (num) num.innerHTML = '<i class="fa-solid fa-check"></i>';
-        } else if (sectionIdx === currentIndex) {
+        } else if (completedSections.includes("contact")) {
           step.classList.add("active");
           const num = step.querySelector(".ck-step-num");
-          if (num) num.textContent = i + 1;
+          if (num) num.textContent = "2";
         } else {
           const num = step.querySelector(".ck-step-num");
-          if (num) num.textContent = i + 1;
+          if (num) num.textContent = "2";
+        }
+      } else if (i === 2) {
+        // Payment step — green only when receipt is confirmed
+        if (receiptConfirmed) {
+          step.classList.add("done");
+          const num = step.querySelector(".ck-step-num");
+          if (num) num.innerHTML = '<i class="fa-solid fa-check"></i>';
+        } else if (completedSections.includes("delivery")) {
+          step.classList.add("active");
+          const num = step.querySelector(".ck-step-num");
+          if (num) num.textContent = "3";
+        } else {
+          const num = step.querySelector(".ck-step-num");
+          if (num) num.textContent = "3";
         }
       } else if (i === 3) {
-        // Payment step — mark active once delivery is done, but NEVER done on checkout
-        // Only marks green via confirmation page
-        if (completedSections.includes("delivery")) {
-          step.classList.add("active");
-          const num = step.querySelector(".ck-step-num");
-          if (num) num.textContent = i + 1;
-        } else {
-          const num = step.querySelector(".ck-step-num");
-          if (num) num.textContent = i + 1;
-        }
-      } else if (i === 4) {
         // Done step — stays neutral on checkout page
         const num = step.querySelector(".ck-step-num");
-        if (num) num.textContent = i + 1;
+        if (num) num.textContent = "4";
       }
     });
 
     lines.forEach((line, i) => {
-      // Lines 0-1 follow contact/delivery completion, line 2+ stays neutral
-      if (i < 2) {
-        line.classList.toggle(
-          "done",
-          completedSections.includes(sectionOrder[i]),
-        );
-      } else {
-        line.classList.remove("done");
+      line.classList.remove("done");
+      if (i === 0) {
+        // Line after Cart — done when contact is completed
+        line.classList.toggle("done", completedSections.includes("contact"));
+      } else if (i === 1) {
+        // Line after Shipping — done when delivery is completed
+        line.classList.toggle("done", completedSections.includes("delivery"));
+      } else if (i === 2) {
+        // Line after Payment — done when receipt confirmed
+        line.classList.toggle("done", !!receiptConfirmed);
       }
     });
   }
@@ -120,6 +126,13 @@
       if (card) card.classList.add("active");
       currentSection = sectionName;
       updateProgressSteps();
+
+      // Re-show saved data banners if fields are empty
+      if (sectionName === "contact") {
+        reshowProfileBanner();
+      } else if (sectionName === "delivery") {
+        reshowSavedAddresses();
+      }
     }
   }
 
@@ -268,20 +281,119 @@
 
   // Handle payment method selection — auto-complete payment section
   function setupPaymentMethods() {
-    const options = document.querySelectorAll(".payment-option");
+    const options = document.querySelectorAll(".payment-option:not(.payment-option--disabled)");
 
     options.forEach((option) => {
       option.addEventListener("click", function () {
-        options.forEach((o) => o.classList.remove("selected"));
+        document.querySelectorAll(".payment-option").forEach((o) => o.classList.remove("selected"));
         this.classList.add("selected");
 
         const radio = this.querySelector('input[type="radio"]');
-        radio.checked = true;
+        if (radio && !radio.disabled) radio.checked = true;
+
+        // Show bank transfer details if bank transfer selected
+        const bankDetails = document.getElementById("bankTransferDetails");
+        if (bankDetails) {
+          bankDetails.hidden = radio?.value !== "bank_transfer";
+        }
 
         // Auto-complete payment section after small delay (visual feedback)
         setTimeout(() => completeSection("payment"), 300);
       });
     });
+
+    // Auto-select bank transfer on load
+    const bankOption = document.querySelector('.payment-option[data-method="bank_transfer"]');
+    if (bankOption) {
+      bankOption.classList.add("selected");
+      const bankDetails = document.getElementById("bankTransferDetails");
+      if (bankDetails) bankDetails.hidden = false;
+    }
+
+    // Copy account number
+    const copyBtn = document.getElementById("copyAccountBtn");
+    if (copyBtn) {
+      copyBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const acctNum = document.getElementById("bankAccountNumber")?.textContent?.replace(/[^0-9]/g, "") || "";
+        navigator.clipboard.writeText(acctNum).then(() => {
+          showToast("Account number copied!", "success");
+          copyBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+          setTimeout(() => { copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>'; }, 2000);
+        });
+      });
+    }
+
+    // Receipt file upload
+    const receiptLabel = document.querySelector(".receipt-upload-label");
+    const receiptInput = document.getElementById("receiptFile");
+    const receiptPreview = document.getElementById("receiptPreview");
+    const receiptFileName = document.getElementById("receiptFileName");
+    const removeReceiptBtn = document.getElementById("removeReceiptBtn");
+    const paymentSentBtn = document.getElementById("paymentSentBtn");
+
+    if (receiptLabel && receiptInput) {
+      receiptLabel.addEventListener("click", (e) => {
+        // Let the label's for behavior trigger the file input
+      });
+
+      receiptInput.addEventListener("change", () => {
+        const file = receiptInput.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+          showToast("File too large. Max 5MB", "error");
+          receiptInput.value = "";
+          return;
+        }
+        if (receiptFileName) receiptFileName.textContent = file.name;
+        if (receiptPreview) receiptPreview.hidden = false;
+        receiptLabel.classList.add("has-file");
+        // Enable the confirm button when receipt is uploaded
+        if (paymentSentBtn) paymentSentBtn.disabled = false;
+      });
+
+      if (removeReceiptBtn) {
+        removeReceiptBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          receiptInput.value = "";
+          if (receiptPreview) receiptPreview.hidden = true;
+          receiptLabel.classList.remove("has-file");
+          // Disable and reset confirm button when receipt is removed
+          if (paymentSentBtn) {
+            paymentSentBtn.disabled = true;
+            paymentSentBtn.classList.remove("confirmed");
+            paymentSentBtn.querySelector(".pcb-idle").classList.remove("u-hidden");
+            paymentSentBtn.querySelector(".pcb-loading").classList.add("u-hidden");
+            paymentSentBtn.querySelector(".pcb-done").classList.add("u-hidden");
+          }
+          // Unmark Payment step green
+          updateProgressSteps();
+        });
+      }
+    }
+
+    // "I Have Sent the Payment" button — confirm receipt with loading animation
+    if (paymentSentBtn) {
+      paymentSentBtn.addEventListener("click", () => {
+        if (paymentSentBtn.classList.contains("confirmed")) return;
+        const idle = paymentSentBtn.querySelector(".pcb-idle");
+        const loading = paymentSentBtn.querySelector(".pcb-loading");
+        const done = paymentSentBtn.querySelector(".pcb-done");
+
+        idle.classList.add("u-hidden");
+        loading.classList.remove("u-hidden");
+        paymentSentBtn.disabled = true;
+
+        setTimeout(() => {
+          loading.classList.add("u-hidden");
+          done.classList.remove("u-hidden");
+          paymentSentBtn.classList.add("confirmed");
+          // Update progress — marks Payment step green
+          updateProgressSteps();
+        }, 2000);
+      });
+    }
   }
 
   // Show toast notification
@@ -293,7 +405,7 @@
       if (toast) {
         toast.textContent = message;
         toast.className = `toast show ${type}`;
-        setTimeout(() => toast.classList.remove("show"), 3000);
+        setTimeout(() => toast.classList.remove("show"), 10000);
       }
     }
   }
@@ -387,8 +499,9 @@
           promo_code: orderData.promoCode || null,
           total: orderData.total,
           status: orderData.paymentStatus === "PAID" ? "processing" : "pending",
-          payment_method: orderData.paymentMethod || "card",
-          payment_status: orderData.paymentStatus || "paid",
+          payment_method: orderData.paymentMethod || "bank_transfer",
+          payment_status: orderData.paymentStatus || "awaiting_confirmation",
+          payment_receipt_url: orderData.receiptUrl || null,
           notes: orderData.delivery.notes || null,
         })
         .select()
@@ -404,175 +517,101 @@
   }
 
   // Handle place order
+  let _isProcessingPayment = false;
+
   function handlePlaceOrder() {
+    if (_isProcessingPayment) return;
     if (!validateForm()) {
       showToast("Please fill in all required fields", "error");
       return;
     }
 
-    const orderData = buildOrderData();
-    const paymentMethod = orderData.paymentMethod;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
 
-    // Both card and bank transfer use Moniepoint
-    showToast("Initializing Moniepoint payment...", "info");
-    initMoniepointPayment(orderData, paymentMethod);
+    if (paymentMethod === "bank_transfer") {
+      // Bank transfer flow: require receipt + confirmation button
+      const receiptFile = document.getElementById("receiptFile");
+      const paymentSentBtn = document.getElementById("paymentSentBtn");
+
+      if (!receiptFile?.files?.length) {
+        showToast("Please upload your payment receipt", "error");
+        return;
+      }
+      if (!paymentSentBtn?.classList.contains("confirmed")) {
+        showToast("Please confirm that you have sent the payment", "error");
+        return;
+      }
+
+      _isProcessingPayment = true;
+      processBankTransferOrder();
+    } else {
+      showToast("This payment method is coming soon. Please use Bank Transfer.", "info");
+    }
   }
 
-  // Initialize Monnify Payment (Moniepoint's payment gateway)
-  function initMoniepointPayment(orderData, paymentMethod) {
+  // Process bank transfer order with receipt upload
+  async function processBankTransferOrder() {
     const btn = document.getElementById("placeOrderBtn");
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Placing Order...';
 
-    // Check if Monnify SDK is loaded
-    if (typeof MonnifySDK === "undefined") {
-      showToast("Payment system loading. Please wait...", "warning");
-      btn.disabled = false;
-      btn.innerHTML =
-        '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
-      return;
-    }
-
-    // Get Monnify config from APP_CONFIG or use test keys
-    const monnifyConfig = window.APP_CONFIG?.MONNIFY || {
-      apiKey: "MK_TEST_XXXXXXXXXX", // fallback — should come from APP_CONFIG
-      contractCode: "XXXXXXXXXX",
-      isTestMode: false,
-    };
-
-    // Determine payment methods based on selection
-    const paymentMethods =
-      paymentMethod === "card"
-        ? ["CARD", "ACCOUNT_TRANSFER"]
-        : ["ACCOUNT_TRANSFER", "CARD"];
-
-    // Reset button helper
     const resetBtn = () => {
+      _isProcessingPayment = false;
       btn.disabled = false;
-      btn.innerHTML =
-        '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
+      btn.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
     };
-
-    // Safety timeout — if Monnify popup never appears, reset after 15s
-    const safetyTimer = setTimeout(() => {
-      // Only reset if button is still in processing state
-      if (btn.disabled) {
-        resetBtn();
-        showToast("Payment gateway didn't respond. Please try again.", "error");
-      }
-    }, 15000);
-
-    // Pre-validate data before sending to Monnify (SDK fails silently)
-    const email = orderData.customer.email;
-    const amount = orderData.total;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!email || !emailRegex.test(email)) {
-      clearTimeout(safetyTimer);
-      resetBtn();
-      showToast("Please enter a valid email address.", "error");
-      return;
-    }
-    if (!amount || isNaN(amount) || amount <= 0) {
-      clearTimeout(safetyTimer);
-      resetBtn();
-      showToast("Invalid order amount. Please refresh and try again.", "error");
-      return;
-    }
-    if (!monnifyConfig.apiKey || !monnifyConfig.contractCode) {
-      clearTimeout(safetyTimer);
-      resetBtn();
-      showToast("Payment gateway is not configured.", "error");
-      return;
-    }
-
-    console.log("CHECKOUT: Monnify init →", {
-      amount,
-      email,
-      apiKey: monnifyConfig.apiKey,
-      contractCode: monnifyConfig.contractCode,
-      isTestMode: monnifyConfig.isTestMode,
-      reference: orderData.reference,
-    });
-
-    // Define callbacks as named functions (Monnify SDK rejects inline defs)
-    function handleComplete(response) {
-      clearTimeout(safetyTimer);
-      console.log("Monnify payment complete:", response);
-
-      if (response.status === "SUCCESS" || response.paymentStatus === "PAID") {
-        var confirmedOrder = {
-          ...orderData,
-          paymentReference:
-            response.transactionReference || response.paymentReference,
-          paymentStatus: "PAID",
-          paidAt: new Date().toISOString(),
-        };
-
-        saveOrderToDatabase(confirmedOrder).then(function (dbOrder) {
-          if (dbOrder && dbOrder.order_number) {
-            confirmedOrder.reference = dbOrder.order_number;
-            sessionStorage.setItem(
-              "LBS_CONFIRMED_ORDER",
-              JSON.stringify(confirmedOrder),
-            );
-          }
-        });
-
-        sessionStorage.setItem(
-          "LBS_CONFIRMED_ORDER",
-          JSON.stringify(confirmedOrder),
-        );
-
-        localStorage.removeItem(CART_KEY);
-        // Clear form persistence for checkout page
-        try {
-          sessionStorage.removeItem("LBS_FORM__checkout");
-        } catch {}
-
-        if (window.APP && window.APP.updateCartBadge) {
-          window.APP.updateCartBadge();
-        }
-
-        showToast("Payment successful! Redirecting...", "success");
-
-        setTimeout(function () {
-          window.location.href = "/confirmation";
-        }, 1500);
-      } else {
-        resetBtn();
-        showToast("Payment was not completed. Please try again.", "error");
-      }
-    }
-
-    function handleClose(data) {
-      clearTimeout(safetyTimer);
-      console.log("Monnify closed:", data);
-      resetBtn();
-      showToast("Payment cancelled", "info");
-    }
 
     try {
-      MonnifySDK.initialize({
-        amount: amount,
-        currency: "NGN",
-        reference: "LBS_" + Date.now(),
-        customerName:
-          orderData.customer.firstName + " " + orderData.customer.lastName,
-        customerEmail: email,
-        customerMobileNumber: orderData.customer.phone,
-        apiKey: monnifyConfig.apiKey,
-        contractCode: monnifyConfig.contractCode,
-        paymentDescription: "LBS Order",
-        isTestMode: monnifyConfig.isTestMode,
-        onComplete: handleComplete,
-        onClose: handleClose,
-      });
+      const orderData = buildOrderData();
+      orderData.paymentMethod = "bank_transfer";
+      orderData.paymentStatus = "awaiting_confirmation";
+
+      // Upload receipt image to Supabase storage
+      let receiptUrl = null;
+      const receiptFile = document.getElementById("receiptFile")?.files[0];
+      if (receiptFile) {
+        const c = window.DB?.client;
+        if (c) {
+          const ext = receiptFile.name.split(".").pop();
+          const fileName = `receipt_${orderData.reference}_${Date.now()}.${ext}`;
+          const { data: uploadData, error: uploadError } = await c.storage
+            .from("receipts")
+            .upload(fileName, receiptFile, { upsert: true });
+          if (uploadError) {
+            console.warn("Receipt upload failed:", uploadError);
+            // Continue anyway — order is still valid
+          } else {
+            const { data: urlData } = c.storage.from("receipts").getPublicUrl(fileName);
+            receiptUrl = urlData?.publicUrl || null;
+          }
+        }
+      }
+
+      // Save order to database with pending status
+      orderData.receiptUrl = receiptUrl;
+      const dbOrder = await saveOrderToDatabase(orderData);
+
+      if (dbOrder && dbOrder.order_number) {
+        orderData.reference = dbOrder.order_number;
+      }
+
+      // Store confirmed order for confirmation page
+      sessionStorage.setItem("LBS_CONFIRMED_ORDER", JSON.stringify(orderData));
+
+      // Clear cart
+      localStorage.removeItem(CART_KEY);
+      try { sessionStorage.removeItem("LBS_FORM__checkout"); } catch {}
+      if (window.APP && window.APP.updateCartBadge) window.APP.updateCartBadge();
+
+      showToast("Order placed! We'll confirm your payment shortly.", "success");
+
+      setTimeout(() => {
+        window.location.href = "/confirmation";
+      }, 1500);
     } catch (err) {
-      clearTimeout(safetyTimer);
-      console.error("Monnify SDK error:", err);
+      console.error("CHECKOUT: Bank transfer order error:", err);
       resetBtn();
-      showToast("Payment failed to initialize. Please try again.", "error");
+      showToast("Failed to place order. Please try again.", "error");
     }
   }
 
@@ -705,6 +744,7 @@
       return;
     }
 
+    picker.classList.remove("u-hidden");
     picker.style.display = "";
     list.innerHTML = addrs
       .map(
@@ -795,6 +835,33 @@
     }
   }
 
+  // Re-show profile info banner if saved data exists and contact fields are empty
+  function reshowProfileBanner() {
+    if (!_cachedUserFields) return;
+    const hasData = Object.values(_cachedUserFields).some((v) => v.trim());
+    if (!hasData) return;
+    // Only show if at least one field is still empty
+    const fieldsEmpty = ["firstName", "lastName", "email", "phone"].some((id) => {
+      const el = document.getElementById(id);
+      return el && !el.value.trim();
+    });
+    if (!fieldsEmpty) return;
+    const banner = document.getElementById("profileInfoBanner");
+    if (banner) banner.classList.remove("u-hidden");
+  }
+
+  // Re-show saved address picker when delivery section is opened
+  function reshowSavedAddresses() {
+    const picker = document.getElementById("savedAddrPicker");
+    if (!picker) return;
+    let addrs = [];
+    try { addrs = JSON.parse(localStorage.getItem("LBS_ADDRESSES") || "[]"); } catch {}
+    if (addrs.length) {
+      picker.classList.remove("u-hidden");
+      picker.style.display = "";
+    }
+  }
+
   function init() {
     // Check if we're on checkout page
     if (!document.getElementById("checkoutWrapper")) return;
@@ -807,6 +874,11 @@
     loadSavedAddresses();
     initPlacesAutocomplete();
     prefillUserInfo();
+
+    // Re-try profile prefill when auth finishes initializing
+    window.addEventListener("auth:changed", () => {
+      if (!_cachedUserFields) prefillUserInfo();
+    }, { once: true });
 
     // Event listeners
     const placeOrderBtn = document.getElementById("placeOrderBtn");

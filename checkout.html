@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title>Checkout | Lingerie by Sisioyin</title>
     <meta
       name="description"
@@ -13,6 +16,7 @@
     <meta name="color-scheme" content="light dark" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -33,12 +37,29 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
   <body class="checkout-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="page-loader" id="pageLoader">
       <div class="page-loader-inner">
-        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <div class="page-loader-heart">
+          <img
+            src="assets/img/spinner-icon.svg"
+            alt=""
+            width="32"
+            height="32"
+          />
+        </div>
         <p class="page-loader-text"><span></span></p>
       </div>
     </div>
@@ -50,7 +71,9 @@
       <div class="header-inner">
         <!-- Logo -->
         <a href="/home" class="logo">
-          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-icon"
+            ><img src="assets/img/monogram.svg" alt="LBS"
+          /></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
@@ -112,8 +135,8 @@
         <div class="drawer-header">
           <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
-              ><i class="fa-solid fa-heart"></i
-            ></span>
+              ><img src="assets/img/monogram.svg" alt="LBS"
+            /></span>
             <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
           <button
@@ -440,9 +463,9 @@
               </div>
               <div class="ck-panel-body checkout-card-body">
                 <div id="savedAddrPicker" class="saved-addr-picker u-hidden">
-                  <label class="saved-addr-label"
+                  <span class="saved-addr-label"
                     ><i class="fa-solid fa-bookmark"></i> Use a saved
-                    address</label
+                    address</span
                   >
                   <div id="savedAddrList" class="saved-addr-list"></div>
                 </div>
@@ -451,7 +474,7 @@
                     type="text"
                     id="address"
                     name="address"
-                    autocomplete="off"
+                    autocomplete="street-address"
                     placeholder=" "
                     required
                   />
@@ -545,37 +568,139 @@
               </div>
               <div class="ck-panel-body checkout-card-body">
                 <div class="payment-options">
-                  <label class="payment-option" data-method="card">
-                    <input type="radio" name="paymentMethod" value="card" />
-                    <div class="payment-icon card">
-                      <i class="fa-solid fa-credit-card"></i>
-                    </div>
-                    <div class="payment-info">
-                      <span class="payment-name">Pay with Card</span>
-                      <span class="payment-desc"
-                        >Secure payment via Moniepoint (Visa, Mastercard,
-                        Verve)</span
-                      >
-                    </div>
-                    <span class="payment-check"
-                      ><i class="fa-solid fa-check"></i
-                    ></span>
-                  </label>
-                  <label class="payment-option" data-method="bank">
-                    <input type="radio" name="paymentMethod" value="bank" />
+                  <label class="payment-option" data-method="bank_transfer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bank_transfer"
+                      checked
+                    />
                     <div class="payment-icon bank">
                       <i class="fa-solid fa-building-columns"></i>
                     </div>
                     <div class="payment-info">
                       <span class="payment-name">Bank Transfer</span>
                       <span class="payment-desc"
-                        >Pay via bank transfer through Moniepoint</span
+                        >Transfer to our account and upload payment
+                        receipt</span
                       >
                     </div>
                     <span class="payment-check"
                       ><i class="fa-solid fa-check"></i
                     ></span>
                   </label>
+                  <label
+                    class="payment-option payment-option--disabled"
+                    data-method="card"
+                  >
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="card"
+                      disabled
+                    />
+                    <div class="payment-icon card">
+                      <i class="fa-solid fa-credit-card"></i>
+                    </div>
+                    <div class="payment-info">
+                      <span class="payment-name"
+                        >Pay with Card
+                        <span class="payment-coming-soon"
+                          >Coming Soon</span
+                        ></span
+                      >
+                      <span class="payment-desc"
+                        >Visa, Mastercard, Verve — available soon</span
+                      >
+                    </div>
+                    <span class="payment-check"
+                      ><i class="fa-solid fa-check"></i
+                    ></span>
+                  </label>
+                </div>
+
+                <!-- Bank Transfer Details — sequential steps -->
+                <div class="bank-transfer-details" id="bankTransferDetails">
+                  <!-- Step 1: Transfer -->
+                  <div class="pay-step">
+                    <div class="pay-step-badge">1</div>
+                    <div class="pay-step-body">
+                      <h4 class="pay-step-title">Transfer to this account</h4>
+                      <div class="bank-transfer-card">
+                        <div class="bank-transfer-header">
+                          <i class="fa-solid fa-landmark"></i>
+                          <span>Bank details</span>
+                        </div>
+                        <div class="bank-transfer-info">
+                          <div class="bank-detail-row">
+                            <span class="bank-detail-label">Bank Name</span>
+                            <span class="bank-detail-value" id="bankName">Moniepoint MFB</span>
+                          </div>
+                          <div class="bank-detail-row">
+                            <span class="bank-detail-label">Account Number</span>
+                            <span class="bank-detail-value bank-account-number" id="bankAccountNumber">
+                              6327082294
+                              <button type="button" class="copy-acct-btn" id="copyAccountBtn" title="Copy">
+                                <i class="fa-regular fa-copy"></i>
+                              </button>
+                            </span>
+                          </div>
+                          <div class="bank-detail-row">
+                            <span class="bank-detail-label">Account Name</span>
+                            <span class="bank-detail-value" id="bankAccountName">Oyindamola Adelugba (LingeriesBySisioyin)</span>
+                          </div>
+                        </div>
+                        <p class="bank-transfer-note">
+                          <i class="fa-solid fa-info-circle"></i>
+                          Transfer the exact total amount shown in your order summary.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Upload Receipt -->
+                  <div class="pay-step">
+                    <div class="pay-step-badge">2</div>
+                    <div class="pay-step-body">
+                      <h4 class="pay-step-title">Upload payment receipt</h4>
+                      <div class="receipt-upload-section">
+                        <label class="receipt-upload-label">
+                          <i class="fa-solid fa-cloud-arrow-up"></i>
+                          <span class="receipt-upload-text">Upload Payment Receipt</span>
+                          <span class="receipt-upload-hint">PNG, JPG or PDF (max 5MB)</span>
+                          <input type="file" id="receiptFile" accept="image/*,.pdf" hidden />
+                        </label>
+                        <div class="receipt-preview" id="receiptPreview" hidden>
+                          <div class="receipt-preview-inner">
+                            <i class="fa-solid fa-file-image"></i>
+                            <span class="receipt-file-name" id="receiptFileName"></span>
+                            <button type="button" class="receipt-remove-btn" id="removeReceiptBtn">
+                              <i class="fa-solid fa-xmark"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Confirm -->
+                  <div class="pay-step">
+                    <div class="pay-step-badge">3</div>
+                    <div class="pay-step-body">
+                      <h4 class="pay-step-title">Confirm payment</h4>
+                      <button type="button" class="payment-confirm-btn" id="paymentSentBtn" disabled>
+                        <span class="pcb-idle">
+                          <i class="fa-solid fa-check-to-slot"></i> I Have Sent the Payment
+                        </span>
+                        <span class="pcb-loading u-hidden">
+                          <i class="fa-solid fa-spinner fa-spin"></i> Confirming receipt…
+                        </span>
+                        <span class="pcb-done u-hidden">
+                          <i class="fa-solid fa-circle-check"></i> Receipt Upload Confirmed
+                        </span>
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -611,8 +736,8 @@
                 <i class="fa-solid fa-lock"></i> Place Order
               </button>
               <div class="ck-trust">
-                <i class="fa-solid fa-shield-halved"></i> Secure checkout
-                powered by Moniepoint
+                <i class="fa-solid fa-shield-halved"></i> Secure checkout — your
+                payment is safe with us
               </div>
             </div>
           </aside>
@@ -637,7 +762,9 @@
 
       <!-- Decorative header -->
       <div class="auth-hero">
-        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="auth-hero-icon">
+          <img src="assets/img/monogram.svg" alt="LBS" />
+        </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
         <p class="auth-hero-sub" id="authHeroSub">
           Sign in to your account to continue
@@ -825,7 +952,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>
@@ -933,7 +1059,7 @@
 
     <!-- Cart Drawer -->
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+      <div class="cart-drawer" id="cartDrawer" inert>
         <div class="cd-header">
           <h3 class="cd-title">
             <i class="fa-solid fa-bag-shopping"></i> Your Cart
@@ -984,7 +1110,9 @@
           <!-- Brand -->
           <div class="footer-brand">
             <a href="/home" class="logo">
-              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-icon"
+                ><img src="assets/img/monogram.svg" alt="LBS"
+              /></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
             <p>
@@ -1085,8 +1213,6 @@
     </footer>
 
     <!-- Scripts -->
-    <!-- Monnify Payment SDK -->
-    <script src="https://sdk.monnify.com/plugin/monnify.js"></script>
     <script src="assets/js/recaptcha.js"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"

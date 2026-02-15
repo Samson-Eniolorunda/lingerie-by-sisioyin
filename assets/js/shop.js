@@ -492,7 +492,7 @@
 
     // If passed a productId (string/number), fetch the product
     if (typeof productOrId === "string" || typeof productOrId === "number") {
-      const client = window.supabaseClient || window.DB?.client;
+      const client = window.DB?.client;
       if (!client) {
         console.error("SHOP: No database client for fetching product");
         return;
@@ -701,6 +701,7 @@
               </div>
             </div>
 
+            <div class="qm-scroll-hint"><i class="fa-solid fa-chevron-down"></i></div>
           </div>
         </div>
       </div>
@@ -750,7 +751,7 @@
     if (!btn) return;
     btn.hidden = true;
     try {
-      const c = window.supabaseClient || window.DB?.client;
+      const c = window.DB?.client;
       if (!c) return;
       const {
         data: { user },
@@ -779,7 +780,7 @@
     if (!listEl) return;
 
     try {
-      const c = window.supabaseClient;
+      const c = window.DB?.client;
       if (!c) {
         listEl.innerHTML = '<p class="qm-no-reviews">Reviews unavailable</p>';
         return;
@@ -873,7 +874,7 @@
     }
 
     try {
-      const c = window.supabaseClient;
+      const c = window.DB?.client;
       if (!c) throw new Error("Not connected");
 
       const { error } = await c.from("reviews").insert({
@@ -927,6 +928,39 @@
     const copyLink = $("#qmCopyLink");
 
     close?.addEventListener("click", closeModal);
+
+    // Hide bottom fade gradient when scrolled to bottom (desktop)
+    const modal = productModal.querySelector(".quick-modal");
+    if (modal) {
+      const checkFade = () => {
+        const atBottom =
+          modal.scrollTop + modal.clientHeight >= modal.scrollHeight - 10;
+        modal.classList.toggle("scrolled-end", atBottom);
+      };
+      modal.addEventListener("scroll", checkFade, { passive: true });
+      requestAnimationFrame(checkFade);
+    }
+
+    // Mobile: scroll-hint chevron toggles between scroll-down and scroll-up
+    const details = productModal.querySelector(".qm-details");
+    const scrollHint = productModal.querySelector(".qm-scroll-hint");
+    if (details && scrollHint) {
+      const checkDetailsScroll = () => {
+        const atBottom =
+          details.scrollTop + details.clientHeight >= details.scrollHeight - 10;
+        scrollHint.classList.toggle("flipped", atBottom);
+      };
+      details.addEventListener("scroll", checkDetailsScroll, { passive: true });
+      requestAnimationFrame(checkDetailsScroll);
+
+      scrollHint.addEventListener("click", () => {
+        if (scrollHint.classList.contains("flipped")) {
+          details.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          details.scrollTo({ top: details.scrollHeight, behavior: "smooth" });
+        }
+      });
+    }
 
     const updateImage = () => {
       if (mainImg) mainImg.src = modalImages[currentImageIndex];
@@ -1127,6 +1161,25 @@
         toast("Please select a size", "warning");
         return;
       }
+      // Require color selection if colors are available
+      const colors = modalProduct.colors || [];
+      const inStockColors = colors.filter(c => {
+        const qty = typeof c === 'object' ? c.qty || 0 : 1;
+        return qty > 0;
+      });
+      const isAssorted = colors.length === 1 && (
+        (typeof colors[0] === 'string' ? colors[0] : colors[0]?.name || '')
+          .toLowerCase() === 'assorted'
+      );
+      if (
+        modalProduct.allow_color_selection &&
+        inStockColors.length >= 1 &&
+        !isAssorted &&
+        !modalSelectedColor
+      ) {
+        toast("Please select a color", "warning");
+        return;
+      }
       const item = {
         variantId: `${modalProduct.id}-${modalSelectedSize || "default"}${modalSelectedColor ? `-${modalSelectedColor}` : ""}`,
         id: modalProduct.id,
@@ -1199,7 +1252,7 @@
 
     writeBtn?.addEventListener("click", async () => {
       // ── Purchase verification: only verified buyers can review ──
-      const c = window.supabaseClient || window.DB?.client;
+      const c = window.DB?.client;
       if (!c) {
         toast("Please log in to write a review", "warning");
         window.APP?.toggleAuth?.();
@@ -1372,7 +1425,22 @@
     const product = allProducts.find((p) => p.id === productId);
     if (!product) return;
 
+    // Open modal if sizes or colors need selection
     if (product.sizes?.length > 0) {
+      openModal(product);
+      return;
+    }
+
+    const colors = product.colors || [];
+    const inStockColors = colors.filter(c => {
+      const qty = typeof c === 'object' ? c.qty || 0 : 1;
+      return qty > 0;
+    });
+    const isAssorted = colors.length === 1 && (
+      (typeof colors[0] === 'string' ? colors[0] : colors[0]?.name || '')
+        .toLowerCase() === 'assorted'
+    );
+    if (product.allow_color_selection && inStockColors.length >= 1 && !isAssorted) {
       openModal(product);
       return;
     }
@@ -1446,7 +1514,7 @@
       const itemEl = document.createElement("div");
       itemEl.className = "cd-item";
       itemEl.innerHTML = `
-        <img src="${item.image || "https://placehold.co/72x90/f8fafc/be185d?text=No+Image"}" alt="${safeText(item.name)}" class="cd-item-img">
+        <img src="${item.image || "https://placehold.co/72x90/f8fafc/be185d?text=No+Image"}" alt="${safeText(item.name)}" class="cd-item-img" loading="lazy">
         <div class="cd-item-info">
           <h4 class="cd-item-name">${safeText(item.name)}</h4>
           <div class="cd-item-variant">

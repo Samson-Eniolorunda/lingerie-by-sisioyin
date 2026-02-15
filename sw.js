@@ -106,7 +106,7 @@ self.addEventListener("fetch", (event) => {
     url.hostname.includes("supabase") ||
     url.hostname.includes("google") ||
     url.hostname.includes("facebook") ||
-    url.hostname.includes("monnify")
+    url.hostname.includes("moniepoint")
   ) {
     return;
   }

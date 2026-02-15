@@ -21,6 +21,9 @@
   const $ = (s, p = document) => p.querySelector(s);
   const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
   const on = (el, evt, fn) => el && el.addEventListener(evt, fn);
+  function getClient() {
+    return supabase;
+  }
 
   /* ── Pre-check: hide auth/show admin instantly if we have a session token ── */
   (function preCheck() {
@@ -358,12 +361,16 @@
   /* =========================
     Image Compression
   ========================= */
-  async function compressImage(file, maxWidth = 1200, quality = 0.8) {
+  async function compressImage(file, maxWidth = 800, quality = 0.82) {
     console.log("[compressImage] Compressing:", file.name, "size:", file.size);
+
+    // Recommended max dimensions: 800×1000 (4:5 product card ratio)
+    const MAX_W = maxWidth;
+    const MAX_H = Math.round(maxWidth * 1.25); // 4:5 ratio → height = width × 1.25
 
     return new Promise((resolve) => {
       // Skip if not an image or already small
-      if (!file.type.startsWith("image/") || file.size < 100000) {
+      if (!file.type.startsWith("image/") || file.size < 50000) {
         resolve(file);
         return;
       }
@@ -376,10 +383,14 @@
         let width = img.width;
         let height = img.height;
 
-        // Scale down if needed
-        if (width > maxWidth) {
-          height = (height * maxWidth) / width;
-          width = maxWidth;
+        // Scale down to fit within MAX_W × MAX_H while keeping aspect ratio
+        const scaleW = width > MAX_W ? MAX_W / width : 1;
+        const scaleH = height > MAX_H ? MAX_H / height : 1;
+        const scale = Math.min(scaleW, scaleH);
+
+        if (scale < 1) {
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
         }
 
         canvas.width = width;
@@ -390,11 +401,11 @@
           (blob) => {
             if (blob && blob.size < file.size) {
               console.log(
-                "[compressImage] Compressed:",
-                blob.size,
-                "bytes (was",
-                file.size,
-                ")",
+                "[compressImage] Resized to",
+                width + "×" + height,
+                "|",
+                (blob.size / 1024).toFixed(0) + "KB",
+                "(was " + (file.size / 1024).toFixed(0) + "KB)",
               );
               resolve(new File([blob], file.name, { type: "image/jpeg" }));
             } else {
@@ -1223,6 +1234,27 @@
   ========================= */
   function ensureDefaultDashboardView() {
     console.log("[ensureDefaultDashboardView] Setting default view");
+    // Restore from URL hash or sessionStorage on refresh
+    const hashView = location.hash?.replace("#", "");
+    const savedView = hashView || sessionStorage.getItem("LBS_ADMIN_VIEW");
+    const validViews = [
+      "dashboard",
+      "inventory",
+      "orders",
+      "studio",
+      "activity",
+      "admins",
+      "trash",
+      "siteImages",
+      "reviews",
+      "analytics",
+      "customers",
+      "messages",
+    ];
+    if (savedView && validViews.includes(savedView)) {
+      switchView(savedView);
+      return;
+    }
     if ($(".content-view.active")) {
       console.log("[ensureDefaultDashboardView] View already active");
       return;
@@ -1236,6 +1268,9 @@
 
   function switchView(viewId) {
     console.log("[switchView] Switching to:", viewId);
+    // Persist current view in URL hash for refresh persistence
+    history.replaceState(null, "", `#${viewId}`);
+    sessionStorage.setItem("LBS_ADMIN_VIEW", viewId);
     $$(".content-view").forEach((v) => v.classList.remove("active"));
     const target = $(
       `#view${viewId.charAt(0).toUpperCase() + viewId.slice(1)}`,
@@ -1318,6 +1353,32 @@
   /* =========================
     Activity Logging
   ========================= */
+  // Device detection helper
+  function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let device = "Desktop";
+    let browser = "Unknown";
+    if (/Mobi|Android/i.test(ua)) device = "Mobile";
+    else if (/Tablet|iPad/i.test(ua)) device = "Tablet";
+    if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = "Chrome";
+    else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+    else if (/Firefox/i.test(ua)) browser = "Firefox";
+    else if (/Edg/i.test(ua)) browser = "Edge";
+    else if (/Opera|OPR/i.test(ua)) browser = "Opera";
+    const os = /Windows/i.test(ua)
+      ? "Windows"
+      : /Mac/i.test(ua)
+        ? "macOS"
+        : /Linux/i.test(ua)
+          ? "Linux"
+          : /Android/i.test(ua)
+            ? "Android"
+            : /iPhone|iPad/i.test(ua)
+              ? "iOS"
+              : "Unknown";
+    return { device, browser, os };
+  }
+
   async function logActivity(action, entity, entityId, metadata = {}) {
     console.log("[logActivity] Logging:", {
       action,
@@ -1326,12 +1387,13 @@
       metadata,
     });
     try {
+      const deviceInfo = getDeviceInfo();
       await supabase.from("admin_activity_logs").insert({
         admin_id: currentUserId,
         action,
         entity,
         entity_id: entityId,
-        metadata,
+        metadata: { ...metadata, ...deviceInfo },
       });
       console.log("[logActivity] Success");
     } catch (err) {
@@ -1425,9 +1487,10 @@
         </div>
         <div class="activity-info">
           <p class="activity-title">
-            <strong>${adminName}</strong> ${getRoleBadgeSmall(adminRole)} ${actionText}${entityDisplay}
+            <strong>${escapeHtml(adminName)}</strong> ${getRoleBadgeSmall(adminRole)} ${actionText}${entityDisplay}
           </p>
-          <p class="activity-detail">${name !== "Unknown" ? name : ""}</p>
+          <p class="activity-detail">${name !== "Unknown" ? escapeHtml(name) : ""}</p>
+          ${meta.device ? `<p class="activity-device"><i class="fa-solid ${meta.device === "Mobile" ? "fa-mobile-screen" : meta.device === "Tablet" ? "fa-tablet-screen-button" : "fa-desktop"}"></i> ${escapeHtml(meta.device)}${meta.browser ? " · " + escapeHtml(meta.browser) : ""}${meta.os ? " · " + escapeHtml(meta.os) : ""}</p>` : ""}
         </div>
         <time class="activity-time">${formatRelativeTime(log.created_at)}</time>
       </article>
@@ -1462,7 +1525,39 @@
       return;
     }
 
-    list.innerHTML = activityLogsCache.map(getActivityLogCard).join("");
+    renderFilteredActivityLogs();
+  }
+
+  // Activity log filter state
+  let activityActionFilter = "all";
+  let activitySearchQuery = "";
+
+  function renderFilteredActivityLogs() {
+    const list = $("#activityLogsList");
+    if (!list) return;
+    let filtered = activityLogsCache;
+    if (activityActionFilter !== "all") {
+      filtered = filtered.filter((l) => l.action === activityActionFilter);
+    }
+    if (activitySearchQuery) {
+      const q = activitySearchQuery.toLowerCase();
+      filtered = filtered.filter((l) => {
+        const m = l.metadata || {};
+        return (
+          (m.admin_name || "").toLowerCase().includes(q) ||
+          (m.name || "").toLowerCase().includes(q) ||
+          (m.email || "").toLowerCase().includes(q) ||
+          (l.entity || "").toLowerCase().includes(q) ||
+          (l.action || "").toLowerCase().includes(q)
+        );
+      });
+    }
+    if (!filtered.length) {
+      list.innerHTML =
+        '<p class="text-muted text-center">No matching activity</p>';
+      return;
+    }
+    list.innerHTML = filtered.map(getActivityLogCard).join("");
   }
 
   /* =========================
@@ -1866,11 +1961,17 @@
         if (previewImg) previewImg.style.opacity = "0.5";
 
         try {
+          // Compress image before upload (reuse product image compressor)
+          const compressedFile = await compressImage(file);
+
           // Upload to Supabase Storage - bucket name should be 'site-images'
-          const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
+          const fileName = `${Date.now()}-${compressedFile.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
           const { data, error } = await supabase.storage
             .from("site-images")
-            .upload(fileName, file, { cacheControl: "3600", upsert: true });
+            .upload(fileName, compressedFile, {
+              cacheControl: "3600",
+              upsert: true,
+            });
 
           if (error) {
             console.error("[uploadSiteImage] Storage error:", error);
@@ -2211,7 +2312,7 @@
           <td data-label="Date">${date}</td>
           <td data-label="Customer">
             <div class="order-customer">
-              <span class="name">${order.customer_name || "Guest"}</span>
+              <span class="name">${escapeHtml(order.customer_name || "Guest")}</span>
             </div>
           </td>
           <td data-label="Items"><span class="order-items-count">${itemCount} item${itemCount !== 1 ? "s" : ""}</span></td>
@@ -2358,18 +2459,19 @@
       <div class="order-modal-grid">
         <div class="order-detail-section compact">
           <h4><i class="fa-solid fa-user"></i> Customer</h4>
-          <p><strong>${order.customer_name || "Guest"}</strong></p>
-          <p>${order.customer_email || "-"}</p>
-          <p>${order.customer_phone || "-"}</p>
+          <p><strong>${escapeHtml(order.customer_name || "Guest")}</strong></p>
+          <p>${escapeHtml(order.customer_email || "-")}</p>
+          <p>${escapeHtml(order.customer_phone || "-")}</p>
         </div>
         <div class="order-detail-section compact">
           <h4><i class="fa-solid fa-location-dot"></i> Shipping</h4>
-          <p>${shippingAddr}</p>
+          <p>${escapeHtml(shippingAddr)}</p>
         </div>
         <div class="order-detail-section compact">
           <h4><i class="fa-solid fa-credit-card"></i> Payment</h4>
-          <p>${order.payment_method || "Monnify"}</p>
-          <p class="text-muted">${order.payment_reference || "-"}</p>
+          <p>${escapeHtml(order.payment_method || "Bank Transfer")}</p>
+          <p class="text-muted">${escapeHtml(order.payment_reference || "-")}</p>
+          ${order.payment_receipt_url ? `<a href="${escapeHtml(order.payment_receipt_url)}" target="_blank" rel="noopener" class="btn btn-sm btn-outline" style="margin-top:8px;display:inline-flex;align-items:center;gap:4px;"><i class="fa-solid fa-receipt"></i> View Receipt</a>` : ""}
         </div>
       </div>
       <div class="order-detail-section">
@@ -2378,7 +2480,7 @@
           .map(
             (item) => `
           <div class="order-item-row">
-            <img src="${item.image || item.images?.[0] || "assets/img/placeholder.png"}" alt="${escapeHtml(item.name)}" class="order-item-img" />
+            <img src="${item.image || item.images?.[0] || "assets/img/placeholder.png"}" alt="${escapeHtml(item.name)}" class="order-item-img" loading="lazy" />
             <div class="order-item-info">
               <div class="order-item-name">${escapeHtml(item.name)}</div>
               <div class="order-item-meta">Size: ${item.size || item.selectedSize || "-"} &middot; Qty: ${item.quantity || item.qty || 1}</div>
@@ -2391,7 +2493,7 @@
       <div class="order-detail-section order-summary-section">
         <div class="order-detail-row"><span>Subtotal</span><span>₦${(order.subtotal || order.total || 0).toLocaleString()}</span></div>
         <div class="order-detail-row"><span>Shipping</span><span>₦${(order.shipping_cost || 0).toLocaleString()}</span></div>
-        ${order.discount_amount ? `<div class="order-detail-row"><span>Discount${order.promo_code ? " (" + order.promo_code + ")" : ""}</span><span style="color:var(--success)">-₦${order.discount_amount.toLocaleString()}</span></div>` : ""}
+        ${order.discount_amount ? `<div class="order-detail-row"><span>Discount${order.promo_code ? " (" + escapeHtml(order.promo_code) + ")" : ""}</span><span style="color:var(--success)">-₦${order.discount_amount.toLocaleString()}</span></div>` : ""}
         <div class="order-detail-row total"><span>Total</span><span>₦${(order.total || 0).toLocaleString()}</span></div>
       </div>`;
 
@@ -2465,6 +2567,20 @@
     // Refresh button
     on($("#refreshOrdersBtn"), "click", loadOrders);
     on($("#refreshActivityBtn"), "click", loadActivityLogs);
+
+    // Activity log filters
+    on($("#activityActionFilter"), "change", (e) => {
+      activityActionFilter = e.target.value;
+      renderFilteredActivityLogs();
+    });
+    let activitySearchTimer;
+    on($("#activitySearchInput"), "input", (e) => {
+      clearTimeout(activitySearchTimer);
+      activitySearchTimer = setTimeout(() => {
+        activitySearchQuery = e.target.value.trim();
+        renderFilteredActivityLogs();
+      }, 250);
+    });
 
     // View order details
     on($("#ordersTableBody"), "click", (e) => {
@@ -2860,11 +2976,11 @@
           <i class="fa-solid fa-check"></i>
         </div>
         <div class="card-media" data-open-images="1">
-          <img src="${img}" alt="${p.name || "Product"}" loading="lazy">
+          <img src="${img}" alt="${escapeHtml(p.name || "Product")}" loading="lazy">
         </div>
 
         <div class="card-info">
-          <h4 class="card-title">${p.name || "Untitled"}</h4>
+          <h4 class="card-title">${escapeHtml(p.name || "Untitled")}</h4>
 
           <div class="card-meta">
             <strong style="color:var(--primary)">${formatMoney(p.price_ngn)}</strong>
@@ -4644,7 +4760,7 @@
           </div>
           <div class="widget-item-info">
             <span class="widget-item-title">#${order.id.slice(0, 8)}</span>
-            <span class="widget-item-meta">${date} • ${order.customer_name || "Customer"}</span>
+            <span class="widget-item-meta">${date} • ${escapeHtml(order.customer_name || "Customer")}</span>
           </div>
           <span class="status-badge ${statusClass}">${order.status}</span>
         </div>`;
@@ -4819,9 +4935,13 @@
         loadInventory(),
         loadDashboardStats(),
         typeof loadOrders === "function" ? loadOrders() : Promise.resolve(),
-        typeof loadAnalytics === "function" ? loadAnalytics() : Promise.resolve(),
+        typeof loadAnalytics === "function"
+          ? loadAnalytics()
+          : Promise.resolve(),
         typeof loadMessages === "function" ? loadMessages() : Promise.resolve(),
-        typeof loadActivityLogs === "function" ? loadActivityLogs() : Promise.resolve(),
+        typeof loadActivityLogs === "function"
+          ? loadActivityLogs()
+          : Promise.resolve(),
       ]);
       showToast("All data refreshed", "success");
     } catch (e) {
@@ -5026,8 +5146,8 @@
     const uploadedUrls = [];
 
     for (const file of files) {
-      // Compress image before upload
-      const compressedFile = await compressImage(file, 1200, 0.85);
+      // Auto-resize & compress image before upload (800×1000 max)
+      const compressedFile = await compressImage(file);
 
       const safeName = String(compressedFile.name || "img").replace(
         /\s+/g,
@@ -5398,6 +5518,9 @@
 
       // Geo analytics (country & Nigerian state)
       await loadGeoAnalytics();
+
+      // Device & browser analytics
+      await loadDeviceAnalytics();
     } catch (err) {
       console.error("[loadAnalytics] Error:", err);
     }
@@ -5659,6 +5782,90 @@
   on($("#analyticsPeriod"), "change", () => loadAnalytics());
 
   /* ─────────────────────────────────────────────
+   * Device Analytics: Visits by Device Type & Browser
+   * ───────────────────────────────────────────── */
+  async function loadDeviceAnalytics() {
+    const deviceEl = $("#deviceTypeTable");
+    const browserEl = $("#browserTypeTable");
+    if (!deviceEl && !browserEl) return;
+
+    try {
+      const days = parseInt($("#analyticsPeriod")?.value || "30", 10);
+      const since = new Date();
+      since.setDate(since.getDate() - days);
+
+      const client = getClient();
+      if (!client) return;
+
+      const { data, error } = await client
+        .from("site_visits")
+        .select("device_type, browser, os")
+        .gte("created_at", since.toISOString());
+
+      if (error) throw error;
+      if (!data || !data.length) {
+        if (deviceEl)
+          deviceEl.innerHTML =
+            '<p class="text-muted text-center">No device data yet</p>';
+        if (browserEl)
+          browserEl.innerHTML =
+            '<p class="text-muted text-center">No browser data yet</p>';
+        return;
+      }
+
+      // Aggregate device types
+      if (deviceEl) {
+        const deviceCounts = {};
+        data.forEach((r) => {
+          const d = r.device_type || "unknown";
+          deviceCounts[d] = (deviceCounts[d] || 0) + 1;
+        });
+        const total = data.length;
+        const sorted = Object.entries(deviceCounts).sort((a, b) => b[1] - a[1]);
+        const icons = {
+          mobile: "fa-mobile-screen",
+          tablet: "fa-tablet-screen-button",
+          desktop: "fa-desktop",
+        };
+        deviceEl.innerHTML = `<table class="analytics-table"><thead><tr><th>Device</th><th>Visits</th><th>%</th></tr></thead><tbody>${sorted
+          .map(
+            ([d, c]) =>
+              `<tr><td><i class="fa-solid ${icons[d] || "fa-question"}"></i> ${d.charAt(0).toUpperCase() + d.slice(1)}</td><td>${c}</td><td>${((c / total) * 100).toFixed(1)}%</td></tr>`,
+          )
+          .join("")}</tbody></table>`;
+      }
+
+      // Aggregate browsers
+      if (browserEl) {
+        const browserCounts = {};
+        data.forEach((r) => {
+          const b = r.browser || "unknown";
+          browserCounts[b] = (browserCounts[b] || 0) + 1;
+        });
+        const total = data.length;
+        const sorted = Object.entries(browserCounts).sort(
+          (a, b) => b[1] - a[1],
+        );
+        const icons = {
+          Chrome: "fa-chrome",
+          Safari: "fa-safari",
+          Firefox: "fa-firefox-browser",
+          Edge: "fa-edge",
+          Opera: "fa-opera",
+        };
+        browserEl.innerHTML = `<table class="analytics-table"><thead><tr><th>Browser</th><th>Visits</th><th>%</th></tr></thead><tbody>${sorted
+          .map(
+            ([b, c]) =>
+              `<tr><td><i class="fa-brands ${icons[b] || "fa-solid fa-globe"}"></i> ${b}</td><td>${c}</td><td>${((c / total) * 100).toFixed(1)}%</td></tr>`,
+          )
+          .join("")}</tbody></table>`;
+      }
+    } catch (err) {
+      console.log("Device analytics error:", err);
+    }
+  }
+
+  /* ─────────────────────────────────────────────
    * Geo Analytics: Visitors by Country & Nigerian State
    * ───────────────────────────────────────────── */
   async function loadGeoAnalytics() {
@@ -5782,7 +5989,9 @@
       // Fetch all non-admin profiles
       const { data: profiles, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, full_name, email, phone, whatsapp_number, whatsapp_opted_in, created_at, is_admin")
+        .select(
+          "id, first_name, last_name, full_name, email, phone, whatsapp_number, whatsapp_opted_in, created_at, is_admin, date_of_birth, account_status",
+        )
         .eq("is_admin", false)
         .order("created_at", { ascending: false });
 
@@ -5806,8 +6015,16 @@
         const key = (p.email || "").toLowerCase();
         const stats = orderMap[key] || { count: 0, spent: 0 };
         // Build display name from available fields
-        const displayName = p.full_name || `${p.first_name || ""} ${p.last_name || ""}`.trim() || "";
-        return { ...p, full_name: displayName, orderCount: stats.count, totalSpent: stats.spent };
+        const displayName =
+          p.full_name ||
+          `${p.first_name || ""} ${p.last_name || ""}`.trim() ||
+          "";
+        return {
+          ...p,
+          full_name: displayName,
+          orderCount: stats.count,
+          totalSpent: stats.spent,
+        };
       });
 
       // Update stats
@@ -5839,33 +6056,64 @@
 
     if (!customers.length) {
       body.innerHTML =
-        '<tr><td colspan="8" class="text-center text-muted">No customers found</td></tr>';
+        '<tr><td colspan="10" class="text-center text-muted">No customers found</td></tr>';
       return;
     }
 
     const fmt = (n) =>
       "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
     body.innerHTML = customers
-      .map(
-        (c, i) => {
-          const phoneDisplay = c.phone || "—";
-          const waDisplay = c.whatsapp_number
-            ? `<span title="WhatsApp opted-in" style="color:#25d366"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(c.whatsapp_number)}</span>`
-            : "—";
-          return `
+      .map((c, i) => {
+        const phoneDisplay = c.phone || "—";
+        const waDisplay = c.whatsapp_number
+          ? `<span title="WhatsApp opted-in" style="color:#25d366"><i class="fa-brands fa-whatsapp"></i> ${escapeHtml(c.whatsapp_number)}</span>`
+          : "—";
+        const status = c.account_status || "active";
+        const statusClass =
+          status === "active"
+            ? "success"
+            : status === "suspended"
+              ? "warning"
+              : "danger";
+        const statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
+        // DOB formatting
+        const dobDisplay = c.date_of_birth
+          ? new Date(c.date_of_birth).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "—";
+        return `
         <tr>
-          <td>${i + 1}</td>
-          <td>${escapeHtml(c.full_name || "—")}</td>
-          <td>${escapeHtml(c.email || "—")}</td>
-          <td>${escapeHtml(phoneDisplay)}</td>
-          <td>${waDisplay}</td>
-          <td>${c.orderCount}</td>
-          <td>${fmt(c.totalSpent)}</td>
-          <td>${c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : "—"}</td>
+          <td data-label="#">${i + 1}</td>
+          <td data-label="Name">${escapeHtml(c.full_name || "—")}</td>
+          <td data-label="Email">${escapeHtml(c.email || "—")}</td>
+          <td data-label="Phone">${escapeHtml(phoneDisplay)}</td>
+          <td data-label="WhatsApp">${waDisplay}</td>
+          <td data-label="DOB">${dobDisplay}</td>
+          <td data-label="Orders">${c.orderCount}</td>
+          <td data-label="Total Spent">${fmt(c.totalSpent)}</td>
+          <td data-label="Joined">${c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : "—"}</td>
+          <td data-label="Status"><span class="status-badge status-badge--${statusClass}">${statusLabel}</span></td>
+          <td data-label="Actions">
+            <div class="customer-actions">
+              ${
+                status !== "suspended"
+                  ? `<button class="cust-act-btn cust-act-btn--warn" data-customer-action="suspend" data-customer-id="${c.id}" title="Suspend temporarily"><i class="fa-solid fa-pause"></i></button>`
+                  : `<button class="cust-act-btn cust-act-btn--success" data-customer-action="activate" data-customer-id="${c.id}" title="Reactivate"><i class="fa-solid fa-play"></i></button>`
+              }
+              ${
+                status !== "banned"
+                  ? `<button class="cust-act-btn cust-act-btn--danger" data-customer-action="ban" data-customer-id="${c.id}" title="Ban permanently"><i class="fa-solid fa-ban"></i></button>`
+                  : `<button class="cust-act-btn cust-act-btn--success" data-customer-action="activate" data-customer-id="${c.id}" title="Unban"><i class="fa-solid fa-unlock"></i></button>`
+              }
+              <button class="cust-act-btn cust-act-btn--primary" data-customer-action="message" data-customer-idx="${i}" title="Send message"><i class="fa-solid fa-envelope"></i></button>
+            </div>
+          </td>
         </tr>
       `;
-        },
-      )
+      })
       .join("");
   }
 
@@ -5934,7 +6182,8 @@
       });
       downloadBlob(blob, `customers_${date}.json`);
     } else if (format === "txt") {
-      const header = "Name | Email | Phone | WhatsApp | Orders | Total Spent | Joined";
+      const header =
+        "Name | Email | Phone | WhatsApp | Orders | Total Spent | Joined";
       const sep = "-".repeat(100);
       const lines = rows.map(
         (r) =>
@@ -5955,6 +6204,124 @@
     URL.revokeObjectURL(url);
     showToast("Exported successfully");
   }
+
+  /* ─────────────────────────────────────────────
+   * Customer Account Management (Block / Suspend / Activate)
+   * ───────────────────────────────────────────── */
+  async function handleCustomerAction(action, customerId) {
+    const customer = allCustomers.find((c) => c.id === customerId);
+    if (!customer) return;
+
+    const actionLabels = {
+      suspend: "suspend",
+      ban: "permanently ban",
+      activate: "reactivate",
+    };
+    const newStatus =
+      action === "suspend"
+        ? "suspended"
+        : action === "ban"
+          ? "banned"
+          : "active";
+
+    if (
+      !confirm(
+        `Are you sure you want to ${actionLabels[action]} ${customer.full_name || customer.email}?`,
+      )
+    )
+      return;
+
+    try {
+      const client = getClient();
+      if (!client) throw new Error("Not connected");
+
+      const { error } = await client
+        .from("profiles")
+        .update({ account_status: newStatus })
+        .eq("id", customerId);
+
+      if (error) throw error;
+
+      // Send notification email to customer
+      try {
+        const {
+          data: { session },
+        } = await client.auth.getSession();
+        await fetch(
+          `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-admin-reply`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session?.access_token || ""}`,
+            },
+            body: JSON.stringify({
+              to: customer.email,
+              customerName: customer.full_name || "Customer",
+              subject:
+                newStatus === "active"
+                  ? "Your Account Has Been Reactivated — Lingerie by Sisioyin"
+                  : newStatus === "suspended"
+                    ? "Your Account Has Been Temporarily Suspended — Lingerie by Sisioyin"
+                    : "Your Account Has Been Deactivated — Lingerie by Sisioyin",
+              message:
+                newStatus === "active"
+                  ? "Great news! Your account has been reactivated. You can now log in and shop as usual. We look forward to seeing you again!"
+                  : newStatus === "suspended"
+                    ? "Your account has been temporarily suspended. If you believe this is an error, please contact our support team at support@lingeriebysisioyin.store."
+                    : "Your account has been permanently deactivated due to a violation of our terms of service. If you wish to appeal this decision, please contact support@lingeriebysisioyin.store.",
+              fromEmail: "support@lingeriebysisioyin.store",
+            }),
+          },
+        );
+      } catch (emailErr) {
+        console.log("Customer notification email failed:", emailErr);
+      }
+
+      // Log activity
+      logActivity(
+        action === "ban" ? "delete" : "update",
+        "customer",
+        customerId,
+        {
+          name: customer.full_name || "",
+          email: customer.email || "",
+          action: action,
+          new_status: newStatus,
+        },
+      );
+
+      // Update local state
+      customer.account_status = newStatus;
+      renderCustomers(allCustomers);
+
+      showToast(`Customer ${actionLabels[action]}d successfully`);
+    } catch (err) {
+      console.error("Customer action error:", err);
+      showToast("Failed: " + err.message, "error");
+    }
+  }
+
+  // Delegate customer action clicks
+  on($("#customersBody"), "click", (e) => {
+    const btn = e.target.closest("[data-customer-action]");
+    if (!btn) return;
+    const action = btn.dataset.customerAction;
+    if (action === "message") {
+      const idx = parseInt(btn.dataset.customerIdx, 10);
+      const customer = allCustomers[idx];
+      if (customer) {
+        switchView("messages");
+        setTimeout(() => {
+          openCompose();
+          selectComposeRecipient(customer);
+        }, 300);
+      }
+      return;
+    }
+    const customerId = btn.dataset.customerId;
+    if (customerId) handleCustomerAction(action, customerId);
+  });
 
   /* =========================
     Reviews Management
@@ -6359,6 +6726,32 @@
         .order("created_at", { ascending: false });
       if (error) throw error;
       messagesCache = data || [];
+
+      // Fetch latest reply per message so preview shows last activity
+      if (messagesCache.length) {
+        const ids = messagesCache.map((m) => m.id);
+        const { data: replies } = await supabase
+          .from("message_replies")
+          .select("message_id, body, sender_type, created_at")
+          .in("message_id", ids)
+          .order("created_at", { ascending: false });
+        if (replies && replies.length) {
+          // Group by message_id, keep only the latest per message
+          const latestMap = {};
+          replies.forEach((r) => {
+            if (!latestMap[r.message_id]) latestMap[r.message_id] = r;
+          });
+          messagesCache.forEach((m) => {
+            const lr = latestMap[m.id];
+            if (lr) {
+              m._lastReply = lr.body || "";
+              m._lastReplySender = lr.sender_type || "admin";
+              m._lastReplyAt = lr.created_at;
+            }
+          });
+        }
+      }
+
       updateMessagesStats();
       updateUnreadBadge();
       renderMessagesList();
@@ -6460,7 +6853,18 @@
         const date = formatMsgDate(m.timestamp || m.created_at);
         const subjectLabel =
           SUBJECT_LABELS[m.subject] || m.subject || "General";
-        const preview = (m.message || "").slice(0, 90);
+        // Show last reply if available, otherwise original message
+        const lastReplyText = m._lastReply || "";
+        const previewRaw = lastReplyText || m.message || "";
+        const preview = previewRaw.slice(0, 90);
+        const previewPrefix = lastReplyText
+          ? m._lastReplySender === "admin"
+            ? "You: "
+            : ""
+          : "";
+        const previewDate = m._lastReplyAt
+          ? formatMsgDate(m._lastReplyAt)
+          : date;
         const isActive = String(m.id) === String(openMessageId);
         const statusText =
           status === "replied"
@@ -6475,13 +6879,13 @@
           <div class="inbox-msg-body">
             <div class="inbox-msg-row1">
               <span class="inbox-msg-name">${escapeHtml(m.name || "Unknown")}</span>
-              <span class="inbox-msg-time">${date}</span>
+              <span class="inbox-msg-time">${previewDate}</span>
             </div>
             <div class="inbox-msg-row2">
               <span class="inbox-msg-category" data-cat="${m.subject || "general"}">${escapeHtml(subjectLabel)}</span>
               <span class="inbox-msg-status-badge ${status}">${statusText}</span>
             </div>
-            <div class="inbox-msg-preview">${escapeHtml(preview)}</div>
+            <div class="inbox-msg-preview">${previewPrefix ? '<span class="inbox-preview-sender">' + previewPrefix + "</span>" : ""}${escapeHtml(preview)}</div>
           </div>
         </div>`;
       })
@@ -6858,6 +7262,176 @@
     renderMessagesList();
   }
 
+  /* ─────────────────────────────────────────────
+   * Compose New Message to Customer
+   * ───────────────────────────────────────────── */
+  let composeSelectedCustomer = null;
+
+  function openCompose() {
+    const overlay = $("#composeOverlay");
+    if (overlay) overlay.hidden = false;
+    composeSelectedCustomer = null;
+    const tag = $("#composeRecipientTag");
+    const search = $("#composeRecipientSearch");
+    if (tag) tag.hidden = true;
+    if (search) {
+      search.value = "";
+      search.style.display = "";
+    }
+    const subj = $("#composeSubject");
+    const msg = $("#composeMessage");
+    if (subj) subj.value = "";
+    if (msg) msg.value = "";
+  }
+
+  function closeCompose() {
+    const overlay = $("#composeOverlay");
+    if (overlay) overlay.hidden = true;
+  }
+
+  function handleComposeRecipientSearch(e) {
+    const q = (e.target.value || "").toLowerCase().trim();
+    const dropdown = $("#composeRecipientDropdown");
+    if (!dropdown) return;
+    if (!q || q.length < 2) {
+      dropdown.hidden = true;
+      return;
+    }
+
+    // Use allCustomers if loaded, otherwise fetch
+    const customers = allCustomers || [];
+    const matches = customers
+      .filter((c) =>
+        [c.full_name, c.email].some((f) => (f || "").toLowerCase().includes(q)),
+      )
+      .slice(0, 8);
+
+    if (!matches.length) {
+      dropdown.innerHTML =
+        '<div class="compose-recipient-option"><small>No customers found</small></div>';
+      dropdown.hidden = false;
+      return;
+    }
+
+    dropdown.innerHTML = matches
+      .map(
+        (c, i) =>
+          `<button type="button" class="compose-recipient-option" data-idx="${i}">
+        <strong>${escapeHtml(c.full_name || "Unknown")}</strong>
+        <small>${escapeHtml(c.email || "")}</small>
+      </button>`,
+      )
+      .join("");
+    dropdown.hidden = false;
+
+    // Bind clicks
+    dropdown.querySelectorAll(".compose-recipient-option").forEach((opt) => {
+      opt.addEventListener("click", () => {
+        const idx = parseInt(opt.dataset.idx, 10);
+        selectComposeRecipient(matches[idx]);
+      });
+    });
+  }
+
+  function selectComposeRecipient(customer) {
+    composeSelectedCustomer = customer;
+    const tag = $("#composeRecipientTag");
+    const search = $("#composeRecipientSearch");
+    const dropdown = $("#composeRecipientDropdown");
+    if (dropdown) dropdown.hidden = true;
+    if (search) search.style.display = "none";
+    if (tag) {
+      tag.hidden = false;
+      const nameEl = tag.querySelector("#composeRecipientName");
+      const emailEl = tag.querySelector("#composeRecipientEmail");
+      if (nameEl) nameEl.textContent = customer.full_name || "Unknown";
+      if (emailEl) emailEl.textContent = ` (${customer.email || ""})`;
+    }
+  }
+
+  function removeComposeRecipient() {
+    composeSelectedCustomer = null;
+    const tag = $("#composeRecipientTag");
+    const search = $("#composeRecipientSearch");
+    if (tag) tag.hidden = true;
+    if (search) {
+      search.style.display = "";
+      search.value = "";
+      search.focus();
+    }
+  }
+
+  async function sendComposeMessage() {
+    if (!composeSelectedCustomer) {
+      showToast("Please select a customer", "error");
+      return;
+    }
+    const subject = ($("#composeSubject")?.value || "").trim();
+    const message = ($("#composeMessage")?.value || "").trim();
+    const fromEmail =
+      $("#composeFromEmail")?.value || "support@lingeriebysisioyin.store";
+
+    if (!message) {
+      showToast("Please enter a message", "error");
+      return;
+    }
+
+    const btn = $("#composeSendBtn");
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...';
+    }
+
+    try {
+      const client = getClient();
+      if (!client) throw new Error("Not connected");
+
+      // Insert as a contact_messages record (admin-initiated)
+      const { error } = await client.from("contact_messages").insert({
+        name: composeSelectedCustomer.full_name || "Customer",
+        email: composeSelectedCustomer.email,
+        subject: subject || "Message from Lingerie by Sisioyin",
+        message: message,
+        status: "replied",
+      });
+      if (error) throw error;
+
+      // Also send the email via edge function
+      const {
+        data: { session },
+      } = await client.auth.getSession();
+      await fetch(
+        `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-admin-reply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session?.access_token || ""}`,
+          },
+          body: JSON.stringify({
+            to: composeSelectedCustomer.email,
+            customerName: composeSelectedCustomer.full_name || "Customer",
+            subject: subject || "Message from Lingerie by Sisioyin",
+            message: message,
+            fromEmail: fromEmail,
+          }),
+        },
+      );
+
+      showToast("Message sent successfully!");
+      closeCompose();
+      await loadMessages();
+    } catch (err) {
+      console.error("Compose send error:", err);
+      showToast("Failed to send message: " + err.message, "error");
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send';
+      }
+    }
+  }
+
   /* ── Bind All Actions ── */
   function bindMessagesActions() {
     on($("#refreshMessagesBtn"), "click", loadMessages);
@@ -6896,6 +7470,21 @@
     on($("#msgDeleteBtn"), "click", deleteMessage);
     on($("#msgMarkUnreadBtn"), "click", markAsUnread);
     on($("#inboxBackBtn"), "click", inboxGoBack);
+
+    // Compose message
+    on($("#composeMessageBtn"), "click", openCompose);
+    on($("#composeCloseBtn"), "click", closeCompose);
+    on($("#composeCancelBtn"), "click", closeCompose);
+    on($("#composeSendBtn"), "click", sendComposeMessage);
+    on($("#composeRecipientRemove"), "click", removeComposeRecipient);
+    let composeSearchTimer;
+    on($("#composeRecipientSearch"), "input", (e) => {
+      clearTimeout(composeSearchTimer);
+      composeSearchTimer = setTimeout(
+        () => handleComposeRecipientSearch(e),
+        200,
+      );
+    });
   }
 
   document.addEventListener("DOMContentLoaded", init);

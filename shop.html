@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title>Shop | Lingerie by Sisioyin</title>
     <meta
       name="description"
@@ -31,6 +34,7 @@
     <meta name="twitter:image" content="assets/img/og-image.png" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -51,6 +55,16 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
 
   <body>
@@ -58,7 +72,14 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="page-loader" id="pageLoader">
       <div class="page-loader-inner">
-        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <div class="page-loader-heart">
+          <img
+            src="assets/img/spinner-icon.svg"
+            alt=""
+            width="32"
+            height="32"
+          />
+        </div>
         <p class="page-loader-text"><span></span></p>
       </div>
     </div>
@@ -70,7 +91,9 @@
       <div class="header-inner">
         <!-- Logo -->
         <a href="/home" class="logo">
-          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-icon"
+            ><img src="assets/img/monogram.svg" alt="LBS"
+          /></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
@@ -133,8 +156,8 @@
         <div class="drawer-header">
           <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
-              ><i class="fa-solid fa-heart"></i
-            ></span>
+              ><img src="assets/img/monogram.svg" alt="LBS"
+            /></span>
             <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
           <button
@@ -359,22 +382,42 @@
               </h4>
               <div class="filter-checkboxes" data-filter-key="gender">
                 <label class="filter-checkbox">
-                  <input type="checkbox" value="Women" autocomplete="off" />
+                  <input
+                    type="checkbox"
+                    name="gender"
+                    value="Women"
+                    autocomplete="off"
+                  />
                   <span class="checkmark"></span>
                   <span>Women</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" value="Men" autocomplete="off" />
+                  <input
+                    type="checkbox"
+                    name="gender"
+                    value="Men"
+                    autocomplete="off"
+                  />
                   <span class="checkmark"></span>
                   <span>Men</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" value="Kids" autocomplete="off" />
+                  <input
+                    type="checkbox"
+                    name="gender"
+                    value="Kids"
+                    autocomplete="off"
+                  />
                   <span class="checkmark"></span>
                   <span>Kids</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" value="Unisex" autocomplete="off" />
+                  <input
+                    type="checkbox"
+                    name="gender"
+                    value="Unisex"
+                    autocomplete="off"
+                  />
                   <span class="checkmark"></span>
                   <span>Unisex</span>
                 </label>
@@ -448,12 +491,22 @@
               </h4>
               <div class="filter-checkboxes" data-filter-key="deliveryType">
                 <label class="filter-checkbox">
-                  <input type="checkbox" value="express" autocomplete="off" />
+                  <input
+                    type="checkbox"
+                    name="delivery"
+                    value="express"
+                    autocomplete="off"
+                  />
                   <span class="checkmark"></span>
                   <span><i class="fa-solid fa-bolt"></i> Same-day</span>
                 </label>
                 <label class="filter-checkbox">
-                  <input type="checkbox" value="standard" autocomplete="off" />
+                  <input
+                    type="checkbox"
+                    name="delivery"
+                    value="standard"
+                    autocomplete="off"
+                  />
                   <span class="checkmark"></span>
                   <span><i class="fa-solid fa-truck"></i> Standard</span>
                 </label>
@@ -695,7 +748,7 @@
 
     <!-- Cart Drawer -->
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+      <div class="cart-drawer" id="cartDrawer" inert>
         <div class="cd-header">
           <h3 class="cd-title">
             <i class="fa-solid fa-bag-shopping"></i> Your Cart
@@ -753,7 +806,9 @@
           <!-- Brand -->
           <div class="footer-brand">
             <a href="/home" class="logo">
-              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-icon"
+                ><img src="assets/img/monogram.svg" alt="LBS"
+              /></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
             <p>
@@ -871,7 +926,9 @@
 
       <!-- Decorative header -->
       <div class="auth-hero">
-        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="auth-hero-icon">
+          <img src="assets/img/monogram.svg" alt="LBS" />
+        </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
         <p class="auth-hero-sub" id="authHeroSub">
           Sign in to your account to continue
@@ -1059,7 +1116,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>

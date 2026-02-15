@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title>Terms of Service | Lingerie by Sisioyin</title>
     <meta
       name="description"
@@ -26,6 +29,7 @@
     <meta property="og:url" content="https://lingeriebysisioyin.store/terms" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -46,13 +50,30 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
 
   <body class="legal-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="page-loader" id="pageLoader">
       <div class="page-loader-inner">
-        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <div class="page-loader-heart">
+          <img
+            src="assets/img/spinner-icon.svg"
+            alt=""
+            width="32"
+            height="32"
+          />
+        </div>
         <p class="page-loader-text"><span></span></p>
       </div>
     </div>
@@ -60,7 +81,9 @@
     <header class="header" id="siteHeader">
       <div class="header-inner">
         <a href="/home" class="logo">
-          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-icon"
+            ><img src="assets/img/monogram.svg" alt="LBS"
+          /></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
         <nav class="nav" id="mainNav">
@@ -118,8 +141,8 @@
         <div class="drawer-header">
           <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
-              ><i class="fa-solid fa-heart"></i
-            ></span>
+              ><img src="assets/img/monogram.svg" alt="LBS"
+            /></span>
             <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
           <button
@@ -255,7 +278,7 @@
           <i class="fa-solid fa-file-contract"></i>
         </div>
         <h1 class="legal-hero-title">Terms of Service</h1>
-        <p class="legal-hero-updated">Last updated: January 1, 2026</p>
+        <p class="legal-hero-updated">Last updated: February 15, 2026</p>
       </div>
     </section>
 
@@ -305,15 +328,16 @@
           <div class="legal-content">
             <div class="legal-intro">
               <p>
-                Welcome to Lingerie by Sisioyin. These Terms of Service
-                ("Terms") govern your use of our website and your purchase of
-                products from us. By accessing our website or placing an order,
-                you agree to be bound by these Terms.
+                Welcome to Lingerie by Sisioyin ("LBS," "we," "us," or "our").
+                These Terms of Service ("Terms") govern your use of our website
+                at <strong>lingeriebysisioyin.store</strong> and your purchase
+                of products from us. By accessing our website or placing an
+                order, you agree to be bound by these Terms.
               </p>
               <p>
                 Please read these terms carefully before using our services. If
-                you do not agree with any part of these terms, you may not use
-                our website or services.
+                you do not agree with any part of these terms, please do not use
+                our website.
               </p>
             </div>
 
@@ -323,17 +347,12 @@
               </h2>
               <p>
                 By accessing and using this website, you accept and agree to be
-                bound by these Terms and our Privacy Policy. We reserve the
-                right to modify these Terms at any time without prior notice.
-                Your continued use of the website following any changes
-                constitutes acceptance of those changes.
+                bound by these Terms and our
+                <a href="/privacy">Privacy Policy</a>. We may update these Terms
+                from time to time. Continued use of the website after any
+                changes constitutes acceptance of those changes. We encourage
+                you to review these Terms periodically.
               </p>
-              <div class="legal-highlight">
-                <p>
-                  We recommend reviewing these Terms periodically to stay
-                  informed of any updates.
-                </p>
-              </div>
             </section>
 
             <section class="legal-section" id="eligibility">
@@ -342,16 +361,18 @@
               </h2>
               <p>To use our services and make purchases, you must:</p>
               <ul>
-                <li>Be at least 18 years of age or have parental consent</li>
-                <li>Have the legal capacity to enter into binding contracts</li>
+                <li>
+                  Be at least 18 years of age or have parental/guardian consent
+                </li>
+                <li>
+                  Be a resident of Nigeria or have a valid Nigerian delivery
+                  address
+                </li>
                 <li>
                   Provide accurate and complete information during registration
                   and checkout
                 </li>
-                <li>
-                  Not be prohibited from using our services under applicable
-                  laws
-                </li>
+                <li>Not use the site for any unlawful purpose</li>
               </ul>
             </section>
 
@@ -359,18 +380,26 @@
               <h2 class="legal-section-title">
                 <i class="fa-solid fa-user-gear"></i>Account Registration
               </h2>
-              <p>When creating an account, you agree to:</p>
+              <p>When creating an account on our website, you agree to:</p>
               <ul>
-                <li>Provide accurate, current, and complete information</li>
-                <li>Maintain the security of your account credentials</li>
-                <li>Notify us immediately of any unauthorized access</li>
                 <li>
-                  Accept responsibility for all activities under your account
+                  Provide accurate, current, and complete information (name,
+                  email, phone number)
+                </li>
+                <li>Keep your login credentials secure and confidential</li>
+                <li>
+                  Notify us immediately if you suspect unauthorized access to
+                  your account
+                </li>
+                <li>
+                  Accept responsibility for all activities that occur under your
+                  account
                 </li>
               </ul>
               <p>
                 We reserve the right to suspend or terminate accounts that
-                violate these Terms or engage in fraudulent activity.
+                violate these Terms, provide false information, or engage in
+                fraudulent activity.
               </p>
             </section>
 
@@ -379,27 +408,37 @@
                 <i class="fa-solid fa-shopping-cart"></i>Orders & Payment
               </h2>
               <p>
-                <strong>Order Acceptance:</strong> Your order constitutes an
-                offer to purchase. We reserve the right to accept or reject any
-                order for any reason, including product availability, pricing
-                errors, or suspected fraud.
+                <strong>Order Placement:</strong> Adding items to your cart and
+                completing checkout constitutes an offer to purchase. We reserve
+                the right to accept or reject any order due to product
+                availability, pricing errors, or suspected fraud.
               </p>
               <p>
                 <strong>Pricing:</strong> All prices are displayed in Nigerian
-                Naira (₦) and include applicable taxes. We reserve the right to
-                change prices without notice. The price charged will be the
-                price in effect at the time of your order.
+                Naira (₦). We reserve the right to change prices at any time.
+                The price shown at the time you place your order is the price
+                you'll be charged.
               </p>
               <p>
-                <strong>Payment:</strong> We accept various payment methods
-                through our secure payment processor. By providing payment
-                information, you represent that you are authorized to use the
-                payment method.
+                <strong>Payment Method:</strong> We currently accept payment via
+                <strong>bank transfer only</strong>. At checkout, you'll be
+                shown our bank details (Moniepoint MFB, Account Number:
+                6327082294, Account Name: Oyindamola Adelugba). After making the
+                transfer, you must upload a screenshot or photo of your payment
+                receipt to confirm the order. Card payment will be available
+                soon.
+              </p>
+              <p>
+                <strong>Payment Verification:</strong> Orders are confirmed once
+                we verify your payment receipt. Verification typically takes a
+                few hours during business hours. You'll receive an email
+                notification once your order is confirmed.
               </p>
               <p>
                 <strong>Order Cancellation:</strong> Orders may be cancelled
-                within 1 hour of placement. After this window, orders enter
-                processing and cannot be cancelled.
+                within 1 hour of placement by contacting us via WhatsApp (+234
+                903 334 4860) or our <a href="/contact">Contact page</a>. After
+                this window, orders enter processing and cannot be cancelled.
               </p>
             </section>
 
@@ -408,20 +447,31 @@
                 <i class="fa-solid fa-truck"></i>Shipping & Delivery
               </h2>
               <p>
-                <strong>Delivery Areas:</strong> We currently ship within
-                Nigeria only. Delivery times vary based on location and selected
-                shipping method.
+                <strong>Delivery Area:</strong> We currently ship within Nigeria
+                only. Delivery fees vary by state and are calculated
+                automatically at checkout.
               </p>
               <p>
-                <strong>Shipping Costs:</strong> Shipping costs are calculated
-                at checkout based on your location and selected delivery speed.
-                Free shipping is available on orders over ₦50,000.
+                <strong>Delivery Fees:</strong>
+              </p>
+              <ul>
+                <li><strong>Lagos:</strong> Free delivery</li>
+                <li><strong>Ogun:</strong> ₦2,000</li>
+                <li><strong>Oyo, Osun, Ondo:</strong> ₦2,500</li>
+                <li><strong>Ekiti:</strong> ₦3,000</li>
+                <li><strong>Abuja (FCT):</strong> ₦3,500</li>
+                <li><strong>Other states:</strong> ₦2,500</li>
+              </ul>
+              <p>
+                <strong>Delivery Times:</strong> Lagos orders typically arrive
+                in 1–3 business days. South-West states take 2–4 business days.
+                Other locations take 3–5 business days. Delays may occur during
+                public holidays or peak periods.
               </p>
               <p>
-                <strong>Risk of Loss:</strong> Risk of loss and title for
-                products pass to you upon delivery to the carrier. We are not
-                responsible for delays caused by carriers, customs, or other
-                factors outside our control.
+                <strong>Risk of Loss:</strong> We are not responsible for
+                packages lost in transit by third-party logistics providers once
+                they have been dispatched.
               </p>
             </section>
 
@@ -430,26 +480,28 @@
                 <i class="fa-solid fa-rotate-left"></i>Returns & Refunds
               </h2>
               <p>
-                <strong>Return Policy:</strong> We accept returns within 14 days
-                of delivery for unworn items with original tags attached.
+                <strong>Return Window:</strong> We accept returns within 7 days
+                of delivery for unworn items with original tags and packaging
+                intact.
               </p>
               <p>
                 <strong>Non-Returnable Items:</strong> Due to hygiene reasons,
                 underwear, panties, and bodysuits cannot be returned unless they
-                arrive damaged or defective.
+                arrive damaged, defective, or incorrect.
               </p>
               <p>
-                <strong>Refund Process:</strong> Approved refunds will be
-                processed within 7-10 business days. Refunds will be issued to
-                the original payment method.
+                <strong>How to Return:</strong> Contact us via our
+                <a href="/contact">Contact page</a> or WhatsApp (+234 903 334
+                4860) with your order number, reason, and photos of the item.
+                We'll review your request and respond within 24 hours.
               </p>
               <p>
-                <strong>Exchanges:</strong> We offer free exchanges for
-                different sizes within 14 days of delivery.
+                <strong>Refunds:</strong> Approved refunds are processed within
+                3–5 business days via bank transfer to an account you provide.
               </p>
               <p>
-                For more details, please visit our
-                <a href="/faq">FAQs</a> page.
+                <strong>Exchanges:</strong> We offer size exchanges within 7
+                days of delivery, subject to stock availability.
               </p>
             </section>
 
@@ -458,20 +510,23 @@
                 <i class="fa-solid fa-copyright"></i>Intellectual Property
               </h2>
               <p>
-                All content on this website, including text, graphics, logos,
-                images, product descriptions, and software, is the property of
-                Lingerie by Sisioyin and is protected by intellectual property
+                All content on this website — including text, graphics, logos,
+                product images, and design — is the property of Lingerie by
+                Sisioyin and is protected by applicable intellectual property
                 laws.
               </p>
               <p>You may not:</p>
               <ul>
                 <li>
-                  Copy, reproduce, or distribute our content without permission
+                  Copy, reproduce, or distribute any content from our website
+                  without written permission
                 </li>
-                <li>Use our trademarks or branding for any purpose</li>
-                <li>Modify or create derivative works from our content</li>
                 <li>
-                  Use our content for commercial purposes without authorization
+                  Use the "Lingerie by Sisioyin" or "LBS" name, logo, or
+                  branding for any purpose
+                </li>
+                <li>
+                  Scrape, download, or re-use our product images or descriptions
                 </li>
               </ul>
             </section>
@@ -482,16 +537,21 @@
               </h2>
               <p>When using our website, you agree not to:</p>
               <ul>
-                <li>Violate any applicable laws or regulations</li>
-                <li>Infringe on the rights of others</li>
-                <li>Submit false or misleading information</li>
-                <li>Attempt to gain unauthorized access to our systems</li>
+                <li>Violate any laws, regulations, or the rights of others</li>
                 <li>
-                  Use automated systems to access or collect data from our
-                  website
+                  Submit false, misleading, or fraudulent information or payment
+                  receipts
                 </li>
-                <li>Interfere with the proper functioning of our website</li>
-                <li>Engage in any fraudulent activity</li>
+                <li>
+                  Attempt to gain unauthorized access to our systems or other
+                  users' accounts
+                </li>
+                <li>
+                  Use bots, scrapers, or automated tools to access or collect
+                  data from our website
+                </li>
+                <li>Interfere with the proper functioning of the website</li>
+                <li>Post or submit abusive, offensive, or spam content</li>
               </ul>
             </section>
 
@@ -501,9 +561,9 @@
                 Liability
               </h2>
               <p>
-                To the maximum extent permitted by law, Lingerie by Sisioyin
-                shall not be liable for any indirect, incidental, special,
-                consequential, or punitive damages arising from your use of our
+                To the maximum extent permitted by Nigerian law, Lingerie by
+                Sisioyin shall not be liable for any indirect, incidental,
+                special, or consequential damages arising from your use of our
                 website or purchase of our products.
               </p>
               <p>
@@ -512,8 +572,10 @@
               </p>
               <div class="legal-highlight">
                 <p>
-                  These limitations apply even if we have been advised of the
-                  possibility of such damages.
+                  Product colours may appear slightly different on screen due to
+                  device display settings. This is not grounds for a return
+                  unless the product is materially different from its
+                  description.
                 </p>
               </div>
             </section>
@@ -524,12 +586,30 @@
               </h2>
               <p>
                 If you have any questions about these Terms of Service, please
-                contact us:
+                reach out:
               </p>
               <ul>
                 <li>
                   <strong>Contact Form:</strong>
                   <a href="/contact">Contact Page</a>
+                </li>
+                <li>
+                  <strong>WhatsApp:</strong>
+                  <a
+                    href="https://wa.me/2349033344860"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >+234 903 334 4860</a
+                  >
+                </li>
+                <li>
+                  <strong>Instagram:</strong>
+                  <a
+                    href="https://instagram.com/lingeries_bysisioyin"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    >@lingeries_bysisioyin</a
+                  >
                 </li>
               </ul>
             </section>
@@ -551,7 +631,8 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <a href="/home" class="logo"
-              ><span class="logo-icon"><i class="fa-solid fa-heart"></i></span
+              ><span class="logo-icon"
+                ><img src="assets/img/monogram.svg" alt="LBS" /></span
               ><span class="logo-text">Lingerie by Sisioyin</span></a
             >
             <p>
@@ -645,7 +726,7 @@
     </footer>
 
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+      <div class="cart-drawer" id="cartDrawer" inert>
         <div class="cd-header">
           <h3 class="cd-title">
             <i class="fa-solid fa-bag-shopping"></i> Your Cart
@@ -735,7 +816,9 @@
 
       <!-- Decorative header -->
       <div class="auth-hero">
-        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="auth-hero-icon">
+          <img src="assets/img/monogram.svg" alt="LBS" />
+        </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
         <p class="auth-hero-sub" id="authHeroSub">
           Sign in to your account to continue
@@ -923,7 +1006,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>

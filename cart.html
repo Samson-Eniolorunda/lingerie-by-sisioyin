@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+    />
     <title>Shopping Cart | Lingerie by Sisioyin</title>
     <meta
       name="description"
@@ -13,6 +16,7 @@
     <meta name="color-scheme" content="light dark" />
 
     <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg" />
     <link rel="icon" type="image/png" href="assets/img/favicon.png" />
     <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="site.webmanifest" />
@@ -33,14 +37,31 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/styles.css" />
+    <script>
+      try {
+        var t = JSON.parse(localStorage.getItem("LBS_THEME"));
+        if (
+          t === "dark" ||
+          (t === "system" && matchMedia("(prefers-color-scheme:dark)").matches)
+        )
+          document.documentElement.setAttribute("data-theme", "dark");
+      } catch (e) {}
+    </script>
   </head>
 
-  <body>
+  <body class="cart-page">
     <!-- Skip Link -->
     <a class="skip-link" href="#main">Skip to content</a>
     <div class="page-loader" id="pageLoader">
       <div class="page-loader-inner">
-        <div class="page-loader-heart"><i class="fa-solid fa-heart"></i></div>
+        <div class="page-loader-heart">
+          <img
+            src="assets/img/spinner-icon.svg"
+            alt=""
+            width="32"
+            height="32"
+          />
+        </div>
         <p class="page-loader-text"><span></span></p>
       </div>
     </div>
@@ -52,7 +73,9 @@
       <div class="header-inner">
         <!-- Logo -->
         <a href="/home" class="logo">
-          <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+          <span class="logo-icon"
+            ><img src="assets/img/monogram.svg" alt="LBS"
+          /></span>
           <span class="logo-text">Lingerie by Sisioyin</span>
         </a>
 
@@ -114,8 +137,8 @@
         <div class="drawer-header">
           <a href="/home" class="drawer-logo">
             <span class="drawer-logo-icon"
-              ><i class="fa-solid fa-heart"></i
-            ></span>
+              ><img src="assets/img/monogram.svg" alt="LBS"
+            /></span>
             <span class="drawer-logo-text">Lingerie by Sisioyin</span>
           </a>
           <button
@@ -249,6 +272,23 @@
        MAIN CONTENT
        ═══════════════════════════════════════════════════════════════════════ -->
 
+    <!-- Breadcrumb -->
+    <section class="page-header">
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="/home"><i class="fa-solid fa-house"></i></a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <a href="/shop">Shop</a>
+          <i class="fa-solid fa-chevron-right"></i>
+          <span>Cart</span>
+        </nav>
+        <h1 class="page-title">
+          <i class="fa-solid fa-bag-shopping"></i>
+          Shopping Cart
+        </h1>
+      </div>
+    </section>
+
     <!-- Step Progress -->
     <div class="ck-progress">
       <div class="container">
@@ -278,19 +318,6 @@
 
     <main class="ck-main" id="main">
       <div class="container">
-        <!-- Breadcrumb -->
-        <nav class="ck-breadcrumb" aria-label="Breadcrumb">
-          <a href="/home"><i class="fa-solid fa-house"></i></a>
-          <span class="ck-breadcrumb-sep"
-            ><i class="fa-solid fa-chevron-right"></i
-          ></span>
-          <a href="/shop">Shop</a>
-          <span class="ck-breadcrumb-sep"
-            ><i class="fa-solid fa-chevron-right"></i
-          ></span>
-          <span class="ck-breadcrumb-current">Cart</span>
-        </nav>
-
         <!-- Empty State -->
         <div class="ck-empty" id="cartPageEmpty" style="display: none">
           <div class="ck-empty-icon">
@@ -403,7 +430,7 @@
 
               <div class="ck-trust">
                 <i class="fa-solid fa-shield-halved"></i> Secure checkout
-                powered by Moniepoint
+                powered by LBS
               </div>
             </div>
           </aside>
@@ -415,7 +442,7 @@
        CART DRAWER
        ═══════════════════════════════════════════════════════════════════════ -->
     <div class="cart-drawer-overlay" id="cartDrawerOverlay">
-      <div class="cart-drawer" id="cartDrawer" aria-hidden="true" inert>
+      <div class="cart-drawer" id="cartDrawer" inert>
         <div class="cd-header">
           <h3 class="cd-title">
             <i class="fa-solid fa-bag-shopping"></i> Your Cart
@@ -467,7 +494,9 @@
         <div class="footer-grid">
           <div class="footer-brand">
             <a href="/home" class="logo">
-              <span class="logo-icon"><i class="fa-solid fa-heart"></i></span>
+              <span class="logo-icon"
+                ><img src="assets/img/monogram.svg" alt="LBS"
+              /></span>
               <span class="logo-text">Lingerie by Sisioyin</span>
             </a>
             <p>
@@ -583,7 +612,9 @@
 
       <!-- Decorative header -->
       <div class="auth-hero">
-        <div class="auth-hero-icon"><i class="fa-solid fa-heart"></i></div>
+        <div class="auth-hero-icon">
+          <img src="assets/img/monogram.svg" alt="LBS" />
+        </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
         <p class="auth-hero-sub" id="authHeroSub">
           Sign in to your account to continue
@@ -771,7 +802,6 @@
           By continuing, you agree to our
           <a href="/terms">Terms</a> and
           <a href="/privacy">Privacy Policy</a>
-          >
         </p>
       </div>
     </div>
