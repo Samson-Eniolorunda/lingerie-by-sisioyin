@@ -66,3 +66,7 @@ _*.js
 # Temp files
 clear_test_data.sh
 DocuMorph/
+
+# Audit/dev scripts
+audit_css*.py
+css_audit_report.md

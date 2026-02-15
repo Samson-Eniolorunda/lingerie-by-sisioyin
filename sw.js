@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v12";
+const CACHE_NAME = "lbs-cache-v13";
 const STATIC_ASSETS = [
   "/home",
   "/home.html",
@@ -119,10 +119,8 @@ self.addEventListener("fetch", (event) => {
         const path = url.pathname;
         if (path !== "/" && !path.includes(".") && !path.endsWith("/")) {
           const htmlUrl = new URL(path + ".html", url.origin);
-          req = new Request(htmlUrl.href, {
-            mode: request.mode,
-            credentials: request.credentials,
-          });
+          // Can't set mode: 'navigate' manually, use url-only Request
+          req = new Request(htmlUrl.href);
         }
       }
 
