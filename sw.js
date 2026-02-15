@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 14;
+const SW_VERSION = 15;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
@@ -114,43 +114,39 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     (async () => {
-      // Clean URL support — rewrite /page to /page.html for local dev
-      let req = request;
-      if (request.mode === "navigate" && url.origin === self.location.origin) {
-        const path = url.pathname;
-        if (path !== "/" && !path.includes(".") && !path.endsWith("/")) {
-          const htmlUrl = new URL(path + ".html", url.origin);
-          // Can't set mode: 'navigate' manually, use url-only Request
-          req = new Request(htmlUrl.href);
-        }
-      }
-
       // Network-first for navigations (HTML pages) — always show fresh content
       if (request.mode === "navigate") {
         try {
-          const networkResponse = await fetch(req);
-          if (networkResponse && networkResponse.status === 200) {
+          // Fetch with redirect: "follow" and let the server handle clean URLs
+          const networkResponse = await fetch(request);
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            !networkResponse.redirected
+          ) {
             const cache = await caches.open(CACHE_NAME);
-            cache.put(req, networkResponse.clone());
+            cache.put(request, networkResponse.clone());
           }
           return networkResponse;
         } catch {
-          const cached =
-            (await caches.match(req)) || (await caches.match(request));
+          const cached = await caches.match(request);
           return cached || caches.match("/home");
         }
       }
 
       // Stale-while-revalidate for static assets (CSS, JS, images)
-      const cachedResponse =
-        (await caches.match(req)) || (await caches.match(request));
+      const cachedResponse = await caches.match(request);
       if (cachedResponse) {
         event.waitUntil(
-          fetch(req)
+          fetch(request)
             .then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
+              if (
+                networkResponse &&
+                networkResponse.status === 200 &&
+                !networkResponse.redirected
+              ) {
                 caches.open(CACHE_NAME).then((cache) => {
-                  cache.put(req, networkResponse.clone());
+                  cache.put(request, networkResponse.clone());
                 });
               }
             })
@@ -160,11 +156,15 @@ self.addEventListener("fetch", (event) => {
       }
 
       try {
-        const networkResponse = await fetch(req);
-        if (networkResponse && networkResponse.status === 200) {
+        const networkResponse = await fetch(request);
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          !networkResponse.redirected
+        ) {
           const responseClone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(req, responseClone);
+            cache.put(request, responseClone);
           });
         }
         return networkResponse;
