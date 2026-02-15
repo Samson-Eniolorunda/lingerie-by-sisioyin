@@ -5,7 +5,8 @@
  * ============================================
  */
 
-const CACHE_NAME = "lbs-cache-v13";
+const SW_VERSION = 14;
+const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
   "/home.html",
@@ -218,4 +219,25 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-console.log("[SW] Service Worker script loaded");
+// Listen for messages from the page
+self.addEventListener("message", (event) => {
+  if (event.data === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+  if (event.data === "GET_VERSION") {
+    event.source.postMessage({ type: "SW_VERSION", version: SW_VERSION });
+  }
+  if (event.data === "FORCE_UNREGISTER") {
+    // Nuclear option: clear everything and unregister
+    caches.keys().then((names) => {
+      names.forEach((name) => caches.delete(name));
+    });
+    self.registration.unregister().then(() => {
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => client.navigate(client.url));
+      });
+    });
+  }
+});
+
+console.log("[SW] Service Worker v" + SW_VERSION + " loaded");

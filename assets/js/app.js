@@ -1128,14 +1128,16 @@
       }
 
       const colors = modalProduct.colors || [];
-      const inStockColors = colors.filter(c => {
-        const qty = typeof c === 'object' ? c.qty || 0 : 1;
+      const inStockColors = colors.filter((c) => {
+        const qty = typeof c === "object" ? c.qty || 0 : 1;
         return qty > 0;
       });
-      const isAssorted = colors.length === 1 && (
-        (typeof colors[0] === 'string' ? colors[0] : colors[0]?.name || '')
-          .toLowerCase() === 'assorted'
-      );
+      const isAssorted =
+        colors.length === 1 &&
+        (typeof colors[0] === "string"
+          ? colors[0]
+          : colors[0]?.name || ""
+        ).toLowerCase() === "assorted";
       if (
         modalProduct.allow_color_selection &&
         inStockColors.length >= 1 &&
@@ -2066,25 +2068,52 @@
    * Service Worker Registration (PWA)
    * ───────────────────────────────────────────── */
   function registerServiceWorker() {
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        // Get the base path dynamically
-        const basePath = window.location.pathname.substring(
-          0,
-          window.location.pathname.lastIndexOf("/") + 1,
-        );
-        const swPath = basePath + "sw.js";
+    if (!("serviceWorker" in navigator)) return;
 
-        navigator.serviceWorker
-          .register(swPath)
-          .then((registration) => {
-            console.log("📦 SW: Registered, scope:", registration.scope);
-          })
-          .catch((error) => {
-            console.log("📦 SW: Registration failed:", error);
+    window.addEventListener("load", async () => {
+      const basePath = window.location.pathname.substring(
+        0,
+        window.location.pathname.lastIndexOf("/") + 1,
+      );
+      const swPath = basePath + "sw.js";
+
+      try {
+        const registration = await navigator.serviceWorker.register(swPath);
+        console.log("📦 SW: Registered, scope:", registration.scope);
+
+        // Check for updates every 30 minutes
+        setInterval(() => registration.update(), 30 * 60 * 1000);
+
+        // Listen for new SW waiting to activate
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          if (!newWorker) return;
+
+          newWorker.addEventListener("statechange", () => {
+            if (
+              newWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              // Auto-activate the new SW silently — no user action needed
+              console.log("📦 SW: New version found, activating silently...");
+              newWorker.postMessage("SKIP_WAITING");
+            }
           });
-      });
-    }
+        });
+
+        // When the new SW takes over, reload the page seamlessly
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log("📦 SW: Updated — reloading page...");
+            window.location.reload();
+          }
+        });
+      } catch (error) {
+        console.log("📦 SW: Registration failed:", error);
+      }
+    });
   }
 
   /* ─────────────────────────────────────────────
