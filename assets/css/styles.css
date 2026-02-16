@@ -9889,7 +9889,9 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 @media (max-width: 768px) {
   .payment-option .payment-desc {
@@ -9994,6 +9996,9 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   font-weight: 600;
   color: var(--text-primary);
   font-size: var(--text-sm);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 .bank-account-number {
   font-family: var(--ff-mono, monospace);
@@ -10003,6 +10008,9 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  flex-wrap: wrap;
+  max-width: 100%;
+  word-break: break-word;
 }
 .copy-acct-btn {
   display: inline-flex;
