@@ -52,7 +52,9 @@
 
     const sectionOrder = ["contact", "delivery", "payment"];
     const currentIndex = sectionOrder.indexOf(currentSection);
-    const receiptConfirmed = document.getElementById("paymentSentBtn")?.classList.contains("confirmed");
+    const receiptConfirmed = document
+      .getElementById("paymentSentBtn")
+      ?.classList.contains("confirmed");
 
     // Step 0 = Cart (always done)
     // Step 1 = Shipping — green when delivery address is completed
@@ -295,11 +297,15 @@
 
   // Handle payment method selection — auto-complete payment section
   function setupPaymentMethods() {
-    const options = document.querySelectorAll(".payment-option:not(.payment-option--disabled)");
+    const options = document.querySelectorAll(
+      ".payment-option:not(.payment-option--disabled)",
+    );
 
     options.forEach((option) => {
       option.addEventListener("click", function () {
-        document.querySelectorAll(".payment-option").forEach((o) => o.classList.remove("selected"));
+        document
+          .querySelectorAll(".payment-option")
+          .forEach((o) => o.classList.remove("selected"));
         this.classList.add("selected");
 
         const radio = this.querySelector('input[type="radio"]');
@@ -317,7 +323,9 @@
     });
 
     // Auto-select bank transfer on load
-    const bankOption = document.querySelector('.payment-option[data-method="bank_transfer"]');
+    const bankOption = document.querySelector(
+      '.payment-option[data-method="bank_transfer"]',
+    );
     if (bankOption) {
       bankOption.classList.add("selected");
       const bankDetails = document.getElementById("bankTransferDetails");
@@ -330,11 +338,16 @@
       copyBtn.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const acctNum = document.getElementById("bankAccountNumber")?.textContent?.replace(/[^0-9]/g, "") || "";
+        const acctNum =
+          document
+            .getElementById("bankAccountNumber")
+            ?.textContent?.replace(/[^0-9]/g, "") || "";
         navigator.clipboard.writeText(acctNum).then(() => {
           showToast("Account number copied!", "success");
           copyBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
-          setTimeout(() => { copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>'; }, 2000);
+          setTimeout(() => {
+            copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+          }, 2000);
         });
       });
     }
@@ -377,8 +390,12 @@
           if (paymentSentBtn) {
             paymentSentBtn.disabled = true;
             paymentSentBtn.classList.remove("confirmed");
-            paymentSentBtn.querySelector(".pcb-idle").classList.remove("u-hidden");
-            paymentSentBtn.querySelector(".pcb-loading").classList.add("u-hidden");
+            paymentSentBtn
+              .querySelector(".pcb-idle")
+              .classList.remove("u-hidden");
+            paymentSentBtn
+              .querySelector(".pcb-loading")
+              .classList.add("u-hidden");
             paymentSentBtn.querySelector(".pcb-done").classList.add("u-hidden");
           }
           // Unmark Payment step green
@@ -540,7 +557,9 @@
       return;
     }
 
-    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+    const paymentMethod = document.querySelector(
+      'input[name="paymentMethod"]:checked',
+    )?.value;
 
     if (paymentMethod === "bank_transfer") {
       // Bank transfer flow: require receipt + confirmation button
@@ -559,7 +578,10 @@
       _isProcessingPayment = true;
       processBankTransferOrder();
     } else {
-      showToast("This payment method is coming soon. Please use Bank Transfer.", "info");
+      showToast(
+        "This payment method is coming soon. Please use Bank Transfer.",
+        "info",
+      );
     }
   }
 
@@ -567,12 +589,14 @@
   async function processBankTransferOrder() {
     const btn = document.getElementById("placeOrderBtn");
     btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Placing Order...';
+    btn.innerHTML =
+      '<i class="fa-solid fa-spinner fa-spin"></i> Placing Order...';
 
     const resetBtn = () => {
       _isProcessingPayment = false;
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
+      btn.innerHTML =
+        '<i class="fa-solid fa-lock"></i> <span>Place Order</span>';
     };
 
     try {
@@ -595,7 +619,9 @@
             console.warn("Receipt upload failed:", uploadError);
             // Continue anyway — order is still valid
           } else {
-            const { data: urlData } = c.storage.from("receipts").getPublicUrl(fileName);
+            const { data: urlData } = c.storage
+              .from("receipts")
+              .getPublicUrl(fileName);
             receiptUrl = urlData?.publicUrl || null;
           }
         }
@@ -614,8 +640,11 @@
 
       // Clear cart
       localStorage.removeItem(CART_KEY);
-      try { sessionStorage.removeItem("LBS_FORM__checkout"); } catch {}
-      if (window.APP && window.APP.updateCartBadge) window.APP.updateCartBadge();
+      try {
+        sessionStorage.removeItem("LBS_FORM__checkout");
+      } catch {}
+      if (window.APP && window.APP.updateCartBadge)
+        window.APP.updateCartBadge();
 
       showToast("Order placed! We'll confirm your payment shortly.", "success");
 
@@ -744,8 +773,8 @@
   /* ── Saved address picker ── */
   function loadSavedAddresses() {
     const picker = document.getElementById("savedAddrPicker");
-    const list = document.getElementById("savedAddrList");
-    if (!picker || !list) return;
+    const select = document.getElementById("savedAddrSelect");
+    if (!picker || !select) return;
 
     let addrs = [];
     try {
@@ -760,44 +789,37 @@
 
     picker.classList.remove("u-hidden");
     picker.style.display = "";
-    list.innerHTML = addrs
-      .map(
-        (a, i) => `
-      <button type="button" class="saved-addr-chip" data-idx="${i}">
-        <span class="saved-addr-chip-icon"><i class="fa-solid fa-location-dot"></i></span>
-        <span class="saved-addr-chip-text">
-          <strong>${a.label || "Address " + (i + 1)}</strong>
-          <small>${a.street}, ${a.city}${a.state ? ", " + a.state : ""}</small>
-        </span>
-      </button>`,
-      )
-      .join("");
 
-    list.querySelectorAll(".saved-addr-chip").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const a = addrs[+btn.dataset.idx];
-        if (!a) return;
-        const addrEl = document.getElementById("address");
-        const cityEl = document.getElementById("city");
-        const stateEl = document.getElementById("state");
-        if (addrEl) addrEl.value = a.street;
-        if (cityEl) cityEl.value = a.city;
-        if (stateEl) {
-          // Try to match select option
-          const opt = [...stateEl.options].find((o) =>
-            o.value.toLowerCase().includes((a.state || "").toLowerCase()),
-          );
-          stateEl.value = opt ? opt.value : a.state || "";
-        }
-        // Highlight selected chip
-        list
-          .querySelectorAll(".saved-addr-chip")
-          .forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-        // Trigger floating label
-        [addrEl, cityEl, stateEl].forEach((el) => {
-          if (el) el.dispatchEvent(new Event("input"));
-        });
+    // Clear existing options and add new ones
+    select.innerHTML = '<option value="">Use a saved address</option>';
+    addrs.forEach((a, i) => {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = `${a.label || "Address " + (i + 1)} - ${a.street}, ${a.city}${a.state ? ", " + a.state : ""}`;
+      select.appendChild(opt);
+    });
+
+    // Handle selection
+    select.addEventListener("change", () => {
+      const idx = select.value;
+      if (idx === "") return;
+      const a = addrs[+idx];
+      if (!a) return;
+      const addrEl = document.getElementById("address");
+      const cityEl = document.getElementById("city");
+      const stateEl = document.getElementById("state");
+      if (addrEl) addrEl.value = a.street;
+      if (cityEl) cityEl.value = a.city;
+      if (stateEl) {
+        // Try to match select option
+        const opt = [...stateEl.options].find((o) =>
+          o.value.toLowerCase().includes((a.state || "").toLowerCase()),
+        );
+        stateEl.value = opt ? opt.value : a.state || "";
+      }
+      // Trigger floating label
+      [addrEl, cityEl, stateEl].forEach((el) => {
+        if (el) el.dispatchEvent(new Event("input"));
       });
     });
   }
@@ -855,10 +877,12 @@
     const hasData = Object.values(_cachedUserFields).some((v) => v.trim());
     if (!hasData) return;
     // Only show if at least one field is still empty
-    const fieldsEmpty = ["firstName", "lastName", "email", "phone"].some((id) => {
-      const el = document.getElementById(id);
-      return el && !el.value.trim();
-    });
+    const fieldsEmpty = ["firstName", "lastName", "email", "phone"].some(
+      (id) => {
+        const el = document.getElementById(id);
+        return el && !el.value.trim();
+      },
+    );
     if (!fieldsEmpty) return;
     const banner = document.getElementById("profileInfoBanner");
     if (banner) banner.classList.remove("u-hidden");
@@ -869,7 +893,9 @@
     const picker = document.getElementById("savedAddrPicker");
     if (!picker) return;
     let addrs = [];
-    try { addrs = JSON.parse(localStorage.getItem("LBS_ADDRESSES") || "[]"); } catch {}
+    try {
+      addrs = JSON.parse(localStorage.getItem("LBS_ADDRESSES") || "[]");
+    } catch {}
     if (addrs.length) {
       picker.classList.remove("u-hidden");
       picker.style.display = "";
@@ -890,9 +916,13 @@
     prefillUserInfo();
 
     // Re-try profile prefill when auth finishes initializing
-    window.addEventListener("auth:changed", () => {
-      if (!_cachedUserFields) prefillUserInfo();
-    }, { once: true });
+    window.addEventListener(
+      "auth:changed",
+      () => {
+        if (!_cachedUserFields) prefillUserInfo();
+      },
+      { once: true },
+    );
 
     // Event listeners
     const placeOrderBtn = document.getElementById("placeOrderBtn");

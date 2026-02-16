@@ -49,27 +49,66 @@
     </script>
     <style>
       /* Prevent horizontal overflow on mobile checkout */
-      html, body { overflow-x: hidden !important; max-width: 100vw !important; position: relative !important; }
-      main, .ck-main { position: relative !important; overflow: hidden !important; max-width: 100% !important; }
-      .ck-panel, .ck-panel-body, .checkout-card-body, .ck-col-main, .ck-grid, .ck-main, .container {
-        max-width: 100% !important; overflow-x: hidden !important; box-sizing: border-box !important; position: relative !important;
+      html,
+      body {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
+        position: relative !important;
       }
-      .ck-panel-body *, .checkout-card-body * { max-width: 100% !important; word-break: break-word !important; box-sizing: border-box !important; }
-      /* Payment section specific */
-      .payment-options, .payment-option, .bank-transfer-details, .bank-transfer-card, .bank-transfer-info, .bank-detail-row {
-        max-width: 100% !important; width: 100% !important; overflow: hidden !important; box-sizing: border-box !important;
+      main,
+      .ck-main {
+        position: relative !important;
+        overflow: hidden !important;
+        max-width: 100% !important;
       }
-      .payment-option .payment-info, .payment-option .payment-desc, .bank-detail-value {
-        overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word !important; max-width: 100% !important;
+      .ck-panel,
+      .ck-panel-body,
+      .checkout-card-body,
+      .ck-col-main,
+      .ck-grid,
+      .ck-main,
+      .container {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+        position: relative !important;
+      }
+      .ck-panel-body *,
+      .checkout-card-body * {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      /* Payment text - show fully, no truncation */
+      .payment-option .payment-info,
+      .payment-option .payment-desc,
+      .bank-detail-value {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        word-wrap: break-word !important;
+        max-width: 100% !important;
+        line-height: 1.4 !important;
       }
       /* Form elements */
-      .form-floating, .form-row-2, input, select, textarea {
-        max-width: 100% !important; box-sizing: border-box !important;
+      .form-floating,
+      .form-row-2,
+      input,
+      select,
+      textarea {
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       @media (max-width: 768px) {
-        .ck-panel-body { padding: 12px !important; }
-        .payment-option { flex-wrap: wrap; }
-        .bank-detail-row { flex-direction: column !important; align-items: flex-start !important; }
+        .ck-panel-body {
+          padding: 12px !important;
+        }
+        .payment-option {
+          flex-wrap: wrap;
+        }
+        .bank-detail-row {
+          flex-direction: column !important;
+          align-items: flex-start !important;
+        }
       }
     </style>
   </head>
@@ -488,11 +527,9 @@
               </div>
               <div class="ck-panel-body checkout-card-body">
                 <div id="savedAddrPicker" class="saved-addr-picker u-hidden">
-                  <span class="saved-addr-label"
-                    ><i class="fa-solid fa-bookmark"></i> Use a saved
-                    address</span
-                  >
-                  <div id="savedAddrList" class="saved-addr-list"></div>
+                  <select id="savedAddrSelect" class="saved-addr-select">
+                    <option value="">Use a saved address</option>
+                  </select>
                 </div>
                 <div class="form-floating">
                   <input
@@ -659,25 +696,40 @@
                         <div class="bank-transfer-info">
                           <div class="bank-detail-row">
                             <span class="bank-detail-label">Bank Name</span>
-                            <span class="bank-detail-value" id="bankName">Moniepoint MFB</span>
+                            <span class="bank-detail-value" id="bankName"
+                              >Moniepoint MFB</span
+                            >
                           </div>
                           <div class="bank-detail-row">
-                            <span class="bank-detail-label">Account Number</span>
-                            <span class="bank-detail-value bank-account-number" id="bankAccountNumber">
+                            <span class="bank-detail-label"
+                              >Account Number</span
+                            >
+                            <span
+                              class="bank-detail-value bank-account-number"
+                              id="bankAccountNumber"
+                            >
                               6327082294
-                              <button type="button" class="copy-acct-btn" id="copyAccountBtn" title="Copy">
+                              <button
+                                type="button"
+                                class="copy-acct-btn"
+                                id="copyAccountBtn"
+                                title="Copy"
+                              >
                                 <i class="fa-regular fa-copy"></i>
                               </button>
                             </span>
                           </div>
                           <div class="bank-detail-row">
                             <span class="bank-detail-label">Account Name</span>
-                            <span class="bank-detail-value" id="bankAccountName">Oyindamola Adelugba (LingeriesBySisioyin)</span>
+                            <span class="bank-detail-value" id="bankAccountName"
+                              >Oyindamola Adelugba (LingeriesBySisioyin)</span
+                            >
                           </div>
                         </div>
                         <p class="bank-transfer-note">
                           <i class="fa-solid fa-info-circle"></i>
-                          Transfer the exact total amount shown in your order summary.
+                          Transfer the exact total amount shown in your order
+                          summary.
                         </p>
                       </div>
                     </div>
@@ -691,15 +743,31 @@
                       <div class="receipt-upload-section">
                         <label class="receipt-upload-label">
                           <i class="fa-solid fa-cloud-arrow-up"></i>
-                          <span class="receipt-upload-text">Upload Payment Receipt</span>
-                          <span class="receipt-upload-hint">PNG, JPG or PDF (max 5MB)</span>
-                          <input type="file" id="receiptFile" accept="image/*,.pdf" hidden />
+                          <span class="receipt-upload-text"
+                            >Upload Payment Receipt</span
+                          >
+                          <span class="receipt-upload-hint"
+                            >PNG, JPG or PDF (max 5MB)</span
+                          >
+                          <input
+                            type="file"
+                            id="receiptFile"
+                            accept="image/*,.pdf"
+                            hidden
+                          />
                         </label>
                         <div class="receipt-preview" id="receiptPreview" hidden>
                           <div class="receipt-preview-inner">
                             <i class="fa-solid fa-file-image"></i>
-                            <span class="receipt-file-name" id="receiptFileName"></span>
-                            <button type="button" class="receipt-remove-btn" id="removeReceiptBtn">
+                            <span
+                              class="receipt-file-name"
+                              id="receiptFileName"
+                            ></span>
+                            <button
+                              type="button"
+                              class="receipt-remove-btn"
+                              id="removeReceiptBtn"
+                            >
                               <i class="fa-solid fa-xmark"></i>
                             </button>
                           </div>
@@ -713,15 +781,23 @@
                     <div class="pay-step-badge">3</div>
                     <div class="pay-step-body">
                       <h4 class="pay-step-title">Confirm payment</h4>
-                      <button type="button" class="payment-confirm-btn" id="paymentSentBtn" disabled>
+                      <button
+                        type="button"
+                        class="payment-confirm-btn"
+                        id="paymentSentBtn"
+                        disabled
+                      >
                         <span class="pcb-idle">
-                          <i class="fa-solid fa-check-to-slot"></i> I Have Sent the Payment
+                          <i class="fa-solid fa-check-to-slot"></i> I Have Sent
+                          the Payment
                         </span>
                         <span class="pcb-loading u-hidden">
-                          <i class="fa-solid fa-spinner fa-spin"></i> Confirming receipt…
+                          <i class="fa-solid fa-spinner fa-spin"></i> Confirming
+                          receipt…
                         </span>
                         <span class="pcb-done u-hidden">
-                          <i class="fa-solid fa-circle-check"></i> Receipt Upload Confirmed
+                          <i class="fa-solid fa-circle-check"></i> Receipt
+                          Upload Confirmed
                         </span>
                       </button>
                     </div>
