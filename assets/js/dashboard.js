@@ -277,7 +277,11 @@
           .select("date_of_birth")
           .eq("id", currentUser.id)
           .single();
-        console.log("📅 Profile DOB check:", { profileDob: profile?.date_of_birth, authDob: meta.dob, readErr });
+        console.log("📅 Profile DOB check:", {
+          profileDob: profile?.date_of_birth,
+          authDob: meta.dob,
+          readErr,
+        });
         // If profiles table doesn't have DOB but auth does, sync it
         if (profile && !profile.date_of_birth) {
           const { error: syncErr } = await c
@@ -300,11 +304,14 @@
     const c = client();
     if (!c || !currentUser) return;
     try {
+      // Convert empty strings to null for dob
+      const dobValue = fd.dob && fd.dob.trim() ? fd.dob : null;
+      
       const { error } = await c.auth.updateUser({
         data: {
           full_name: fd.fullName,
           phone: fd.phone,
-          dob: fd.dob,
+          dob: dobValue,
           gender: fd.gender,
         },
       });
@@ -317,14 +324,14 @@
         first_name: nameParts[0] || null,
         last_name: nameParts.slice(1).join(" ") || null,
         phone: fd.phone || null,
-        date_of_birth: fd.dob || null,
+        date_of_birth: dobValue,
       };
       console.log("📝 Updating profile:", profileUpdate);
       const { error: profileError } = await c
         .from("profiles")
         .update(profileUpdate)
         .eq("id", currentUser.id);
-      
+
       if (profileError) {
         console.error("❌ Profile update failed:", profileError);
       } else {
