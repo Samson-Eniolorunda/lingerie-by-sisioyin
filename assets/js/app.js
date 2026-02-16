@@ -2094,7 +2094,11 @@
 
     // Don't show if user dismissed in the last 7 days
     const dismissed = localStorage.getItem("lbs_pwa_dismiss_time");
-    if (dismissed && Date.now() - parseInt(dismissed, 10) < 7 * 24 * 60 * 60 * 1000) return;
+    if (
+      dismissed &&
+      Date.now() - parseInt(dismissed, 10) < 7 * 24 * 60 * 60 * 1000
+    )
+      return;
 
     const banner = document.createElement("div");
     banner.id = "pwa-install-banner";
@@ -2141,14 +2145,16 @@
     `;
     document.body.appendChild(banner);
 
-    document.getElementById("pwa-install-btn").addEventListener("click", async () => {
-      if (!deferredInstallPrompt) return;
-      deferredInstallPrompt.prompt();
-      const { outcome } = await deferredInstallPrompt.userChoice;
-      console.log("📦 PWA: Install choice:", outcome);
-      deferredInstallPrompt = null;
-      banner.remove();
-    });
+    document
+      .getElementById("pwa-install-btn")
+      .addEventListener("click", async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        console.log("📦 PWA: Install choice:", outcome);
+        deferredInstallPrompt = null;
+        banner.remove();
+      });
 
     document.getElementById("pwa-dismiss-btn").addEventListener("click", () => {
       localStorage.setItem("lbs_pwa_dismiss_time", String(Date.now()));
