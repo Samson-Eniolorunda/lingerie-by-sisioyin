@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 15;
+const SW_VERSION = 16;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
@@ -22,6 +22,10 @@ const STATIC_ASSETS = [
   "/terms",
   "/privacy",
   "/track",
+  "/assets/img/favicon.svg",
+  "/assets/img/favicon.png",
+  "/assets/img/icon-192.png",
+  "/assets/img/icon-512.png",
   "/assets/css/styles.css",
   "/assets/js/config.js",
   "/assets/js/utils.js",
@@ -100,7 +104,9 @@ self.addEventListener("fetch", (event) => {
   if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return;
 
   // Skip external requests (CDNs, APIs)
-  if (!url.origin.includes(self.location.origin)) return;
+  const swHost = self.location.hostname.replace(/^www\./, "");
+  const reqHost = url.hostname.replace(/^www\./, "");
+  if (reqHost !== swHost) return;
 
   // Skip Supabase and analytics requests
   if (
@@ -169,6 +175,15 @@ self.addEventListener("fetch", (event) => {
         }
         return networkResponse;
       } catch {
+        // Return appropriate offline fallback based on request type
+        const accept = request.headers.get("Accept") || "";
+        if (accept.includes("image")) {
+          // Return transparent 1x1 GIF for images
+          return new Response(
+            Uint8Array.from(atob("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"), (c) => c.charCodeAt(0)),
+            { status: 200, headers: { "Content-Type": "image/gif" } },
+          );
+        }
         return new Response("Offline", { status: 503 });
       }
     })(),
