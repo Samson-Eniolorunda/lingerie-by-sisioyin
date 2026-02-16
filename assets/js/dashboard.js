@@ -252,7 +252,7 @@
   }
 
   /* ── Profile ─────────────────────────────── */
-  function loadProfile() {
+  async function loadProfile() {
     if (!currentUser) return;
     const meta = currentUser.user_metadata || {};
     const full = meta.full_name || "";
@@ -267,6 +267,28 @@
     set("profilePhone", meta.phone || "");
     set("profileDob", meta.dob || "");
     set("profileGender", meta.gender || "");
+
+    // Sync DOB from auth metadata to profiles table if missing there
+    const c = client();
+    if (c && meta.dob) {
+      try {
+        const { data: profile } = await c
+          .from("profiles")
+          .select("date_of_birth")
+          .eq("id", currentUser.id)
+          .single();
+        // If profiles table doesn't have DOB but auth does, sync it
+        if (profile && !profile.date_of_birth) {
+          await c
+            .from("profiles")
+            .update({ date_of_birth: meta.dob })
+            .eq("id", currentUser.id);
+          console.log("📅 Synced DOB to profiles table");
+        }
+      } catch (_) {
+        /* ignore - RLS might block */
+      }
+    }
   }
 
   async function saveProfile(fd) {
