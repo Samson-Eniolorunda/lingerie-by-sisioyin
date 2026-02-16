@@ -283,7 +283,7 @@
       });
       if (error) throw error;
 
-      // Also sync name + phone to profiles table so admin can see them
+      // Also sync name + phone + dob to profiles table so admin can see them
       const nameParts = (fd.fullName || "").trim().split(" ");
       await c
         .from("profiles")
@@ -292,6 +292,7 @@
           first_name: nameParts[0] || null,
           last_name: nameParts.slice(1).join(" ") || null,
           phone: fd.phone || null,
+          date_of_birth: fd.dob || null,
         })
         .eq("id", currentUser.id);
 
