@@ -25075,17 +25075,32 @@ html[data-theme="dark"] .confirm-card {
 
   /* Center prefill banner on mobile */
   .ck-prefill-banner {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    gap: var(--space-3);
+    gap: var(--space-2);
   }
   .ck-prefill-text {
     justify-content: center;
+    width: 100%;
   }
   .ck-prefill-actions {
+    display: flex;
+    flex-wrap: nowrap;
     justify-content: center;
-    width: 100%;
+    gap: var(--space-2);
+  }
+  .ck-prefill-yes,
+  .ck-prefill-no {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Ensure saved-addr-select shows on mobile */
+  .saved-addr-select {
+    display: block;
   }
 
   /* Fix checkout boxes overflow on mobile */
@@ -25217,31 +25232,31 @@ html[data-theme="dark"] .confirm-card {
     max-width: 100% !important;
     overflow: hidden !important;
   }
+  /* Payment description text - no wrap, smaller font on mobile */
   .payment-option .payment-desc {
-    white-space: normal !important;
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
     display: block !important;
     max-width: 100% !important;
+    font-size: 0.65rem !important;
   }
   .payment-option .payment-name {
-    word-break: break-word;
-    white-space: normal !important;
-    overflow-wrap: break-word !important;
+    word-break: normal;
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  /* Bank transfer specific text constraints */
+  /* Bank transfer card - display like desktop */
   .bank-transfer-info,
   .bank-transfer-card {
     width: 100% !important;
     max-width: 100% !important;
-    overflow: hidden !important;
   }
   .bank-transfer-info span,
   .bank-transfer-card span {
-    word-break: break-word !important;
-    overflow-wrap: break-word !important;
-    white-space: normal !important;
-    display: block !important;
+    word-break: normal !important;
+    white-space: nowrap !important;
   }
   #bankAccountName {
     word-break: break-word !important;
@@ -25516,6 +25531,9 @@ html[data-theme="dark"] .confirm-card {
   .payment-confirm-btn {
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
+    background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark)) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(190, 24, 93, 0.25);
   }
 }
 @media (max-width: 380px) {

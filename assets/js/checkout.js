@@ -821,6 +821,8 @@
       [addrEl, cityEl, stateEl].forEach((el) => {
         if (el) el.dispatchEvent(new Event("input"));
       });
+      // Hide the dropdown after selection
+      picker.style.display = "none";
     });
   }
 
