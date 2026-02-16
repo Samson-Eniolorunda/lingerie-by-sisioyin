@@ -272,21 +272,26 @@
     const c = client();
     if (c && meta.dob) {
       try {
-        const { data: profile } = await c
+        const { data: profile, error: readErr } = await c
           .from("profiles")
           .select("date_of_birth")
           .eq("id", currentUser.id)
           .single();
+        console.log("📅 Profile DOB check:", { profileDob: profile?.date_of_birth, authDob: meta.dob, readErr });
         // If profiles table doesn't have DOB but auth does, sync it
         if (profile && !profile.date_of_birth) {
-          await c
+          const { error: syncErr } = await c
             .from("profiles")
             .update({ date_of_birth: meta.dob })
             .eq("id", currentUser.id);
-          console.log("📅 Synced DOB to profiles table");
+          if (syncErr) {
+            console.error("❌ DOB sync failed:", syncErr);
+          } else {
+            console.log("✅ Synced DOB to profiles table");
+          }
         }
-      } catch (_) {
-        /* ignore - RLS might block */
+      } catch (e) {
+        console.error("❌ DOB sync exception:", e);
       }
     }
   }
@@ -307,16 +312,24 @@
 
       // Also sync name + phone + dob to profiles table so admin can see them
       const nameParts = (fd.fullName || "").trim().split(" ");
-      await c
+      const profileUpdate = {
+        full_name: fd.fullName || null,
+        first_name: nameParts[0] || null,
+        last_name: nameParts.slice(1).join(" ") || null,
+        phone: fd.phone || null,
+        date_of_birth: fd.dob || null,
+      };
+      console.log("📝 Updating profile:", profileUpdate);
+      const { error: profileError } = await c
         .from("profiles")
-        .update({
-          full_name: fd.fullName || null,
-          first_name: nameParts[0] || null,
-          last_name: nameParts.slice(1).join(" ") || null,
-          phone: fd.phone || null,
-          date_of_birth: fd.dob || null,
-        })
+        .update(profileUpdate)
         .eq("id", currentUser.id);
+      
+      if (profileError) {
+        console.error("❌ Profile update failed:", profileError);
+      } else {
+        console.log("✅ Profile updated successfully");
+      }
 
       window.UTILS?.toast?.("Profile updated!", "success");
       if (elUserName)
