@@ -306,7 +306,7 @@
     try {
       // Convert empty strings to null for dob
       const dobValue = fd.dob && fd.dob.trim() ? fd.dob : null;
-      
+
       const { error } = await c.auth.updateUser({
         data: {
           full_name: fd.fullName,
