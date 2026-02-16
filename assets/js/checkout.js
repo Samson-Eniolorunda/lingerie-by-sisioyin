@@ -127,6 +127,13 @@
       currentSection = sectionName;
       updateProgressSteps();
 
+      // Fix mobile horizontal overflow after section change
+      requestAnimationFrame(() => {
+        window.scrollTo({ left: 0 });
+        document.documentElement.scrollLeft = 0;
+        document.body.scrollLeft = 0;
+      });
+
       // Re-show saved data banners if fields are empty
       if (sectionName === "contact") {
         reshowProfileBanner();
@@ -174,6 +181,13 @@
       if (nextCard) nextCard.classList.add("active");
       currentSection = nextSection;
     }
+
+    // Fix mobile horizontal overflow after section change
+    requestAnimationFrame(() => {
+      window.scrollTo({ left: 0 });
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+    });
 
     updateProgressSteps();
     updateTotals();

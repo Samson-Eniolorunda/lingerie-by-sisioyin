@@ -47,6 +47,14 @@
           document.documentElement.setAttribute("data-theme", "dark");
       } catch (e) {}
     </script>
+    <style>
+      /* Prevent horizontal overflow on mobile checkout */
+      html, body { overflow-x: hidden !important; max-width: 100vw !important; }
+      .ck-panel, .ck-panel-body, .checkout-card-body, .ck-col-main, .ck-grid, .ck-main, .container {
+        max-width: 100% !important; overflow-x: hidden !important; box-sizing: border-box !important;
+      }
+      .ck-panel-body *, .checkout-card-body * { max-width: 100% !important; word-break: break-word !important; }
+    </style>
   </head>
   <body class="checkout-page">
     <a class="skip-link" href="#main">Skip to content</a>
