@@ -9012,9 +9012,18 @@ html[data-theme="dark"] .category-showcase-btn:hover {
     gap: var(--space-4);
   }
 
+  /* Quick Modal slides from bottom */
+  .quick-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
   .quick-modal {
-    max-width: 95%;
+    max-width: 100%;
     max-height: 90vh;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    animation: modalSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .qm-body {
@@ -9037,8 +9046,18 @@ html[data-theme="dark"] .category-showcase-btn:hover {
     gap: var(--space-5);
   }
 
+  /* Quick Modal slides from bottom */
+  .quick-modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
   .quick-modal {
-    max-width: 500px;
+    max-width: 100%;
+    max-height: 90vh;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+    animation: modalSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .qm-body {
