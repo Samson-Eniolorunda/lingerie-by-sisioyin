@@ -10071,7 +10071,13 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 .receipt-upload-label.has-file {
   border-color: var(--clr-success, #10b981);
   border-style: solid;
-  background: rgba(16, 185, 129, 0.05);
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+}
+.receipt-upload-label.has-file i,
+.receipt-upload-label.has-file .receipt-upload-text,
+.receipt-upload-label.has-file .receipt-upload-hint {
+  color: #fff;
 }
 .receipt-upload-label i {
   font-size: 1.5rem;
@@ -10213,9 +10219,10 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 }
 .payment-confirm-btn.confirmed {
   border-color: var(--clr-success, #22c55e);
-  background: rgba(34, 197, 94, 0.08);
-  color: var(--clr-success, #22c55e);
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color: #fff !important;
   cursor: default;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.30);
 }
 .payment-confirm-btn .pcb-idle,
 .payment-confirm-btn .pcb-loading,
@@ -25531,7 +25538,11 @@ html[data-theme="dark"] .confirm-card {
   .payment-confirm-btn {
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-xs);
-    background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark)) !important;
+    background: linear-gradient(
+      135deg,
+      var(--clr-primary),
+      var(--clr-primary-dark)
+    ) !important;
     color: #fff !important;
     box-shadow: 0 4px 12px rgba(190, 24, 93, 0.25);
   }
