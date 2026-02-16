@@ -25144,22 +25144,52 @@ html[data-theme="dark"] .confirm-card {
     flex-wrap: wrap;
     gap: var(--space-1);
     width: 100%;
+    flex-direction: column !important;
+    align-items: flex-start !important;
   }
   .bank-detail-value {
     word-break: break-word;
     max-width: 100%;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
   }
   .bank-account-number {
     font-size: var(--text-base) !important;
     flex-wrap: wrap;
     word-break: break-all;
+    max-width: 100% !important;
+    overflow: hidden !important;
   }
   .payment-option .payment-desc {
-    white-space: normal;
-    word-break: break-word;
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    display: block !important;
+    max-width: 100% !important;
   }
   .payment-option .payment-name {
     word-break: break-word;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+  }
+  /* Bank transfer specific text constraints */
+  .bank-transfer-info,
+  .bank-transfer-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+  }
+  .bank-transfer-info span,
+  .bank-transfer-card span {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    display: block !important;
+  }
+  #bankAccountName {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
   }
   .pay-step {
     max-width: 100%;
@@ -25365,6 +25395,23 @@ html[data-theme="dark"] .confirm-card {
   /* Payment section overflow fixes for small phones */
   .checkout-card-body {
     padding: var(--space-3);
+    overflow: hidden !important;
+  }
+  /* Force all text to wrap on small phones */
+  .bank-detail-value,
+  .payment-option .payment-desc,
+  .payment-option .payment-name,
+  #bankAccountName {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+  }
+  .bank-transfer-info span,
+  .bank-detail-row span {
+    display: block !important;
+    word-break: break-word !important;
+    max-width: 100% !important;
   }
   .bank-transfer-info {
     padding: var(--space-2);
