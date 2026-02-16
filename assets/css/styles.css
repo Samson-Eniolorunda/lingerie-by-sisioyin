@@ -25251,10 +25251,15 @@ html[data-theme="dark"] .confirm-card {
   }
 
   /* Global overflow prevention for checkout page */
+  html:has(body.checkout-page),
   body.checkout-page {
-    overflow-x: hidden;
-    width: 100%;
-    max-width: 100vw;
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    position: relative;
+  }
+  body.checkout-page *:not(script):not(style) {
+    max-width: 100vw !important;
   }
   body.checkout-page .main-content,
   body.checkout-page .checkout-wrapper,
