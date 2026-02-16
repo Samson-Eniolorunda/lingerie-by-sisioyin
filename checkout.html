@@ -53,7 +53,18 @@
       .ck-panel, .ck-panel-body, .checkout-card-body, .ck-col-main, .ck-grid, .ck-main, .container {
         max-width: 100% !important; overflow-x: hidden !important; box-sizing: border-box !important;
       }
-      .ck-panel-body *, .checkout-card-body * { max-width: 100% !important; word-break: break-word !important; }
+      .ck-panel-body *, .checkout-card-body * { max-width: 100% !important; word-break: break-word !important; box-sizing: border-box !important; }
+      /* Payment section specific */
+      .payment-options, .payment-option, .bank-transfer-details, .bank-transfer-card, .bank-transfer-info, .bank-detail-row {
+        max-width: 100% !important; width: 100% !important; overflow: hidden !important; box-sizing: border-box !important;
+      }
+      .payment-option .payment-info, .payment-option .payment-desc, .bank-detail-value {
+        overflow: hidden !important; text-overflow: ellipsis !important; word-break: break-word !important; max-width: 100% !important;
+      }
+      @media (max-width: 768px) {
+        .ck-panel-body { padding: 12px !important; }
+        .payment-option { flex-wrap: wrap; }
+      }
     </style>
   </head>
   <body class="checkout-page">
