@@ -2115,45 +2115,15 @@
     const banner = document.createElement("div");
     banner.id = "pwa-install-banner";
     banner.innerHTML = `
-      <div style="
-        position:fixed;bottom:0;left:0;right:0;z-index:99999;
-        background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        color:#fff;padding:16px 20px;
-        display:flex;align-items:center;gap:14px;
-        font-family:inherit;font-size:14px;
-        box-shadow:0 -4px 20px rgba(0,0,0,.4);
-        border-top:1px solid rgba(190,24,93,.3);
-        animation:pwa-slide-up .4s ease;
-      ">
-        <img src="/assets/img/icon-192.png" alt="" style="
-          width:44px;height:44px;border-radius:10px;flex-shrink:0;
-        "/>
-        <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;font-size:15px;margin-bottom:2px;">
-            Install Lingerie by Sisioyin
-          </div>
-          <div style="font-size:12px;opacity:.75;">
-            Add to your home screen for a faster, app-like experience
-          </div>
+      <div class="pwa-banner">
+        <img src="/assets/img/icon-192.png" alt="" class="pwa-banner-icon"/>
+        <div class="pwa-banner-text">
+          <div class="pwa-banner-title">Install Lingerie by Sisioyin</div>
+          <div class="pwa-banner-desc">Add to your home screen for a faster, app-like experience</div>
         </div>
-        <button id="pwa-install-btn" style="
-          background:linear-gradient(135deg,#be185d,#e91e63);
-          border:none;color:#fff;padding:8px 18px;border-radius:8px;
-          cursor:pointer;font-size:13px;font-weight:600;white-space:nowrap;
-          flex-shrink:0;
-        ">Install</button>
-        <button id="pwa-dismiss-btn" aria-label="Dismiss" style="
-          background:none;border:none;color:rgba(255,255,255,.5);
-          cursor:pointer;font-size:20px;padding:4px 8px;flex-shrink:0;
-          line-height:1;
-        ">&times;</button>
+        <button id="pwa-install-btn" class="pwa-banner-install">Install</button>
+        <button id="pwa-dismiss-btn" aria-label="Dismiss" class="pwa-banner-dismiss">&times;</button>
       </div>
-      <style>
-        @keyframes pwa-slide-up {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-      </style>
     `;
     document.body.appendChild(banner);
 
@@ -2189,40 +2159,16 @@
     const banner = document.createElement("div");
     banner.id = "pwa-install-banner";
     banner.innerHTML = `
-      <div style="
-        position:fixed;bottom:0;left:0;right:0;z-index:99999;
-        background:linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        color:#fff;padding:16px 20px;
-        font-family:inherit;font-size:14px;
-        box-shadow:0 -4px 20px rgba(0,0,0,.4);
-        border-top:1px solid rgba(190,24,93,.3);
-        animation:pwa-slide-up .4s ease;
-      ">
-        <div style="display:flex;align-items:center;gap:14px;">
-          <img src="/assets/img/icon-192.png" alt="" style="
-            width:44px;height:44px;border-radius:10px;flex-shrink:0;
-          "/>
-          <div style="flex:1;min-width:0;">
-            <div style="font-weight:600;font-size:15px;margin-bottom:4px;">
-              Install Lingerie by Sisioyin
-            </div>
-            <div style="font-size:12px;opacity:.85;line-height:1.4;">
-              Tap <svg style="display:inline-block;vertical-align:middle;width:16px;height:16px;margin:0 2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then <strong>"Add to Home Screen"</strong>
-            </div>
+      <div class="pwa-banner">
+        <img src="/assets/img/icon-192.png" alt="" class="pwa-banner-icon"/>
+        <div class="pwa-banner-text">
+          <div class="pwa-banner-title">Install Lingerie by Sisioyin</div>
+          <div class="pwa-banner-desc">
+            Tap <svg class="pwa-ios-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then <strong>"Add to Home Screen"</strong>
           </div>
-          <button id="pwa-dismiss-btn" aria-label="Dismiss" style="
-            background:none;border:none;color:rgba(255,255,255,.5);
-            cursor:pointer;font-size:22px;padding:4px 8px;flex-shrink:0;
-            line-height:1;align-self:flex-start;
-          ">&times;</button>
         </div>
+        <button id="pwa-dismiss-btn" aria-label="Dismiss" class="pwa-banner-dismiss">&times;</button>
       </div>
-      <style>
-        @keyframes pwa-slide-up {
-          from { transform: translateY(100%); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-      </style>
     `;
     document.body.appendChild(banner);
 

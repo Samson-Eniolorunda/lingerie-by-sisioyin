@@ -11235,6 +11235,97 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   border-color: var(--text-secondary);
 }
 
+/* ---- PWA Install Banner ---- */
+@keyframes pwa-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.pwa-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #fff;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: inherit;
+  font-size: 14px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  border-top: 1px solid rgba(190, 24, 93, 0.3);
+  animation: pwa-slide-up 0.4s ease;
+}
+
+.pwa-banner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.pwa-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pwa-banner-title {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.pwa-banner-desc {
+  font-size: 12px;
+  opacity: 0.75;
+  line-height: 1.4;
+}
+
+.pwa-banner-install {
+  background: linear-gradient(135deg, #be185d, #e91e63);
+  border: none;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pwa-banner-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 22px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.pwa-banner-dismiss:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.pwa-ios-share {
+  display: inline-block;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin: 0 2px;
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .ck-progress {
@@ -24867,6 +24958,48 @@ html[data-theme="dark"] .confirm-card {
   }
   .ck-prefill-no {
     font-size: 0.68rem;
+  }
+
+  /* Center prefill banner on mobile */
+  .ck-prefill-banner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-3);
+  }
+  .ck-prefill-text {
+    justify-content: center;
+  }
+  .ck-prefill-actions {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Fix checkout boxes overflow on mobile */
+  .ck-panel {
+    overflow: visible;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .ck-panel-body {
+    overflow: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .ck-col-main {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .ck-grid {
+    max-width: 100%;
+    overflow: hidden;
+  }
+  .form-floating input,
+  .form-floating select,
+  .form-floating textarea {
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .ck-items .cart-item-name {
     font-size: 0.92rem;
