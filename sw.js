@@ -180,7 +180,10 @@ self.addEventListener("fetch", (event) => {
         if (accept.includes("image")) {
           // Return transparent 1x1 GIF for images
           return new Response(
-            Uint8Array.from(atob("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"), (c) => c.charCodeAt(0)),
+            Uint8Array.from(
+              atob("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"),
+              (c) => c.charCodeAt(0),
+            ),
             { status: 200, headers: { "Content-Type": "image/gif" } },
           );
         }
