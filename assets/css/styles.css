@@ -8808,16 +8808,28 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 
   /* Quick Modal Mobile */
   .quick-modal-overlay {
-    padding: var(--space-3);
-    align-items: center;
+    padding: 0;
+    align-items: flex-end;
     justify-content: center;
   }
 
   .quick-modal {
     max-width: 100%;
     max-height: 90vh;
-    border-radius: var(--radius-2xl);
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
     overflow: hidden;
+    animation: modalSlideUp 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes modalSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .qm-close {
@@ -25001,6 +25013,34 @@ html[data-theme="dark"] .confirm-card {
     max-width: 100%;
     box-sizing: border-box;
   }
+
+  /* Fix bank transfer and payment overflow */
+  .bank-transfer-details,
+  .bank-transfer-card,
+  .payment-options,
+  .payment-option,
+  .receipt-upload-section {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .bank-detail-row {
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+  .bank-detail-value {
+    word-break: break-word;
+  }
+  .bank-account-number {
+    font-size: var(--text-base) !important;
+    flex-wrap: wrap;
+  }
+  .payment-option .payment-desc {
+    white-space: normal;
+  }
+  .pay-step-body {
+    max-width: 100%;
+    overflow: hidden;
+  }
   .ck-items .cart-item-name {
     font-size: 0.92rem;
   }
@@ -25021,6 +25061,17 @@ html[data-theme="dark"] .confirm-card {
   }
   .ck-items .cart-item-quantity .qty-value {
     font-size: 0.78rem;
+  }
+
+  /* Global overflow prevention for checkout page */
+  body.checkout-page {
+    overflow-x: hidden;
+  }
+  body.checkout-page .main-content,
+  body.checkout-page .checkout-wrapper,
+  body.checkout-page .checkout-main {
+    overflow-x: hidden;
+    max-width: 100vw;
   }
 }
 
