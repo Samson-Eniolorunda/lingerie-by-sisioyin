@@ -372,14 +372,62 @@
     }
 
     try {
-      const { error } = await client.auth.signInWithOAuth({
+      const { data, error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: window.location.origin,
+          skipBrowserRedirect: true,
         },
       });
 
       if (error) throw error;
+
+      // Open popup instead of redirecting
+      const popup = window.open(
+        data.url,
+        "google-login",
+        "width=500,height=600,scrollbars=yes,resizable=yes",
+      );
+
+      // Listen for the popup to return with auth tokens
+      const checkPopup = setInterval(async () => {
+        try {
+          if (!popup || popup.closed) {
+            clearInterval(checkPopup);
+            // Check if user is now logged in
+            const {
+              data: { session },
+            } = await client.auth.getSession();
+            if (session) {
+              updateAuthUI(session.user);
+              window.UTILS?.toast?.("Signed in successfully!", "success");
+            }
+            return;
+          }
+          // Check if popup navigated back to our origin
+          if (popup.location.origin === window.location.origin) {
+            const url = new URL(popup.location.href);
+            // Grab the hash fragment with tokens
+            if (
+              url.hash.includes("access_token") ||
+              url.searchParams.has("code")
+            ) {
+              clearInterval(checkPopup);
+              popup.close();
+              // Let Supabase pick up the session from the URL
+              const {
+                data: { session },
+              } = await client.auth.getSession();
+              if (session) {
+                updateAuthUI(session.user);
+                window.UTILS?.toast?.("Signed in successfully!", "success");
+              }
+            }
+          }
+        } catch {
+          // Cross-origin access will throw — ignore until popup returns to our origin
+        }
+      }, 500);
     } catch (err) {
       console.error("🔐 AUTH: Google login error:", err);
       window.UTILS?.toast?.(err.message || "Google login failed", "error");
