@@ -9891,6 +9891,13 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+@media (max-width: 768px) {
+  .payment-option .payment-desc {
+    white-space: normal;
+    text-overflow: clip;
+    word-break: break-word;
+  }
+}
 
 .payment-option .payment-check {
   width: 24px;
@@ -9971,6 +9978,13 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+@media (max-width: 768px) {
+  .bank-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
 }
 .bank-detail-label {
   font-size: var(--text-sm);
@@ -10621,6 +10635,20 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 @media (max-width: 960px) {
   .ck-grid {
     grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .ck-main .container {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .ck-grid {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }
 
@@ -25028,16 +25056,20 @@ html[data-theme="dark"] .confirm-card {
   .ck-panel {
     overflow: visible;
     max-width: 100%;
+    width: 100% !important;
     box-sizing: border-box;
   }
   .ck-panel-body {
     overflow: hidden;
     max-width: 100%;
+    width: 100% !important;
     box-sizing: border-box;
+    padding: var(--space-4) !important;
   }
   .ck-col-main {
     min-width: 0;
     max-width: 100%;
+    width: 100% !important;;
     overflow: hidden;
   }
   .ck-grid {
@@ -25055,25 +25087,44 @@ html[data-theme="dark"] .confirm-card {
   .bank-transfer-details,
   .bank-transfer-card,
   .payment-options,
-  .payment-option,
   .receipt-upload-section {
     max-width: 100%;
+    width: 100% !important;
     box-sizing: border-box;
+    overflow: hidden;
+  }
+  .payment-option {
+    max-width: 100%;
+    width: 100% !important;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .payment-option .payment-info {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 80px);
     overflow: hidden;
   }
   .bank-detail-row {
     flex-wrap: wrap;
     gap: var(--space-1);
+    width: 100%;
   }
   .bank-detail-value {
     word-break: break-word;
+    max-width: 100%;
   }
   .bank-account-number {
     font-size: var(--text-base) !important;
     flex-wrap: wrap;
+    word-break: break-all;
   }
   .payment-option .payment-desc {
     white-space: normal;
+    word-break: break-word;
+  }
+  .payment-option .payment-name {
+    word-break: break-word;
   }
   .pay-step {
     max-width: 100%;
@@ -25129,12 +25180,23 @@ html[data-theme="dark"] .confirm-card {
   /* Global overflow prevention for checkout page */
   body.checkout-page {
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
   }
   body.checkout-page .main-content,
   body.checkout-page .checkout-wrapper,
-  body.checkout-page .checkout-main {
+  body.checkout-page .checkout-main,
+  body.checkout-page .container,
+  body.checkout-page .ck-main {
     overflow-x: hidden;
     max-width: 100vw;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  body.checkout-page .ck-main .container {
+    padding-left: var(--space-3);
+    padding-right: var(--space-3);
+    max-width: 100%;
   }
 }
 
