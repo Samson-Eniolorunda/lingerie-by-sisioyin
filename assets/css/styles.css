@@ -15458,25 +15458,55 @@ html[data-theme="dark"] .wa-popup-msg {
 
 @media (max-width: 768px) {
   .dash-sidebar {
+    width: 64px;
+  }
+  .dash-sidebar-user,
+  .dash-sidebar-nav .dash-tab span,
+  .dash-sidebar-link span {
     display: none;
   }
+  .dash-sidebar-nav::before {
+    display: none;
+  }
+  .dash-sidebar-header {
+    justify-content: center;
+    padding: var(--space-4) var(--space-2);
+  }
+  .dash-sidebar .dash-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.85rem;
+  }
+  .dash-sidebar-nav .dash-tab {
+    justify-content: center;
+    padding: 0.6rem;
+  }
+  .dash-sidebar-nav .dash-tab i {
+    width: auto;
+    font-size: 1rem;
+  }
+  .dash-sidebar-nav .dash-tab.active {
+    box-shadow: none;
+    background: linear-gradient(
+      135deg,
+      rgba(190, 24, 93, 0.15),
+      rgba(219, 39, 119, 0.1)
+    );
+    border-radius: 12px;
+  }
+  .dash-sidebar-link {
+    justify-content: center;
+    padding: 0.5rem;
+  }
+  .dash-sidebar-link i {
+    width: auto;
+    font-size: 1rem;
+  }
   .dash-bottombar {
-    display: flex;
+    display: none;
   }
   .dash-layout {
-    gap: 0;
-  }
-  .dash-content {
-    padding-bottom: 80px;
-  }
-  /* Push WhatsApp above the dashboard bottom bar */
-  .whatsapp-float {
-    bottom: calc(80px + env(safe-area-inset-bottom));
-  }
-  .whatsapp-float-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
+    gap: var(--space-3);
   }
 }
 

@@ -232,7 +232,6 @@
    * Testimonials / Reviews Section
    * ───────────────────────────────────────────── */
   const testimonialsGrid = document.getElementById("testimonialsGrid");
-  const testimonialsEmpty = document.getElementById("testimonialsEmpty");
   const reviewModal = document.getElementById("reviewModal");
   const reviewForm = document.getElementById("reviewForm");
   const openReviewBtn = document.getElementById("openReviewModal");
@@ -300,8 +299,6 @@
     `,
       )
       .join("");
-
-    if (testimonialsEmpty) testimonialsEmpty.style.display = "none";
   }
 
   function generateStars(rating) {
@@ -322,8 +319,16 @@
   }
 
   function showEmptyTestimonials() {
-    if (testimonialsGrid) testimonialsGrid.innerHTML = "";
-    if (testimonialsEmpty) testimonialsEmpty.style.display = "block";
+    if (testimonialsGrid) {
+      testimonialsGrid.innerHTML = `
+        <div class="wishlist-empty" style="grid-column: 1 / -1;">
+          <div class="wishlist-empty-icon">
+            <i class="fa-solid fa-comments"></i>
+          </div>
+          <h3>No Reviews Yet</h3>
+          <p>Be the first to share your experience!</p>
+        </div>`;
+    }
   }
 
   // Review Modal
