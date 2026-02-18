@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 28;
+const SW_VERSION = 29;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",

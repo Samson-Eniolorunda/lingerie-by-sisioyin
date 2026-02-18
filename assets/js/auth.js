@@ -963,12 +963,22 @@
         // Listen for auth changes
         client.auth.onAuthStateChange((event, session) => {
           console.log("🔐 AUTH: Auth state changed:", event);
-          updateAuthUI(session?.user || null);
 
-          // Cross-device sync on sign-in (covers Google OAuth redirect)
+          // Only update UI for explicit sign-in/sign-out events
+          // Ignore TOKEN_REFRESHED with null session (mobile background/resume)
           if (event === "SIGNED_IN" && session?.user) {
+            updateAuthUI(session.user);
             window.SYNC?.onLogin?.();
+          } else if (event === "SIGNED_OUT") {
+            updateAuthUI(null);
+          } else if (event === "TOKEN_REFRESHED" && session?.user) {
+            // Token refreshed successfully, keep user logged in
+            updateAuthUI(session.user);
+          } else if (event === "USER_UPDATED" && session?.user) {
+            updateAuthUI(session.user);
           }
+          // For TOKEN_REFRESHED with null session — do NOT log out,
+          // the stored session in localStorage may still be valid
         });
       } catch (err) {
         console.error("🔐 AUTH: Session check error:", err);
