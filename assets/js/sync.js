@@ -28,7 +28,12 @@
   };
 
   // Columns in the profiles table
-  const SYNC_FIELDS = ["wishlist", "cart", "saved_addresses", "dashboard_settings"];
+  const SYNC_FIELDS = [
+    "wishlist",
+    "cart",
+    "saved_addresses",
+    "dashboard_settings",
+  ];
 
   // Debounce timers per field
   const _timers = {};
@@ -52,7 +57,7 @@
   function loadLocal(field) {
     try {
       const raw = localStorage.getItem(KEYS[field]);
-      return raw ? JSON.parse(raw) : (field === "dashboard_settings" ? {} : []);
+      return raw ? JSON.parse(raw) : field === "dashboard_settings" ? {} : [];
     } catch (_) {
       return field === "dashboard_settings" ? {} : [];
     }
@@ -101,7 +106,8 @@
   function mergeAddresses(local, remote) {
     if (!remote?.length) return local || [];
     if (!local?.length) return remote;
-    const key = (a) => `${(a.street || "").toLowerCase().trim()}|${(a.city || "").toLowerCase().trim()}`;
+    const key = (a) =>
+      `${(a.street || "").toLowerCase().trim()}|${(a.city || "").toLowerCase().trim()}`;
     const seen = new Set(local.map(key));
     const merged = [...local];
     for (const addr of remote) {
@@ -207,7 +213,6 @@
       window.dispatchEvent(new CustomEvent("sync:complete"));
       window.dispatchEvent(new CustomEvent("wishlist:changed"));
       window.dispatchEvent(new CustomEvent("cart:updated"));
-
     } catch (e) {
       console.warn("🔄 SYNC: Pull exception:", e);
     }

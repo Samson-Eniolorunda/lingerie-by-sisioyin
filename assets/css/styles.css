@@ -12595,10 +12595,24 @@ html[data-theme="dark"] .wa-popup-msg {
   }
 }
 
-/* Push WhatsApp widget above bottom bar on dashboard mobile */
+/* Place WhatsApp widget inside the bottom bar on dashboard mobile */
 @media (max-width: 768px) {
   .dashboard-page .whatsapp-float {
-    bottom: calc(4.5rem + env(safe-area-inset-bottom) + var(--space-4));
+    bottom: calc(0.25rem + env(safe-area-inset-bottom));
+    right: var(--space-3);
+    z-index: 201;
+  }
+  .dashboard-page .whatsapp-float-btn {
+    width: 42px;
+    height: 42px;
+    font-size: 1.15rem;
+    box-shadow: 0 2px 12px rgba(37, 211, 102, 0.35);
+  }
+  .dashboard-page .whatsapp-float-btn::before {
+    display: none;
+  }
+  .dashboard-page .whatsapp-tooltip {
+    display: none;
   }
 }
 
@@ -16250,6 +16264,9 @@ html[data-theme="dark"]
   input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
 }
+html[data-theme="dark"] .dash-form-group input[type="date"] {
+  color-scheme: dark;
+}
 .dash-form-group input:focus,
 .dash-form-group select:focus {
   outline: none;
@@ -16351,6 +16368,8 @@ html[data-theme="dark"]
   border: 1px solid rgba(37, 211, 102, 0.18);
   border-radius: 12px;
   padding: var(--space-4);
+  overflow: visible;
+  min-width: 0;
 }
 .dash-whatsapp-number-inner label {
   font-size: 0.9rem;
@@ -17326,12 +17345,47 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
   .dash-panel.active {
     padding: var(--space-3);
     border-radius: 14px;
+    overflow-x: auto;
+    overflow-y: visible;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .dash-panel.active * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .dash-panel-head {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .dash-panel-head h2 {
+    font-size: 1.05rem;
+    word-break: break-word;
+  }
+  .dash-panel-head p {
+    font-size: 0.75rem;
+  }
+  .dash-whatsapp-number-inner {
+    padding: var(--space-3);
+  }
+  .dash-whatsapp-input-group {
+    flex-wrap: wrap;
+  }
+  .dash-whatsapp-input-group input {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+  .dash-whatsapp-input-group .dash-btn-primary {
+    flex: 0 0 auto;
+  }
+  .dash-whatsapp-hint {
+    font-size: 0.72rem;
   }
   .dash-stats {
     grid-template-columns: 1fr;
   }
   .dash-qa-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
   .dash-form-row {
     grid-template-columns: 1fr;
@@ -17349,22 +17403,26 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
     font-size: 0.92rem;
   }
   .dash-setting-row {
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-3);
+    flex-wrap: nowrap;
+    gap: var(--space-3);
     padding: var(--space-2) 0;
+    align-items: center;
   }
   .dash-setting-info {
     flex: 1 1 0;
     min-width: 0;
   }
   .dash-setting-info h4 {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .dash-setting-info p {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .dash-btn-outline,
   .dash-btn-danger,
@@ -17373,8 +17431,8 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
   .dash-setting-meta {
     white-space: nowrap;
     flex-shrink: 0;
-    font-size: 0.72rem;
-    padding: 0.35rem 0.75rem;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
   }
 }
 @media (max-width: 360px) {

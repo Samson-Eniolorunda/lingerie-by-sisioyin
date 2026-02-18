@@ -565,28 +565,36 @@
     underwear: "https://placehold.co/600x600/fdf2f8/be185d?text=Underwear",
   };
 
+  // Helper: reveal image and hide skeleton
+  function _revealImage(img) {
+    if (!img) return;
+    img.style.opacity = "1";
+    const skelId = img.getAttribute("data-skeleton");
+    if (skelId) {
+      const skel = document.getElementById(skelId);
+      if (skel) skel.style.display = "none";
+    }
+  }
+
   // Helper: set image src and attach load listener for fade-in
   function applyImage(img, url) {
     if (!img || !url) return;
     img.onload = null;
     img.addEventListener("load", function onLoad() {
       img.removeEventListener("load", onLoad);
-      img.style.opacity = "1";
-      const skelId = img.getAttribute("data-skeleton");
-      if (skelId) {
-        const skel = document.getElementById(skelId);
-        if (skel) skel.style.display = "none";
-      }
+      _revealImage(img);
     });
     img.src = url;
+    // Immediately reveal if already cached
     if (img.complete && img.naturalWidth > 0) {
-      img.style.opacity = "1";
-      const skelId = img.getAttribute("data-skeleton");
-      if (skelId) {
-        const skel = document.getElementById(skelId);
-        if (skel) skel.style.display = "none";
-      }
+      _revealImage(img);
     }
+    // iOS Safari fallback: force reveal after 4s in case load event never fires
+    setTimeout(function () {
+      if (img.style.opacity !== "1") {
+        _revealImage(img);
+      }
+    }, 4000);
   }
 
   // IntersectionObserver-based lazy loading (avoids iOS Safari loading="lazy" + opacity:0 deadlock)
