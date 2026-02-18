@@ -3143,13 +3143,6 @@ p:last-child {
   }
 }
 
-/* Hide Quick View text on small phones only */
-@media (max-width: 480px) {
-  .arrival-card__action-btn span {
-    display: none;
-  }
-}
-
 /* Mobile Responsive */
 @media (max-width: 640px) {
   .arrival-card {
