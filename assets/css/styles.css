@@ -3141,17 +3141,6 @@ p:last-child {
     );
     padding: var(--space-3);
   }
-
-  .arrival-card__action-btn span {
-    display: none;
-  }
-
-  .arrival-card__action-btn {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-  }
 }
 
 /* Hide Quick View text on small phones only */
@@ -12608,7 +12597,7 @@ html[data-theme="dark"] .wa-popup-msg {
 /* Push WhatsApp widget above bottom bar on dashboard mobile */
 @media (max-width: 768px) {
   .dashboard-page .whatsapp-float {
-    bottom: calc(3.5rem + env(safe-area-inset-bottom) + var(--space-4));
+    bottom: calc(4.5rem + env(safe-area-inset-bottom) + var(--space-4));
   }
 }
 
@@ -17359,14 +17348,32 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
     font-size: 0.92rem;
   }
   .dash-setting-row {
-    gap: var(--space-3);
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
     padding: var(--space-2) 0;
+  }
+  .dash-setting-info {
+    flex: 1 1 0;
+    min-width: 0;
   }
   .dash-setting-info h4 {
     font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .dash-setting-info p {
     font-size: 0.75rem;
+  }
+  .dash-btn-outline,
+  .dash-btn-danger,
+  .dash-btn-warn,
+  .dash-setting-badge,
+  .dash-setting-meta {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.75rem;
   }
 }
 @media (max-width: 360px) {
@@ -22896,14 +22903,24 @@ html[data-theme="dark"] .receipt-remove-btn:hover {
   color: #f87171;
 }
 html[data-theme="dark"] .payment-confirm-btn {
-  background: var(--bg-surface);
-  border-color: var(--border-default);
+  background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);
+}
+html[data-theme="dark"] .payment-confirm-btn:disabled {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  box-shadow: none;
 }
 html[data-theme="dark"] .payment-confirm-btn:not(:disabled):hover {
-  background: rgba(190, 24, 93, 0.1);
+  background: linear-gradient(135deg, var(--clr-primary-dark), #6b1038);
+  box-shadow: 0 6px 16px rgba(190, 24, 93, 0.4);
 }
 html[data-theme="dark"] .payment-confirm-btn.confirmed {
-  background: rgba(34, 197, 94, 0.1);
+  background: linear-gradient(135deg, #22c55e, #16a34a) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
 }
 html[data-theme="dark"] .copy-acct-btn {
   background: var(--bg-surface);

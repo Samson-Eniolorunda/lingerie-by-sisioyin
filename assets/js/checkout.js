@@ -640,6 +640,8 @@
 
       // Clear cart
       localStorage.removeItem(CART_KEY);
+      // Sync empty cart to DB so other devices clear too
+      window.SYNC?.pushCart?.();
       try {
         sessionStorage.removeItem("LBS_FORM__checkout");
       } catch {}
