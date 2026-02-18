@@ -2754,6 +2754,16 @@
   initPostDeliveryReview();
   initFormPersistence();
 
+  // Listen for cross-device sync events to update cart badge & drawer
+  window.addEventListener("cart:updated", () => {
+    updateCartBadge();
+    renderCartDrawer();
+  });
+  window.addEventListener("sync:complete", () => {
+    updateCartBadge();
+    renderCartDrawer();
+  });
+
   // ── Mobile Keyboard: Scroll focused input into view ────────────
   // Prevents virtual keyboard from covering the input field on mobile devices.
   // Works as a fallback for browsers that don't support interactive-widget=resizes-content.

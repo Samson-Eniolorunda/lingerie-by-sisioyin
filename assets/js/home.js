@@ -591,24 +591,25 @@
 
   // IntersectionObserver-based lazy loading (avoids iOS Safari loading="lazy" + opacity:0 deadlock)
   const _pendingUrls = new Map(); // img element -> url
-  const _lazyObserver = "IntersectionObserver" in window
-    ? new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const img = entry.target;
-              const url = _pendingUrls.get(img);
-              if (url) {
-                applyImage(img, url);
-                _pendingUrls.delete(img);
+  const _lazyObserver =
+    "IntersectionObserver" in window
+      ? new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const img = entry.target;
+                const url = _pendingUrls.get(img);
+                if (url) {
+                  applyImage(img, url);
+                  _pendingUrls.delete(img);
+                }
+                _lazyObserver.unobserve(img);
               }
-              _lazyObserver.unobserve(img);
-            }
-          });
-        },
-        { rootMargin: "200px" },
-      )
-    : null;
+            });
+          },
+          { rootMargin: "200px" },
+        )
+      : null;
 
   // Queue image for lazy load via IntersectionObserver, or load immediately if unsupported
   function lazyApplyImage(img, url) {
@@ -687,13 +688,22 @@
             if (heroImg) heroImg.src = url;
             break;
           case "category_lingerie":
-            lazyApplyImage(document.getElementById("categoryLingerieImage"), url);
+            lazyApplyImage(
+              document.getElementById("categoryLingerieImage"),
+              url,
+            );
             break;
           case "category_loungewear":
-            lazyApplyImage(document.getElementById("categoryLoungewearImage"), url);
+            lazyApplyImage(
+              document.getElementById("categoryLoungewearImage"),
+              url,
+            );
             break;
           case "category_underwear":
-            lazyApplyImage(document.getElementById("categoryUnderwearImage"), url);
+            lazyApplyImage(
+              document.getElementById("categoryUnderwearImage"),
+              url,
+            );
             break;
         }
       });

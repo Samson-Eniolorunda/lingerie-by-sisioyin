@@ -359,6 +359,7 @@
 
     try {
       await client.auth.signOut();
+      window.SYNC?.onLogout?.();
       window.UTILS?.toast?.("Logged out successfully", "info");
       updateAuthUI(null);
     } catch (err) {

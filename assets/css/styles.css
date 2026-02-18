@@ -9613,7 +9613,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   background: var(--bg-surface);
   border: 2px solid var(--border-light);
   border-radius: var(--radius-2xl);
-  overflow: hidden;
+  overflow: visible;
   transition:
     box-shadow 0.3s,
     border-color 0.3s,
@@ -11201,7 +11201,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   display: block;
   width: 100%;
   max-width: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   box-sizing: border-box;
 }
 .ck-accordion .ck-check {
@@ -22903,7 +22904,11 @@ html[data-theme="dark"] .receipt-remove-btn:hover {
   color: #f87171;
 }
 html[data-theme="dark"] .payment-confirm-btn {
-  background: linear-gradient(135deg, var(--clr-primary), var(--clr-primary-dark));
+  background: linear-gradient(
+    135deg,
+    var(--clr-primary),
+    var(--clr-primary-dark)
+  );
   color: #fff;
   border-color: transparent;
   box-shadow: 0 4px 12px rgba(190, 24, 93, 0.3);
@@ -25815,6 +25820,7 @@ html[data-theme="dark"] .confirm-card {
   .checkout-card-body {
     max-width: 100%;
     overflow-x: hidden;
+    overflow-y: visible;
     box-sizing: border-box;
     padding: var(--space-4);
   }

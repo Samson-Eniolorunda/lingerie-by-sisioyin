@@ -34,6 +34,9 @@
   const _timers = {};
   const DEBOUNCE_MS = 1500;
 
+  // Track active realtime subscription
+  let _realtimeChannel = null;
+
   /* ─────────────────────────────────────────────
    * Helpers
    * ───────────────────────────────────────────── */
@@ -211,13 +214,93 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Realtime Subscription — instant cross-device sync
+   * Listens for changes to the user's profile row
+   * ───────────────────────────────────────────── */
+  function subscribeRealtime() {
+    const uid = getUserId();
+    const client = getClient();
+    if (!uid || !client) return;
+
+    // Unsubscribe existing channel first
+    unsubscribeRealtime();
+
+    console.log("🔄 SYNC: Subscribing to realtime profile changes");
+    _realtimeChannel = client
+      .channel(`sync-profile-${uid}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "profiles",
+          filter: `id=eq.${uid}`,
+        },
+        (payload) => {
+          console.log("🔄 SYNC: Realtime update received");
+          const updated = payload.new;
+          if (!updated) return;
+
+          let changed = false;
+          for (const field of SYNC_FIELDS) {
+            if (updated[field] !== undefined) {
+              const remote = updated[field];
+              const local = loadLocal(field);
+
+              // Skip if data is the same (avoid echo from own push)
+              const remoteStr = JSON.stringify(remote);
+              const localStr = JSON.stringify(local);
+              if (remoteStr === localStr) continue;
+
+              // Accept remote data (it's from another device)
+              saveLocal(field, remote);
+              changed = true;
+              console.log(`🔄 SYNC: Updated local ${field} from realtime`);
+            }
+          }
+
+          if (changed) {
+            // Notify UI components
+            window.dispatchEvent(new CustomEvent("sync:complete"));
+            window.dispatchEvent(new CustomEvent("cart:updated"));
+            window.dispatchEvent(new CustomEvent("wishlist:changed"));
+          }
+        },
+      )
+      .subscribe((status) => {
+        console.log(`🔄 SYNC: Realtime subscription status: ${status}`);
+      });
+  }
+
+  function unsubscribeRealtime() {
+    if (_realtimeChannel) {
+      const client = getClient();
+      if (client) {
+        client.removeChannel(_realtimeChannel);
+      }
+      _realtimeChannel = null;
+      console.log("🔄 SYNC: Unsubscribed from realtime");
+    }
+  }
+
+  /* ─────────────────────────────────────────────
    * Public API
    * ───────────────────────────────────────────── */
   window.SYNC = {
     /**
-     * Call on login — pulls DB data and merges with local
+     * Call on login — pulls DB data, merges, and subscribes to realtime
      */
-    onLogin: pullAndMerge,
+    async onLogin() {
+      await pullAndMerge();
+      subscribeRealtime();
+    },
+
+    /**
+     * Call on logout — unsubscribe from realtime
+     */
+    onLogout() {
+      unsubscribeRealtime();
+    },
 
     /**
      * Call whenever wishlist changes
