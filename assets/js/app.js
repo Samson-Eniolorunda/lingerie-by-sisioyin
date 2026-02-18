@@ -2106,6 +2106,12 @@
   });
 
   function showInstallBanner() {
+    // Don't show if already running as installed PWA
+    if (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      navigator.standalone
+    )
+      return;
     // Don't show if already installed, dismissed recently, or already visible
     if (localStorage.getItem("lbs_pwa_installed") === "true") return;
     if (document.getElementById("pwa-install-banner")) return;
@@ -2140,6 +2146,9 @@
         deferredInstallPrompt.prompt();
         const { outcome } = await deferredInstallPrompt.userChoice;
         console.log("📦 PWA: Install choice:", outcome);
+        if (outcome === "dismissed") {
+          localStorage.setItem("lbs_pwa_dismiss_time", String(Date.now()));
+        }
         deferredInstallPrompt = null;
         banner.remove();
       });

@@ -8230,6 +8230,12 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 .auth-input-wrap .password-wrapper input {
   padding-right: 2.8rem;
 }
+/* Hide browser-native password reveal buttons (Edge, Chrome) */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+  display: none !important;
+}
 .auth-input-wrap .password-toggle {
   z-index: 2;
 }
@@ -11478,7 +11484,7 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   }
   .ck-panel-head h2,
   .ck-panel-head h3 {
-    font-size: var(--text-sm);
+    font-size: var(--text-base);
   }
   .ck-summary {
     position: static;
@@ -13427,29 +13433,6 @@ html[data-theme="dark"] .wa-popup-msg {
   border-color: var(--clr-primary);
   color: var(--clr-primary);
   transform: translateY(-3px);
-}
-.hero-privacy-note {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  margin-top: var(--space-3);
-}
-.hero-privacy-note i {
-  color: var(--clr-primary);
-  font-size: 0.85rem;
-  opacity: 0.7;
-}
-.hero-privacy-note a {
-  color: var(--clr-primary);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  font-weight: 500;
-  transition: opacity 0.2s;
-}
-.hero-privacy-note a:hover {
-  opacity: 0.8;
 }
 
 /* Hero Media */
@@ -25594,7 +25577,7 @@ html[data-theme="dark"] .confirm-card {
     font-size: 0.92rem;
   }
   .ck-panel-head h3 {
-    font-size: 0.88rem;
+    font-size: 1rem;
   }
   .ck-panel-head .ck-link-btn {
     font-size: 0.78rem;
@@ -25701,7 +25684,8 @@ html[data-theme="dark"] .confirm-card {
     min-width: 0 !important;
   }
   .ck-panel {
-    overflow: clip !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -25722,7 +25706,8 @@ html[data-theme="dark"] .confirm-card {
   }
   .ck-panel-body,
   .checkout-card-body {
-    overflow: clip !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -25757,7 +25742,8 @@ html[data-theme="dark"] .confirm-card {
     max-width: 100% !important;
     width: 100% !important;
     box-sizing: border-box !important;
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
   }
   .form-row-2 > * {
     max-width: 100% !important;
@@ -25984,7 +25970,7 @@ html[data-theme="dark"] .confirm-card {
     font-size: 0.78rem;
   }
   .ck-panel-head h3 {
-    font-size: 0.75rem;
+    font-size: 0.92rem;
   }
   .ck-breadcrumb {
     font-size: 0.72rem;
