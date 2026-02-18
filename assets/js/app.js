@@ -1,5 +1,5 @@
 /**
- * Lingerie by Sisioyin - Core Application
+ * Lingeries by Sisioyin - Core Application
  * Handles cart, theme, modals, navigation, and global state
  */
 
@@ -101,6 +101,8 @@
     updateCartBadge();
     renderCartDrawer();
     emit("cart:updated");
+    // Cross-device sync
+    window.SYNC?.pushCart?.();
   }
 
   function addToCart(item) {
@@ -168,6 +170,8 @@
     console.log(`❤️ APP: setWishlist() - ${wishlist.length} items`);
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
     emit("wishlist:updated");
+    // Cross-device sync
+    window.SYNC?.pushWishlist?.();
   }
 
   function toggleWishlist(productId) {
@@ -397,6 +401,7 @@
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     updateCartBadge();
     renderCartDrawer();
+    window.SYNC?.pushCart?.();
   }
 
   function removeCartItemByIndex(idx) {
@@ -406,6 +411,7 @@
     updateCartBadge();
     renderCartDrawer();
     UTILS.toast("Item removed", "info");
+    window.SYNC?.pushCart?.();
   }
 
   /* ─────────────────────────────────────────────
@@ -1366,7 +1372,7 @@
             <i class="fa-brands fa-whatsapp"></i>
           </div>
           <div class="wa-popup-info">
-            <span class="wa-popup-name">Lingerie by Sisioyin</span>
+            <span class="wa-popup-name">Lingeries by Sisioyin</span>
             <span class="wa-popup-status">Typically replies within minutes</span>
           </div>
           <button class="wa-popup-close" id="waPopupClose" aria-label="Close chat popup">
@@ -1961,7 +1967,7 @@
    * Social Sharing
    * ───────────────────────────────────────────── */
   window.shareProduct = function (platform, productName, productUrl) {
-    const text = `Check out ${productName} from Lingerie by Sisioyin!`;
+    const text = `Check out ${productName} from Lingeries by Sisioyin!`;
     const url = productUrl || window.location.href;
 
     let shareUrl = "";
@@ -2118,7 +2124,7 @@
       <div class="pwa-banner">
         <img src="/assets/img/icon-192.png" alt="" class="pwa-banner-icon"/>
         <div class="pwa-banner-text">
-          <div class="pwa-banner-title">Install Lingerie by Sisioyin</div>
+          <div class="pwa-banner-title">Install Lingeries by Sisioyin</div>
           <div class="pwa-banner-desc">Add to your home screen for a faster, app-like experience</div>
         </div>
         <button id="pwa-install-btn" class="pwa-banner-install">Install</button>
@@ -2162,7 +2168,7 @@
       <div class="pwa-banner">
         <img src="/assets/img/icon-192.png" alt="" class="pwa-banner-icon"/>
         <div class="pwa-banner-text">
-          <div class="pwa-banner-title">Install Lingerie by Sisioyin</div>
+          <div class="pwa-banner-title">Install Lingeries by Sisioyin</div>
           <div class="pwa-banner-desc">
             Tap <svg class="pwa-ios-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a2 2 0 002 2h12a2 2 0 002-2v-7"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg> then <strong>"Add to Home Screen"</strong>
           </div>

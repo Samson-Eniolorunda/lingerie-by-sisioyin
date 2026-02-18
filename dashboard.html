@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content, viewport-fit=cover"
     />
-    <title>My Account | Lingerie by Sisioyin</title>
+    <title>My Account | Lingeries by Sisioyin</title>
     <meta
       name="description"
-      content="Manage your account, view orders, and update your preferences at Lingerie by Sisioyin."
+      content="Manage your account, view orders, and update your preferences at Lingeries by Sisioyin."
     />
     <meta name="robots" content="noindex, follow" />
     <meta name="theme-color" content="#be185d" />
@@ -81,7 +81,7 @@
           <span class="logo-icon"
             ><img src="assets/img/monogram.svg" alt="LBS"
           /></span>
-          <span class="logo-text">Lingerie by Sisioyin</span>
+          <span class="logo-text">Lingeries by Sisioyin</span>
         </a>
 
         <nav class="nav" id="mainNav">
@@ -142,7 +142,7 @@
             <span class="drawer-logo-icon"
               ><img src="assets/img/monogram.svg" alt="LBS"
             /></span>
-            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+            <span class="drawer-logo-text">Lingeries by Sisioyin</span>
           </a>
           <button
             type="button"
@@ -314,59 +314,701 @@
 
       <!-- ═══ Dashboard Shell ═══ -->
       <div class="dash-app" id="dashboardLayout" hidden>
-        <!-- Profile Banner -->
-        <div class="dash-banner">
-          <div class="dash-banner-bg"></div>
-          <div class="dash-banner-inner">
-            <div class="dash-banner-left">
+        <div class="dash-layout">
+          <!-- Sidebar Navigation -->
+          <aside class="dash-sidebar">
+            <div class="dash-sidebar-header">
               <div class="dash-avatar" id="userAvatar">U</div>
-              <div class="dash-banner-info">
-                <p class="dash-banner-greeting" id="dashGreeting">
-                  Welcome back
+              <div class="dash-sidebar-user">
+                <h2 class="dash-sidebar-name" id="userName">User</h2>
+                <p class="dash-sidebar-email" id="userEmail">
+                  user@example.com
                 </p>
-                <h1 class="dash-banner-name" id="userName">User</h1>
-                <p class="dash-banner-email" id="userEmail">user@example.com</p>
               </div>
             </div>
-            <div class="dash-banner-actions">
-              <a href="/shop" class="dash-banner-action"
-                ><i class="fa-solid fa-bag-shopping"></i><span>Shop</span></a
+            <nav class="dash-sidebar-nav">
+              <button
+                type="button"
+                class="dash-tab active"
+                data-section="overview"
               >
-              <a href="/wishlist" class="dash-banner-action"
-                ><i class="fa-solid fa-heart"></i><span>Wishlist</span></a
-              >
-              <button type="button" class="dash-banner-action" id="logoutBtn">
+                <i class="fa-solid fa-chart-pie"></i><span>Overview</span>
+              </button>
+              <button type="button" class="dash-tab" data-section="profile">
+                <i class="fa-solid fa-user-pen"></i><span>Profile</span>
+              </button>
+              <button type="button" class="dash-tab" data-section="orders">
+                <i class="fa-solid fa-box"></i><span>Orders</span>
+              </button>
+              <button type="button" class="dash-tab" data-section="addresses">
+                <i class="fa-solid fa-map-pin"></i><span>Addresses</span>
+              </button>
+              <button type="button" class="dash-tab" data-section="settings">
+                <i class="fa-solid fa-sliders"></i><span>Settings</span>
+              </button>
+            </nav>
+            <div class="dash-sidebar-footer">
+              <a href="/shop" class="dash-sidebar-link">
+                <i class="fa-solid fa-bag-shopping"></i><span>Shop</span>
+              </a>
+              <a href="/wishlist" class="dash-sidebar-link">
+                <i class="fa-solid fa-heart"></i><span>Wishlist</span>
+              </a>
+              <button type="button" class="dash-sidebar-link" id="logoutBtn">
                 <i class="fa-solid fa-right-from-bracket"></i
                 ><span>Sign Out</span>
               </button>
             </div>
-          </div>
-        </div>
+          </aside>
 
-        <!-- Horizontal Tab Navigation (desktop) -->
-        <div class="dash-tabs-bar">
-          <div class="dash-tabs-inner">
-            <button
-              type="button"
-              class="dash-tab active"
-              data-section="overview"
-            >
-              <i class="fa-solid fa-chart-pie"></i><span>Overview</span>
-            </button>
-            <button type="button" class="dash-tab" data-section="orders">
-              <i class="fa-solid fa-box"></i><span>Orders</span>
-            </button>
-            <button type="button" class="dash-tab" data-section="addresses">
-              <i class="fa-solid fa-map-pin"></i><span>Addresses</span>
-            </button>
-            <button type="button" class="dash-tab" data-section="profile">
-              <i class="fa-solid fa-user-pen"></i><span>Profile</span>
-            </button>
-            <button type="button" class="dash-tab" data-section="settings">
-              <i class="fa-solid fa-sliders"></i><span>Settings</span>
-            </button>
+          <!-- Main Content Area -->
+          <div class="dash-main">
+            <div class="dash-content">
+              <!-- ═══ OVERVIEW ═══ -->
+              <section class="dash-panel active" id="section-overview">
+                <div class="dash-hero-greeting" id="dashMainGreeting">
+                  <div class="dash-hero-greeting-text">
+                    <h1 id="dashGreetingMain">Welcome back</h1>
+                    <p class="dash-hero-greeting-sub">
+                      Here's a quick look at your account activity.
+                    </p>
+                  </div>
+                </div>
+                <div class="dash-stats">
+                  <div class="dash-stat-card" data-accent="rose">
+                    <div class="dash-stat-icon">
+                      <i class="fa-solid fa-box"></i>
+                    </div>
+                    <div class="dash-stat-body">
+                      <span class="dash-stat-value" id="totalOrders">0</span>
+                      <span class="dash-stat-label">Orders</span>
+                    </div>
+                  </div>
+                  <div class="dash-stat-card" data-accent="violet">
+                    <div class="dash-stat-icon">
+                      <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <div class="dash-stat-body">
+                      <span class="dash-stat-value" id="wishlistCount">0</span>
+                      <span class="dash-stat-label">Wishlist</span>
+                    </div>
+                  </div>
+                  <div class="dash-stat-card" data-accent="emerald">
+                    <div class="dash-stat-icon">
+                      <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <div class="dash-stat-body">
+                      <span class="dash-stat-value" id="totalSpent"
+                        >&#8358;0</span
+                      >
+                      <span class="dash-stat-label">Total Spent</span>
+                    </div>
+                  </div>
+                  <div class="dash-stat-card" data-accent="amber">
+                    <div class="dash-stat-icon">
+                      <i class="fa-solid fa-gem"></i>
+                    </div>
+                    <div class="dash-stat-body">
+                      <span class="dash-stat-value" id="rewardPoints">0</span>
+                      <span class="dash-stat-label">Rewards</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dash-card">
+                  <div class="dash-card-top">
+                    <h2>Recent Orders</h2>
+                    <button
+                      type="button"
+                      class="dash-link-btn"
+                      data-go="orders"
+                    >
+                      View All <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
+                  <div class="dash-card-inner" id="recentOrders">
+                    <div class="dash-empty">
+                      <div class="dash-empty-icon">
+                        <i class="fa-solid fa-box"></i>
+                      </div>
+                      <h3>No orders yet</h3>
+                      <p>
+                        Your order history will appear here once you make your
+                        first purchase.
+                      </p>
+                      <a href="/shop" class="dash-btn-primary"
+                        >Start Shopping</a
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <h3 class="dash-section-title">Quick Actions</h3>
+                <div class="dash-qa-grid">
+                  <a href="/shop" class="dash-qa-item">
+                    <div class="dash-qa-icon">
+                      <i class="fa-solid fa-store"></i>
+                    </div>
+                    <span>Browse Shop</span>
+                  </a>
+                  <a href="/wishlist" class="dash-qa-item">
+                    <div class="dash-qa-icon">
+                      <i class="fa-solid fa-heart"></i>
+                    </div>
+                    <span>My Wishlist</span>
+                  </a>
+                  <a href="/size" class="dash-qa-item">
+                    <div class="dash-qa-icon">
+                      <i class="fa-solid fa-ruler"></i>
+                    </div>
+                    <span>Size Guide</span>
+                  </a>
+                  <a href="/contact" class="dash-qa-item">
+                    <div class="dash-qa-icon">
+                      <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <span>Contact Us</span>
+                  </a>
+                </div>
+              </section>
+
+              <!-- ═══ ORDERS ═══ -->
+              <section class="dash-panel" id="section-orders">
+                <div class="dash-panel-head">
+                  <div>
+                    <h2>My Orders</h2>
+                    <p>Track and manage all your purchases.</p>
+                  </div>
+                  <select
+                    id="orderFilter"
+                    class="dash-select"
+                    aria-label="Filter orders"
+                  >
+                    <option value="all">All Orders</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div class="dash-orders-list" id="allOrders">
+                  <div class="dash-empty">
+                    <div class="dash-empty-icon">
+                      <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <h3>No orders yet</h3>
+                    <p>Once you place an order, it will show up here.</p>
+                    <a href="/shop" class="dash-btn-primary">Start Shopping</a>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ═══ ADDRESSES ═══ -->
+              <section class="dash-panel" id="section-addresses">
+                <div class="dash-panel-head">
+                  <div>
+                    <h2>Saved Addresses</h2>
+                    <p>Manage your delivery addresses.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="dash-btn-primary"
+                    id="addAddressBtn"
+                  >
+                    <i class="fa-solid fa-plus"></i> Add Address
+                  </button>
+                </div>
+                <div class="dash-addresses" id="addressesGrid">
+                  <div class="dash-empty">
+                    <div class="dash-empty-icon">
+                      <i class="fa-regular fa-map"></i>
+                    </div>
+                    <h3>No saved addresses</h3>
+                    <p>Add a delivery address for faster checkout.</p>
+                    <button
+                      type="button"
+                      class="dash-empty-add"
+                      id="addFirstAddressBtn"
+                      title="Add Address"
+                    >
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ═══ PROFILE ═══ -->
+              <section class="dash-panel" id="section-profile">
+                <div class="dash-panel-head">
+                  <div>
+                    <h2>My Profile</h2>
+                    <p>Update your personal information.</p>
+                  </div>
+                </div>
+                <div class="dash-card">
+                  <div class="dash-card-inner">
+                    <form class="dash-profile-form" id="profileForm">
+                      <div class="dash-form-row">
+                        <div class="dash-form-group">
+                          <label for="profileFirstName">First Name</label>
+                          <input
+                            type="text"
+                            id="profileFirstName"
+                            autocomplete="given-name"
+                            placeholder="First name"
+                          />
+                        </div>
+                        <div class="dash-form-group">
+                          <label for="profileLastName">Last Name</label>
+                          <input
+                            type="text"
+                            id="profileLastName"
+                            autocomplete="family-name"
+                            placeholder="Last name"
+                          />
+                        </div>
+                      </div>
+                      <div class="dash-form-group">
+                        <label for="profileEmail">Email Address</label>
+                        <input
+                          type="email"
+                          id="profileEmail"
+                          autocomplete="email"
+                          disabled
+                        />
+                      </div>
+                      <div class="dash-form-group">
+                        <label for="profilePhone">Phone Number</label>
+                        <input
+                          type="tel"
+                          id="profilePhone"
+                          autocomplete="tel"
+                          placeholder="+234 800 000 0000"
+                        />
+                      </div>
+                      <div class="dash-form-row">
+                        <div class="dash-form-group">
+                          <label for="profileDob">Date of Birth</label>
+                          <input
+                            type="date"
+                            id="profileDob"
+                            autocomplete="birthday"
+                          />
+                        </div>
+                        <div class="dash-form-group">
+                          <label for="profileGender">Gender</label>
+                          <select id="profileGender" autocomplete="sex">
+                            <option value="">Prefer not to say</option>
+                            <option value="female">Female</option>
+                            <option value="male">Male</option>
+                            <option value="other">Other</option>
+                          </select>
+                        </div>
+                      </div>
+                      <button type="submit" class="dash-btn-primary">
+                        <i class="fa-solid fa-check"></i> Save Changes
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </section>
+
+              <!-- ═══ SETTINGS ═══ -->
+              <section class="dash-panel" id="section-settings">
+                <div class="dash-panel-head">
+                  <div>
+                    <h2>Settings</h2>
+                    <p>Manage your account preferences.</p>
+                  </div>
+                </div>
+
+                <!-- Appearance -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title">
+                    <i class="fa-solid fa-palette"></i> Appearance
+                  </h3>
+                  <div class="dash-card">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Theme</h4>
+                          <p>Choose your preferred look and feel.</p>
+                        </div>
+                        <select class="dash-theme-select" id="dashThemeSelect">
+                          <option value="system">System</option>
+                          <option value="light">Light</option>
+                          <option value="dark">Dark</option>
+                        </select>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Text Size</h4>
+                          <p>Adjust the display font size.</p>
+                        </div>
+                        <div class="dash-size-picker" id="dashSizePicker">
+                          <button
+                            type="button"
+                            class="dash-size-opt"
+                            data-size="small"
+                          >
+                            A
+                          </button>
+                          <button
+                            type="button"
+                            class="dash-size-opt active"
+                            data-size="medium"
+                          >
+                            A
+                          </button>
+                          <button
+                            type="button"
+                            class="dash-size-opt"
+                            data-size="large"
+                          >
+                            A
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title">
+                    <i class="fa-solid fa-bell"></i> Notifications
+                  </h3>
+                  <div class="dash-card">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Order Updates</h4>
+                          <p>Get notified when your order status changes.</p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input
+                            type="checkbox"
+                            id="notifOrders"
+                            checked /><span class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Shipping Alerts</h4>
+                          <p>
+                            Updates when your package ships or is out for
+                            delivery.
+                          </p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input
+                            type="checkbox"
+                            id="notifShipping"
+                            checked /><span class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Promotions &amp; Sales</h4>
+                          <p>Hear about exclusive deals and discounts.</p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="notifPromos" /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Price Drop Alerts</h4>
+                          <p>
+                            Get notified when items in your wishlist go on sale.
+                          </p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="notifPriceDrop" /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>New Arrivals</h4>
+                          <p>Be the first to know about new products.</p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="notifNewArrivals" /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Communication -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title">
+                    <i class="fa-solid fa-comments"></i> Communication
+                  </h3>
+                  <div class="dash-card">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Email Notifications</h4>
+                          <p>Receive updates and receipts via email.</p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="commEmail" checked /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row dash-setting-row--whatsapp">
+                        <div class="dash-setting-info">
+                          <h4>WhatsApp Updates</h4>
+                          <p>Get order updates via WhatsApp messages.</p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="commWhatsApp" /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <!-- WhatsApp number input (shown when toggle is ON) -->
+                      <div
+                        class="dash-whatsapp-number-row"
+                        id="whatsappNumberRow"
+                        style="display: none"
+                      >
+                        <div class="dash-whatsapp-number-inner">
+                          <label for="whatsappNumber"
+                            ><i class="fa-brands fa-whatsapp"></i> WhatsApp
+                            Number</label
+                          >
+                          <p class="dash-whatsapp-hint">
+                            Enter the number linked to your WhatsApp account
+                            (with country code).
+                          </p>
+                          <div class="dash-whatsapp-input-group">
+                            <input
+                              type="tel"
+                              id="whatsappNumber"
+                              placeholder="+234 800 000 0000"
+                              autocomplete="tel"
+                            />
+                            <button
+                              type="button"
+                              id="saveWhatsappBtn"
+                              class="dash-btn-primary dash-btn-sm"
+                            >
+                              <i class="fa-solid fa-check"></i> Save
+                            </button>
+                          </div>
+                          <p
+                            class="dash-whatsapp-status"
+                            id="whatsappStatus"
+                          ></p>
+                        </div>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>SMS Notifications</h4>
+                          <p>Receive order and delivery alerts by text.</p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="commSMS" /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Privacy & Data -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title">
+                    <i class="fa-solid fa-eye-slash"></i> Privacy &amp; Data
+                  </h3>
+                  <div class="dash-card">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Personalized Recommendations</h4>
+                          <p>
+                            Allow us to suggest products based on your activity.
+                          </p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input
+                            type="checkbox"
+                            id="privacyRecs"
+                            checked /><span class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Marketing Consent</h4>
+                          <p>
+                            Allow us to use your data for marketing purposes.
+                          </p>
+                        </div>
+                        <label class="dash-toggle"
+                          ><input type="checkbox" id="privacyMarketing" /><span
+                            class="dash-toggle-track"
+                            ><span class="dash-toggle-thumb"></span></span
+                        ></label>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Clear Browsing History</h4>
+                          <p>Remove your recently viewed products.</p>
+                        </div>
+                        <button
+                          type="button"
+                          class="dash-btn-outline"
+                          id="clearHistoryBtn"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Security -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title">
+                    <i class="fa-solid fa-shield-halved"></i> Security
+                  </h3>
+                  <div class="dash-card">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Change Password</h4>
+                          <p>Update your account password via email.</p>
+                        </div>
+                        <button
+                          type="button"
+                          class="dash-btn-outline"
+                          id="changePasswordBtn"
+                        >
+                          Change
+                        </button>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Two-Factor Authentication</h4>
+                          <p>Add an extra layer of security to your account.</p>
+                        </div>
+                        <span class="dash-setting-badge">Coming Soon</span>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Active Sessions</h4>
+                          <p>You are currently signed in on this device.</p>
+                        </div>
+                        <span class="dash-setting-meta"
+                          ><i class="fa-solid fa-circle dash-status-icon"></i>
+                          Active</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Account Management -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title">
+                    <i class="fa-solid fa-user-gear"></i> Account
+                  </h3>
+                  <div class="dash-card">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Download My Data</h4>
+                          <p>Request a copy of your personal data.</p>
+                        </div>
+                        <button
+                          type="button"
+                          class="dash-btn-outline"
+                          id="downloadDataBtn"
+                        >
+                          <i class="fa-solid fa-download"></i> Download
+                        </button>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Deactivate Account</h4>
+                          <p>
+                            Temporarily disable your account. You can reactivate
+                            anytime.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          class="dash-btn-outline dash-btn-warn"
+                          id="deactivateBtn"
+                        >
+                          Deactivate
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="dash-settings-group">
+                  <h3 class="dash-settings-title dash-settings-title--danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
+                  </h3>
+                  <div class="dash-card dash-card--danger">
+                    <div class="dash-card-inner">
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Sign Out</h4>
+                          <p>Sign out from your account on this device.</p>
+                        </div>
+                        <button
+                          type="button"
+                          class="dash-btn-danger"
+                          id="logoutBtn2"
+                        >
+                          Sign Out
+                        </button>
+                      </div>
+                      <div class="dash-setting-row">
+                        <div class="dash-setting-info">
+                          <h4>Delete Account</h4>
+                          <p>
+                            Permanently delete your account and all associated
+                            data. This cannot be undone.
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          class="dash-btn-danger"
+                          id="deleteAccountBtn"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <!-- .dash-content -->
           </div>
+          <!-- .dash-main -->
         </div>
+        <!-- .dash-layout -->
 
         <!-- Mobile Bottom Nav -->
         <nav class="dash-bottombar" id="dashBottomBar">
@@ -377,631 +1019,19 @@
           >
             <i class="fa-solid fa-chart-pie"></i><span>Home</span>
           </button>
+          <button type="button" class="dash-bb-item" data-section="profile">
+            <i class="fa-solid fa-user-pen"></i><span>Profile</span>
+          </button>
           <button type="button" class="dash-bb-item" data-section="orders">
             <i class="fa-solid fa-box"></i><span>Orders</span>
           </button>
           <button type="button" class="dash-bb-item" data-section="addresses">
             <i class="fa-solid fa-map-pin"></i><span>Address</span>
           </button>
-          <button type="button" class="dash-bb-item" data-section="profile">
-            <i class="fa-solid fa-user-pen"></i><span>Profile</span>
-          </button>
           <button type="button" class="dash-bb-item" data-section="settings">
             <i class="fa-solid fa-sliders"></i><span>Settings</span>
           </button>
         </nav>
-
-        <!-- Content Container -->
-        <div class="dash-content">
-          <!-- ═══ OVERVIEW ═══ -->
-          <section class="dash-panel active" id="section-overview">
-            <div class="dash-stats">
-              <div class="dash-stat-card" data-accent="rose">
-                <div class="dash-stat-icon">
-                  <i class="fa-solid fa-box"></i>
-                </div>
-                <div class="dash-stat-body">
-                  <span class="dash-stat-value" id="totalOrders">0</span>
-                  <span class="dash-stat-label">Orders</span>
-                </div>
-              </div>
-              <div class="dash-stat-card" data-accent="violet">
-                <div class="dash-stat-icon">
-                  <i class="fa-solid fa-heart"></i>
-                </div>
-                <div class="dash-stat-body">
-                  <span class="dash-stat-value" id="wishlistCount">0</span>
-                  <span class="dash-stat-label">Wishlist</span>
-                </div>
-              </div>
-              <div class="dash-stat-card" data-accent="emerald">
-                <div class="dash-stat-icon">
-                  <i class="fa-solid fa-wallet"></i>
-                </div>
-                <div class="dash-stat-body">
-                  <span class="dash-stat-value" id="totalSpent">&#8358;0</span>
-                  <span class="dash-stat-label">Total Spent</span>
-                </div>
-              </div>
-              <div class="dash-stat-card" data-accent="amber">
-                <div class="dash-stat-icon">
-                  <i class="fa-solid fa-gem"></i>
-                </div>
-                <div class="dash-stat-body">
-                  <span class="dash-stat-value" id="rewardPoints">0</span>
-                  <span class="dash-stat-label">Rewards</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="dash-card">
-              <div class="dash-card-top">
-                <h2>Recent Orders</h2>
-                <button type="button" class="dash-link-btn" data-go="orders">
-                  View All <i class="fa-solid fa-arrow-right"></i>
-                </button>
-              </div>
-              <div class="dash-card-inner" id="recentOrders">
-                <div class="dash-empty">
-                  <div class="dash-empty-icon">
-                    <i class="fa-solid fa-box"></i>
-                  </div>
-                  <h3>No orders yet</h3>
-                  <p>
-                    Your order history will appear here once you make your first
-                    purchase.
-                  </p>
-                  <a href="/shop" class="dash-btn-primary">Start Shopping</a>
-                </div>
-              </div>
-            </div>
-
-            <h3 class="dash-section-title">Quick Actions</h3>
-            <div class="dash-qa-grid">
-              <a href="/shop" class="dash-qa-item">
-                <div class="dash-qa-icon">
-                  <i class="fa-solid fa-store"></i>
-                </div>
-                <span>Browse Shop</span>
-              </a>
-              <a href="/wishlist" class="dash-qa-item">
-                <div class="dash-qa-icon">
-                  <i class="fa-solid fa-heart"></i>
-                </div>
-                <span>My Wishlist</span>
-              </a>
-              <a href="/size" class="dash-qa-item">
-                <div class="dash-qa-icon">
-                  <i class="fa-solid fa-ruler"></i>
-                </div>
-                <span>Size Guide</span>
-              </a>
-              <a href="/contact" class="dash-qa-item">
-                <div class="dash-qa-icon">
-                  <i class="fa-solid fa-envelope"></i>
-                </div>
-                <span>Contact Us</span>
-              </a>
-            </div>
-          </section>
-
-          <!-- ═══ ORDERS ═══ -->
-          <section class="dash-panel" id="section-orders">
-            <div class="dash-panel-head">
-              <div>
-                <h2>My Orders</h2>
-                <p>Track and manage all your purchases.</p>
-              </div>
-              <select
-                id="orderFilter"
-                class="dash-select"
-                aria-label="Filter orders"
-              >
-                <option value="all">All Orders</option>
-                <option value="pending">Pending</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="processing">Processing</option>
-                <option value="shipped">Shipped</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div class="dash-orders-list" id="allOrders">
-              <div class="dash-empty">
-                <div class="dash-empty-icon">
-                  <i class="fa-solid fa-box-open"></i>
-                </div>
-                <h3>No orders yet</h3>
-                <p>Once you place an order, it will show up here.</p>
-                <a href="/shop" class="dash-btn-primary">Start Shopping</a>
-              </div>
-            </div>
-          </section>
-
-          <!-- ═══ ADDRESSES ═══ -->
-          <section class="dash-panel" id="section-addresses">
-            <div class="dash-panel-head">
-              <div>
-                <h2>Saved Addresses</h2>
-                <p>Manage your delivery addresses.</p>
-              </div>
-              <button type="button" class="dash-btn-primary" id="addAddressBtn">
-                <i class="fa-solid fa-plus"></i> Add Address
-              </button>
-            </div>
-            <div class="dash-addresses" id="addressesGrid">
-              <div class="dash-empty">
-                <div class="dash-empty-icon">
-                  <i class="fa-regular fa-map"></i>
-                </div>
-                <h3>No saved addresses</h3>
-                <p>Add a delivery address for faster checkout.</p>
-                <button
-                  type="button"
-                  class="dash-empty-add"
-                  id="addFirstAddressBtn"
-                  title="Add Address"
-                >
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <!-- ═══ PROFILE ═══ -->
-          <section class="dash-panel" id="section-profile">
-            <div class="dash-panel-head">
-              <div>
-                <h2>My Profile</h2>
-                <p>Update your personal information.</p>
-              </div>
-            </div>
-            <div class="dash-card">
-              <div class="dash-card-inner">
-                <form class="dash-profile-form" id="profileForm">
-                  <div class="dash-form-row">
-                    <div class="dash-form-group">
-                      <label for="profileFirstName">First Name</label>
-                      <input
-                        type="text"
-                        id="profileFirstName"
-                        autocomplete="given-name"
-                        placeholder="First name"
-                      />
-                    </div>
-                    <div class="dash-form-group">
-                      <label for="profileLastName">Last Name</label>
-                      <input
-                        type="text"
-                        id="profileLastName"
-                        autocomplete="family-name"
-                        placeholder="Last name"
-                      />
-                    </div>
-                  </div>
-                  <div class="dash-form-group">
-                    <label for="profileEmail">Email Address</label>
-                    <input
-                      type="email"
-                      id="profileEmail"
-                      autocomplete="email"
-                      disabled
-                    />
-                  </div>
-                  <div class="dash-form-group">
-                    <label for="profilePhone">Phone Number</label>
-                    <input
-                      type="tel"
-                      id="profilePhone"
-                      autocomplete="tel"
-                      placeholder="+234 800 000 0000"
-                    />
-                  </div>
-                  <div class="dash-form-row">
-                    <div class="dash-form-group">
-                      <label for="profileDob">Date of Birth</label>
-                      <input
-                        type="date"
-                        id="profileDob"
-                        autocomplete="birthday"
-                      />
-                    </div>
-                    <div class="dash-form-group">
-                      <label for="profileGender">Gender</label>
-                      <select id="profileGender" autocomplete="sex">
-                        <option value="">Prefer not to say</option>
-                        <option value="female">Female</option>
-                        <option value="male">Male</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
-                  </div>
-                  <button type="submit" class="dash-btn-primary">
-                    <i class="fa-solid fa-check"></i> Save Changes
-                  </button>
-                </form>
-              </div>
-            </div>
-          </section>
-
-          <!-- ═══ SETTINGS ═══ -->
-          <section class="dash-panel" id="section-settings">
-            <div class="dash-panel-head">
-              <div>
-                <h2>Settings</h2>
-                <p>Manage your account preferences.</p>
-              </div>
-            </div>
-
-            <!-- Appearance -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title">
-                <i class="fa-solid fa-palette"></i> Appearance
-              </h3>
-              <div class="dash-card">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Theme</h4>
-                      <p>Choose your preferred look and feel.</p>
-                    </div>
-                    <select class="dash-theme-select" id="dashThemeSelect">
-                      <option value="system">System</option>
-                      <option value="light">Light</option>
-                      <option value="dark">Dark</option>
-                    </select>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Text Size</h4>
-                      <p>Adjust the display font size.</p>
-                    </div>
-                    <div class="dash-size-picker" id="dashSizePicker">
-                      <button
-                        type="button"
-                        class="dash-size-opt"
-                        data-size="small"
-                      >
-                        A
-                      </button>
-                      <button
-                        type="button"
-                        class="dash-size-opt active"
-                        data-size="medium"
-                      >
-                        A
-                      </button>
-                      <button
-                        type="button"
-                        class="dash-size-opt"
-                        data-size="large"
-                      >
-                        A
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Notifications -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title">
-                <i class="fa-solid fa-bell"></i> Notifications
-              </h3>
-              <div class="dash-card">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Order Updates</h4>
-                      <p>Get notified when your order status changes.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="notifOrders" checked /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Shipping Alerts</h4>
-                      <p>
-                        Updates when your package ships or is out for delivery.
-                      </p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="notifShipping" checked /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Promotions &amp; Sales</h4>
-                      <p>Hear about exclusive deals and discounts.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="notifPromos" /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Price Drop Alerts</h4>
-                      <p>
-                        Get notified when items in your wishlist go on sale.
-                      </p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="notifPriceDrop" /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>New Arrivals</h4>
-                      <p>Be the first to know about new products.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="notifNewArrivals" /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Communication -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title">
-                <i class="fa-solid fa-comments"></i> Communication
-              </h3>
-              <div class="dash-card">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Email Notifications</h4>
-                      <p>Receive updates and receipts via email.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="commEmail" checked /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row dash-setting-row--whatsapp">
-                    <div class="dash-setting-info">
-                      <h4>WhatsApp Updates</h4>
-                      <p>Get order updates via WhatsApp messages.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="commWhatsApp" /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <!-- WhatsApp number input (shown when toggle is ON) -->
-                  <div
-                    class="dash-whatsapp-number-row"
-                    id="whatsappNumberRow"
-                    style="display: none"
-                  >
-                    <div class="dash-whatsapp-number-inner">
-                      <label for="whatsappNumber"
-                        ><i class="fa-brands fa-whatsapp"></i> WhatsApp
-                        Number</label
-                      >
-                      <p class="dash-whatsapp-hint">
-                        Enter the number linked to your WhatsApp account (with
-                        country code).
-                      </p>
-                      <div class="dash-whatsapp-input-group">
-                        <input
-                          type="tel"
-                          id="whatsappNumber"
-                          placeholder="+234 800 000 0000"
-                          autocomplete="tel"
-                        />
-                        <button
-                          type="button"
-                          id="saveWhatsappBtn"
-                          class="dash-btn-primary dash-btn-sm"
-                        >
-                          <i class="fa-solid fa-check"></i> Save
-                        </button>
-                      </div>
-                      <p class="dash-whatsapp-status" id="whatsappStatus"></p>
-                    </div>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>SMS Notifications</h4>
-                      <p>Receive order and delivery alerts by text.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="commSMS" /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Privacy & Data -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title">
-                <i class="fa-solid fa-eye-slash"></i> Privacy &amp; Data
-              </h3>
-              <div class="dash-card">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Personalized Recommendations</h4>
-                      <p>
-                        Allow us to suggest products based on your activity.
-                      </p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="privacyRecs" checked /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Marketing Consent</h4>
-                      <p>Allow us to use your data for marketing purposes.</p>
-                    </div>
-                    <label class="dash-toggle"
-                      ><input type="checkbox" id="privacyMarketing" /><span
-                        class="dash-toggle-track"
-                        ><span class="dash-toggle-thumb"></span></span
-                    ></label>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Clear Browsing History</h4>
-                      <p>Remove your recently viewed products.</p>
-                    </div>
-                    <button
-                      type="button"
-                      class="dash-btn-outline"
-                      id="clearHistoryBtn"
-                    >
-                      Clear
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Security -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title">
-                <i class="fa-solid fa-shield-halved"></i> Security
-              </h3>
-              <div class="dash-card">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Change Password</h4>
-                      <p>Update your account password via email.</p>
-                    </div>
-                    <button
-                      type="button"
-                      class="dash-btn-outline"
-                      id="changePasswordBtn"
-                    >
-                      Change
-                    </button>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Two-Factor Authentication</h4>
-                      <p>Add an extra layer of security to your account.</p>
-                    </div>
-                    <span class="dash-setting-badge">Coming Soon</span>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Active Sessions</h4>
-                      <p>You are currently signed in on this device.</p>
-                    </div>
-                    <span class="dash-setting-meta"
-                      ><i class="fa-solid fa-circle dash-status-icon"></i>
-                      Active</span
-                    >
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Account Management -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title">
-                <i class="fa-solid fa-user-gear"></i> Account
-              </h3>
-              <div class="dash-card">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Download My Data</h4>
-                      <p>Request a copy of your personal data.</p>
-                    </div>
-                    <button
-                      type="button"
-                      class="dash-btn-outline"
-                      id="downloadDataBtn"
-                    >
-                      <i class="fa-solid fa-download"></i> Download
-                    </button>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Deactivate Account</h4>
-                      <p>
-                        Temporarily disable your account. You can reactivate
-                        anytime.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      class="dash-btn-outline dash-btn-warn"
-                      id="deactivateBtn"
-                    >
-                      Deactivate
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Danger Zone -->
-            <div class="dash-settings-group">
-              <h3 class="dash-settings-title dash-settings-title--danger">
-                <i class="fa-solid fa-triangle-exclamation"></i> Danger Zone
-              </h3>
-              <div class="dash-card dash-card--danger">
-                <div class="dash-card-inner">
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Sign Out</h4>
-                      <p>Sign out from your account on this device.</p>
-                    </div>
-                    <button
-                      type="button"
-                      class="dash-btn-danger"
-                      id="logoutBtn2"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                  <div class="dash-setting-row">
-                    <div class="dash-setting-info">
-                      <h4>Delete Account</h4>
-                      <p>
-                        Permanently delete your account and all associated data.
-                        This cannot be undone.
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      class="dash-btn-danger"
-                      id="deleteAccountBtn"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </div>
-        <!-- .dash-content -->
       </div>
       <!-- .dash-app -->
     </main>
@@ -1017,7 +1047,7 @@
               <span class="logo-icon"
                 ><img src="assets/img/monogram.svg" alt="LBS"
               /></span>
-              <span class="logo-text">Lingerie by Sisioyin</span>
+              <span class="logo-text">Lingeries by Sisioyin</span>
             </a>
             <p>
               Luxe essentials defined by comfort and confidence. Premium
@@ -1076,7 +1106,7 @@
         </div>
         <div class="footer-bottom">
           <p class="footer-copyright">
-            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            &copy; <span id="currentYear">2026</span> Lingeries by Sisioyin. All
             rights reserved.
           </p>
           <div id="themeToggle">
@@ -1408,6 +1438,7 @@
     <script defer src="assets/js/utils.js"></script>
     <script defer src="assets/js/supabase.js"></script>
     <script defer src="assets/js/app.js"></script>
+    <script defer src="assets/js/sync.js"></script>
     <script defer src="assets/js/auth.js"></script>
     <script defer src="assets/js/dashboard.js"></script>
   </body>

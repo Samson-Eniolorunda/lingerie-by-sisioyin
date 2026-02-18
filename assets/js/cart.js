@@ -1,7 +1,7 @@
 /**
  * ============================================
  * CART PAGE CONTROLLER
- * Lingerie by Sisioyin - Cart & Checkout
+ * Lingeries by Sisioyin - Cart & Checkout
  * ============================================
  */
 (function () {

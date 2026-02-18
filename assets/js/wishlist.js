@@ -1,5 +1,5 @@
 /**
- * Lingerie by Sisioyin - Wishlist Page
+ * Lingeries by Sisioyin - Wishlist Page
  * Displays saved/liked products
  */
 
@@ -27,6 +27,8 @@
       wishlist.splice(index, 1);
       localStorage.setItem(WISHLIST_KEY, JSON.stringify(wishlist));
       UTILS.toast("Removed from wishlist", "info");
+      // Cross-device sync
+      window.SYNC?.pushWishlist?.();
       return true;
     }
     return false;
@@ -187,6 +189,8 @@
       window.dispatchEvent(new CustomEvent("wishlist:changed"));
       // Trigger storage event for cross-tab sync
       localStorage.setItem("LBS_WISHLIST_UPDATED", Date.now().toString());
+      // Cross-device sync
+      window.SYNC?.pushWishlist?.();
     });
 
     // Wishlist grid actions

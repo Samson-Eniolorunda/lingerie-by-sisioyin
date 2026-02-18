@@ -1,11 +1,11 @@
 /**
  * ============================================
  * SERVICE WORKER
- * Lingerie by Sisioyin - PWA Offline Support
+ * Lingeries by Sisioyin - PWA Offline Support
  * ============================================
  */
 
-const SW_VERSION = 16;
+const SW_VERSION = 21;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
@@ -210,7 +210,7 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(
     self.registration.showNotification(
-      data.title || "Lingerie by Sisioyin",
+      data.title || "Lingeries by Sisioyin",
       options,
     ),
   );

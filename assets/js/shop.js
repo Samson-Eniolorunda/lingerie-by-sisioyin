@@ -1,5 +1,5 @@
 /**
- * Lingerie by Sisioyin - Shop Page
+ * Lingeries by Sisioyin - Shop Page
  * Modern e-commerce with unique UX
  */
 
@@ -560,7 +560,7 @@
       window.location.origin + "/shop?product=" + product.id,
     );
     const shareText = encodeURIComponent(
-      product.name + " - Lingerie by Sisioyin",
+      product.name + " - Lingeries by Sisioyin",
     );
 
     productModal.innerHTML = `

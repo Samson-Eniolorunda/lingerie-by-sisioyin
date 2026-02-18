@@ -1,7 +1,7 @@
 /**
  * ============================================
  * DASHBOARD MODULE — Rebuilt
- * Lingerie by Sisioyin
+ * Lingeries by Sisioyin
  * ============================================
  */
 (function () {
@@ -360,6 +360,8 @@
 
   function saveAddresses(list) {
     localStorage.setItem(ADDR_KEY, JSON.stringify(list));
+    // Cross-device sync
+    window.SYNC?.pushAddresses?.();
   }
 
   function renderAddresses() {
@@ -712,11 +714,12 @@
 
   /* ── Greeting ────────────────────────── */
   function updateGreeting(name) {
-    const el = $("#dashGreeting");
+    const el = $("#dashGreetingMain");
     if (!el) return;
     const h = new Date().getHours();
     const tod = h < 12 ? "morning" : h < 17 ? "afternoon" : "evening";
-    el.textContent = `Good ${tod}, ${name.split(" ")[0]}! Here's your account at a glance.`;
+    const firstName = name.split(" ")[0];
+    el.textContent = `Good ${tod}, ${firstName}!`;
   }
 
   /* ── Settings ─────────────────────────── */
@@ -732,6 +735,8 @@
   function saveSettings(obj) {
     const merged = { ...getSettings(), ...obj };
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
+    // Cross-device sync
+    window.SYNC?.pushSettings?.();
   }
 
   function initSettings() {
@@ -982,7 +987,7 @@
         });
 
         let txt = "╔══════════════════════════════════════════╗\n";
-        txt += "║    LINGERIE BY SISIOYIN — MY DATA        ║\n";
+        txt += "║    LINGERIES BY SISIOYIN — MY DATA       ║\n";
         txt += "╚══════════════════════════════════════════╝\n\n";
         txt += "Exported: " + date + "\n\n";
 
@@ -1274,6 +1279,61 @@
             <div class="track-summary-row total"><span>Total</span><span>${fmtPrice(o.total || 0)}</span></div>
           </div>
 
+          ${(() => {
+            // Cancel button: only for pending orders within 30 minutes
+            if (status === "pending") {
+              const placed = new Date(o.created_at).getTime();
+              const now = Date.now();
+              const thirtyMin = 30 * 60 * 1000;
+              const remaining = Math.max(0, thirtyMin - (now - placed));
+              if (remaining > 0) {
+                const mins = Math.ceil(remaining / 60000);
+                return `
+                  <div class="track-section track-actions-section">
+                    <div class="track-action-card track-action-cancel">
+                      <div class="track-action-header">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>You have <strong>${mins} minute${mins !== 1 ? "s" : ""}</strong> to cancel this order</span>
+                      </div>
+                      <button type="button" class="track-action-btn track-cancel-btn" data-cancel-order="${o.id}">
+                        <i class="fa-solid fa-ban"></i> Cancel Order
+                      </button>
+                    </div>
+                  </div>`;
+              }
+            }
+            return "";
+          })()}
+
+          ${(() => {
+            // Return / Refund button: only for delivered orders within 7 days
+            if (status === "delivered") {
+              const deliveredDate = new Date(
+                o.updated_at || o.created_at,
+              ).getTime();
+              const now = Date.now();
+              const sevenDays = 7 * 24 * 60 * 60 * 1000;
+              const remaining = Math.max(0, sevenDays - (now - deliveredDate));
+              if (remaining > 0) {
+                const days = Math.ceil(remaining / (24 * 60 * 60 * 1000));
+                return `
+                  <div class="track-section track-actions-section">
+                    <div class="track-action-card track-action-return">
+                      <div class="track-action-header">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Return window: <strong>${days} day${days !== 1 ? "s" : ""} remaining</strong></span>
+                      </div>
+                      <p class="track-action-note">Returns are accepted only for: damaged items, defective products, wrong item received, or size mismatch per our size chart.</p>
+                      <button type="button" class="track-action-btn track-return-btn" data-return-order="${o.id}" data-order-num="${orderNum}">
+                        <i class="fa-solid fa-rotate-left"></i> Request Return / Refund
+                      </button>
+                    </div>
+                  </div>`;
+              }
+            }
+            return "";
+          })()}
+
           ${
             status === "delivered"
               ? `
@@ -1315,11 +1375,97 @@
         const productId = btn.dataset.reviewProduct;
         if (productId) {
           close();
-          // Navigate to shop with product modal
           window.location.href = `/shop?product=${productId}`;
         }
       });
     });
+
+    // Handle cancel order
+    const cancelBtn = modal.querySelector(".track-cancel-btn");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", async () => {
+        const orderId = cancelBtn.dataset.cancelOrder;
+        if (
+          !confirm(
+            "Are you sure you want to cancel this order? This action cannot be undone.",
+          )
+        )
+          return;
+
+        cancelBtn.disabled = true;
+        cancelBtn.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Cancelling...';
+
+        try {
+          const c = client();
+          if (!c) throw new Error("Not connected");
+
+          // Verify still within 30 minutes
+          const order = orders.find((x) => x.id === orderId);
+          if (!order) throw new Error("Order not found");
+          const elapsed = Date.now() - new Date(order.created_at).getTime();
+          if (elapsed > 30 * 60 * 1000)
+            throw new Error("Cancellation window has expired");
+
+          const { error } = await c
+            .from("orders")
+            .update({ status: "cancelled" })
+            .eq("id", orderId);
+          if (error) throw error;
+
+          // Update local list
+          const idx = orders.findIndex((x) => x.id === orderId);
+          if (idx >= 0) orders[idx].status = "cancelled";
+          renderOrders();
+
+          close();
+          window.UTILS?.toast?.("Order cancelled successfully", "success");
+        } catch (err) {
+          cancelBtn.disabled = false;
+          cancelBtn.innerHTML = '<i class="fa-solid fa-ban"></i> Cancel Order';
+          window.UTILS?.toast?.(
+            err.message || "Failed to cancel order",
+            "error",
+          );
+        }
+      });
+    }
+
+    // Handle return / refund request
+    const returnBtn = modal.querySelector(".track-return-btn");
+    if (returnBtn) {
+      returnBtn.addEventListener("click", () => {
+        const orderNum = returnBtn.dataset.orderNum;
+        const subject = `Return/Refund Request - Order ${orderNum}`;
+        const body = `Hi, I would like to request a return/refund for my order ${orderNum}.\n\nReason: [Please select one]\n- Item arrived damaged\n- Item is defective\n- Wrong item received\n- Size does not match size chart\n\nPlease describe the issue:\n[Your description here]`;
+
+        // Open WhatsApp with pre-filled message
+        const waNum = "2349033344860";
+        const waText = encodeURIComponent(
+          `Return/Refund Request - Order ${orderNum}\n\nReason: \n\nDescription: `,
+        );
+
+        // Show options modal
+        const optionsHTML = `
+          <div class="track-return-options">
+            <h4><i class="fa-solid fa-rotate-left"></i> How would you like to submit your return request?</h4>
+            <p class="track-return-note">Please include your order number, reason for return, and photos of the item.</p>
+            <div class="track-return-btns">
+              <a href="https://wa.me/${waNum}?text=${waText}" target="_blank" rel="noopener noreferrer" class="track-action-btn track-wa-btn">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp
+              </a>
+              <a href="/contact?subject=${encodeURIComponent(subject)}" class="track-action-btn track-contact-btn">
+                <i class="fa-solid fa-envelope"></i> Contact Form
+              </a>
+            </div>
+          </div>`;
+
+        const card = returnBtn.closest(".track-action-card");
+        if (card) {
+          card.innerHTML = optionsHTML;
+        }
+      });
+    }
   }
 
   /* ── Event Listeners ─────────────────────── */

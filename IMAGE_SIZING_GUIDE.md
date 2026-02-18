@@ -1,4 +1,4 @@
-# Image Sizing Guide — Lingerie by Sisioyin
+# Image Sizing Guide — Lingeries by Sisioyin
 
 Use this guide when uploading images to ensure the best visual quality across all devices.
 
@@ -52,11 +52,11 @@ Product images are shared across the Shop page and New Arrivals section — uplo
 
 ## Quick Summary
 
-| Location                       | Size (px)    | Ratio | Max File Size |
-| ------------------------------ | ------------ | ----- | ------------- |
-| Hero Image (Homepage)          | 900 × 1200   | 3:4   | ~400 KB       |
-| Product Card (Shop & Arrivals) | 800 × 1000   | 4:5   | ~200 KB       |
-| Category Showcase              | 900 × 1200   | 3:4   | ~300 KB       |
+| Location                       | Size (px)  | Ratio | Max File Size |
+| ------------------------------ | ---------- | ----- | ------------- |
+| Hero Image (Homepage)          | 900 × 1200 | 3:4   | ~400 KB       |
+| Product Card (Shop & Arrivals) | 800 × 1000 | 4:5   | ~200 KB       |
+| Category Showcase              | 900 × 1200 | 3:4   | ~300 KB       |
 
 ---
 

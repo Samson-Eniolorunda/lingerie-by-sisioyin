@@ -1,4 +1,4 @@
-# Lingerie by Sisioyin - robots.txt
+# Lingeries by Sisioyin - robots.txt
 User-agent: *
 Allow: /
 Disallow: /admin

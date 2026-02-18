@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1, interactive-widget=resizes-content"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content, viewport-fit=cover"
     />
-    <title>Track Your Order | Lingerie by Sisioyin</title>
+    <title>Track Your Order | Lingeries by Sisioyin</title>
     <meta
       name="description"
-      content="Track your order status at Lingerie by Sisioyin. Enter your order number or email to see real-time updates."
+      content="Track your order status at Lingeries by Sisioyin. Enter your order number or email to see real-time updates."
     />
     <meta name="robots" content="noindex, follow" />
     <meta name="theme-color" content="#be185d" />
@@ -72,7 +72,7 @@
           <span class="logo-icon"
             ><img src="assets/img/monogram.svg" alt="LBS"
           /></span>
-          <span class="logo-text">Lingerie by Sisioyin</span>
+          <span class="logo-text">Lingeries by Sisioyin</span>
         </a>
 
         <nav class="nav" id="mainNav">
@@ -133,7 +133,7 @@
             <span class="drawer-logo-icon"
               ><img src="assets/img/monogram.svg" alt="LBS"
             /></span>
-            <span class="drawer-logo-text">Lingerie by Sisioyin</span>
+            <span class="drawer-logo-text">Lingeries by Sisioyin</span>
           </a>
           <button
             type="button"
@@ -298,7 +298,12 @@
        ═══════════════════════════════════════════════════════════════════════ -->
     <div class="modal-backdrop" id="authBackdrop"></div>
     <div class="modal auth-modal" id="authModal">
-      <button type="button" class="auth-modal-close" id="authClose" aria-label="Close">
+      <button
+        type="button"
+        class="auth-modal-close"
+        id="authClose"
+        aria-label="Close"
+      >
         <i class="fa-solid fa-xmark"></i>
       </button>
       <div class="auth-hero">
@@ -306,7 +311,9 @@
           <img src="assets/img/monogram.svg" alt="LBS" />
         </div>
         <h2 class="auth-hero-title" id="authHeroTitle">Welcome Back</h2>
-        <p class="auth-hero-sub" id="authHeroSub">Sign in to your account to continue</p>
+        <p class="auth-hero-sub" id="authHeroSub">
+          Sign in to your account to continue
+        </p>
       </div>
       <div class="modal-body">
         <div class="auth-tabs" id="authTabs">
@@ -322,20 +329,42 @@
           <div class="auth-field">
             <div class="auth-input-wrap">
               <i class="fa-solid fa-envelope auth-input-icon"></i>
-              <input type="email" id="loginEmail" name="email" class="form-input" placeholder="Email Address" autocomplete="email" required />
+              <input
+                type="email"
+                id="loginEmail"
+                name="email"
+                class="form-input"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+              />
             </div>
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
               <i class="fa-solid fa-lock auth-input-icon"></i>
-              <input type="password" id="loginPassword" name="password" class="form-input" placeholder="Password" autocomplete="current-password" required />
+              <input
+                type="password"
+                id="loginPassword"
+                name="password"
+                class="form-input"
+                placeholder="Password"
+                autocomplete="current-password"
+                required
+              />
             </div>
           </div>
           <div class="auth-forgot">
-            <a href="#" id="forgotPasswordLink" class="auth-forgot-link">Forgot password?</a>
+            <a href="#" id="forgotPasswordLink" class="auth-forgot-link"
+              >Forgot password?</a
+            >
           </div>
           <div class="form-group recaptcha-field">
-            <div class="g-recaptcha" id="loginRecaptcha" data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"></div>
+            <div
+              class="g-recaptcha"
+              id="loginRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
           </div>
           <button type="submit" class="auth-submit-btn btn-disabled" disabled>
             <span>Sign In</span>
@@ -344,10 +373,22 @@
           <div class="auth-divider">or continue with</div>
           <button type="button" class="auth-google-btn google-login-btn">
             <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
             Continue with Google
           </button>
@@ -356,29 +397,67 @@
           <div class="auth-field">
             <div class="auth-input-wrap">
               <i class="fa-solid fa-user auth-input-icon"></i>
-              <input type="text" id="signupName" name="fullName" class="form-input" placeholder="Full Name" autocomplete="name" required />
+              <input
+                type="text"
+                id="signupName"
+                name="fullName"
+                class="form-input"
+                placeholder="Full Name"
+                autocomplete="name"
+                required
+              />
             </div>
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
               <i class="fa-solid fa-envelope auth-input-icon"></i>
-              <input type="email" id="signupEmail" name="email" class="form-input" placeholder="Email Address" autocomplete="email" required />
+              <input
+                type="email"
+                id="signupEmail"
+                name="email"
+                class="form-input"
+                placeholder="Email Address"
+                autocomplete="email"
+                required
+              />
             </div>
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
               <i class="fa-solid fa-lock auth-input-icon"></i>
-              <input type="password" id="signupPassword" name="password" class="form-input" placeholder="Create Password" autocomplete="new-password" required minlength="6" />
+              <input
+                type="password"
+                id="signupPassword"
+                name="password"
+                class="form-input"
+                placeholder="Create Password"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
             </div>
           </div>
           <div class="auth-field">
             <div class="auth-input-wrap">
               <i class="fa-solid fa-lock auth-input-icon"></i>
-              <input type="password" id="signupConfirm" name="confirmPassword" class="form-input" placeholder="Confirm Password" autocomplete="new-password" required minlength="6" />
+              <input
+                type="password"
+                id="signupConfirm"
+                name="confirmPassword"
+                class="form-input"
+                placeholder="Confirm Password"
+                autocomplete="new-password"
+                required
+                minlength="6"
+              />
             </div>
           </div>
           <div class="form-group recaptcha-field">
-            <div class="g-recaptcha" id="signupRecaptcha" data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"></div>
+            <div
+              class="g-recaptcha"
+              id="signupRecaptcha"
+              data-sitekey="6LfhBmMsAAAAAMLoUlm0VlYhc4RLJyscH_YVfs6l"
+            ></div>
           </div>
           <button type="submit" class="auth-submit-btn btn-disabled" disabled>
             <span>Create Account</span>
@@ -387,10 +466,22 @@
           <div class="auth-divider">or continue with</div>
           <button type="button" class="auth-google-btn google-login-btn">
             <svg viewBox="0 0 24 24" width="18" height="18">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z" />
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              <path
+                fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+              />
+              <path
+                fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.05-3.72 1.05-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+              />
+              <path
+                fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+              />
+              <path
+                fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+              />
             </svg>
             Continue with Google
           </button>
@@ -409,7 +500,12 @@
     <div class="forgot-modal-backdrop" id="forgotBackdrop"></div>
     <div class="forgot-modal" id="forgotModal">
       <div class="forgot-modal-hero">
-        <button type="button" class="forgot-modal-close" id="forgotClose" aria-label="Close">
+        <button
+          type="button"
+          class="forgot-modal-close"
+          id="forgotClose"
+          aria-label="Close"
+        >
           <i class="fa-solid fa-xmark"></i>
         </button>
         <div class="forgot-modal-icon"><i class="fa-solid fa-key"></i></div>
@@ -422,7 +518,14 @@
             <div class="forgot-modal-field">
               <div class="auth-input-wrap">
                 <i class="fa-solid fa-envelope auth-input-icon"></i>
-                <input type="email" id="forgotEmail" class="form-input" placeholder="Enter your email address" autocomplete="email" required />
+                <input
+                  type="email"
+                  id="forgotEmail"
+                  class="form-input"
+                  placeholder="Enter your email address"
+                  autocomplete="email"
+                  required
+                />
               </div>
             </div>
             <button type="submit" class="forgot-modal-submit">
@@ -435,11 +538,28 @@
         </div>
         <div class="forgot-success-view">
           <div class="forgot-success">
-            <div class="forgot-success-icon"><i class="fa-solid fa-check"></i></div>
+            <div class="forgot-success-icon">
+              <i class="fa-solid fa-check"></i>
+            </div>
             <h3>Check your email</h3>
-            <p>We've sent a password reset link to <strong id="forgotSuccessEmail"></strong>. Check your inbox and follow the instructions.</p>
+            <p>
+              We've sent a password reset link to
+              <strong id="forgotSuccessEmail"></strong>. Check your inbox and
+              follow the instructions.
+            </p>
           </div>
-          <button type="button" class="forgot-modal-back" onclick="document.getElementById('forgotBackdrop')?.classList.remove('active');document.getElementById('forgotModal')?.classList.remove('active');">
+          <button
+            type="button"
+            class="forgot-modal-back"
+            onclick="
+              document
+                .getElementById('forgotBackdrop')
+                ?.classList.remove('active');
+              document
+                .getElementById('forgotModal')
+                ?.classList.remove('active');
+            "
+          >
             <i class="fa-solid fa-xmark"></i> Close
           </button>
         </div>
@@ -504,7 +624,7 @@
               <span class="logo-icon"
                 ><img src="assets/img/monogram.svg" alt="LBS"
               /></span>
-              <span class="logo-text">Lingerie by Sisioyin</span>
+              <span class="logo-text">Lingeries by Sisioyin</span>
             </a>
             <p>
               Luxe essentials defined by comfort and confidence. Premium
@@ -563,7 +683,7 @@
         </div>
         <div class="footer-bottom">
           <p class="footer-copyright">
-            &copy; <span id="currentYear">2026</span> Lingerie by Sisioyin. All
+            &copy; <span id="currentYear">2026</span> Lingeries by Sisioyin. All
             rights reserved.
           </p>
           <div id="themeToggle">
@@ -611,6 +731,7 @@
     <script defer src="assets/js/utils.js"></script>
     <script defer src="assets/js/supabase.js"></script>
     <script defer src="assets/js/app.js"></script>
+    <script defer src="assets/js/sync.js"></script>
     <script defer src="assets/js/auth.js"></script>
     <script defer src="assets/js/track.js"></script>
   </body>

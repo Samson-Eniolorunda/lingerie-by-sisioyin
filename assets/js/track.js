@@ -1,7 +1,7 @@
 /**
  * ============================================
  * TRACK ORDER MODULE
- * Lingerie by Sisioyin - Public Order Tracking
+ * Lingeries by Sisioyin - Public Order Tracking
  * ============================================
  */
 (function () {

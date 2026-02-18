@@ -1,7 +1,7 @@
 /**
  * ============================================
  * ANALYTICS MODULE
- * Lingerie by Sisioyin - Google Analytics & Facebook Pixel
+ * Lingeries by Sisioyin - Google Analytics & Facebook Pixel
  * ============================================
  */
 (function () {

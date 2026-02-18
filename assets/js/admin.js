@@ -6260,10 +6260,10 @@
               customerName: customer.full_name || "Customer",
               subject:
                 newStatus === "active"
-                  ? "Your Account Has Been Reactivated — Lingerie by Sisioyin"
+                  ? "Your Account Has Been Reactivated — Lingeries by Sisioyin"
                   : newStatus === "suspended"
-                    ? "Your Account Has Been Temporarily Suspended — Lingerie by Sisioyin"
-                    : "Your Account Has Been Deactivated — Lingerie by Sisioyin",
+                    ? "Your Account Has Been Temporarily Suspended — Lingeries by Sisioyin"
+                    : "Your Account Has Been Deactivated — Lingeries by Sisioyin",
               message:
                 newStatus === "active"
                   ? "Great news! Your account has been reactivated. You can now log in and shop as usual. We look forward to seeing you again!"
@@ -7390,7 +7390,7 @@
       const { error } = await client.from("contact_messages").insert({
         name: composeSelectedCustomer.full_name || "Customer",
         email: composeSelectedCustomer.email,
-        subject: subject || "Message from Lingerie by Sisioyin",
+        subject: subject || "Message from Lingeries by Sisioyin",
         message: message,
         status: "replied",
       });
@@ -7411,7 +7411,7 @@
           body: JSON.stringify({
             to: composeSelectedCustomer.email,
             customerName: composeSelectedCustomer.full_name || "Customer",
-            subject: subject || "Message from Lingerie by Sisioyin",
+            subject: subject || "Message from Lingeries by Sisioyin",
             message: message,
             fromEmail: fromEmail,
           }),

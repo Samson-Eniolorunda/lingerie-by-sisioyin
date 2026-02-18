@@ -16,7 +16,7 @@ window.APP_CONFIG = {
   },
 
   // Brand Name
-  BRAND_NAME: "Lingerie by Sisioyin",
+  BRAND_NAME: "Lingeries by Sisioyin",
 
   // Website Domain (used for SEO, canonical URLs, etc.)
   SITE_URL: "https://lingeriebysisioyin.store",

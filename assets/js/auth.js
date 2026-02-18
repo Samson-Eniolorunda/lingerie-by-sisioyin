@@ -1,7 +1,7 @@
 /**
  * ============================================
  * AUTH MODULE
- * Lingerie by Sisioyin - User Authentication
+ * Lingeries by Sisioyin - User Authentication
  * ============================================
  */
 (function () {
@@ -278,6 +278,9 @@
       window.UTILS?.toast?.("Welcome back!", "success");
       closeAuthModal();
       updateAuthUI(data.user);
+
+      // Cross-device sync: pull & merge remote data
+      window.SYNC?.onLogin?.();
     } catch (err) {
       console.error("🔐 AUTH: Login error:", err);
       window.UTILS?.toast?.(err.message || "Login failed", "error");
@@ -960,6 +963,11 @@
         client.auth.onAuthStateChange((event, session) => {
           console.log("🔐 AUTH: Auth state changed:", event);
           updateAuthUI(session?.user || null);
+
+          // Cross-device sync on sign-in (covers Google OAuth redirect)
+          if (event === "SIGNED_IN" && session?.user) {
+            window.SYNC?.onLogin?.();
+          }
         });
       } catch (err) {
         console.error("🔐 AUTH: Session check error:", err);

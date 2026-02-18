@@ -1,5 +1,5 @@
 /**
- * Lingerie by Sisioyin - Home Page
+ * Lingeries by Sisioyin - Home Page
  * Handles new arrivals and home page functionality
  */
 
@@ -537,11 +537,20 @@
     const underwearImg = document.getElementById("categoryUnderwearImage");
 
     if (heroImg && !heroImg.src) heroImg.src = PLACEHOLDER_IMAGES.hero;
-    if (lingerieImg && !lingerieImg.src)
+    if (
+      lingerieImg &&
+      (!lingerieImg.src || lingerieImg.src.includes("data:image"))
+    )
       lingerieImg.src = PLACEHOLDER_IMAGES.lingerie;
-    if (loungewearImg && !loungewearImg.src)
+    if (
+      loungewearImg &&
+      (!loungewearImg.src || loungewearImg.src.includes("data:image"))
+    )
       loungewearImg.src = PLACEHOLDER_IMAGES.loungewear;
-    if (underwearImg && !underwearImg.src)
+    if (
+      underwearImg &&
+      (!underwearImg.src || underwearImg.src.includes("data:image"))
+    )
       underwearImg.src = PLACEHOLDER_IMAGES.underwear;
   }
 

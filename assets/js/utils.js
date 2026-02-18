@@ -1,5 +1,5 @@
 /**
- * Lingerie by Sisioyin - Utility Functions
+ * Lingeries by Sisioyin - Utility Functions
  * Modern utility library for e-commerce functionality
  */
 

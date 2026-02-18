@@ -1,4 +1,4 @@
-# Lingerie by Sisioyin
+# Lingeries by Sisioyin
 
 A modern e-commerce website for a lingerie brand, built as a static site with Supabase as the backend.
 
