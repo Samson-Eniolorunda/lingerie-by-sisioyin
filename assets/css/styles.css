@@ -2392,7 +2392,7 @@ p:last-child {
   padding-top: var(--space-16);
 }
 .footer > .container {
-  max-width: 1200px;
+  max-width: var(--container-xl);
 }
 
 .footer-grid {
@@ -3122,27 +3122,28 @@ p:last-child {
   margin: 0;
 }
 
-/* Touch Device Styles */
+/* Touch Device Styles — hide overlay, show on tap via JS */
 @media (hover: none) {
   .arrival-card__actions {
-    opacity: 1;
+    opacity: 0;
     transform: translateY(0);
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .arrival-card.touched .arrival-card__actions {
+    opacity: 1;
+    pointer-events: auto;
     background: linear-gradient(
       to top,
       rgba(0, 0, 0, 0.6) 0%,
       transparent 100%
     );
     padding: var(--space-3);
-    pointer-events: auto;
   }
 
   .arrival-card__action-btn span {
-    display: inline; /* Show Quick View text on tablet */
-  }
-
-  .arrival-card__actions {
-    flex-direction: row;
-    justify-content: center;
+    display: none;
   }
 
   .arrival-card__action-btn {
@@ -10659,7 +10660,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 .ck-main .container {
-  max-width: 1100px;
+  max-width: var(--container-xl);
 }
 
 /* ---- Grid ---- */
@@ -10700,7 +10701,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   transition: box-shadow 0.3s;
 }
 .ck-panel:hover {
@@ -12600,6 +12602,13 @@ html[data-theme="dark"] .wa-popup-msg {
     width: 52px;
     height: 52px;
     font-size: 1.5rem;
+  }
+}
+
+/* Push WhatsApp widget above bottom bar on dashboard mobile */
+@media (max-width: 768px) {
+  .dashboard-page .whatsapp-float {
+    bottom: calc(3.5rem + env(safe-area-inset-bottom) + var(--space-4));
   }
 }
 
@@ -17362,10 +17371,36 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
 }
 @media (max-width: 360px) {
   .dash-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+  .dash-stat-card {
+    gap: var(--space-1);
+    padding: var(--space-2);
+  }
+  .dash-stat-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 0.7rem;
+  }
+  .dash-stat-value {
+    font-size: 0.85rem;
+  }
+  .dash-stat-label {
+    font-size: 0.55rem;
   }
   .dash-qa-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+  .dash-qa-item {
+    padding: var(--space-2);
+    font-size: 0.62rem;
+  }
+  .dash-qa-icon {
+    width: 26px;
+    height: 26px;
+    font-size: 0.7rem;
   }
 }
 
@@ -25594,7 +25629,8 @@ html[data-theme="dark"] .confirm-card {
     box-sizing: border-box !important;
   }
   .ck-main {
-    overflow: clip !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     max-width: 100% !important;
     width: 100% !important;
     min-width: 0 !important;
@@ -25640,12 +25676,14 @@ html[data-theme="dark"] .confirm-card {
     min-width: 0 !important;
     max-width: 100% !important;
     width: 100% !important;
-    overflow: clip !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
   }
   .ck-grid {
     max-width: 100% !important;
     width: 100% !important;
-    overflow: clip !important;
+    overflow-x: clip !important;
+    overflow-y: visible !important;
     min-width: 0 !important;
   }
   /* Form elements strict constraints */
@@ -25715,14 +25753,16 @@ html[data-theme="dark"] .confirm-card {
     max-width: 100% !important;
     overflow: hidden !important;
   }
-  /* Payment description text - no wrap, smaller font on mobile */
+  /* Payment description text - allow wrapping on mobile */
   .payment-option .payment-desc {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
     display: block !important;
     max-width: 100% !important;
     font-size: 0.65rem !important;
+    line-height: 1.4 !important;
+    word-break: break-word !important;
   }
   .payment-option .payment-name {
     word-break: normal;
@@ -25763,7 +25803,8 @@ html[data-theme="dark"] .confirm-card {
   }
   /* Payment section specific fixes */
   #paymentCard .ck-panel-body {
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: visible;
     max-width: 100%;
   }
   .bank-transfer-info {
@@ -25955,7 +25996,8 @@ html[data-theme="dark"] .confirm-card {
   /* Payment section overflow fixes for small phones */
   .checkout-card-body {
     padding: var(--space-3);
-    overflow: hidden !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
   }
   /* Force all text to wrap on small phones */
   .bank-detail-value,

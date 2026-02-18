@@ -908,28 +908,26 @@
     const checkoutBtn = $(".cd-checkout-btn");
     if (checkoutBtn) {
       checkoutBtn.addEventListener("click", (e) => {
-        const client = window.DB?.client;
-        if (!client) return; // Supabase not loaded, let link work normally
+        // Use cached user check (sync) instead of async getSession
+        const user = window.AUTH?.getUser?.();
+        if (user) {
+          // Already logged in — let the <a href="/checkout"> navigate naturally
+          return;
+        }
 
         e.preventDefault();
-        client.auth.getSession().then(({ data }) => {
-          if (data?.session?.user) {
-            window.location.href = "/cart";
+        closeDrawer();
+        UTILS.toast?.(
+          "Please sign in or create an account to proceed to checkout. It only takes a moment!",
+          "info",
+        );
+        setTimeout(() => {
+          if (window.AUTH?.openModal) {
+            window.AUTH.openModal("login");
           } else {
-            closeDrawer();
-            UTILS.toast?.(
-              "Please sign in or create an account to proceed to checkout. It only takes a moment!",
-              "info",
-            );
-            setTimeout(() => {
-              if (window.AUTH?.openModal) {
-                window.AUTH.openModal("login");
-              } else {
-                document.getElementById("loginBtn")?.click();
-              }
-            }, 1200);
+            document.getElementById("loginBtn")?.click();
           }
-        });
+        }, 1200);
       });
     }
 

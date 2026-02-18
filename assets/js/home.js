@@ -523,6 +523,37 @@
     loadProducts();
   });
 
+  // Touch handler for arrival cards — toggle quick view overlay on tap
+  if (window.matchMedia("(hover: none)").matches) {
+    let activeTouchCard = null;
+    grid.addEventListener("click", (e) => {
+      const card = e.target.closest(".arrival-card");
+      if (!card) return;
+      // If tapping an action button inside an already-touched card, let it through
+      if (
+        e.target.closest(".arrival-card__action-btn") ||
+        e.target.closest(".arrival-card__wishlist")
+      )
+        return;
+      // Toggle touched state
+      if (activeTouchCard === card) {
+        card.classList.remove("touched");
+        activeTouchCard = null;
+      } else {
+        if (activeTouchCard) activeTouchCard.classList.remove("touched");
+        card.classList.add("touched");
+        activeTouchCard = card;
+      }
+    });
+    // Dismiss on tap outside
+    document.addEventListener("click", (e) => {
+      if (activeTouchCard && !e.target.closest(".arrival-card")) {
+        activeTouchCard.classList.remove("touched");
+        activeTouchCard = null;
+      }
+    });
+  }
+
   /* ─────────────────────────────────────────────
    * Load Site Images from Database
    * ───────────────────────────────────────────── */
@@ -534,29 +565,61 @@
     underwear: "https://placehold.co/600x600/fdf2f8/be185d?text=Underwear",
   };
 
+  // Helper: set image src and attach load listener for fade-in
+  function applyImage(img, url) {
+    if (!img || !url) return;
+    img.onload = null;
+    img.addEventListener("load", function onLoad() {
+      img.removeEventListener("load", onLoad);
+      img.style.opacity = "1";
+      const skelId = img.getAttribute("data-skeleton");
+      if (skelId) {
+        const skel = document.getElementById(skelId);
+        if (skel) skel.style.display = "none";
+      }
+    });
+    img.src = url;
+    if (img.complete && img.naturalWidth > 0) {
+      img.style.opacity = "1";
+      const skelId = img.getAttribute("data-skeleton");
+      if (skelId) {
+        const skel = document.getElementById(skelId);
+        if (skel) skel.style.display = "none";
+      }
+    }
+  }
+
   // Set placeholder images immediately
   function setPlaceholderImages() {
     const heroImg = document.getElementById("heroImage");
-    const lingerieImg = document.getElementById("categoryLingerieImage");
-    const loungewearImg = document.getElementById("categoryLoungewearImage");
-    const underwearImg = document.getElementById("categoryUnderwearImage");
-
     if (heroImg && !heroImg.src) heroImg.src = PLACEHOLDER_IMAGES.hero;
+
+    const lingerieImg = document.getElementById("categoryLingerieImage");
     if (
       lingerieImg &&
-      (!lingerieImg.src || lingerieImg.src.includes("data:image"))
+      (!lingerieImg.src ||
+        lingerieImg.src.includes("data:image") ||
+        !lingerieImg.src)
     )
-      lingerieImg.src = PLACEHOLDER_IMAGES.lingerie;
+      applyImage(lingerieImg, PLACEHOLDER_IMAGES.lingerie);
+
+    const loungewearImg = document.getElementById("categoryLoungewearImage");
     if (
       loungewearImg &&
-      (!loungewearImg.src || loungewearImg.src.includes("data:image"))
+      (!loungewearImg.src ||
+        loungewearImg.src.includes("data:image") ||
+        !loungewearImg.src)
     )
-      loungewearImg.src = PLACEHOLDER_IMAGES.loungewear;
+      applyImage(loungewearImg, PLACEHOLDER_IMAGES.loungewear);
+
+    const underwearImg = document.getElementById("categoryUnderwearImage");
     if (
       underwearImg &&
-      (!underwearImg.src || underwearImg.src.includes("data:image"))
+      (!underwearImg.src ||
+        underwearImg.src.includes("data:image") ||
+        !underwearImg.src)
     )
-      underwearImg.src = PLACEHOLDER_IMAGES.underwear;
+      applyImage(underwearImg, PLACEHOLDER_IMAGES.underwear);
   }
 
   async function loadSiteImages() {
@@ -592,22 +655,13 @@
             if (heroImg) heroImg.src = url;
             break;
           case "category_lingerie":
-            const lingerieImg = document.getElementById(
-              "categoryLingerieImage",
-            );
-            if (lingerieImg) lingerieImg.src = url;
+            applyImage(document.getElementById("categoryLingerieImage"), url);
             break;
           case "category_loungewear":
-            const loungewearImg = document.getElementById(
-              "categoryLoungewearImage",
-            );
-            if (loungewearImg) loungewearImg.src = url;
+            applyImage(document.getElementById("categoryLoungewearImage"), url);
             break;
           case "category_underwear":
-            const underwearImg = document.getElementById(
-              "categoryUnderwearImage",
-            );
-            if (underwearImg) underwearImg.src = url;
+            applyImage(document.getElementById("categoryUnderwearImage"), url);
             break;
         }
       });
