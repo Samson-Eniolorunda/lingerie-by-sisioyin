@@ -15441,55 +15441,16 @@ html[data-theme="dark"] .wa-popup-msg {
 
 @media (max-width: 768px) {
   .dash-sidebar {
-    width: 64px;
-  }
-  .dash-sidebar-user,
-  .dash-sidebar-nav .dash-tab span,
-  .dash-sidebar-link span {
     display: none;
-  }
-  .dash-sidebar-nav::before {
-    display: none;
-  }
-  .dash-sidebar-header {
-    justify-content: center;
-    padding: var(--space-4) var(--space-2);
-  }
-  .dash-sidebar .dash-avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 0.85rem;
-  }
-  .dash-sidebar-nav .dash-tab {
-    justify-content: center;
-    padding: 0.6rem;
-  }
-  .dash-sidebar-nav .dash-tab i {
-    width: auto;
-    font-size: 1rem;
-  }
-  .dash-sidebar-nav .dash-tab.active {
-    box-shadow: none;
-    background: linear-gradient(
-      135deg,
-      rgba(190, 24, 93, 0.15),
-      rgba(219, 39, 119, 0.1)
-    );
-    border-radius: 12px;
-  }
-  .dash-sidebar-link {
-    justify-content: center;
-    padding: 0.5rem;
-  }
-  .dash-sidebar-link i {
-    width: auto;
-    font-size: 1rem;
   }
   .dash-bottombar {
-    display: none;
+    display: flex;
   }
   .dash-layout {
     gap: var(--space-3);
+  }
+  .dash-main {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
   }
 }
 
@@ -17344,51 +17305,6 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
    RESPONSIVE
    =========================== */
 @media (max-width: 1024px) {
-  .dash-sidebar {
-    width: 64px;
-  }
-  .dash-sidebar-user,
-  .dash-sidebar-nav .dash-tab span,
-  .dash-sidebar-link span {
-    display: none;
-  }
-  .dash-sidebar-nav::before {
-    display: none;
-  }
-  .dash-sidebar-header {
-    justify-content: center;
-    padding: var(--space-4) var(--space-2);
-  }
-  .dash-sidebar .dash-avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 0.85rem;
-  }
-  .dash-sidebar-nav .dash-tab {
-    justify-content: center;
-    padding: 0.6rem;
-  }
-  .dash-sidebar-nav .dash-tab i {
-    width: auto;
-    font-size: 1rem;
-  }
-  .dash-sidebar-nav .dash-tab.active {
-    box-shadow: none;
-    background: linear-gradient(
-      135deg,
-      rgba(190, 24, 93, 0.15),
-      rgba(219, 39, 119, 0.1)
-    );
-    border-radius: 12px;
-  }
-  .dash-sidebar-link {
-    justify-content: center;
-    padding: 0.5rem;
-  }
-  .dash-sidebar-link i {
-    width: auto;
-    font-size: 1rem;
-  }
   .dash-stats {
     grid-template-columns: repeat(2, 1fr);
   }
