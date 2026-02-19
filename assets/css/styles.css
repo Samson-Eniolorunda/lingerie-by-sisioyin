@@ -15503,7 +15503,7 @@ html[data-theme="dark"] .wa-popup-msg {
   background: rgba(255, 255, 255, 0.55);
   -webkit-backdrop-filter: blur(16px) saturate(1.6);
   backdrop-filter: blur(16px) saturate(1.6);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1.5px solid rgba(190, 24, 93, 0.25);
   border-radius: 18px;
   padding: var(--space-5);
   box-shadow:
@@ -16357,6 +16357,9 @@ html[data-theme="dark"] .dash-form-group input[type="date"] {
   font-size: 0.82rem;
   color: var(--text-muted);
   line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .dash-setting-badge {
   font-size: 0.65rem;
@@ -17440,9 +17443,8 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
   .dash-setting-info p {
     font-size: 0.72rem;
     line-height: 1.4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    word-break: break-word;
   }
   .dash-btn-outline,
   .dash-btn-danger,
