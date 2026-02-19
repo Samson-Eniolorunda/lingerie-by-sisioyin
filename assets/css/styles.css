@@ -12588,10 +12588,10 @@ html[data-theme="dark"] .wa-popup-msg {
   }
 }
 
-/* Place WhatsApp widget inside the bottom bar on dashboard mobile */
+/* Place WhatsApp widget above the bottom bar on dashboard mobile */
 @media (max-width: 768px) {
   .dashboard-page .whatsapp-float {
-    bottom: calc(0.25rem + env(safe-area-inset-bottom));
+    bottom: calc(4rem + env(safe-area-inset-bottom));
     right: var(--space-3);
     z-index: 201;
   }
@@ -16135,7 +16135,8 @@ html[data-theme="dark"] .wa-popup-msg {
   color: var(--text-muted);
   margin: 0 auto var(--space-4);
   line-height: 1.5;
-  white-space: nowrap;
+  max-width: 100%;
+  padding: 0 var(--space-2);
 }
 .dash-empty .btn,
 .dash-empty .btn-primary {
@@ -17407,15 +17408,10 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
   }
   .dash-setting-info h4 {
     font-size: 0.82rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
   .dash-setting-info p {
     font-size: 0.72rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.4;
   }
   .dash-btn-outline,
   .dash-btn-danger,
