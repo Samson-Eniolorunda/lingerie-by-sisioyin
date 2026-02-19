@@ -53,7 +53,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css?v=61" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=62" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -399,9 +399,12 @@
               </p>
               <ul>
                 <li>
-                  <strong>Account Information:</strong> Full name, email
-                  address, phone number, and date of birth when you create an
-                  account (account registration is required to make purchases).
+                  <strong>Account Information:</strong> First name, last name,
+                  email address, phone number, date of birth, and gender when
+                  you create an account or update your profile. You may also
+                  sign in using Google, which provides your name, email, and
+                  profile picture. Account registration is required to make
+                  purchases.
                 </li>
                 <li>
                   <strong>Order Information:</strong> Shipping address, order
@@ -410,18 +413,29 @@
                 <li>
                   <strong>Payment Receipts:</strong> Screenshots or photos of
                   bank transfer receipts that you upload during checkout to
-                  confirm payment. We do not collect or store credit card or
-                  debit card details.
+                  confirm payment. These are stored securely in cloud storage.
+                  We do not collect or store credit card or debit card details.
                 </li>
                 <li>
                   <strong>Communication Data:</strong> Messages you send via our
                   contact form or WhatsApp, including your name, email, and
                   message content.
                 </li>
+                <li>
+                  <strong>Newsletter:</strong> Your email address if you
+                  subscribe to our newsletter.
+                </li>
+                <li>
+                  <strong>Reviews:</strong> Your name, rating, and comments if
+                  you submit a product review.
+                </li>
               </ul>
               <p>We also automatically collect:</p>
               <ul>
-                <li>IP address and approximate location</li>
+                <li>
+                  IP address and approximate location (country, region, and
+                  city) — stored in our database for analytics
+                </li>
                 <li>Pages visited, time spent, and referring website</li>
                 <li>Screen resolution and viewport size</li>
                 <li>
@@ -429,6 +443,11 @@
                   model
                 </li>
               </ul>
+              <p>
+                This data is collected using a third-party geolocation service
+                (ipapi.co) and stored in our own database alongside Google
+                Analytics and Meta Pixel.
+              </p>
             </section>
 
             <section class="legal-section" id="how-we-use">
@@ -486,11 +505,19 @@
                 <li>
                   <strong>Analytics Providers:</strong> We use Google Analytics
                   and Meta (Facebook) Pixel to understand how visitors use our
-                  site. These services collect anonymised browsing data.
+                  site. These services collect anonymised browsing data. We also
+                  use ipapi.co to determine visitor location from IP addresses.
                 </li>
                 <li>
                   <strong>Email Services:</strong> We use third-party email
-                  services to send order confirmations and notifications.
+                  services (including Cloudflare Workers) to send order
+                  confirmations and notifications.
+                </li>
+                <li>
+                  <strong>Google Services:</strong> We use Google Fonts for
+                  typography (which may transmit your IP to Google), Google
+                  Maps Places API for address autocomplete, and Google
+                  reCAPTCHA for security.
                 </li>
                 <li>
                   <strong>Legal Requirements:</strong> When required by Nigerian
@@ -509,9 +536,18 @@
               <ul>
                 <li>
                   <strong>Local Storage:</strong> We store your theme preference
-                  (light/dark mode), shopping cart contents, wishlist items, and
-                  authentication session locally in your browser. This data
-                  stays on your device and is not transmitted to us.
+                  (light/dark mode), shopping cart contents, wishlist items,
+                  saved addresses, dashboard preferences, form drafts, and
+                  authentication session locally in your browser. If you are
+                  logged in, some of this data (cart, wishlist, addresses, and
+                  preferences) is also synced to our servers for cross-device
+                  access.
+                </li>
+                <li>
+                  <strong>Session Storage:</strong> We use temporary session
+                  storage for analytics flags, order confirmation data, and
+                  page state. This data is automatically cleared when you
+                  close your browser tab.
                 </li>
                 <li>
                   <strong>Google Analytics:</strong> We use Google Analytics to
@@ -559,7 +595,8 @@
                   <strong>No Card Data:</strong> We do not collect, process, or
                   store any credit or debit card information. Payment is made
                   directly via bank transfer to our Moniepoint MFB account
-                  (Account Name: Oyindamola Adelugba).
+                  (Account Name: Oyindamola Adelugba
+                  (LingeriesbySisioyin)).
                 </li>
                 <li>
                   <strong>Password Security:</strong> Account passwords are
@@ -646,8 +683,10 @@
                   years for customer service quality purposes.
                 </li>
                 <li>
-                  <strong>Analytics data:</strong> Anonymised analytics data is
-                  retained by Google and Meta according to their respective
+                  <strong>Analytics data:</strong> Site visit records (IP,
+                  location, device info) stored in our database are retained
+                  indefinitely in anonymised form. Analytics data held by
+                  Google and Meta is retained according to their respective
                   policies.
                 </li>
               </ul>
@@ -703,10 +742,11 @@
                   Account profile information (name, email, phone number, date
                   of birth, gender)
                 </li>
-                <li>Saved addresses and preferences</li>
-                <li>Wishlist items</li>
-                <li>Shopping cart contents</li>
+                <li>Saved addresses and delivery preferences</li>
+                <li>Wishlist items and shopping cart contents</li>
+                <li>Browsing history and search history</li>
                 <li>Communication history (messages, inquiries)</li>
+                <li>Notification, privacy, and marketing preferences</li>
                 <li>WhatsApp notification preferences</li>
               </ul>
               <h3>Data We May Retain</h3>
@@ -727,7 +767,9 @@
               <h3>Processing Time</h3>
               <p>
                 <strong>Self-service deletion (via Dashboard):</strong>
-                Processed immediately.
+                Your account is locked immediately. Your data is permanently
+                deleted after a 30-day grace period, during which you may
+                contact support to recover your account.
                 <strong
                   >Manual requests (via email, WhatsApp, or contact
                   form):</strong
@@ -824,14 +866,14 @@
             </p>
             <div class="footer-social">
               <a
-                href="https://instagram.com/lingeriebysissioyin"
+                href="https://instagram.com/lingeries_bysisioyin"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
                 ><i class="fa-brands fa-instagram"></i
               ></a>
               <a
-                href="https://tiktok.com/@lingeriebysissioyin"
+                href="https://tiktok.com/@lingeries_bysisioyin"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="TikTok"
@@ -1281,7 +1323,7 @@
       </div>
     </div>
 
-    <script src="assets/js/recaptcha.js?v=61"></script>
+    <script src="assets/js/recaptcha.js?v=62"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
@@ -1291,13 +1333,13 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=61"></script>
-    <script defer src="assets/js/utils.js?v=61"></script>
-    <script defer src="assets/js/supabase.js?v=61"></script>
-    <script defer src="assets/js/app.js?v=61"></script>
-    <script defer src="assets/js/sync.js?v=61"></script>
-    <script defer src="assets/js/auth.js?v=61"></script>
+    <script defer src="assets/js/config.js?v=62"></script>
+    <script defer src="assets/js/utils.js?v=62"></script>
+    <script defer src="assets/js/supabase.js?v=62"></script>
+    <script defer src="assets/js/app.js?v=62"></script>
+    <script defer src="assets/js/sync.js?v=62"></script>
+    <script defer src="assets/js/auth.js?v=62"></script>
 
-    <script src="assets/js/legal.js?v=61"></script>
+    <script src="assets/js/legal.js?v=62"></script>
   </body>
 </html>

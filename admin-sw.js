@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = "1.61.26";
+const SW_VERSION = "1.62.26";
 const SW_BUILD = 60;
 const CACHE_NAME = "lbs-admin-cache-v" + SW_BUILD;
 
