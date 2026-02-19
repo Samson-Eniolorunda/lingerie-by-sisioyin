@@ -15,10 +15,7 @@
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
   (function forceCacheClear() {
-    const storedBuild = parseInt(
-      localStorage.getItem(VERSION_KEY) || "0",
-      10,
-    );
+    const storedBuild = parseInt(localStorage.getItem(VERSION_KEY) || "0", 10);
     if (storedBuild >= APP_BUILD) return;
 
     console.log(

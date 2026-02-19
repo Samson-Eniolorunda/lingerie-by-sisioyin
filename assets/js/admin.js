@@ -1595,7 +1595,9 @@
       `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || "No name";
     // Developer, owner, and super_admin can manage other admins
     const hasFullAccess =
-      currentUserRole === "owner" || currentUserRole === "super_admin" || currentUserRole === "developer";
+      currentUserRole === "owner" ||
+      currentUserRole === "super_admin" ||
+      currentUserRole === "developer";
     const canManage = admin.id !== currentUserId && hasFullAccess;
     const isOwner = admin.role === "owner";
     const isSuperAdmin = admin.role === "super_admin";
