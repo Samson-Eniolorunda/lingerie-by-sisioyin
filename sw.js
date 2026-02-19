@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 31;
+const SW_VERSION = 32;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
@@ -140,7 +140,24 @@ self.addEventListener("fetch", (event) => {
         }
       }
 
-      // Stale-while-revalidate for static assets (CSS, JS, images)
+      // Network-first for CSS and JS (always serve fresh code)
+      const isCSSorJS = url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || 
+                        url.search.includes('.css') || url.search.includes('.js');
+      if (isCSSorJS) {
+        try {
+          const networkResponse = await fetch(request);
+          if (networkResponse && networkResponse.status === 200) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+          }
+          return networkResponse;
+        } catch {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+        }
+      }
+
+      // Stale-while-revalidate for other static assets (images, fonts)
       const cachedResponse = await caches.match(request);
       if (cachedResponse) {
         event.waitUntil(
