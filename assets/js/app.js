@@ -7,45 +7,78 @@
   "use strict";
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // FORCE CACHE CLEAR - Ensures all users get fresh assets
+  // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = 47;
+  const APP_VERSION = 48;
   const VERSION_KEY = "LBS_APP_VERSION";
+  const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
   (function forceCacheClear() {
     const storedVersion = parseInt(
       localStorage.getItem(VERSION_KEY) || "0",
       10,
     );
-    if (storedVersion < APP_VERSION) {
-      console.log("[APP] New version detected, clearing all caches...");
-      // Clear all caches
-      if ("caches" in window) {
-        caches.keys().then((names) => {
-          names.forEach((name) => {
-            caches.delete(name);
-            console.log("[APP] Deleted cache:", name);
-          });
-        });
-      }
-      // Unregister all service workers
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.getRegistrations().then((regs) => {
-          regs.forEach((reg) => {
-            reg.unregister();
-            console.log("[APP] Unregistered service worker");
-          });
-        });
-      }
-      // Update stored version
-      localStorage.setItem(VERSION_KEY, String(APP_VERSION));
-      // Force reload after a brief delay to ensure cache is cleared
-      if (storedVersion > 0) {
-        setTimeout(() => {
-          window.location.reload(true);
-        }, 500);
-      }
+    if (storedVersion >= APP_VERSION) return;
+
+    console.log(
+      "[APP] Version mismatch (" + storedVersion + " → " + APP_VERSION + "), nuking caches…",
+    );
+
+    // Collect all async cleanup tasks
+    const tasks = [];
+
+    // 1. Delete every Cache Storage entry
+    if ("caches" in window) {
+      tasks.push(
+        caches.keys().then((names) =>
+          Promise.all(
+            names.map((n) => {
+              console.log("[APP] Deleting cache:", n);
+              return caches.delete(n);
+            }),
+          ),
+        ),
+      );
     }
+
+    // 2. Unregister every service worker
+    if ("serviceWorker" in navigator) {
+      tasks.push(
+        navigator.serviceWorker.getRegistrations().then((regs) =>
+          Promise.all(
+            regs.map((r) => {
+              console.log("[APP] Unregistering SW");
+              return r.unregister();
+            }),
+          ),
+        ),
+      );
+    }
+
+    // 3. Wait for ALL cleanup to finish, then stamp version + hard reload
+    Promise.all(tasks)
+      .catch((err) => console.warn("[APP] Cache cleanup error:", err))
+      .finally(() => {
+        localStorage.setItem(VERSION_KEY, String(APP_VERSION));
+        // Only reload if user already had a previous version (not first visit)
+        if (storedVersion > 0) {
+          // Prevent infinite reload loops
+          const reloads = parseInt(
+            sessionStorage.getItem(RELOAD_KEY) || "0",
+            10,
+          );
+          if (reloads < 2) {
+            sessionStorage.setItem(RELOAD_KEY, String(reloads + 1));
+            // Navigate with a cache-busting param to bypass HTTP cache
+            const url = new URL(window.location.href);
+            url.searchParams.set("_cb", Date.now());
+            window.location.replace(url.toString());
+            return;
+          }
+          // Tried twice — reset counter, continue loading
+          sessionStorage.removeItem(RELOAD_KEY);
+        }
+      });
   })();
 
   // ═══════════════════════════════════════════════════════════════════════════

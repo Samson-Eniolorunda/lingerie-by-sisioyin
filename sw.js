@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 47;
+const SW_VERSION = 48;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 // Only cache HTML pages and icons for offline support
 // CSS/JS are NOT cached - always fetched fresh from server
@@ -105,8 +105,8 @@ self.addEventListener("fetch", (event) => {
       // Network-first for navigations (HTML pages) — always show fresh content
       if (request.mode === "navigate") {
         try {
-          // Fetch with redirect: "follow" and let the server handle clean URLs
-          const networkResponse = await fetch(request);
+          // Bypass HTTP cache to ensure fresh HTML on stubborn devices
+          const networkResponse = await fetch(request, { cache: "no-cache" });
           if (
             networkResponse &&
             networkResponse.status === 200 &&
@@ -129,8 +129,8 @@ self.addEventListener("fetch", (event) => {
         url.search.includes(".css") ||
         url.search.includes(".js");
       if (isCSSorJS) {
-        // Don't intercept - let browser handle directly
-        return fetch(request);
+        // Force bypass HTTP cache on stubborn devices
+        return fetch(request, { cache: "no-store" });
       }
 
       // Stale-while-revalidate for other static assets (images, fonts)
