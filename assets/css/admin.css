@@ -1462,7 +1462,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-6);
+  padding: var(--space-4);
   background: linear-gradient(
     135deg,
     var(--bg-body) 0%,
@@ -1472,8 +1472,8 @@ textarea {
 
 .auth-container {
   width: 100%;
-  max-width: 420px;
-  padding: var(--space-8);
+  max-width: 380px;
+  padding: var(--space-5);
   background: var(--bg-surface);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
@@ -1482,16 +1482,16 @@ textarea {
 
 .auth-brand {
   text-align: center;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-3);
 }
 
 .auth-logo {
-  width: 60px;
-  height: 60px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto var(--space-4);
+  margin: 0 auto var(--space-2);
   background: var(--bg-surface-alt);
   border-radius: var(--radius-xl);
   border: 1.5px solid var(--border-light);
@@ -1499,14 +1499,14 @@ textarea {
 
 .auth-brand h1 {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  margin-bottom: var(--space-1);
+  font-size: 1.2rem;
+  margin-bottom: 2px;
   color: var(--text-primary);
 }
 
 .auth-brand p {
   color: var(--text-muted);
-  font-size: var(--text-sm);
+  font-size: 0.78rem;
 }
 
 .auth-alert {
@@ -1525,15 +1525,16 @@ textarea {
   display: flex;
   background: var(--bg-surface-alt);
   border-radius: var(--radius-lg);
-  padding: var(--space-1);
-  margin-bottom: var(--space-6);
+  padding: 3px;
+  margin-bottom: var(--space-3);
 }
 
 .auth-tab {
   flex: 1;
-  padding: var(--space-3);
+  padding: var(--space-2);
   border-radius: var(--radius-md);
   font-weight: 500;
+  font-size: 0.85rem;
   color: var(--text-muted);
   transition: all var(--transition-fast);
 }
@@ -1547,22 +1548,22 @@ textarea {
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
 }
 
 .auth-form-header {
   text-align: center;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-1);
 }
 
 .auth-form-header h3 {
-  font-size: var(--text-xl);
-  margin-bottom: var(--space-2);
+  font-size: 1rem;
+  margin-bottom: var(--space-1);
 }
 
 .auth-form-header p {
   color: var(--text-muted);
-  font-size: var(--text-sm);
+  font-size: 0.78rem;
 }
 
 .auth-links {
@@ -6685,65 +6686,81 @@ html[data-theme="dark"] .bar-tooltip::after {
 }
 
 /* ── #20: Admin auth form — reduce spacing + no terms cookie ── */
-.auth-form {
-  gap: var(--space-3);
-}
-
-.auth-form-header {
-  margin-bottom: var(--space-2);
-}
-
 .auth-form .form-group {
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.auth-form .form-group label {
+  font-size: 0.8rem;
+  margin-bottom: 2px;
+}
+
+.auth-form .form-input {
+  padding: 0.5rem 0.7rem;
+  font-size: 0.88rem;
+}
+
+.auth-form .input-icon .form-input {
+  padding-left: 2.2rem;
+}
+
+.auth-form .input-icon i:first-child {
+  font-size: 0.82rem;
+}
+
+.auth-form .form-row {
+  gap: var(--space-2);
+}
+
+.auth-form .btn {
+  padding: 0.55rem;
+  font-size: 0.88rem;
+  margin-top: var(--space-1);
+}
+
+.auth-links {
+  margin-top: var(--space-1);
 }
 
 /* ── #21: Admin auth compact for short viewports ── */
-@media (max-height: 700px) {
+@media (max-height: 600px) {
   .auth-portal {
-    padding: var(--space-4) var(--space-3);
+    padding: var(--space-2);
+    align-items: flex-start;
+    overflow-y: auto;
   }
   .auth-container {
-    padding: var(--space-4);
+    padding: var(--space-3);
   }
   .auth-brand {
-    margin-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
   }
   .auth-logo {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
   }
   .auth-brand h1 {
-    font-size: 1.15rem;
+    font-size: 1rem;
   }
   .auth-brand p {
-    font-size: 0.78rem;
-    margin-top: 2px;
+    display: none;
   }
   .auth-tabs {
-    margin-bottom: var(--space-3);
-  }
-  .auth-tab {
-    padding: var(--space-2) var(--space-3);
-    font-size: 0.82rem;
+    margin-bottom: var(--space-2);
   }
   .auth-form {
-    gap: var(--space-2);
+    gap: var(--space-1);
   }
-  .form-label {
-    font-size: 0.78rem;
-    margin-bottom: 2px;
+  .auth-form .form-group label {
+    font-size: 0.75rem;
   }
-  .form-input {
-    padding: 0.45rem 0.65rem;
-    font-size: 0.85rem;
+  .auth-form .form-input {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.82rem;
   }
-  .form-row {
-    gap: var(--space-2);
-  }
-  .btn-auth-submit {
-    padding: 0.55rem;
-    font-size: 0.88rem;
-    margin-top: var(--space-1);
+  .auth-form .btn {
+    padding: 0.45rem;
+    font-size: 0.82rem;
   }
 }
 

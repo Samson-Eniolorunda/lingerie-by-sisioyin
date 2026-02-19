@@ -2284,7 +2284,9 @@
         0,
         window.location.pathname.lastIndexOf("/") + 1,
       );
-      const swPath = basePath + "sw.js";
+      const isAdmin = /\/admin(\.html)?$/i.test(window.location.pathname);
+      const swFile = isAdmin ? "admin-sw.js" : "sw.js";
+      const swPath = basePath + swFile;
 
       try {
         const registration = await navigator.serviceWorker.register(swPath);
