@@ -5,8 +5,8 @@
  * ============================================
  */
 
-const SW_VERSION = "1.62.26";
-const SW_BUILD = 60;
+const SW_VERSION = "1.63.26";
+const SW_BUILD = 63;
 const CACHE_NAME = "lbs-cache-v" + SW_BUILD;
 // Only cache HTML pages and icons for offline support
 // CSS/JS are NOT cached - always fetched fresh from server
@@ -44,7 +44,7 @@ self.addEventListener("install", (event) => {
       })
       .then(() => {
         console.log("[SW] Static assets cached");
-        return self.skipWaiting();
+        // skipWaiting is called via message handler when app.js detects an update
       })
       .catch((err) => {
         console.error("[SW] Cache error:", err);

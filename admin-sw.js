@@ -5,8 +5,8 @@
  * ============================================
  */
 
-const SW_VERSION = "1.62.26";
-const SW_BUILD = 60;
+const SW_VERSION = "1.63.26";
+const SW_BUILD = 63;
 const CACHE_NAME = "lbs-admin-cache-v" + SW_BUILD;
 
 const STATIC_ASSETS = [
@@ -27,7 +27,10 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE_NAME)
       .then((cache) => cache.addAll(STATIC_ASSETS))
-      .then(() => self.skipWaiting())
+      .then(() => {
+        console.log("[Admin SW] Static assets cached");
+        // skipWaiting is called via message handler when app.js detects an update
+      })
       .catch((err) => console.error("[Admin SW] Cache error:", err)),
   );
 });
