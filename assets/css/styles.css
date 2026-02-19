@@ -2543,6 +2543,17 @@ p:last-child {
   color: var(--clr-gray-500);
 }
 
+.footer-privacy-link {
+  color: var(--clr-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-privacy-link:hover {
+  color: var(--clr-primary-light);
+  text-decoration: underline;
+}
+
 /* =============================================================================
    15. PRODUCT CARDS
    ============================================================================= */
@@ -22249,11 +22260,17 @@ html[data-theme="dark"] .page-loader-text span {
   animation: spin 1s linear infinite;
 }
 @keyframes categoryShimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 /* Dark mode category skeleton */
 [data-theme="dark"] .category-skeleton {
