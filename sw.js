@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 51;
+const SW_VERSION = 52;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 // Only cache HTML pages and icons for offline support
 // CSS/JS are NOT cached - always fetched fresh from server

@@ -13120,8 +13120,7 @@ html[data-theme="dark"] .wa-popup-msg {
   align-items: center;
   padding-top: var(--header-height);
   position: relative;
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: hidden;
   background: var(--bg-base);
 }
 
@@ -13541,14 +13540,14 @@ html[data-theme="dark"] .wa-popup-msg {
 
 .hero-float-card.top {
   top: 8%;
-  left: -12%;
+  left: -5%;
   animation: floatCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards,
     floatBob 5s ease-in-out 1.4s infinite;
 }
 
 .hero-float-card.bottom {
-  bottom: 12%;
-  right: -8%;
+  bottom: 8%;
+  right: -5%;
   animation: floatCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1s forwards,
     floatBob 5s ease-in-out 1.7s infinite;
 }
@@ -13668,12 +13667,12 @@ html[data-theme="dark"] .wa-popup-msg {
 
   .hero-float-card.top {
     top: 4%;
-    left: 2%;
+    left: 0;
   }
 
   .hero-float-card.bottom {
     bottom: 4%;
-    right: 2%;
+    right: 0;
   }
 
   .hero-float-icon {
@@ -13699,7 +13698,7 @@ html[data-theme="dark"] .wa-popup-msg {
     left: 0;
   }
   .hero-float-card.bottom {
-    bottom: 2%;
+    bottom: 3%;
     right: 0;
   }
 }
