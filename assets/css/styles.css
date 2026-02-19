@@ -2543,15 +2543,28 @@ p:last-child {
   color: var(--clr-gray-500);
 }
 
-.footer-privacy-link {
+.footer-legal-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.footer-legal-link {
   color: var(--clr-primary);
   text-decoration: none;
   transition: color 0.2s;
 }
 
-.footer-privacy-link:hover {
+.footer-legal-link:hover {
   color: var(--clr-primary-light);
   text-decoration: underline;
+}
+
+.footer-legal-divider {
+  color: var(--clr-gray-400);
 }
 
 /* =============================================================================

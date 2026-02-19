@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Ensures all users get fresh assets
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = 40;
+  const APP_VERSION = 41;
   const VERSION_KEY = "LBS_APP_VERSION";
 
   (function forceCacheClear() {
