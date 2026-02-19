@@ -3116,6 +3116,11 @@ body.bulk-mode .product-card .select-checkbox {
   font-weight: 600;
 }
 
+.role-badge.owner {
+  background: rgba(217, 119, 6, 0.12);
+  color: #d97706;
+}
+
 .role-badge.super {
   background: var(--clr-primary-light);
   color: var(--clr-primary);
@@ -3141,6 +3146,11 @@ body.bulk-mode .product-card .select-checkbox {
   font-weight: 600;
   margin-left: 4px;
   vertical-align: middle;
+}
+
+.role-badge-sm.owner {
+  background: rgba(217, 119, 6, 0.15);
+  color: #d97706;
 }
 
 .role-badge-sm.super {

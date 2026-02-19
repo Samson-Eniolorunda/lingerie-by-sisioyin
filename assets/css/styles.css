@@ -13530,7 +13530,9 @@ html[data-theme="dark"] .wa-popup-msg {
     0 1px 4px rgba(0, 0, 0, 0.04);
   opacity: 0;
   z-index: 2;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .hero-float-card:hover {
   transform: translateY(-3px);
@@ -13542,14 +13544,16 @@ html[data-theme="dark"] .wa-popup-msg {
 .hero-float-card.top {
   top: 8%;
   left: -5%;
-  animation: floatCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards,
+  animation:
+    floatCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.7s forwards,
     floatBob 5s ease-in-out 1.4s infinite;
 }
 
 .hero-float-card.bottom {
   bottom: 8%;
   right: -5%;
-  animation: floatCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1s forwards,
+  animation:
+    floatCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 1s forwards,
     floatBob 5s ease-in-out 1.7s infinite;
 }
 
@@ -13564,8 +13568,13 @@ html[data-theme="dark"] .wa-popup-msg {
   }
 }
 @keyframes floatBob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .hero-float-icon {
@@ -13694,8 +13703,13 @@ html[data-theme="dark"] .wa-popup-msg {
 
   /* Reduce bob amplitude on mobile to prevent clipping */
   @keyframes floatBob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
   }
 }
 
@@ -13712,7 +13726,11 @@ html[data-theme="dark"] .wa-popup-msg {
 
 /* Dark mode float cards */
 [data-theme="dark"] .hero-float-card {
-  background: linear-gradient(135deg, rgba(190, 24, 93, 0.12), rgba(140, 20, 70, 0.08));
+  background: linear-gradient(
+    135deg,
+    rgba(190, 24, 93, 0.12),
+    rgba(140, 20, 70, 0.08)
+  );
   border-color: rgba(190, 24, 93, 0.15);
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.3),

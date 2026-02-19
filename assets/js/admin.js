@@ -1006,7 +1006,7 @@
     if (statusText && statusText.textContent) {
       const currentText = statusText.textContent;
       if (isOwner && !currentText.includes("Owner")) {
-        statusText.innerHTML = `${currentText} <span style="color: var(--primary); font-weight: 800; white-space: nowrap;">• Owner</span>`;
+        statusText.innerHTML = `${currentText} <span style="color: #d97706; font-weight: 800; white-space: nowrap;">• Owner</span>`;
       } else if (isSuperAdmin && !currentText.includes("Super Admin")) {
         statusText.innerHTML = `${currentText} <span style="color: var(--primary); font-weight: 800; white-space: nowrap;">• Super Admin</span>`;
       } else if (isDeveloper && !currentText.includes("Developer")) {
@@ -1073,7 +1073,7 @@
       if (currentUserRole === "developer") {
         roleEl.style.color = "#10b981";
       } else if (currentUserRole === "owner") {
-        roleEl.style.color = "var(--clr-primary)";
+        roleEl.style.color = "#d97706";
       } else if (currentUserRole === "super_admin") {
         roleEl.style.color = "var(--clr-primary)";
       } else {
@@ -1464,7 +1464,7 @@
     // Get role badge for activity log
     const getRoleBadgeSmall = (role) => {
       if (role === "owner") {
-        return '<span class="role-badge-sm super">Own</span>';
+        return '<span class="role-badge-sm owner">Own</span>';
       }
       if (role === "developer") {
         return '<span class="role-badge-sm developer">Dev</span>';
@@ -1579,7 +1579,7 @@
   function getRoleBadge(role) {
     console.log("[getRoleBadge] Getting badge for role:", role);
     if (role === "owner") {
-      return '<span class="role-badge super">Owner</span>';
+      return '<span class="role-badge owner">Owner</span>';
     }
     if (role === "super_admin") {
       return '<span class="role-badge super">Super Admin</span>';
