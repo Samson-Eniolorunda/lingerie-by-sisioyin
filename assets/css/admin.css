@@ -1477,6 +1477,7 @@ textarea {
   background: var(--bg-surface);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
+  color: var(--text-primary);
 }
 
 .auth-brand {
@@ -1491,16 +1492,16 @@ textarea {
   align-items: center;
   justify-content: center;
   margin: 0 auto var(--space-4);
-  background: var(--clr-primary);
+  background: var(--bg-surface-alt);
   border-radius: var(--radius-xl);
-  color: white;
-  font-size: var(--text-2xl);
+  border: 1.5px solid var(--border-light);
 }
 
 .auth-brand h1 {
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   margin-bottom: var(--space-1);
+  color: var(--text-primary);
 }
 
 .auth-brand p {
@@ -1710,6 +1711,13 @@ textarea {
 
 .sidebar-logo i {
   color: var(--clr-primary);
+}
+
+.sidebar-logo img {
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  background: var(--bg-surface-alt);
 }
 
 .sidebar-tagline {
@@ -6687,6 +6695,56 @@ html[data-theme="dark"] .bar-tooltip::after {
 
 .auth-form .form-group {
   margin-bottom: var(--space-2);
+}
+
+/* ── #21: Admin auth compact for short viewports ── */
+@media (max-height: 700px) {
+  .auth-portal {
+    padding: var(--space-4) var(--space-3);
+  }
+  .auth-container {
+    padding: var(--space-4);
+  }
+  .auth-brand {
+    margin-bottom: var(--space-2);
+  }
+  .auth-logo {
+    width: 48px;
+    height: 48px;
+  }
+  .auth-brand h1 {
+    font-size: 1.15rem;
+  }
+  .auth-brand p {
+    font-size: 0.78rem;
+    margin-top: 2px;
+  }
+  .auth-tabs {
+    margin-bottom: var(--space-3);
+  }
+  .auth-tab {
+    padding: var(--space-2) var(--space-3);
+    font-size: 0.82rem;
+  }
+  .auth-form {
+    gap: var(--space-2);
+  }
+  .form-label {
+    font-size: 0.78rem;
+    margin-bottom: 2px;
+  }
+  .form-input {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.85rem;
+  }
+  .form-row {
+    gap: var(--space-2);
+  }
+  .btn-auth-submit {
+    padding: 0.55rem;
+    font-size: 0.88rem;
+    margin-top: var(--space-1);
+  }
 }
 
 /* ── #23: Admin dropdown overflow + unified arrow style ── */
