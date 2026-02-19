@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 30;
+const SW_VERSION = 31;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
@@ -26,7 +26,7 @@ const STATIC_ASSETS = [
   "/assets/img/favicon.png",
   "/assets/img/icon-192.png",
   "/assets/img/icon-512.png",
-  "/assets/css/styles.css",
+  "/assets/css/styles.css?v=31",
   "/assets/js/config.js",
   "/assets/js/utils.js",
   "/assets/js/supabase.js",
