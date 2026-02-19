@@ -568,7 +568,12 @@
   // Helper: reveal image and hide skeleton
   function _revealImage(img) {
     if (!img) return;
-    img.style.opacity = "1";
+    // Support both class-based and inline style approaches
+    if (img.classList.contains("category-img-loading")) {
+      img.classList.add("loaded");
+    } else {
+      img.style.opacity = "1";
+    }
     const skelId = img.getAttribute("data-skeleton");
     if (skelId) {
       const skel = document.getElementById(skelId);
@@ -579,25 +584,33 @@
   // Helper: set image src and attach load listener for fade-in
   function applyImage(img, url) {
     if (!img || !url) return;
-    img.onload = null;
-    // Remove any previous load listener
-    img.addEventListener("load", function onLoad() {
-      img.removeEventListener("load", onLoad);
+
+    // Use Image() preloader for more reliable loading on mobile Chrome
+    const preloader = new Image();
+
+    preloader.onload = function () {
+      img.src = url;
       _revealImage(img);
-    });
-    // Set src after attaching listener
-    img.src = url;
-    // Immediately reveal if already cached (common on back-navigation)
-    if (img.complete && img.naturalWidth > 0) {
+    };
+
+    preloader.onerror = function () {
+      // Still set src and reveal on error (browser might still show it)
+      img.src = url;
       _revealImage(img);
-    }
-    // Safety fallback: force reveal after 2s in case load event never fires
-    // (iOS Safari / Android Chrome can silently fail)
+    };
+
+    preloader.src = url;
+
+    // Safety fallback: force reveal after 1.5s regardless
     setTimeout(function () {
-      if (img.style.opacity !== "1") {
+      const isLoaded = img.classList.contains("loaded") || img.style.opacity === "1";
+      if (!isLoaded) {
+        if (!img.src || img.src.includes("data:image")) {
+          img.src = url;
+        }
         _revealImage(img);
       }
-    }, 2000);
+    }, 1500);
   }
 
   // IntersectionObserver-based lazy loading (avoids iOS Safari loading="lazy" + opacity:0 deadlock)
@@ -640,17 +653,17 @@
 
     // Always apply placeholder images if they haven't already loaded
     const lingerieImg = document.getElementById("categoryLingerieImage");
-    if (lingerieImg && lingerieImg.style.opacity !== "1") {
+    if (lingerieImg && !lingerieImg.classList.contains("loaded")) {
       applyImage(lingerieImg, PLACEHOLDER_IMAGES.lingerie);
     }
 
     const loungewearImg = document.getElementById("categoryLoungewearImage");
-    if (loungewearImg && loungewearImg.style.opacity !== "1") {
+    if (loungewearImg && !loungewearImg.classList.contains("loaded")) {
       applyImage(loungewearImg, PLACEHOLDER_IMAGES.loungewear);
     }
 
     const underwearImg = document.getElementById("categoryUnderwearImage");
-    if (underwearImg && underwearImg.style.opacity !== "1") {
+    if (underwearImg && !underwearImg.classList.contains("loaded")) {
       applyImage(underwearImg, PLACEHOLDER_IMAGES.underwear);
     }
   }
