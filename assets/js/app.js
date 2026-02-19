@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = 48;
+  const APP_VERSION = 51;
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
@@ -21,7 +21,11 @@
     if (storedVersion >= APP_VERSION) return;
 
     console.log(
-      "[APP] Version mismatch (" + storedVersion + " → " + APP_VERSION + "), nuking caches…",
+      "[APP] Version mismatch (" +
+        storedVersion +
+        " → " +
+        APP_VERSION +
+        "), nuking caches…",
     );
 
     // Collect all async cleanup tasks

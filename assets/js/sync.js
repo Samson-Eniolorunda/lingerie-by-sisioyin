@@ -120,10 +120,18 @@
   }
 
   /**
-   * Merge dashboard settings: shallow merge, local wins
+   * Merge dashboard settings: shallow merge, local wins.
+   * textSize is device-local — never overwrite from remote.
    */
   function mergeSettings(local, remote) {
-    return { ...(remote || {}), ...(local || {}) };
+    const merged = { ...(remote || {}), ...(local || {}) };
+    // Preserve device-local textSize (don't adopt remote value)
+    if (local && local.textSize !== undefined) {
+      merged.textSize = local.textSize;
+    } else {
+      delete merged.textSize;
+    }
+    return merged;
   }
 
   const MERGE_FN = {
@@ -141,7 +149,12 @@
     const client = getClient();
     if (!uid || !client) return;
 
-    const data = loadLocal(field);
+    let data = loadLocal(field);
+    // Strip device-local textSize from settings before syncing
+    if (field === "dashboard_settings" && data && typeof data === "object") {
+      data = { ...data };
+      delete data.textSize;
+    }
     try {
       const { error } = await client
         .from("profiles")
