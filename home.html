@@ -117,7 +117,134 @@
   <body>
     <!-- Skip Link -->
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="page-loader" id="pageLoader">
+    <!-- Page Skeleton -->
+    <div class="page-skel" id="pageSkeleton">
+      <!-- Hero skeleton -->
+      <div
+        class="sk-section"
+        style="
+          padding-top: calc(var(--header-height) + var(--space-8));
+          padding-bottom: var(--space-8);
+        "
+      >
+        <div class="container">
+          <div class="sk-row" style="gap: var(--space-12); align-items: center">
+            <div class="sk-col" style="gap: var(--space-4)">
+              <div class="sk-shimmer sk-line thick w-40"></div>
+              <div class="sk-shimmer sk-line xl w-90"></div>
+              <div class="sk-shimmer sk-line xl w-70"></div>
+              <div
+                class="sk-shimmer sk-line w-80"
+                style="margin-top: var(--space-2)"
+              ></div>
+              <div class="sk-shimmer sk-line w-60"></div>
+              <div
+                class="sk-row"
+                style="gap: var(--space-3); margin-top: var(--space-4)"
+              >
+                <div
+                  class="sk-pulse sk-rect h-40"
+                  style="width: 160px; border-radius: 9999px"
+                ></div>
+                <div
+                  class="sk-pulse sk-rect h-40"
+                  style="width: 140px; border-radius: 9999px"
+                ></div>
+              </div>
+            </div>
+            <div class="sk-col" style="align-items: center">
+              <div
+                class="sk-shimmer sk-rect aspect-34"
+                style="max-width: 400px; border-radius: var(--radius-3xl)"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Trust skeleton -->
+      <div class="sk-section" style="padding: var(--space-8) 0">
+        <div class="container">
+          <div class="sk-grid-4">
+            <div class="sk-center">
+              <div class="sk-pulse sk-circle md"></div>
+              <div class="sk-shimmer sk-line thick w-70"></div>
+              <div class="sk-shimmer sk-line w-50"></div>
+            </div>
+            <div class="sk-center">
+              <div class="sk-pulse sk-circle md"></div>
+              <div class="sk-shimmer sk-line thick w-70"></div>
+              <div class="sk-shimmer sk-line w-50"></div>
+            </div>
+            <div class="sk-center">
+              <div class="sk-pulse sk-circle md"></div>
+              <div class="sk-shimmer sk-line thick w-70"></div>
+              <div class="sk-shimmer sk-line w-50"></div>
+            </div>
+            <div class="sk-center">
+              <div class="sk-pulse sk-circle md"></div>
+              <div class="sk-shimmer sk-line thick w-70"></div>
+              <div class="sk-shimmer sk-line w-50"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Products skeleton -->
+      <div class="sk-section">
+        <div class="container">
+          <div class="sk-center sk-mb-6">
+            <div class="sk-shimmer sk-line thick w-30"></div>
+            <div class="sk-shimmer sk-line xl" style="width: 250px"></div>
+            <div class="sk-shimmer sk-line w-50"></div>
+          </div>
+          <div class="sk-grid-4">
+            <div class="sk-product">
+              <div class="sk-shimmer sk-product-img"></div>
+              <div class="sk-product-body">
+                <div class="sk-shimmer sk-line w-80"></div>
+                <div class="sk-shimmer sk-line w-40"></div>
+              </div>
+            </div>
+            <div class="sk-product">
+              <div class="sk-shimmer sk-product-img"></div>
+              <div class="sk-product-body">
+                <div class="sk-shimmer sk-line w-80"></div>
+                <div class="sk-shimmer sk-line w-40"></div>
+              </div>
+            </div>
+            <div class="sk-product">
+              <div class="sk-shimmer sk-product-img"></div>
+              <div class="sk-product-body">
+                <div class="sk-shimmer sk-line w-80"></div>
+                <div class="sk-shimmer sk-line w-40"></div>
+              </div>
+            </div>
+            <div class="sk-product">
+              <div class="sk-shimmer sk-product-img"></div>
+              <div class="sk-product-body">
+                <div class="sk-shimmer sk-line w-80"></div>
+                <div class="sk-shimmer sk-line w-40"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Categories skeleton -->
+      <div class="sk-section" style="background: var(--bg-surface-alt)">
+        <div class="container">
+          <div class="sk-center sk-mb-6">
+            <div class="sk-shimmer sk-line thick w-30"></div>
+            <div class="sk-shimmer sk-line xl" style="width: 220px"></div>
+          </div>
+          <div class="sk-grid-3">
+            <div class="sk-shimmer sk-rect aspect-34"></div>
+            <div class="sk-shimmer sk-rect aspect-34"></div>
+            <div class="sk-shimmer sk-rect aspect-34"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Slow-network spinner fallback (hidden, shown after 3s by JS) -->
+    <div class="page-loader page-loader--hidden" id="pageLoader">
       <div class="page-loader-inner">
         <div class="page-loader-heart">
           <img

@@ -9736,7 +9736,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .form-floating {
   position: relative;
   margin-bottom: var(--space-4);
-  padding-top: 8px; /* Space for floating label */
+  padding-top: 12px; /* Space for floating label */
 }
 
 .form-floating input,
@@ -9808,8 +9808,8 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .form-floating textarea:focus ~ label,
 .form-floating textarea:not(:placeholder-shown) ~ label,
 .form-floating select.has-value ~ label {
-  top: -10px;
-  transform: none;
+  top: 12px;
+  transform: translateY(-50%);
   font-size: var(--text-xs);
   color: var(--clr-primary);
   font-weight: 500;
@@ -9896,7 +9896,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 .payment-option .payment-info {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .payment-option .payment-name {
@@ -22301,6 +22301,379 @@ html[data-theme="dark"] .page-loader-text span {
   border-top-color: #f472b6;
 }
 
+/* =============================================================================
+   PAGE SKELETON LOADERS — Universal System (v46)
+   Mix: shimmer for content lines/images, pulse for larger cards/containers
+   ============================================================================= */
+
+/* ---- Wrapper ---- */
+.page-skel {
+  padding-top: var(--header-height);
+  min-height: 100vh;
+  background: var(--bg-base);
+}
+.page-skel[hidden] {
+  display: none !important;
+}
+
+/* ---- Animations ---- */
+@keyframes skelShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* reuse existing skelPulse from dashboard */
+
+/* ---- Shimmer primitive ---- */
+.sk-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-alt) 25%,
+    rgba(255, 255, 255, 0.45) 50%,
+    var(--bg-surface-alt) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.5s ease infinite;
+  border-radius: var(--radius-md);
+}
+[data-theme="dark"] .sk-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-surface-alt) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    var(--bg-surface-alt) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ---- Pulse primitive ---- */
+.sk-pulse {
+  background: var(--bg-surface-alt);
+  border-radius: var(--radius-lg);
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+/* ---- Text line placeholders ---- */
+.sk-line {
+  height: 12px;
+}
+.sk-line.thick {
+  height: 20px;
+  border-radius: var(--radius-sm);
+}
+.sk-line.xl {
+  height: 28px;
+}
+.sk-line.w-30 {
+  width: 30%;
+}
+.sk-line.w-40 {
+  width: 40%;
+}
+.sk-line.w-50 {
+  width: 50%;
+}
+.sk-line.w-60 {
+  width: 60%;
+}
+.sk-line.w-70 {
+  width: 70%;
+}
+.sk-line.w-80 {
+  width: 80%;
+}
+.sk-line.w-90 {
+  width: 90%;
+}
+.sk-line.w-full {
+  width: 100%;
+}
+
+/* ---- Circle placeholder (icons) ---- */
+.sk-circle {
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.sk-circle.sm {
+  width: 40px;
+  height: 40px;
+}
+.sk-circle.md {
+  width: 64px;
+  height: 64px;
+}
+.sk-circle.lg {
+  width: 80px;
+  height: 80px;
+}
+.sk-circle.xl {
+  width: 100px;
+  height: 100px;
+}
+
+/* ---- Rectangle / card ---- */
+.sk-rect {
+  width: 100%;
+  border-radius: var(--radius-xl);
+}
+.sk-rect.h-40 {
+  height: 40px;
+}
+.sk-rect.h-60 {
+  height: 60px;
+}
+.sk-rect.h-80 {
+  height: 80px;
+}
+.sk-rect.h-120 {
+  height: 120px;
+}
+.sk-rect.h-160 {
+  height: 160px;
+}
+.sk-rect.h-200 {
+  height: 200px;
+}
+.sk-rect.h-250 {
+  height: 250px;
+}
+.sk-rect.h-300 {
+  height: 300px;
+}
+.sk-rect.h-400 {
+  height: 400px;
+}
+.sk-rect.aspect-34 {
+  aspect-ratio: 3/4;
+  height: auto;
+}
+.sk-rect.aspect-45 {
+  aspect-ratio: 4/5;
+  height: auto;
+}
+
+/* ---- Card container (with padding + border) ---- */
+.sk-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ---- Product card skeleton ---- */
+.sk-product {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+}
+.sk-product-img {
+  aspect-ratio: 4/5;
+}
+.sk-product-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ---- Layout helpers ---- */
+.sk-section {
+  padding: var(--space-8) 0;
+}
+.sk-section .container {
+  max-width: var(--container-xl);
+  margin: 0 auto;
+  padding: 0 var(--space-4);
+}
+.sk-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+.sk-row {
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+.sk-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+  min-width: 0;
+}
+.sk-gap-2 {
+  gap: var(--space-2);
+}
+.sk-gap-4 {
+  gap: var(--space-4);
+}
+.sk-gap-6 {
+  gap: var(--space-6);
+}
+
+/* ---- Grid layouts ---- */
+.sk-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+.sk-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+.sk-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-4);
+}
+
+/* ---- Hero skeleton (centered with gradient bg) ---- */
+.sk-hero {
+  padding: var(--space-12) 0 var(--space-8);
+  background: linear-gradient(
+    135deg,
+    var(--clr-primary) 0%,
+    var(--clr-primary-dark, #9d174d) 100%
+  );
+}
+.sk-hero .sk-shimmer,
+.sk-hero .sk-pulse {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.12) 25%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.12) 75%
+  );
+  background-size: 200% 100%;
+  animation: skelShimmer 1.5s ease infinite;
+}
+
+/* ---- Two-column layout skeleton ---- */
+.sk-layout-sidebar {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+/* ---- Progress steps skeleton (checkout flow) ---- */
+.sk-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--space-5) 0;
+}
+.sk-step-dot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+.sk-step-line {
+  flex: 1;
+  min-width: 36px;
+  max-width: 80px;
+  height: 2px;
+  margin: 0 var(--space-2);
+}
+
+/* ---- Accordion panel skeleton ---- */
+.sk-accordion {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.sk-accordion-head {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-light);
+}
+.sk-accordion-body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ---- Checkout grid skeleton ---- */
+.sk-ck-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* Spacing helper */
+.sk-mb-4 {
+  margin-bottom: var(--space-4);
+}
+.sk-mb-6 {
+  margin-bottom: var(--space-6);
+}
+.sk-mt-4 {
+  margin-top: var(--space-4);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 992px) {
+  .sk-layout-sidebar {
+    grid-template-columns: 1fr;
+  }
+  .sk-ck-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 768px) {
+  .sk-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sk-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sk-hero {
+    padding: var(--space-8) 0 var(--space-6);
+  }
+  .sk-section {
+    padding: var(--space-6) 0;
+  }
+}
+@media (max-width: 480px) {
+  .sk-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  .sk-grid-3 {
+    grid-template-columns: 1fr;
+  }
+  .sk-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Spinner now hidden by default, shown only on slow network ---- */
+.page-loader--hidden {
+  display: none !important;
+}
+.page-loader--hidden.slow-show {
+  display: flex !important;
+}
+
 /* Category image loading state */
 .category-img-loading {
   opacity: 0;
@@ -25885,7 +26258,7 @@ html[data-theme="dark"] .confirm-card {
     flex: 1;
     min-width: 0;
     max-width: calc(100% - 80px);
-    overflow: hidden;
+    overflow: visible;
   }
   .bank-detail-row {
     flex-wrap: wrap;

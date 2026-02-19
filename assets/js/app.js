@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Ensures all users get fresh assets
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = 43;
+  const APP_VERSION = 47;
   const VERSION_KEY = "LBS_APP_VERSION";
 
   (function forceCacheClear() {
@@ -47,6 +47,14 @@
       }
     }
   })();
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SMART LOADER — show spinner only on slow networks (after 3s)
+  // ═══════════════════════════════════════════════════════════════════════════
+  const _slowTimer = setTimeout(() => {
+    const loader = document.getElementById("pageLoader");
+    if (loader) loader.classList.add("slow-show");
+  }, 3000);
 
   console.log("🚀 APP: Initializing core application...");
 
@@ -2686,7 +2694,21 @@
   });
 
   // Remove page loading state — reveal the page
+  clearTimeout(_slowTimer);
   document.body.classList.remove("page-loading");
+
+  // Hide page skeleton with a quick fade
+  const pageSkelEl = document.getElementById("pageSkeleton");
+  if (pageSkelEl) {
+    pageSkelEl.style.transition = "opacity 0.3s ease";
+    pageSkelEl.style.opacity = "0";
+    setTimeout(() => {
+      pageSkelEl.hidden = true;
+      pageSkelEl.remove();
+    }, 350);
+  }
+
+  // Hide slow-network spinner if it appeared
   const pageLoaderEl = document.getElementById("pageLoader");
   if (pageLoaderEl) {
     pageLoaderEl.classList.add("fade-out");

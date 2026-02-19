@@ -65,7 +65,86 @@
 
   <body class="size-page">
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="page-loader" id="pageLoader">
+    <!-- Page Skeleton -->
+    <div class="page-skel" id="pageSkeleton">
+      <!-- Hero skeleton -->
+      <div class="sk-hero">
+        <div class="container">
+          <div class="sk-center">
+            <div class="sk-shimmer sk-circle lg"></div>
+            <div class="sk-shimmer sk-line xl" style="width: 280px"></div>
+            <div class="sk-shimmer sk-line w-60" style="max-width: 400px"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Main content skeleton -->
+      <div class="sk-section">
+        <div class="container">
+          <div class="sk-center sk-mb-6">
+            <div class="sk-shimmer sk-line xl" style="width: 220px"></div>
+            <div class="sk-shimmer sk-line w-50" style="max-width: 350px"></div>
+          </div>
+          <div class="sk-grid-4">
+            <div class="sk-card">
+              <div class="sk-pulse sk-circle md" style="margin: 0 auto"></div>
+              <div
+                class="sk-shimmer sk-line thick w-70"
+                style="margin: 0 auto"
+              ></div>
+              <div class="sk-shimmer sk-line w-90"></div>
+              <div class="sk-shimmer sk-line w-60"></div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-pulse sk-circle md" style="margin: 0 auto"></div>
+              <div
+                class="sk-shimmer sk-line thick w-70"
+                style="margin: 0 auto"
+              ></div>
+              <div class="sk-shimmer sk-line w-90"></div>
+              <div class="sk-shimmer sk-line w-60"></div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-pulse sk-circle md" style="margin: 0 auto"></div>
+              <div
+                class="sk-shimmer sk-line thick w-70"
+                style="margin: 0 auto"
+              ></div>
+              <div class="sk-shimmer sk-line w-90"></div>
+              <div class="sk-shimmer sk-line w-60"></div>
+            </div>
+            <div class="sk-card">
+              <div class="sk-pulse sk-circle md" style="margin: 0 auto"></div>
+              <div
+                class="sk-shimmer sk-line thick w-70"
+                style="margin: 0 auto"
+              ></div>
+              <div class="sk-shimmer sk-line w-90"></div>
+              <div class="sk-shimmer sk-line w-60"></div>
+            </div>
+          </div>
+          <!-- Chart skeleton -->
+          <div style="margin-top: var(--space-8)">
+            <div class="sk-row sk-mb-4" style="gap: var(--space-2)">
+              <div
+                class="sk-pulse sk-rect h-40"
+                style="width: 100px; border-radius: var(--radius-full)"
+              ></div>
+              <div
+                class="sk-pulse sk-rect h-40"
+                style="width: 100px; border-radius: var(--radius-full)"
+              ></div>
+              <div
+                class="sk-pulse sk-rect h-40"
+                style="width: 100px; border-radius: var(--radius-full)"
+              ></div>
+            </div>
+            <div class="sk-pulse sk-rect h-300"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Slow-network spinner fallback -->
+    <div class="page-loader page-loader--hidden" id="pageLoader">
       <div class="page-loader-inner">
         <div class="page-loader-heart">
           <img

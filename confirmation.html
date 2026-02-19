@@ -51,7 +51,93 @@
 
   <body class="confirmation-page">
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="page-loader" id="pageLoader">
+    <!-- Page Skeleton -->
+    <div class="page-skel" id="pageSkeleton">
+      <div class="sk-section" style="padding-top: var(--space-6)">
+        <div class="container">
+          <div class="sk-center" style="margin-bottom: var(--space-5)">
+            <div class="sk-shimmer sk-line w-30" style="max-width: 200px"></div>
+            <div
+              class="sk-shimmer sk-line xl"
+              style="width: 240px; margin-top: var(--space-2)"
+            ></div>
+          </div>
+          <div class="sk-progress" style="margin-bottom: var(--space-6)">
+            <div class="sk-shimmer sk-circle sm"></div>
+            <div class="sk-shimmer sk-line" style="flex: 1; height: 3px"></div>
+            <div class="sk-shimmer sk-circle sm"></div>
+            <div class="sk-shimmer sk-line" style="flex: 1; height: 3px"></div>
+            <div class="sk-shimmer sk-circle sm"></div>
+            <div class="sk-shimmer sk-line" style="flex: 1; height: 3px"></div>
+            <div class="sk-shimmer sk-circle sm"></div>
+          </div>
+          <div class="sk-center" style="max-width: 600px; margin: 0 auto">
+            <div class="sk-shimmer sk-circle xl"></div>
+            <div
+              class="sk-shimmer sk-line xl"
+              style="width: 280px; margin-top: var(--space-4)"
+            ></div>
+            <div
+              class="sk-shimmer sk-line w-60"
+              style="max-width: 360px; margin-top: var(--space-2)"
+            ></div>
+            <div
+              class="sk-pulse sk-card"
+              style="
+                width: 100%;
+                padding: var(--space-5);
+                margin-top: var(--space-5);
+              "
+            >
+              <div
+                class="sk-shimmer sk-line thick w-50"
+                style="margin-bottom: var(--space-4)"
+              ></div>
+              <div
+                class="sk-shimmer sk-rect h-60"
+                style="
+                  margin-bottom: var(--space-3);
+                  border-radius: var(--radius-md);
+                "
+              ></div>
+              <div
+                class="sk-shimmer sk-rect h-60"
+                style="
+                  margin-bottom: var(--space-3);
+                  border-radius: var(--radius-md);
+                "
+              ></div>
+              <div
+                class="sk-shimmer sk-line w-full"
+                style="margin-top: var(--space-3)"
+              ></div>
+              <div
+                class="sk-shimmer sk-line w-full"
+                style="margin-top: var(--space-2)"
+              ></div>
+              <div
+                class="sk-shimmer sk-line thick w-full"
+                style="margin-top: var(--space-3)"
+              ></div>
+            </div>
+            <div
+              class="sk-row"
+              style="gap: var(--space-3); margin-top: var(--space-5)"
+            >
+              <div
+                class="sk-shimmer sk-rect h-40"
+                style="width: 180px; border-radius: var(--radius-md)"
+              ></div>
+              <div
+                class="sk-shimmer sk-rect h-40"
+                style="width: 180px; border-radius: var(--radius-md)"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="page-loader page-loader--hidden" id="pageLoader">
       <div class="page-loader-inner">
         <div class="page-loader-heart">
           <img
