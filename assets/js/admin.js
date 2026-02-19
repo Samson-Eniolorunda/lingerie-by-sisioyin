@@ -28,7 +28,7 @@
   /* ── Pre-check: hide auth/show admin instantly if we have a session token ── */
   (function preCheck() {
     try {
-      const stored = localStorage.getItem("sb-oriojylsilcsvcsefuux-auth-token");
+      const stored = localStorage.getItem("lbs-admin-auth");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed?.currentSession || parsed?.access_token) {
@@ -5014,6 +5014,16 @@
     }
   }
 
+  // Title-case helper: capitalises first letter of each word
+  function titleCase(str) {
+    if (!str) return "";
+    return str
+      .trim()
+      .split(/\s+/)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  }
+
   // Show welcome animation after successful login
   async function showWelcomeScreen(session) {
     const overlay = $("#welcomeOverlay");
@@ -5027,11 +5037,17 @@
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name")
+        .select("display_name, first_name, last_name, full_name")
         .eq("id", session.user.id)
         .single();
       if (data?.display_name) {
         displayName = data.display_name;
+      } else if (data?.first_name && data?.last_name) {
+        displayName = data.first_name + " " + data.last_name;
+      } else if (data?.first_name) {
+        displayName = data.first_name;
+      } else if (data?.full_name) {
+        displayName = data.full_name;
       } else if (session.user.user_metadata?.full_name) {
         displayName = session.user.user_metadata.full_name;
       } else if (session.user.email) {
@@ -5046,6 +5062,9 @@
       }
       console.log("Could not fetch display name, using fallback");
     }
+
+    // Ensure title-case
+    displayName = titleCase(displayName);
 
     // Set the name
     if (nameEl) {
@@ -5886,14 +5905,16 @@
         const brandCounts = {};
         data.forEach((r) => {
           if (!r.device_brand && !r.device_model) return;
-          const label = r.device_model && r.device_model !== r.device_brand
-            ? `${r.device_brand || "Unknown"} ${r.device_model}`
-            : r.device_brand || "Unknown";
+          const label =
+            r.device_model && r.device_model !== r.device_brand
+              ? `${r.device_brand || "Unknown"} ${r.device_model}`
+              : r.device_brand || "Unknown";
           brandCounts[label] = (brandCounts[label] || 0) + 1;
         });
         const entries = Object.entries(brandCounts);
         if (entries.length === 0) {
-          brandEl.innerHTML = '<p class="text-muted text-center">No device brand data yet</p>';
+          brandEl.innerHTML =
+            '<p class="text-muted text-center">No device brand data yet</p>';
         } else {
           const total = entries.reduce((s, [, c]) => s + c, 0);
           const sorted = entries.sort((a, b) => b[1] - a[1]).slice(0, 15);
@@ -6051,7 +6072,7 @@
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select(
-          "id, first_name, last_name, full_name, email, phone, whatsapp_number, whatsapp_opted_in, created_at, is_admin, date_of_birth, account_status",
+          "id, first_name, last_name, full_name, email, phone, whatsapp_number, whatsapp_opted_in, created_at, is_admin, date_of_birth, account_status, return_privilege_revoked",
         )
         .eq("is_admin", false)
         .order("created_at", { ascending: false });
@@ -6170,6 +6191,11 @@
                   : `<button class="cust-act-btn cust-act-btn--success" data-customer-action="activate" data-customer-id="${c.id}" title="Unban"><i class="fa-solid fa-unlock"></i></button>`
               }
               <button class="cust-act-btn cust-act-btn--primary" data-customer-action="message" data-customer-idx="${i}" title="Send message"><i class="fa-solid fa-envelope"></i></button>
+              ${
+                c.return_privilege_revoked
+                  ? `<button class="cust-act-btn cust-act-btn--success" data-customer-action="restore_returns" data-customer-id="${c.id}" title="Restore return privilege"><i class="fa-solid fa-rotate-left"></i></button>`
+                  : `<button class="cust-act-btn cust-act-btn--warn" data-customer-action="revoke_returns" data-customer-id="${c.id}" title="Revoke return privilege"><i class="fa-solid fa-arrow-rotate-left" style="opacity:.5"></i></button>`
+              }
             </div>
           </td>
         </tr>
@@ -6277,6 +6303,8 @@
       suspend: "suspend",
       ban: "permanently ban",
       activate: "reactivate",
+      revoke_returns: "revoke return privileges for",
+      restore_returns: "restore return privileges for",
     };
     const newStatus =
       action === "suspend"
@@ -6284,6 +6312,76 @@
         : action === "ban"
           ? "banned"
           : "active";
+
+    // Handle return privilege toggle separately
+    if (action === "revoke_returns" || action === "restore_returns") {
+      const revoking = action === "revoke_returns";
+      if (
+        !confirm(
+          `Are you sure you want to ${actionLabels[action]} ${customer.full_name || customer.email}?`,
+        )
+      )
+        return;
+
+      try {
+        const client = getClient();
+        if (!client) throw new Error("Not connected");
+
+        const { error } = await client
+          .from("profiles")
+          .update({ return_privilege_revoked: revoking })
+          .eq("id", customerId);
+
+        if (error) throw error;
+
+        // Send notification email
+        try {
+          const {
+            data: { session },
+          } = await client.auth.getSession();
+          await fetch(
+            `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-admin-reply`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session?.access_token || ""}`,
+              },
+              body: JSON.stringify({
+                to: customer.email,
+                customerName: customer.full_name || "Customer",
+                subject: revoking
+                  ? "Return Privilege Revoked \u2014 Lingeries by Sisioyin"
+                  : "Return Privilege Restored \u2014 Lingeries by Sisioyin",
+                message: revoking
+                  ? "Your return privilege has been revoked due to misuse of our return policy. You will no longer be able to submit return requests. If you believe this is an error, please contact support@lingeriebysisioyin.store."
+                  : "Your return privilege has been restored. You may now submit return requests again in accordance with our return policy.",
+                fromEmail: "support@lingeriebysisioyin.store",
+              }),
+            },
+          );
+        } catch (emailErr) {
+          console.log("Return privilege notification email failed:", emailErr);
+        }
+
+        logActivity("update", "customer", customerId, {
+          name: customer.full_name || "",
+          email: customer.email || "",
+          action: action,
+          return_privilege_revoked: revoking,
+        });
+
+        customer.return_privilege_revoked = revoking;
+        renderCustomers(allCustomers);
+        showToast(
+          revoking ? "Return privilege revoked" : "Return privilege restored",
+        );
+      } catch (err) {
+        console.error("Return privilege error:", err);
+        showToast("Failed: " + err.message, "error");
+      }
+      return;
+    }
 
     if (
       !confirm(
@@ -6724,7 +6822,14 @@
     // Logout
     on($("#logoutBtn"), "click", async () => {
       console.log("[logoutBtn] Logout clicked");
+      // Show logout overlay
+      const logoutOverlay = $("#logoutOverlay");
+      if (logoutOverlay) {
+        logoutOverlay.hidden = false;
+      }
       sessionStorage.removeItem("LBS_ADMIN_VIEW");
+      // Wait for animation then sign out
+      await new Promise((r) => setTimeout(r, 1500));
       await supabase.auth.signOut();
       window.location.href = window.location.pathname;
     });

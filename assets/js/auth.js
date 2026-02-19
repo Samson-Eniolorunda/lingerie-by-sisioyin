@@ -256,6 +256,14 @@
         .eq("id", data.user.id)
         .maybeSingle();
 
+      if (profile?.account_status === "deleted") {
+        await client.auth.signOut();
+        window.UTILS?.toast?.(
+          "This account has been deleted. If you believe this is an error, please contact support.",
+          "error",
+        );
+        return;
+      }
       if (profile?.account_status === "banned") {
         await client.auth.signOut();
         window.UTILS?.toast?.(
@@ -358,12 +366,28 @@
     if (!client) return;
 
     try {
+      // Show logout overlay
+      const overlay = document.createElement("div");
+      overlay.className = "auth-logout-overlay";
+      overlay.innerHTML = `
+        <div class="auth-logout-content">
+          <div class="auth-logout-icon"><i class="fa-solid fa-right-from-bracket"></i></div>
+          <p class="auth-logout-text">Signing out...</p>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      // Allow time for the user to see the overlay
+      await new Promise((r) => setTimeout(r, 1200));
       await client.auth.signOut();
       window.SYNC?.onLogout?.();
       window.UTILS?.toast?.("Logged out successfully", "info");
       updateAuthUI(null);
+      // Fade out and remove
+      overlay.classList.add("fade-out");
+      setTimeout(() => overlay.remove(), 500);
     } catch (err) {
       console.error("🔐 AUTH: Logout error:", err);
+      document.querySelector(".auth-logout-overlay")?.remove();
     }
   }
 

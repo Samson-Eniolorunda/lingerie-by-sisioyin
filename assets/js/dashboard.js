@@ -1092,11 +1092,11 @@
     // Delete account
     $("#deleteAccountBtn")?.addEventListener("click", async () => {
       const ok = confirm(
-        "⚠️ DELETE ACCOUNT PERMANENTLY\n\nThis will permanently delete your account and all associated data. This action CANNOT be undone.\n\nAre you absolutely sure?",
+        "⚠️ DELETE ACCOUNT\n\nYour account will be immediately locked and your data will be permanently deleted after 30 days. This action CANNOT be undone.\n\nAre you absolutely sure?",
       );
       if (!ok) return;
       const doubleConfirm = prompt(
-        'Type "DELETE" to confirm permanent account deletion:',
+        'Type "DELETE" to confirm account deletion:',
       );
       if (doubleConfirm !== "DELETE") {
         window.UTILS?.toast?.("Account deletion cancelled", "info");
@@ -1109,19 +1109,53 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Deleting…';
       try {
-        // Mark account for deletion in metadata
-        await c.auth.updateUser({
-          data: {
-            deletion_requested: true,
+        const {
+          data: { session },
+        } = await c.auth.getSession();
+        if (!session) throw new Error("No active session");
+
+        // Set account_status to 'deleted' and record timestamp
+        const { error } = await c
+          .from("profiles")
+          .update({
+            account_status: "deleted",
             deletion_requested_at: new Date().toISOString(),
-          },
-        });
+          })
+          .eq("id", session.user.id);
+
+        if (error) throw error;
+
+        // Send deletion confirmation email (fire-and-forget)
+        try {
+          fetch(
+            `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-admin-reply`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session.access_token}`,
+              },
+              body: JSON.stringify({
+                to: session.user.email,
+                customerName:
+                  session.user.user_metadata?.full_name || "Customer",
+                subject: "Account Deletion Requested — Lingeries by Sisioyin",
+                message:
+                  "Your account has been marked for deletion and is now locked. Your personal data will be permanently deleted after 30 days. If you did not request this or wish to cancel, please contact support@lingeriebysisioyin.store within 30 days.",
+                fromEmail: "support@lingeriebysisioyin.store",
+              }),
+            },
+          );
+        } catch (_) {
+          /* non-critical */
+        }
+
         // Clear all local data
         Object.keys(localStorage)
-          .filter((k) => k.startsWith("LBS_"))
+          .filter((k) => k.startsWith("LBS_") || k.startsWith("lbs-"))
           .forEach((k) => localStorage.removeItem(k));
         window.UTILS?.toast?.(
-          "Account deletion requested. You will receive a confirmation email.",
+          "Account locked. Your data will be deleted in 30 days.",
           "success",
         );
         setTimeout(async () => {

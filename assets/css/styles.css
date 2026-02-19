@@ -7957,6 +7957,90 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 
 /* =============================================================================
    AUTH MODAL
+/* =============================================================================
+   LOGOUT OVERLAY (shop / customer)
+   ============================================================================= */
+
+.auth-logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: logoutFadeIn 0.3s ease-out;
+}
+.auth-logout-content {
+  text-align: center;
+  animation: logoutSlideUp 0.4s ease-out 0.1s both;
+}
+.auth-logout-icon {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(100, 116, 139, 0.35);
+  animation: logoutIconPop 0.35s ease-out 0.25s both;
+}
+.auth-logout-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+@keyframes logoutFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes logoutSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes logoutIconPop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.auth-logout-overlay.fade-out {
+  animation: logoutFadeOut 0.5s ease-out forwards;
+}
+@keyframes logoutFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* =============================================================================
+   AUTH MODAL
    ============================================================================= */
 
 .auth-modal {

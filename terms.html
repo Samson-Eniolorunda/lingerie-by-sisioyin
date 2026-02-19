@@ -53,7 +53,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css?v=59" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=61" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -470,10 +470,10 @@
                 <strong>Payment Method:</strong> We currently accept payment via
                 <strong>bank transfer only</strong>. At checkout, you'll be
                 shown our bank details (Moniepoint MFB, Account Number:
-                6327082294, Account Name: Oyindamola Adelugba (Lingerie by
-                Sisioyin)). After making the transfer, you must upload a
-                screenshot or photo of your payment receipt to confirm the
-                order. Card payment will be available soon.
+                6327082294, Account Name: Oyindamola Adelugba
+                (LingeriesbySisioyin)). After making the transfer, you must
+                upload a screenshot or photo of your payment receipt to confirm
+                the order. Card payment will be available soon.
               </p>
               <p>
                 <strong>Payment Verification:</strong> Orders are confirmed once
@@ -539,12 +539,14 @@
                 arrive damaged, defective, or incorrect.
               </p>
               <p>
-                <strong>Valid Return Reasons:</strong> Returns are accepted only
-                for the following reasons: item arrived damaged, item is
-                defective, wrong item received, or size does not match the size
-                chart. Returns for reasons such as "changed my mind" or "no
-                longer needed" are not accepted. Please note that return
-                privileges may be revoked if misused.
+                <strong>Valid Return Reasons:</strong> Returns are accepted
+                <strong>only</strong> when the issue is caused by us — the
+                store. Qualifying reasons include: item arrived damaged, item is
+                defective, wrong item was sent, or the size does not match what
+                was described on our size chart. We do <strong>not</strong>
+                accept returns for reasons such as "changed my mind", "no longer
+                needed", or buyer's remorse. Return privileges may be
+                permanently revoked if this policy is misused.
               </p>
               <p>
                 <strong>How to Return:</strong> Within 7 days of delivery, you
@@ -970,18 +972,34 @@
 
         <!-- Signup Form -->
         <form class="auth-form" id="signupForm" novalidate>
-          <div class="auth-field">
-            <div class="auth-input-wrap">
-              <i class="fa-solid fa-user auth-input-icon"></i>
-              <input
-                type="text"
-                id="signupName"
-                name="fullName"
-                class="form-input"
-                placeholder="Full Name"
-                autocomplete="name"
-                required
-              />
+          <div class="auth-field-row">
+            <div class="auth-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-user auth-input-icon"></i>
+                <input
+                  type="text"
+                  id="signupFirstName"
+                  name="firstName"
+                  class="form-input"
+                  placeholder="First Name"
+                  autocomplete="given-name"
+                  required
+                />
+              </div>
+            </div>
+            <div class="auth-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-user auth-input-icon"></i>
+                <input
+                  type="text"
+                  id="signupLastName"
+                  name="lastName"
+                  class="form-input"
+                  placeholder="Last Name"
+                  autocomplete="family-name"
+                  required
+                />
+              </div>
             </div>
           </div>
           <div class="auth-field">
@@ -1143,7 +1161,7 @@
       </div>
     </div>
 
-    <script src="assets/js/recaptcha.js?v=59"></script>
+    <script src="assets/js/recaptcha.js?v=61"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
@@ -1153,13 +1171,13 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=59"></script>
-    <script defer src="assets/js/utils.js?v=59"></script>
-    <script defer src="assets/js/supabase.js?v=59"></script>
-    <script defer src="assets/js/app.js?v=59"></script>
-    <script defer src="assets/js/sync.js?v=59"></script>
-    <script defer src="assets/js/auth.js?v=59"></script>
+    <script defer src="assets/js/config.js?v=61"></script>
+    <script defer src="assets/js/utils.js?v=61"></script>
+    <script defer src="assets/js/supabase.js?v=61"></script>
+    <script defer src="assets/js/app.js?v=61"></script>
+    <script defer src="assets/js/sync.js?v=61"></script>
+    <script defer src="assets/js/auth.js?v=61"></script>
 
-    <script src="assets/js/legal.js?v=59"></script>
+    <script src="assets/js/legal.js?v=61"></script>
   </body>
 </html>

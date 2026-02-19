@@ -47,7 +47,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css?v=59" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=61" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -911,18 +911,34 @@
 
         <!-- Signup Form -->
         <form class="auth-form" id="signupForm" novalidate>
-          <div class="auth-field">
-            <div class="auth-input-wrap">
-              <i class="fa-solid fa-user auth-input-icon"></i>
-              <input
-                type="text"
-                id="signupName"
-                name="fullName"
-                class="form-input"
-                placeholder="Full Name"
-                autocomplete="name"
-                required
-              />
+          <div class="auth-field-row">
+            <div class="auth-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-user auth-input-icon"></i>
+                <input
+                  type="text"
+                  id="signupFirstName"
+                  name="firstName"
+                  class="form-input"
+                  placeholder="First Name"
+                  autocomplete="given-name"
+                  required
+                />
+              </div>
+            </div>
+            <div class="auth-field">
+              <div class="auth-input-wrap">
+                <i class="fa-solid fa-user auth-input-icon"></i>
+                <input
+                  type="text"
+                  id="signupLastName"
+                  name="lastName"
+                  class="form-input"
+                  placeholder="Last Name"
+                  autocomplete="family-name"
+                  required
+                />
+              </div>
             </div>
           </div>
           <div class="auth-field">
@@ -1085,7 +1101,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/recaptcha.js?v=59"></script>
+    <script src="assets/js/recaptcha.js?v=61"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
@@ -1095,13 +1111,13 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=59"></script>
-    <script defer src="assets/js/utils.js?v=59"></script>
-    <script defer src="assets/js/supabase.js?v=59"></script>
-    <script defer src="assets/js/app.js?v=59"></script>
-    <script defer src="assets/js/sync.js?v=59"></script>
-    <script defer src="assets/js/auth.js?v=59"></script>
+    <script defer src="assets/js/config.js?v=61"></script>
+    <script defer src="assets/js/utils.js?v=61"></script>
+    <script defer src="assets/js/supabase.js?v=61"></script>
+    <script defer src="assets/js/app.js?v=61"></script>
+    <script defer src="assets/js/sync.js?v=61"></script>
+    <script defer src="assets/js/auth.js?v=61"></script>
 
-    <script src="assets/js/contact.js?v=59"></script>
+    <script src="assets/js/contact.js?v=61"></script>
   </body>
 </html>

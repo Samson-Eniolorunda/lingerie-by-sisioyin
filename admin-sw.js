@@ -5,8 +5,8 @@
  * ============================================
  */
 
-const SW_VERSION = "1.59.26";
-const SW_BUILD = 59;
+const SW_VERSION = "1.61.26";
+const SW_BUILD = 60;
 const CACHE_NAME = "lbs-admin-cache-v" + SW_BUILD;
 
 const STATIC_ASSETS = [
@@ -101,7 +101,9 @@ self.addEventListener("fetch", (event) => {
           fetch(request)
             .then((resp) => {
               if (resp && resp.status === 200 && !resp.redirected) {
-                caches.open(CACHE_NAME).then((c) => c.put(request, resp.clone()));
+                caches
+                  .open(CACHE_NAME)
+                  .then((c) => c.put(request, resp.clone()));
               }
             })
             .catch(() => {}),

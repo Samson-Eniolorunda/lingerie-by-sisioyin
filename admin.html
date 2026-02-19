@@ -36,7 +36,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/admin.css?v=59" />
+    <link rel="stylesheet" href="assets/css/admin.css?v=61" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -61,6 +61,27 @@
           <div class="welcome-loader-bar"></div>
         </div>
         <p class="welcome-text">Setting up your workspace...</p>
+      </div>
+    </div>
+
+    <!-- LOGOUT OVERLAY -->
+    <div class="welcome-overlay logout-overlay" id="logoutOverlay" hidden>
+      <div class="welcome-content">
+        <div
+          class="welcome-avatar"
+          style="
+            background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+            box-shadow: 0 8px 32px rgba(100, 116, 139, 0.3);
+          "
+        >
+          <i class="fa-solid fa-right-from-bracket" style="font-size: 32px"></i>
+        </div>
+        <p class="welcome-greeting">Signing out</p>
+        <h1 class="welcome-name" id="logoutName">See you soon!</h1>
+        <div class="welcome-loader">
+          <div class="welcome-loader-bar"></div>
+        </div>
+        <p class="welcome-text">Clearing your session...</p>
       </div>
     </div>
 
@@ -2679,10 +2700,10 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=59"></script>
-    <script defer src="assets/js/utils.js?v=59"></script>
-    <script defer src="assets/js/supabase.js?v=59"></script>
-    <script defer src="assets/js/app.js?v=59"></script>
-    <script defer src="assets/js/admin.js?v=59"></script>
+    <script defer src="assets/js/config.js?v=61"></script>
+    <script defer src="assets/js/utils.js?v=61"></script>
+    <script defer src="assets/js/supabase.js?v=61"></script>
+    <script defer src="assets/js/app.js?v=61"></script>
+    <script defer src="assets/js/admin.js?v=61"></script>
   </body>
 </html>
