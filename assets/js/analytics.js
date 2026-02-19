@@ -327,6 +327,7 @@
     initFacebookPixel();
     trackDeviceType();
     trackVisitorLocation();
+    trackTimeSpent();
     console.log("✅ ANALYTICS: Module initialized");
   }
 
@@ -500,6 +501,7 @@
       if (geo.error) return;
 
       const locationData = {
+        ip: geo.ip || null,
         country: geo.country_name || "Unknown",
         country_code: geo.country_code || "",
         region: geo.region || "",
@@ -529,8 +531,11 @@
       const c = window.DB?.client;
       if (c) {
         const dev = window._lbsDeviceInfo || {};
-        c.from("site_visits")
+        const screenRes = `${screen.width}x${screen.height}`;
+        const viewportSize = `${window.innerWidth}x${window.innerHeight}`;
+        const { data } = await c.from("site_visits")
           .insert({
+            ip_address: locationData.ip,
             country: locationData.country,
             country_code: locationData.country_code,
             region: locationData.region,
@@ -542,9 +547,13 @@
             os: dev.os || null,
             device_brand: dev.device_brand || null,
             device_model: dev.device_model || null,
+            screen_resolution: screenRes,
+            viewport_size: viewportSize,
           })
-          .then(() => {})
-          .catch(() => {});
+          .select("id")
+          .single();
+        // Store visit ID so time-spent can update this row on unload
+        if (data?.id) window._lbsVisitId = data.id;
       }
 
       sessionStorage.setItem("lbs_geo_tracked", "1");
@@ -557,6 +566,48 @@
       // Silently fail — geo tracking is non-critical
       console.log("📊 ANALYTICS: Geo tracking skipped:", err.message);
     }
+  }
+
+  /* ─────────────────────────────────────────────
+   * Time Spent Tracking
+   * Updates the site_visits row with duration on page unload
+   * ───────────────────────────────────────────── */
+  function trackTimeSpent() {
+    const startTime = Date.now();
+
+    const updateDuration = () => {
+      const visitId = window._lbsVisitId;
+      const c = window.DB?.client;
+      if (!visitId || !c) return;
+
+      const seconds = Math.round((Date.now() - startTime) / 1000);
+      if (seconds < 1) return;
+
+      // Use sendBeacon-friendly approach via Supabase REST
+      const cfg = window.APP_CONFIG || {};
+      const supabaseUrl = cfg.SUPABASE_URL;
+      const supabaseKey = cfg.SUPABASE_ANON_KEY;
+      if (supabaseUrl && supabaseKey) {
+        const url = `${supabaseUrl}/rest/v1/site_visits?id=eq.${visitId}`;
+        const body = JSON.stringify({ time_spent_seconds: seconds });
+        fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: supabaseKey,
+            Authorization: `Bearer ${supabaseKey}`,
+            Prefer: "return=minimal",
+          },
+          body,
+          keepalive: true,
+        }).catch(() => {});
+      }
+    };
+
+    window.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") updateDuration();
+    });
+    window.addEventListener("pagehide", updateDuration);
   }
 
   // Expose globally
