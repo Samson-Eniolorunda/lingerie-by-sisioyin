@@ -5,8 +5,10 @@
  * ============================================
  */
 
-const SW_VERSION = 35;
+const SW_VERSION = 37;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
+// Only cache HTML pages and icons for offline support
+// CSS/JS are NOT cached - always fetched fresh from server
 const STATIC_ASSETS = [
   "/home",
   "/home.html",
@@ -26,26 +28,6 @@ const STATIC_ASSETS = [
   "/assets/img/favicon.png",
   "/assets/img/icon-192.png",
   "/assets/img/icon-512.png",
-  "/assets/css/styles.css?v=31",
-  "/assets/js/config.js",
-  "/assets/js/utils.js",
-  "/assets/js/supabase.js",
-  "/assets/js/app.js",
-  "/assets/js/auth.js",
-  "/assets/js/analytics.js",
-  "/assets/js/recaptcha.js",
-  "/assets/js/home.js",
-  "/assets/js/shop.js",
-  "/assets/js/cart.js",
-  "/assets/js/checkout.js",
-  "/assets/js/confirmation.js",
-  "/assets/js/wishlist.js",
-  "/assets/js/dashboard.js",
-  "/assets/js/contact.js",
-  "/assets/js/faq.js",
-  "/assets/js/size.js",
-  "/assets/js/legal.js",
-  "/assets/js/track.js",
   "/site.webmanifest",
 ];
 
@@ -140,24 +122,15 @@ self.addEventListener("fetch", (event) => {
         }
       }
 
-      // Network-first for CSS and JS (always serve fresh code)
+      // SKIP caching for CSS and JS — always fetch fresh from network
       const isCSSorJS =
         url.pathname.endsWith(".css") ||
         url.pathname.endsWith(".js") ||
         url.search.includes(".css") ||
         url.search.includes(".js");
       if (isCSSorJS) {
-        try {
-          const networkResponse = await fetch(request);
-          if (networkResponse && networkResponse.status === 200) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put(request, networkResponse.clone());
-          }
-          return networkResponse;
-        } catch {
-          const cached = await caches.match(request);
-          if (cached) return cached;
-        }
+        // Don't intercept - let browser handle directly
+        return fetch(request);
       }
 
       // Stale-while-revalidate for other static assets (images, fonts)

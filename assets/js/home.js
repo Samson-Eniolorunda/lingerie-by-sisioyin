@@ -603,7 +603,8 @@
 
     // Safety fallback: force reveal after 1.5s regardless
     setTimeout(function () {
-      const isLoaded = img.classList.contains("loaded") || img.style.opacity === "1";
+      const isLoaded =
+        img.classList.contains("loaded") || img.style.opacity === "1";
       if (!isLoaded) {
         if (!img.src || img.src.includes("data:image")) {
           img.src = url;
