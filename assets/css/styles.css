@@ -13668,12 +13668,12 @@ html[data-theme="dark"] .wa-popup-msg {
 
   .hero-float-card.top {
     top: 4%;
-    left: 0;
+    left: 4%;
   }
 
   .hero-float-card.bottom {
     bottom: 4%;
-    right: 0;
+    right: 4%;
   }
 
   .hero-float-icon {
@@ -13696,11 +13696,11 @@ html[data-theme="dark"] .wa-popup-msg {
 @media (max-width: 480px) {
   .hero-float-card.top {
     top: 2%;
-    left: 0;
+    left: 3%;
   }
   .hero-float-card.bottom {
     bottom: 3%;
-    right: 0;
+    right: 3%;
   }
 }
 
