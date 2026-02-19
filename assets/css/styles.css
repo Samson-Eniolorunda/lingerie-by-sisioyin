@@ -13667,7 +13667,7 @@ html[data-theme="dark"] .wa-popup-msg {
   }
 
   .hero-float-card.top {
-    top: 4%;
+    top: 10%;
     left: 4%;
   }
 
@@ -13691,11 +13691,17 @@ html[data-theme="dark"] .wa-popup-msg {
   .hero-float-value {
     font-size: var(--text-sm);
   }
+
+  /* Reduce bob amplitude on mobile to prevent clipping */
+  @keyframes floatBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
 }
 
 @media (max-width: 480px) {
   .hero-float-card.top {
-    top: 2%;
+    top: 8%;
     left: 3%;
   }
   .hero-float-card.bottom {

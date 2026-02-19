@@ -26,7 +26,7 @@ A modern e-commerce website for a lingerie brand, built as a static site with Su
 - User authentication (email/password + Google OAuth)
 - Customer dashboard with order history and tracking timeline
 - Wishlist with localStorage persistence
-- Admin panel with role-based access (Super Admin / Editor)
+- Admin panel with role-based access (Owner / Super Admin / Editor)
 - Order confirmation emails (customer + admin notification)
 - PWA with offline support (service worker)
 - Dark mode support

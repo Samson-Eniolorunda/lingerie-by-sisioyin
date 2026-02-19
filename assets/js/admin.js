@@ -2,7 +2,7 @@
   ADMIN JS (CLEAN)
   - Theme (system default)
   - Auth + Admin gate (RPC is_admin)
-  - Role-based access (super_admin / editor / developer)
+  - Role-based access (owner / super_admin / editor / developer)
   - Soft delete for products
   - Activity logging
   - Inventory render + viewer slider (with swipe)
@@ -59,7 +59,7 @@
   /* =========================
     Current user state
   ========================= */
-  let currentUserRole = null; // "super_admin" | "editor" | "developer" | null
+  let currentUserRole = null; // "owner" | "super_admin" | "editor" | "developer" | null
   let currentUserId = null;
 
   /* =========================
@@ -984,14 +984,17 @@
     const trashNav = $('[data-view-target="trash"]');
     const statusText = $("#adminStatusText");
 
+    const isOwner = currentUserRole === "owner";
     const isSuperAdmin = currentUserRole === "super_admin";
     const isDeveloper = currentUserRole === "developer";
     const isEditor = currentUserRole === "editor";
-    // Developer has same privileges as super_admin
-    const hasFullAccess = isSuperAdmin || isDeveloper;
+    // Owner, super_admin, and developer all get full access
+    const hasFullAccess = isOwner || isSuperAdmin || isDeveloper;
 
     console.log(
-      "[applyRoleBasedUI] isSuperAdmin:",
+      "[applyRoleBasedUI] isOwner:",
+      isOwner,
+      "isSuperAdmin:",
       isSuperAdmin,
       "isDeveloper:",
       isDeveloper,
@@ -1002,7 +1005,9 @@
     // Update status text with role badge
     if (statusText && statusText.textContent) {
       const currentText = statusText.textContent;
-      if (isSuperAdmin && !currentText.includes("Super Admin")) {
+      if (isOwner && !currentText.includes("Owner")) {
+        statusText.innerHTML = `${currentText} <span style="color: var(--primary); font-weight: 800; white-space: nowrap;">• Owner</span>`;
+      } else if (isSuperAdmin && !currentText.includes("Super Admin")) {
         statusText.innerHTML = `${currentText} <span style="color: var(--primary); font-weight: 800; white-space: nowrap;">• Super Admin</span>`;
       } else if (isDeveloper && !currentText.includes("Developer")) {
         statusText.innerHTML = `${currentText} <span style="color: #10b981; font-weight: 800; white-space: nowrap;">• Developer</span>`;
@@ -1011,22 +1016,22 @@
       }
     }
 
-    // Super_admin and developer can invite other admins
+    // Owner, super_admin, and developer can invite other admins
     if (inviteBtn) {
       inviteBtn.style.display = hasFullAccess ? "" : "none";
     }
 
-    // Super_admin and developer can see activity logs
+    // Owner, super_admin, and developer can see activity logs
     if (activityNav) {
       activityNav.style.display = hasFullAccess ? "" : "none";
     }
 
-    // Super_admin and developer can manage admins
+    // Owner, super_admin, and developer can manage admins
     if (adminsNav) {
       adminsNav.style.display = hasFullAccess ? "" : "none";
     }
 
-    // Super_admin and developer can see trash
+    // Owner, super_admin, and developer can see trash
     if (trashNav) {
       trashNav.style.display = hasFullAccess ? "" : "none";
     }
@@ -1056,6 +1061,7 @@
 
     if (roleEl && currentUserRole) {
       const roleLabels = {
+        owner: "Owner",
         developer: "Developer",
         super_admin: "Super Admin",
         editor: "Editor",
@@ -1066,6 +1072,8 @@
       roleEl.className = "admin-role";
       if (currentUserRole === "developer") {
         roleEl.style.color = "#10b981";
+      } else if (currentUserRole === "owner") {
+        roleEl.style.color = "var(--clr-primary)";
       } else if (currentUserRole === "super_admin") {
         roleEl.style.color = "var(--clr-primary)";
       } else {
@@ -1455,6 +1463,9 @@
 
     // Get role badge for activity log
     const getRoleBadgeSmall = (role) => {
+      if (role === "owner") {
+        return '<span class="role-badge-sm super">Own</span>';
+      }
       if (role === "developer") {
         return '<span class="role-badge-sm developer">Dev</span>';
       }
@@ -1567,6 +1578,9 @@
 
   function getRoleBadge(role) {
     console.log("[getRoleBadge] Getting badge for role:", role);
+    if (role === "owner") {
+      return '<span class="role-badge super">Owner</span>';
+    }
     if (role === "super_admin") {
       return '<span class="role-badge super">Super Admin</span>';
     }
@@ -1579,10 +1593,11 @@
   function getAdminCard(admin) {
     const name =
       `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || "No name";
-    // Developer and super_admin can manage other admins
+    // Developer, owner, and super_admin can manage other admins
     const hasFullAccess =
-      currentUserRole === "super_admin" || currentUserRole === "developer";
+      currentUserRole === "owner" || currentUserRole === "super_admin" || currentUserRole === "developer";
     const canManage = admin.id !== currentUserId && hasFullAccess;
+    const isOwner = admin.role === "owner";
     const isSuperAdmin = admin.role === "super_admin";
     const isDeveloper = admin.role === "developer";
 
@@ -1600,7 +1615,7 @@
         </div>
         <div class="admin-actions">
           ${
-            canManage && !isDeveloper
+            canManage && !isDeveloper && !isOwner
               ? `
             ${
               !isSuperAdmin
@@ -1623,7 +1638,7 @@
           `
               : admin.id === currentUserId
                 ? '<span class="text-muted" style="font-size: 0.9rem;">You</span>'
-                : isDeveloper
+                : isDeveloper || isOwner
                   ? '<span class="text-muted" style="font-size: 0.9rem;">Protected</span>'
                   : ""
           }
@@ -1664,8 +1679,8 @@
       return;
     }
 
-    // Sort: developers first, then super_admin, then editors
-    const roleOrder = { developer: 0, super_admin: 1, editor: 2 };
+    // Sort: owner first, then developers, then super_admin, then editors
+    const roleOrder = { owner: 0, developer: 1, super_admin: 2, editor: 3 };
     adminsCache.sort((a, b) => {
       const orderA = roleOrder[a.role] ?? 3;
       const orderB = roleOrder[b.role] ?? 3;
