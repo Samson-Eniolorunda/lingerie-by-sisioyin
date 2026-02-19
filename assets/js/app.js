@@ -6,6 +6,45 @@
 (function () {
   "use strict";
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // FORCE CACHE CLEAR - Ensures all users get fresh assets
+  // ═══════════════════════════════════════════════════════════════════════════
+  const APP_VERSION = 38;
+  const VERSION_KEY = "LBS_APP_VERSION";
+  
+  (function forceCacheClear() {
+    const storedVersion = parseInt(localStorage.getItem(VERSION_KEY) || "0", 10);
+    if (storedVersion < APP_VERSION) {
+      console.log("[APP] New version detected, clearing all caches...");
+      // Clear all caches
+      if ("caches" in window) {
+        caches.keys().then(names => {
+          names.forEach(name => {
+            caches.delete(name);
+            console.log("[APP] Deleted cache:", name);
+          });
+        });
+      }
+      // Unregister all service workers
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(reg => {
+            reg.unregister();
+            console.log("[APP] Unregistered service worker");
+          });
+        });
+      }
+      // Update stored version
+      localStorage.setItem(VERSION_KEY, String(APP_VERSION));
+      // Force reload after a brief delay to ensure cache is cleared
+      if (storedVersion > 0) {
+        setTimeout(() => {
+          window.location.reload(true);
+        }, 500);
+      }
+    }
+  })();
+
   console.log("🚀 APP: Initializing core application...");
 
   /* ─────────────────────────────────────────────

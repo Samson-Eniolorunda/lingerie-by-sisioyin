@@ -17415,6 +17415,9 @@ html[data-theme="dark"] .dash-hero-greeting-sub {
   .dash-setting-info p {
     font-size: 0.72rem;
     line-height: 1.4;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .dash-btn-outline,
   .dash-btn-danger,
@@ -22214,21 +22217,55 @@ html[data-theme="dark"] .page-loader-text span {
   animation: shimmer 1.5s ease infinite;
 }
 
-/* Category card skeleton */
+/* Category card skeleton - Glassmorphism loading */
 .category-skeleton {
   position: absolute;
   inset: 0;
   border-radius: var(--radius-2xl);
   background: linear-gradient(
     135deg,
-    var(--bg-surface-alt) 25%,
-    rgba(255, 255, 255, 0.3) 50%,
-    var(--bg-surface-alt) 75%
+    rgba(253, 242, 248, 0.9) 0%,
+    rgba(252, 231, 243, 0.7) 50%,
+    rgba(253, 242, 248, 0.9) 100%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.5s ease infinite;
-  z-index: 0;
+  animation: categoryShimmer 1.5s ease infinite;
+  z-index: 5;
   pointer-events: none;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.category-skeleton::before {
+  content: "";
+  width: 48px;
+  height: 48px;
+  border: 3px solid rgba(190, 24, 93, 0.15);
+  border-top-color: var(--clr-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes categoryShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+/* Dark mode category skeleton */
+[data-theme="dark"] .category-skeleton {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 30, 40, 0.9) 0%,
+    rgba(50, 50, 60, 0.7) 50%,
+    rgba(30, 30, 40, 0.9) 100%
+  );
+}
+[data-theme="dark"] .category-skeleton::before {
+  border-color: rgba(190, 24, 93, 0.25);
+  border-top-color: #f472b6;
 }
 
 /* Category image loading state */
