@@ -6075,7 +6075,7 @@
           "id, first_name, last_name, full_name, email, phone, whatsapp_number, whatsapp_opted_in, created_at, is_admin, date_of_birth, account_status, return_privilege_revoked",
         )
         .eq("is_admin", false)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: true });
 
       if (error) throw error;
 
