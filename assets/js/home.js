@@ -638,32 +638,21 @@
     const heroImg = document.getElementById("heroImage");
     if (heroImg && !heroImg.src) heroImg.src = PLACEHOLDER_IMAGES.hero;
 
+    // Always apply placeholder images if they haven't already loaded
     const lingerieImg = document.getElementById("categoryLingerieImage");
-    if (
-      lingerieImg &&
-      (!lingerieImg.src ||
-        lingerieImg.src.includes("data:image") ||
-        !lingerieImg.src)
-    )
+    if (lingerieImg && lingerieImg.style.opacity !== "1") {
       applyImage(lingerieImg, PLACEHOLDER_IMAGES.lingerie);
+    }
 
     const loungewearImg = document.getElementById("categoryLoungewearImage");
-    if (
-      loungewearImg &&
-      (!loungewearImg.src ||
-        loungewearImg.src.includes("data:image") ||
-        !loungewearImg.src)
-    )
+    if (loungewearImg && loungewearImg.style.opacity !== "1") {
       applyImage(loungewearImg, PLACEHOLDER_IMAGES.loungewear);
+    }
 
     const underwearImg = document.getElementById("categoryUnderwearImage");
-    if (
-      underwearImg &&
-      (!underwearImg.src ||
-        underwearImg.src.includes("data:image") ||
-        !underwearImg.src)
-    )
+    if (underwearImg && underwearImg.style.opacity !== "1") {
       applyImage(underwearImg, PLACEHOLDER_IMAGES.underwear);
+    }
   }
 
   async function loadSiteImages() {

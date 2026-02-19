@@ -22217,7 +22217,8 @@ html[data-theme="dark"] .page-loader-text span {
 
 /* Category card skeleton */
 .category-skeleton {
-  aspect-ratio: 3/4;
+  position: absolute;
+  inset: 0;
   border-radius: var(--radius-2xl);
   background: linear-gradient(
     135deg,
@@ -22227,6 +22228,13 @@ html[data-theme="dark"] .page-loader-text span {
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s ease infinite;
+  z-index: 1;
+}
+
+.category-showcase-image img {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
 }
 
 /* Add Address buttons */

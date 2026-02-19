@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = 32;
+const SW_VERSION = 33;
 const CACHE_NAME = "lbs-cache-v" + SW_VERSION;
 const STATIC_ASSETS = [
   "/home",
@@ -141,8 +141,11 @@ self.addEventListener("fetch", (event) => {
       }
 
       // Network-first for CSS and JS (always serve fresh code)
-      const isCSSorJS = url.pathname.endsWith('.css') || url.pathname.endsWith('.js') || 
-                        url.search.includes('.css') || url.search.includes('.js');
+      const isCSSorJS =
+        url.pathname.endsWith(".css") ||
+        url.pathname.endsWith(".js") ||
+        url.search.includes(".css") ||
+        url.search.includes(".js");
       if (isCSSorJS) {
         try {
           const networkResponse = await fetch(request);
