@@ -7990,6 +7990,63 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   padding: var(--space-4) var(--space-5) var(--space-5);
 }
 
+/* Compact auth for short viewports (signup form overflows) */
+@media (max-height: 730px) {
+  .auth-modal {
+    max-height: 92vh;
+  }
+  .auth-hero {
+    padding: var(--space-1) var(--space-3) var(--space-1);
+  }
+  .auth-hero-icon {
+    width: 36px;
+    height: 36px;
+    margin-bottom: 2px;
+  }
+  .auth-hero-title {
+    font-size: 1rem;
+  }
+  .auth-hero-sub {
+    display: none;
+  }
+  .auth-modal .modal-body {
+    padding: var(--space-2) var(--space-4) var(--space-3);
+  }
+  .auth-tabs {
+    margin-bottom: var(--space-2);
+    padding: 3px;
+  }
+  .auth-field {
+    margin-bottom: 4px;
+  }
+  .auth-input-wrap .form-input,
+  .auth-input-wrap input {
+    padding: 0.6rem 2.6rem 0.6rem 2.3rem;
+    font-size: 0.85rem;
+  }
+  .auth-submit-btn {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.85rem;
+  }
+  .auth-divider {
+    margin-block: var(--space-1);
+  }
+  .auth-google-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.82rem;
+  }
+  .auth-legal {
+    margin-top: var(--space-1);
+    font-size: 0.7rem;
+  }
+  .recaptcha-field .g-recaptcha,
+  .g-recaptcha {
+    transform: scale(0.72);
+    transform-origin: center;
+    margin: -6px auto;
+  }
+}
+
 /* Large screens — wider modal to fit all content without scrolling */
 @media (min-width: 768px) {
   .auth-modal {
@@ -13676,7 +13733,7 @@ html[data-theme="dark"] .wa-popup-msg {
   }
 
   .hero-float-card.top {
-    top: 10%;
+    top: 4%;
     left: 4%;
   }
 
@@ -13715,7 +13772,7 @@ html[data-theme="dark"] .wa-popup-msg {
 
 @media (max-width: 480px) {
   .hero-float-card.top {
-    top: 8%;
+    top: 3%;
     left: 3%;
   }
   .hero-float-card.bottom {

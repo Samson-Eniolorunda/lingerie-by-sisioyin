@@ -477,8 +477,9 @@
   async function handleSessionTimeout() {
     console.log("[handleSessionTimeout] Session timed out");
     hideSessionModal();
+    sessionStorage.removeItem("LBS_ADMIN_VIEW");
     await supabase.auth.signOut();
-    window.location.reload();
+    window.location.href = window.location.pathname;
   }
 
   function bindSessionTimeout() {
@@ -506,8 +507,9 @@
     on($("#sessionLogoutBtn"), "click", async () => {
       console.log("[sessionLogoutBtn] Logging out");
       hideSessionModal();
+      sessionStorage.removeItem("LBS_ADMIN_VIEW");
       await supabase.auth.signOut();
-      window.location.reload();
+      window.location.href = window.location.pathname;
     });
   }
 
@@ -5804,7 +5806,8 @@
   async function loadDeviceAnalytics() {
     const deviceEl = $("#deviceTypeTable");
     const browserEl = $("#browserTypeTable");
-    if (!deviceEl && !browserEl) return;
+    const brandEl = $("#deviceBrandTable");
+    if (!deviceEl && !browserEl && !brandEl) return;
 
     try {
       const days = parseInt($("#analyticsPeriod")?.value || "30", 10);
@@ -5816,7 +5819,7 @@
 
       const { data, error } = await client
         .from("site_visits")
-        .select("device_type, browser, os")
+        .select("device_type, browser, os, device_brand, device_model")
         .gte("created_at", since.toISOString());
 
       if (error) throw error;
@@ -5876,6 +5879,47 @@
               `<tr><td><i class="fa-brands ${icons[b] || "fa-solid fa-globe"}"></i> ${b}</td><td>${c}</td><td>${((c / total) * 100).toFixed(1)}%</td></tr>`,
           )
           .join("")}</tbody></table>`;
+      }
+
+      // Aggregate device brands & models
+      if (brandEl) {
+        const brandCounts = {};
+        data.forEach((r) => {
+          if (!r.device_brand && !r.device_model) return;
+          const label = r.device_model && r.device_model !== r.device_brand
+            ? `${r.device_brand || "Unknown"} ${r.device_model}`
+            : r.device_brand || "Unknown";
+          brandCounts[label] = (brandCounts[label] || 0) + 1;
+        });
+        const entries = Object.entries(brandCounts);
+        if (entries.length === 0) {
+          brandEl.innerHTML = '<p class="text-muted text-center">No device brand data yet</p>';
+        } else {
+          const total = entries.reduce((s, [, c]) => s + c, 0);
+          const sorted = entries.sort((a, b) => b[1] - a[1]).slice(0, 15);
+          const brandIcons = {
+            Samsung: "fa-solid fa-mobile-screen",
+            Apple: "fa-brands fa-apple",
+            Google: "fa-brands fa-google",
+            Xiaomi: "fa-solid fa-mobile-screen",
+            Huawei: "fa-solid fa-mobile-screen",
+            OnePlus: "fa-solid fa-mobile-screen",
+            Oppo: "fa-solid fa-mobile-screen",
+            Vivo: "fa-solid fa-mobile-screen",
+            Tecno: "fa-solid fa-mobile-screen",
+            Infinix: "fa-solid fa-mobile-screen",
+            Itel: "fa-solid fa-mobile-screen",
+            PC: "fa-solid fa-desktop",
+            Nokia: "fa-solid fa-mobile-screen",
+          };
+          brandEl.innerHTML = `<table class="analytics-table"><thead><tr><th>Device</th><th>Visits</th><th>%</th></tr></thead><tbody>${sorted
+            .map(([d, c]) => {
+              const brandName = d.split(" ")[0];
+              const icon = brandIcons[brandName] || "fa-solid fa-mobile-screen";
+              return `<tr><td><i class="${icon}"></i> ${d}</td><td>${c}</td><td>${((c / total) * 100).toFixed(1)}%</td></tr>`;
+            })
+            .join("")}</tbody></table>`;
+        }
       }
     } catch (err) {
       console.log("Device analytics error:", err);
@@ -6680,8 +6724,9 @@
     // Logout
     on($("#logoutBtn"), "click", async () => {
       console.log("[logoutBtn] Logout clicked");
+      sessionStorage.removeItem("LBS_ADMIN_VIEW");
       await supabase.auth.signOut();
-      window.location.reload();
+      window.location.href = window.location.pathname;
     });
 
     // Auth state change listener - handles email confirmation redirect
@@ -6749,7 +6794,7 @@
         const ids = messagesCache.map((m) => m.id);
         const { data: replies } = await supabase
           .from("message_replies")
-          .select("message_id, body, sender_type, created_at")
+          .select("message_id, reply_text, sender_type, created_at")
           .in("message_id", ids)
           .order("created_at", { ascending: false });
         if (replies && replies.length) {
@@ -6761,7 +6806,7 @@
           messagesCache.forEach((m) => {
             const lr = latestMap[m.id];
             if (lr) {
-              m._lastReply = lr.body || "";
+              m._lastReply = lr.reply_text || "";
               m._lastReplySender = lr.sender_type || "admin";
               m._lastReplyAt = lr.created_at;
             }

@@ -5,8 +5,8 @@
  * ============================================
  */
 
-const SW_VERSION = "1.57.26";
-const SW_BUILD = 57;
+const SW_VERSION = "1.58.26";
+const SW_BUILD = 58;
 const CACHE_NAME = "lbs-cache-v" + SW_BUILD;
 // Only cache HTML pages and icons for offline support
 // CSS/JS are NOT cached - always fetched fresh from server

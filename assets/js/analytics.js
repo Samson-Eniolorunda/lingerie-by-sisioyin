@@ -362,19 +362,121 @@
         return "Other";
       })();
 
+      // Detect device brand & model from UA string
+      const { brand: deviceBrand, model: deviceModel } = (() => {
+        // Samsung — SM-S9xx (Galaxy S2x), SM-Axxx, SM-Fxxx, SM-Gxxx, SM-Nxxx
+        const sm = ua.match(/SM-([A-Z]\d{3,4}[A-Za-z]*)/i);
+        if (sm) {
+          const code = sm[1].toUpperCase();
+          let model = code;
+          if (/^S9[012]\d/.test(code)) model = "Galaxy S2" + (code[2] === "0" ? "4" : code[2] === "1" ? "4" : code[2] === "2" ? "5" : "x");
+          else if (/^S7[0-9]\d/.test(code)) model = "Galaxy S2" + (parseInt(code[2]) < 5 ? "3" : "3");
+          else if (/^A\d{3}/.test(code)) model = "Galaxy A" + code.slice(1, 3);
+          else if (/^F\d{3}/.test(code)) model = "Galaxy Z Fold";
+          else if (/^N\d{3}/.test(code)) model = "Galaxy Note";
+          else if (/^G\d{3}/.test(code)) model = "Galaxy S";
+          return { brand: "Samsung", model: model };
+        }
+        if (/Samsung/i.test(ua)) return { brand: "Samsung", model: "Samsung" };
+
+        // iPhone / iPad / iPod
+        if (/iPhone/.test(ua)) return { brand: "Apple", model: "iPhone" };
+        if (/iPad/.test(ua)) return { brand: "Apple", model: "iPad" };
+        if (/iPod/.test(ua)) return { brand: "Apple", model: "iPod" };
+        if (/Macintosh/.test(ua)) return { brand: "Apple", model: "Mac" };
+
+        // Google Pixel
+        const pixel = ua.match(/Pixel\s?(\d[a-zA-Z]?\s?(?:Pro|XL)?)/i);
+        if (pixel) return { brand: "Google", model: "Pixel " + pixel[1].trim() };
+        if (/Pixel/i.test(ua)) return { brand: "Google", model: "Pixel" };
+
+        // Xiaomi / Redmi / POCO
+        const xiaomi = ua.match(/(Redmi\s?Note\s?\d+\s?\w*|Redmi\s?\d+\w*|POCO\s?\w+\d*|Mi\s?\d+\w*)/i);
+        if (xiaomi) return { brand: "Xiaomi", model: xiaomi[1].trim() };
+        if (/Xiaomi/i.test(ua)) return { brand: "Xiaomi", model: "Xiaomi" };
+
+        // Huawei
+        const huawei = ua.match(/HUAWEI\s?(\S+)/i) || ua.match(/(VOG|ELS|NOH|OCE|ABR|CET|ALN)-\w+/i);
+        if (huawei) return { brand: "Huawei", model: huawei[1] };
+
+        // OnePlus
+        const oneplus = ua.match(/(ONEPLUS\s?\w+|IN20\d{2}|KB20\d{2}|CPH\d{4}|NE2\d{3})/i);
+        if (oneplus) return { brand: "OnePlus", model: oneplus[1] };
+
+        // Oppo
+        if (/OPPO/i.test(ua)) {
+          const oppoModel = ua.match(/OPPO\s?(\S+)/i);
+          return { brand: "Oppo", model: oppoModel ? oppoModel[1] : "Oppo" };
+        }
+
+        // Vivo
+        if (/vivo/i.test(ua)) {
+          const vivoModel = ua.match(/vivo\s?(\S+)/i);
+          return { brand: "Vivo", model: vivoModel ? vivoModel[1] : "Vivo" };
+        }
+
+        // Tecno
+        const tecno = ua.match(/TECNO\s?(\S+)/i);
+        if (tecno) return { brand: "Tecno", model: tecno[1] };
+
+        // Infinix
+        const infinix = ua.match(/Infinix\s?(\S+)/i);
+        if (infinix) return { brand: "Infinix", model: infinix[1] };
+
+        // Itel
+        const itel = ua.match(/itel\s?(\S+)/i);
+        if (itel) return { brand: "Itel", model: itel[1] };
+
+        // LG
+        const lg = ua.match(/LG-?(\S+)/i);
+        if (lg) return { brand: "LG", model: lg[1] };
+
+        // Nokia / HMD
+        const nokia = ua.match(/Nokia\s?(\S+)/i);
+        if (nokia) return { brand: "Nokia", model: nokia[1] };
+
+        // Windows desktop
+        if (/Windows NT/i.test(ua)) return { brand: "PC", model: "Windows PC" };
+        // Linux desktop
+        if (/Linux/i.test(ua) && !/Android/i.test(ua)) return { brand: "PC", model: "Linux PC" };
+        // Generic Android
+        if (/Android/i.test(ua)) {
+          const genericModel = ua.match(/;\s*([^;)]+)\s*Build/i);
+          if (genericModel) return { brand: "Android", model: genericModel[1].trim().slice(0, 30) };
+          return { brand: "Android", model: "Android" };
+        }
+
+        return { brand: "Unknown", model: "Unknown" };
+      })();
+
+      // Try high-entropy UA data for better model info (Chromium only)
+      let heBrand = deviceBrand, heModel = deviceModel;
+      try {
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+          const he = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]);
+          if (he.model) heModel = he.model;
+          if (he.platform === "Android" && heBrand === "Unknown") heBrand = "Android";
+        }
+      } catch (_) { /* not supported */ }
+
       // Send to GA4
       if (window.gtag && GA_ID) {
         window.gtag("event", "device_info", {
           device_type: deviceType,
           browser: browser,
           operating_system: os,
+          device_brand: heBrand,
+          device_model: heModel,
           screen_width: width,
           screen_height: window.innerHeight,
         });
       }
 
       // Store device info in window for geo tracking to pick up
-      window._lbsDeviceInfo = { device_type: deviceType, browser, os };
+      window._lbsDeviceInfo = {
+        device_type: deviceType, browser, os,
+        device_brand: heBrand, device_model: heModel,
+      };
 
       sessionStorage.setItem("lbs_device_tracked", "1");
     } catch (err) {
@@ -438,6 +540,8 @@
             device_type: dev.device_type || null,
             browser: dev.browser || null,
             os: dev.os || null,
+            device_brand: dev.device_brand || null,
+            device_model: dev.device_model || null,
           })
           .then(() => {})
           .catch(() => {});

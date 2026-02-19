@@ -2446,11 +2446,6 @@ textarea {
   box-shadow: 0 8px 24px rgba(190, 24, 93, 0.15);
   transform: translateY(-4px);
   border-color: var(--clr-primary);
-  background: linear-gradient(
-    to bottom,
-    var(--bg-surface),
-    var(--clr-primary-light)
-  );
 }
 
 .product-card.selected {
