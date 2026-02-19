@@ -580,21 +580,24 @@
   function applyImage(img, url) {
     if (!img || !url) return;
     img.onload = null;
+    // Remove any previous load listener
     img.addEventListener("load", function onLoad() {
       img.removeEventListener("load", onLoad);
       _revealImage(img);
     });
+    // Set src after attaching listener
     img.src = url;
-    // Immediately reveal if already cached
+    // Immediately reveal if already cached (common on back-navigation)
     if (img.complete && img.naturalWidth > 0) {
       _revealImage(img);
     }
-    // iOS Safari fallback: force reveal after 4s in case load event never fires
+    // Safety fallback: force reveal after 2s in case load event never fires
+    // (iOS Safari / Android Chrome can silently fail)
     setTimeout(function () {
       if (img.style.opacity !== "1") {
         _revealImage(img);
       }
-    }, 4000);
+    }, 2000);
   }
 
   // IntersectionObserver-based lazy loading (avoids iOS Safari loading="lazy" + opacity:0 deadlock)
@@ -630,7 +633,7 @@
     }
   }
 
-  // Set placeholder images immediately
+  // Set placeholder images immediately (direct load, no IntersectionObserver — these are key above-fold content)
   function setPlaceholderImages() {
     const heroImg = document.getElementById("heroImage");
     if (heroImg && !heroImg.src) heroImg.src = PLACEHOLDER_IMAGES.hero;
@@ -642,7 +645,7 @@
         lingerieImg.src.includes("data:image") ||
         !lingerieImg.src)
     )
-      lazyApplyImage(lingerieImg, PLACEHOLDER_IMAGES.lingerie);
+      applyImage(lingerieImg, PLACEHOLDER_IMAGES.lingerie);
 
     const loungewearImg = document.getElementById("categoryLoungewearImage");
     if (
@@ -651,7 +654,7 @@
         loungewearImg.src.includes("data:image") ||
         !loungewearImg.src)
     )
-      lazyApplyImage(loungewearImg, PLACEHOLDER_IMAGES.loungewear);
+      applyImage(loungewearImg, PLACEHOLDER_IMAGES.loungewear);
 
     const underwearImg = document.getElementById("categoryUnderwearImage");
     if (
@@ -660,7 +663,7 @@
         underwearImg.src.includes("data:image") ||
         !underwearImg.src)
     )
-      lazyApplyImage(underwearImg, PLACEHOLDER_IMAGES.underwear);
+      applyImage(underwearImg, PLACEHOLDER_IMAGES.underwear);
   }
 
   async function loadSiteImages() {
@@ -696,22 +699,13 @@
             if (heroImg) heroImg.src = url;
             break;
           case "category_lingerie":
-            lazyApplyImage(
-              document.getElementById("categoryLingerieImage"),
-              url,
-            );
+            applyImage(document.getElementById("categoryLingerieImage"), url);
             break;
           case "category_loungewear":
-            lazyApplyImage(
-              document.getElementById("categoryLoungewearImage"),
-              url,
-            );
+            applyImage(document.getElementById("categoryLoungewearImage"), url);
             break;
           case "category_underwear":
-            lazyApplyImage(
-              document.getElementById("categoryUnderwearImage"),
-              url,
-            );
+            applyImage(document.getElementById("categoryUnderwearImage"), url);
             break;
         }
       });
