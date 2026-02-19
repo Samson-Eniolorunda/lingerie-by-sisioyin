@@ -13522,11 +13522,12 @@ html[data-theme="dark"] .wa-popup-msg {
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-5) var(--space-3) var(--space-3);
-  background: #fff;
+  background: linear-gradient(135deg, #fff0f5, #fce4ec);
   border-radius: var(--radius-xl);
+  border: 1px solid rgba(190, 24, 93, 0.08);
   box-shadow:
-    0 4px 20px rgba(190, 24, 93, 0.12),
-    0 1px 4px rgba(0, 0, 0, 0.06);
+    0 4px 20px rgba(190, 24, 93, 0.1),
+    0 1px 4px rgba(0, 0, 0, 0.04);
   opacity: 0;
   z-index: 2;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -13535,7 +13536,7 @@ html[data-theme="dark"] .wa-popup-msg {
   transform: translateY(-3px);
   box-shadow:
     0 8px 30px rgba(190, 24, 93, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.08);
+    0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .hero-float-card.top {
@@ -13705,9 +13706,10 @@ html[data-theme="dark"] .wa-popup-msg {
 
 /* Dark mode float cards */
 [data-theme="dark"] .hero-float-card {
-  background: var(--bg-surface);
+  background: linear-gradient(135deg, rgba(190, 24, 93, 0.12), rgba(140, 20, 70, 0.08));
+  border-color: rgba(190, 24, 93, 0.15);
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.25),
+    0 4px 20px rgba(0, 0, 0, 0.3),
     0 1px 4px rgba(0, 0, 0, 0.15);
 }
 [data-theme="dark"] .hero-float-card:hover {
@@ -13716,7 +13718,7 @@ html[data-theme="dark"] .wa-popup-msg {
     0 2px 8px rgba(0, 0, 0, 0.2);
 }
 [data-theme="dark"] .hero-float-icon {
-  background: rgba(190, 24, 93, 0.15);
+  background: rgba(190, 24, 93, 0.2);
 }
 
 /* =============================================================================

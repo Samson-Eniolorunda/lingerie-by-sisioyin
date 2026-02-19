@@ -9,20 +9,21 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = 52;
+  const APP_VERSION = "1.53.26";
+  const APP_BUILD = 53; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
   (function forceCacheClear() {
-    const storedVersion = parseInt(
+    const storedBuild = parseInt(
       localStorage.getItem(VERSION_KEY) || "0",
       10,
     );
-    if (storedVersion >= APP_VERSION) return;
+    if (storedBuild >= APP_BUILD) return;
 
     console.log(
       "[APP] Version mismatch (" +
-        storedVersion +
+        storedBuild +
         " → " +
         APP_VERSION +
         "), nuking caches…",
@@ -63,9 +64,9 @@
     Promise.all(tasks)
       .catch((err) => console.warn("[APP] Cache cleanup error:", err))
       .finally(() => {
-        localStorage.setItem(VERSION_KEY, String(APP_VERSION));
+        localStorage.setItem(VERSION_KEY, String(APP_BUILD));
         // Only reload if user already had a previous version (not first visit)
-        if (storedVersion > 0) {
+        if (storedBuild > 0) {
           // Prevent infinite reload loops
           const reloads = parseInt(
             sessionStorage.getItem(RELOAD_KEY) || "0",
