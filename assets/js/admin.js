@@ -1047,10 +1047,11 @@
     const meta = u.user_metadata || {};
     const first = String(meta.first_name || "").trim();
     const last = String(meta.last_name || "").trim();
+    // Always show first_name before last_name with space between
     const full = `${first} ${last}`.trim();
-    const displayName = full || u.email || "Welcome back";
+    const displayName = full || meta.full_name || u.email || "Welcome back";
     console.log("[getSessionDisplayName] Display name:", displayName);
-    return displayName;
+    return titleCase(displayName);
   }
 
   function updateSidebarUserInfo(session) {
@@ -4654,7 +4655,7 @@
 
         const { error: otpErr } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: AUTH_REDIRECT_URL },
+          options: { emailRedirectTo: window.location.origin + "/admin?mode=login" },
         });
 
         if (otpErr) {
@@ -5034,34 +5035,30 @@
 
     if (!overlay) return;
 
-    // Get user display name
+    // Get user display name (first_name before last_name)
     let displayName = "Admin";
     try {
       const { data } = await supabase
         .from("profiles")
-        .select("display_name, first_name, last_name, full_name")
+        .select("first_name, last_name, full_name")
         .eq("id", session.user.id)
         .single();
-      if (data?.display_name) {
-        displayName = data.display_name;
-      } else if (data?.first_name && data?.last_name) {
-        displayName = data.first_name + " " + data.last_name;
-      } else if (data?.first_name) {
-        displayName = data.first_name;
+      if (data?.first_name || data?.last_name) {
+        displayName = `${data.first_name || ""} ${data.last_name || ""}`.trim();
       } else if (data?.full_name) {
         displayName = data.full_name;
-      } else if (session.user.user_metadata?.full_name) {
-        displayName = session.user.user_metadata.full_name;
-      } else if (session.user.email) {
-        displayName = session.user.email.split("@")[0];
+      } else {
+        const meta = session.user.user_metadata || {};
+        const first = (meta.first_name || "").trim();
+        const last = (meta.last_name || "").trim();
+        displayName = `${first} ${last}`.trim() || meta.full_name || session.user.email?.split("@")[0] || "Admin";
       }
     } catch (e) {
       // Fallback to metadata or email
-      if (session.user.user_metadata?.full_name) {
-        displayName = session.user.user_metadata.full_name;
-      } else if (session.user.email) {
-        displayName = session.user.email.split("@")[0];
-      }
+      const meta = session.user.user_metadata || {};
+      const first = (meta.first_name || "").trim();
+      const last = (meta.last_name || "").trim();
+      displayName = `${first} ${last}`.trim() || meta.full_name || session.user.email?.split("@")[0] || "Admin";
       console.log("Could not fetch display name, using fallback");
     }
 
@@ -6098,11 +6095,9 @@
       allCustomers = (profiles || []).map((p) => {
         const key = (p.email || "").toLowerCase();
         const stats = orderMap[key] || { count: 0, spent: 0 };
-        // Build display name from available fields
-        const displayName =
-          p.full_name ||
-          `${p.first_name || ""} ${p.last_name || ""}`.trim() ||
-          "";
+        // Build display name: first_name before last_name
+        const firstLast = `${p.first_name || ""} ${p.last_name || ""}`.trim();
+        const displayName = firstLast || p.full_name || "";
         return {
           ...p,
           full_name: displayName,
@@ -6871,13 +6866,15 @@
       await autoGateOnce();
     }
 
-    // Hide signup tab if admins already exist (invite-only after first setup)
+    // Hide signup tab if admins already exist or if mode=login (invite-only)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isLoginMode = urlParams.get("mode") === "login";
     try {
       const { count } = await supabase
         .from("profiles")
         .select("id", { count: "exact", head: true })
         .eq("is_admin", true);
-      if (count && count > 0) {
+      if ((count && count > 0) || isLoginMode) {
         const signupTab = $("[data-auth-tab='signup']");
         if (signupTab) signupTab.style.display = "none";
       }

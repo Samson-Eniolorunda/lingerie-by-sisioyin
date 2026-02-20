@@ -533,6 +533,12 @@
         const dev = window._lbsDeviceInfo || {};
         const screenRes = `${screen.width}x${screen.height}`;
         const viewportSize = `${window.innerWidth}x${window.innerHeight}`;
+        // Get current user ID if logged in (for fraud detection linking)
+        let userId = null;
+        try {
+          const { data: { session } } = await c.auth.getSession();
+          userId = session?.user?.id || null;
+        } catch (_) { /* anonymous visitor */ }
         const { data } = await c.from("site_visits")
           .insert({
             ip_address: locationData.ip,
@@ -549,6 +555,7 @@
             device_model: dev.device_model || null,
             screen_resolution: screenRes,
             viewport_size: viewportSize,
+            user_id: userId,
           })
           .select("id")
           .single();

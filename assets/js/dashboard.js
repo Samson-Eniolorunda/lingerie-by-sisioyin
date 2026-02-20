@@ -31,6 +31,8 @@
   const elRewardPoints = $("#rewardPoints");
   const elRecentOrders = $("#recentOrders");
   const elAllOrders = $("#allOrders");
+  const dashWelcomeOverlay = $("#dashWelcomeOverlay");
+  const dashSignoutOverlay = $("#dashSignoutOverlay");
 
   if (!gate || !shell) return; // not on dashboard page
 
@@ -666,27 +668,47 @@
 
   function show(user) {
     currentUser = user;
-    // Show a brief login spinner before revealing the dashboard
-    if (loading && !loading.hidden) {
-      loading.innerHTML =
-        '<div class="dash-login-spinner"><div class="dash-login-spinner-ring"></div><p>Setting up your dashboard…</p></div>';
+
+    // Prepare welcome overlay data
+    const meta = user.user_metadata || {};
+    const first = (meta.first_name || "").trim();
+    const last = (meta.last_name || "").trim();
+    const fullName = `${first} ${last}`.trim() || meta.full_name || user.email?.split("@")[0] || "User";
+    const parts = fullName.trim().split(/\\s+/);
+    const initials = parts.length > 1
+      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+      : (fullName[0] || "U").toUpperCase();
+
+    // Show welcome overlay
+    if (dashWelcomeOverlay) {
+      const nameEl = $("#dashWelcomeName");
+      const avatarEl = $("#dashWelcomeAvatar");
+      if (nameEl) nameEl.textContent = fullName;
+      if (avatarEl) avatarEl.textContent = initials;
+      dashWelcomeOverlay.hidden = false;
+
+      // Fade out after animation completes
       setTimeout(function () {
-        hideLoading();
-        gate.hidden = true;
-        shell.hidden = false;
-        finishShow(user);
-      }, 600);
-    } else {
-      hideLoading();
-      gate.hidden = true;
-      shell.hidden = false;
-      finishShow(user);
+        dashWelcomeOverlay.classList.add("dash-overlay-fade-out");
+        setTimeout(function () {
+          dashWelcomeOverlay.hidden = true;
+          dashWelcomeOverlay.classList.remove("dash-overlay-fade-out");
+        }, 500);
+      }, 1900);
     }
+
+    // Show dashboard shell immediately (behind the overlay)
+    hideLoading();
+    gate.hidden = true;
+    shell.hidden = false;
+    finishShow(user);
   }
 
   function finishShow(user) {
-    const name =
-      user.user_metadata?.full_name || user.email?.split("@")[0] || "User";
+    const meta = user.user_metadata || {};
+    const first = (meta.first_name || "").trim();
+    const last = (meta.last_name || "").trim();
+    const name = `${first} ${last}`.trim() || meta.full_name || user.email?.split("@")[0] || "User";
     if (elUserName) elUserName.textContent = name;
     if (elUserEmail) elUserEmail.textContent = user.email || "";
     // Avatar: first + last initial
@@ -1068,10 +1090,7 @@
           "Account deactivated. You can reactivate by signing in.",
           "info",
         );
-        if (window.AUTH?.logout) {
-          await window.AUTH.logout();
-          hide();
-        }
+        await dashSignout();
       } catch (e) {
         window.UTILS?.toast?.(
           e.message || "Failed to deactivate account",
@@ -1082,12 +1101,7 @@
 
     /* ─── 7. Danger Zone ─── */
     // Sign out (second button in settings)
-    $("#logoutBtn2")?.addEventListener("click", async () => {
-      if (window.AUTH?.logout) {
-        await window.AUTH.logout();
-        hide();
-      }
-    });
+    $("#logoutBtn2")?.addEventListener("click", () => dashSignout());
 
     // Delete account
     $("#deleteAccountBtn")?.addEventListener("click", async () => {
@@ -1159,10 +1173,7 @@
           "success",
         );
         setTimeout(async () => {
-          if (window.AUTH?.logout) {
-            await window.AUTH.logout();
-            hide();
-          }
+          await dashSignout();
           window.location.href = "/home";
         }, 2000);
       } catch (e) {
@@ -1502,6 +1513,32 @@
     }
   }
 
+  /* ── Dashboard Signout with Overlay ──────── */
+  async function dashSignout() {
+    const c = client();
+    if (!c) return;
+    if (dashSignoutOverlay) {
+      dashSignoutOverlay.hidden = false;
+      await new Promise((r) => setTimeout(r, 1400));
+    }
+    try {
+      await c.auth.signOut();
+      window.SYNC?.onLogout?.();
+      window.UTILS?.toast?.("Logged out successfully", "info");
+      if (window.AUTH?.updateAuthUI) window.AUTH.updateAuthUI(null);
+    } catch (err) {
+      console.error("Dashboard logout error:", err);
+    }
+    if (dashSignoutOverlay) {
+      dashSignoutOverlay.classList.add("dash-overlay-fade-out");
+      setTimeout(() => {
+        dashSignoutOverlay.hidden = true;
+        dashSignoutOverlay.classList.remove("dash-overlay-fade-out");
+      }, 500);
+    }
+    hide();
+  }
+
   /* ── Event Listeners ─────────────────────── */
   function bind() {
     signInBtn?.addEventListener("click", () => {
@@ -1510,12 +1547,7 @@
       if (btn) return btn.click();
     });
 
-    logoutBtn?.addEventListener("click", async () => {
-      if (window.AUTH?.logout) {
-        await window.AUTH.logout();
-        hide();
-      }
-    });
+    logoutBtn?.addEventListener("click", () => dashSignout());
 
     navItems.forEach((t) =>
       t.addEventListener("click", () => switchTab(t.dataset.section)),

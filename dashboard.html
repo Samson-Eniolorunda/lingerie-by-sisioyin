@@ -36,7 +36,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css?v=65" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=66" />
     <style>
       .dash-status-icon {
         color: #22c55e;
@@ -255,6 +255,31 @@
             <i class="fa-solid fa-moon"></i>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+       WELCOME & SIGNOUT OVERLAYS (Glassmorphism)
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="dash-welcome-overlay" id="dashWelcomeOverlay" hidden>
+      <div class="dash-welcome-card">
+        <div class="dash-welcome-avatar" id="dashWelcomeAvatar">U</div>
+        <p class="dash-welcome-greeting">Welcome back</p>
+        <h1 class="dash-welcome-name" id="dashWelcomeName">User</h1>
+        <div class="dash-welcome-loader">
+          <div class="dash-welcome-loader-bar"></div>
+        </div>
+        <p class="dash-welcome-text">Loading your dashboard…</p>
+      </div>
+    </div>
+
+    <div class="dash-welcome-overlay dash-signout-overlay" id="dashSignoutOverlay" hidden>
+      <div class="dash-welcome-card dash-signout-card">
+        <div class="dash-welcome-avatar dash-signout-icon">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+        <h1 class="dash-welcome-name">See you soon!</h1>
+        <p class="dash-welcome-text">Signing out securely…</p>
       </div>
     </div>
 
@@ -1486,7 +1511,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/recaptcha.js?v=65"></script>
+    <script src="assets/js/recaptcha.js?v=66"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
@@ -1496,12 +1521,12 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=65"></script>
-    <script defer src="assets/js/utils.js?v=65"></script>
-    <script defer src="assets/js/supabase.js?v=65"></script>
-    <script defer src="assets/js/app.js?v=65"></script>
-    <script defer src="assets/js/sync.js?v=65"></script>
-    <script defer src="assets/js/auth.js?v=65"></script>
-    <script defer src="assets/js/dashboard.js?v=65"></script>
+    <script defer src="assets/js/config.js?v=66"></script>
+    <script defer src="assets/js/utils.js?v=66"></script>
+    <script defer src="assets/js/supabase.js?v=66"></script>
+    <script defer src="assets/js/app.js?v=66"></script>
+    <script defer src="assets/js/sync.js?v=66"></script>
+    <script defer src="assets/js/auth.js?v=66"></script>
+    <script defer src="assets/js/dashboard.js?v=66"></script>
   </body>
 </html>
