@@ -4,9 +4,9 @@
   "trailingSlash": false,
   "redirects": [
     {
-      "source": "/:path(.*)",
+      "source": "/:path*",
       "has": [{ "type": "host", "value": "www.lingeriebysisioyin.store" }],
-      "destination": "https://lingeriebysisioyin.store/:path",
+      "destination": "https://lingeriebysisioyin.store/:path*",
       "permanent": true
     }
   ],
