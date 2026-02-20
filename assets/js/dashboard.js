@@ -1577,6 +1577,122 @@
       const u = e.detail?.user;
       u ? show(u) : hide();
     });
+
+    /* ── Set New Password modal (recovery link redirect) ── */
+    bindSetPwModal();
+  }
+
+  /* ── Set New Password Modal ──────────────── */
+  function openSetPwModal() {
+    const backdrop = $("#setPwBackdrop");
+    const modal = $("#setPwModal");
+    if (!backdrop || !modal) return;
+    backdrop.classList.add("active");
+    modal.classList.add("active");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => $("#setPwNew")?.focus(), 300);
+  }
+
+  function closeSetPwModal() {
+    const backdrop = $("#setPwBackdrop");
+    const modal = $("#setPwModal");
+    backdrop?.classList.remove("active");
+    modal?.classList.remove("active");
+    document.body.style.overflow = "";
+  }
+
+  function bindSetPwModal() {
+    const form = $("#setPwForm");
+    const closeBtn = $("#setPwClose");
+    const backdrop = $("#setPwBackdrop");
+    if (!form) return;
+
+    closeBtn?.addEventListener("click", closeSetPwModal);
+    backdrop?.addEventListener("click", closeSetPwModal);
+
+    document.addEventListener("keydown", (e) => {
+      if (
+        e.key === "Escape" &&
+        $("#setPwModal")?.classList.contains("active")
+      ) {
+        closeSetPwModal();
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const pw = $("#setPwNew")?.value || "";
+      const pw2 = $("#setPwConfirm")?.value || "";
+
+      if (!pw || pw.length < 8) {
+        window.UTILS?.toast?.(
+          "Password must be at least 8 characters",
+          "error",
+        );
+        return;
+      }
+      if (!/[A-Z]/.test(pw) || !/[a-z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+        window.UTILS?.toast?.(
+          "Password needs uppercase, lowercase, number & special character",
+          "error",
+        );
+        return;
+      }
+      if (pw !== pw2) {
+        window.UTILS?.toast?.("Passwords do not match", "error");
+        return;
+      }
+
+      const btn = $("#setPwSubmit");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+      }
+
+      try {
+        const c = client();
+        if (!c) throw new Error("Auth unavailable");
+        const { error } = await c.auth.updateUser({ password: pw });
+        if (error) throw error;
+        window.UTILS?.toast?.("Password updated successfully!", "success");
+        closeSetPwModal();
+        // Clear the recovery hash from URL
+        if (window.history.replaceState) {
+          window.history.replaceState(null, "", window.location.pathname);
+        }
+      } catch (err) {
+        window.UTILS?.toast?.(
+          err.message || "Failed to update password",
+          "error",
+        );
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML =
+            '<i class="fa-solid fa-check"></i> Update Password';
+        }
+      }
+    });
+
+    // Listen for PASSWORD_RECOVERY event from auth.js
+    const c = client();
+    if (c) {
+      c.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") {
+          console.log("🔐 DASHBOARD: PASSWORD_RECOVERY event — opening set-pw modal");
+          openSetPwModal();
+        }
+      });
+    }
+
+    // Also check hash on load (in case the event already fired)
+    const hash = window.location.hash || "";
+    if (hash.includes("type=recovery")) {
+      console.log("🔐 DASHBOARD: Recovery URL detected — opening set-pw modal");
+      // Small delay to let Supabase process the token
+      setTimeout(openSetPwModal, 600);
+    }
   }
 
   /* ── Init ─────────────────────────────────── */

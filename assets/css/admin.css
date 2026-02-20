@@ -8610,8 +8610,9 @@ html[data-theme="dark"] .compose-recipient-option:hover {
 .customer-actions {
   display: flex;
   gap: 6px;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   align-items: center;
+  min-width: 152px;
 }
 .cust-act-btn {
   display: inline-flex;

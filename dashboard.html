@@ -36,7 +36,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css?v=64" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=65" />
     <style>
       .dash-status-icon {
         color: #22c55e;
@@ -1206,6 +1206,65 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════════════════
+       SET NEW PASSWORD MODAL (shown after clicking reset-password email link)
+       ═══════════════════════════════════════════════════════════════════════ -->
+    <div class="forgot-modal-backdrop" id="setPwBackdrop"></div>
+    <div class="forgot-modal" id="setPwModal">
+      <div class="forgot-modal-hero">
+        <button
+          type="button"
+          class="forgot-modal-close"
+          id="setPwClose"
+          aria-label="Close"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="forgot-modal-icon">
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <h2 class="forgot-modal-title">Set New Password</h2>
+        <p class="forgot-modal-sub">Enter your new password below</p>
+      </div>
+      <div class="forgot-modal-body">
+        <form id="setPwForm" novalidate>
+          <div class="forgot-modal-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="setPwNew"
+                class="form-input"
+                placeholder="New password"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+          </div>
+          <div class="forgot-modal-field">
+            <div class="auth-input-wrap">
+              <i class="fa-solid fa-lock auth-input-icon"></i>
+              <input
+                type="password"
+                id="setPwConfirm"
+                class="form-input"
+                placeholder="Confirm new password"
+                autocomplete="new-password"
+                required
+              />
+            </div>
+          </div>
+          <p class="text-muted" style="font-size: 0.78rem; margin-bottom: 12px">
+            Min 8 characters, with uppercase, lowercase, number &amp; special
+            character.
+          </p>
+          <button type="submit" class="forgot-modal-submit" id="setPwSubmit">
+            <i class="fa-solid fa-check"></i> Update Password
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
        AUTH MODAL
        ═══════════════════════════════════════════════════════════════════════ -->
     <div class="modal-backdrop" id="authBackdrop"></div>
@@ -1427,7 +1486,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/recaptcha.js?v=64"></script>
+    <script src="assets/js/recaptcha.js?v=65"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
@@ -1437,12 +1496,12 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=64"></script>
-    <script defer src="assets/js/utils.js?v=64"></script>
-    <script defer src="assets/js/supabase.js?v=64"></script>
-    <script defer src="assets/js/app.js?v=64"></script>
-    <script defer src="assets/js/sync.js?v=64"></script>
-    <script defer src="assets/js/auth.js?v=64"></script>
-    <script defer src="assets/js/dashboard.js?v=64"></script>
+    <script defer src="assets/js/config.js?v=65"></script>
+    <script defer src="assets/js/utils.js?v=65"></script>
+    <script defer src="assets/js/supabase.js?v=65"></script>
+    <script defer src="assets/js/app.js?v=65"></script>
+    <script defer src="assets/js/sync.js?v=65"></script>
+    <script defer src="assets/js/auth.js?v=65"></script>
+    <script defer src="assets/js/dashboard.js?v=65"></script>
   </body>
 </html>

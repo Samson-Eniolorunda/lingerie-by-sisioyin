@@ -4797,8 +4797,8 @@
       .from("products")
       .select("*")
       .eq("is_deleted", false)
-      .lt("stock", 10)
-      .order("stock", { ascending: true })
+      .lt("qty", 10)
+      .order("qty", { ascending: true })
       .limit(5);
 
     if (error) {
@@ -6861,7 +6861,15 @@
     renderStudioSlider();
     setStudioMode(false);
 
-    await autoGateOnce();
+    // If this is a password-recovery redirect, skip auto-gate and let
+    // the onAuthStateChange PASSWORD_RECOVERY event show the set-pw form.
+    const hashParams = window.location.hash || "";
+    if (hashParams.includes("type=recovery")) {
+      console.log("[init] Recovery URL detected — skipping autoGate, showing set-pw view");
+      showAuthView("setpw");
+    } else {
+      await autoGateOnce();
+    }
 
     // Hide signup tab if admins already exist (invite-only after first setup)
     try {

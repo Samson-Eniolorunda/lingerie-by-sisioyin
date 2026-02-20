@@ -36,7 +36,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/admin.css?v=64" />
+    <link rel="stylesheet" href="assets/css/admin.css?v=65" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -1311,7 +1311,7 @@
 
                   <!-- Size Type - kept for backwards compatibility -->
                   <div class="form-group admin-compat-hidden">
-                    <label for="pSizeName">Available Sizes</label>
+                    <label>Available Sizes</label>
                     <div class="size-stock-list" id="sizeStockList"></div>
                     <input type="hidden" id="pSizeName" value="" />
                     <input type="hidden" id="pSizeQty" value="0" />
@@ -2336,7 +2336,7 @@
               </div>
               <div class="compose-body">
                 <div class="compose-field">
-                  <label>To (Customer)</label>
+                  <label for="composeRecipientSearch">To (Customer)</label>
                   <div class="compose-recipient-wrap">
                     <input
                       type="search"
@@ -2368,7 +2368,7 @@
                   </div>
                 </div>
                 <div class="compose-field">
-                  <label>From</label>
+                  <label for="composeFromEmail">From</label>
                   <select class="form-select" id="composeFromEmail">
                     <option value="support@lingeriebysisioyin.store">
                       support@lingeriebysisioyin.store
@@ -2385,7 +2385,7 @@
                   </select>
                 </div>
                 <div class="compose-field">
-                  <label>Subject</label>
+                  <label for="composeSubject">Subject</label>
                   <input
                     type="text"
                     id="composeSubject"
@@ -2394,7 +2394,7 @@
                   />
                 </div>
                 <div class="compose-field">
-                  <label>Message</label>
+                  <label for="composeMessage">Message</label>
                   <textarea
                     id="composeMessage"
                     class="form-textarea"
@@ -2700,10 +2700,10 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=64"></script>
-    <script defer src="assets/js/utils.js?v=64"></script>
-    <script defer src="assets/js/supabase.js?v=64"></script>
-    <script defer src="assets/js/app.js?v=64"></script>
-    <script defer src="assets/js/admin.js?v=64"></script>
+    <script defer src="assets/js/config.js?v=65"></script>
+    <script defer src="assets/js/utils.js?v=65"></script>
+    <script defer src="assets/js/supabase.js?v=65"></script>
+    <script defer src="assets/js/app.js?v=65"></script>
+    <script defer src="assets/js/admin.js?v=65"></script>
   </body>
 </html>

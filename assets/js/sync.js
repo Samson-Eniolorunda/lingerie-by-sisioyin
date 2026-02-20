@@ -10,7 +10,7 @@
  * Strategy:
  *   - On login:  pull from DB, merge with local, save merged to both
  *   - On change: save to localStorage immediately + debounced push to DB
- *   - On logout: local data stays on device (user expects this)
+ *   - On logout: clear local data so next user starts fresh
  */
 (function () {
   "use strict";
@@ -317,6 +317,7 @@
      * Call on logout — unsubscribe from realtime
      */
     onLogout() {
+      Object.values(KEYS).forEach((k) => localStorage.removeItem(k));
       unsubscribeRealtime();
     },
 
