@@ -334,7 +334,7 @@
   /* ─────────────────────────────────────────────
    * Device Type Tracking
    * ───────────────────────────────────────────── */
-  function trackDeviceType() {
+  async function trackDeviceType() {
     try {
       if (sessionStorage.getItem("lbs_device_tracked")) return;
 

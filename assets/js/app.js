@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.63.26";
+  const APP_VERSION = "1.63.27";
   const APP_BUILD = 63; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
@@ -2313,8 +2313,14 @@
         });
 
         // When the new SW takes over, reload the page seamlessly
+        // Only reload if there WAS a previous controller (genuine update, not first install)
+        const hadController = !!navigator.serviceWorker.controller;
         let refreshing = false;
         navigator.serviceWorker.addEventListener("controllerchange", () => {
+          if (!hadController) {
+            console.log("📦 SW: First activation, no reload needed");
+            return;
+          }
           if (!refreshing) {
             refreshing = true;
             console.log("📦 SW: Updated — reloading page...");
