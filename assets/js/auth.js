@@ -403,7 +403,7 @@
       const { error } = await client.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: window.APP_CONFIG?.SITE_URL || window.location.origin,
         },
       });
 
@@ -456,7 +456,7 @@
 
     try {
       const { error } = await client.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + "/dashboard",
+        redirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/dashboard",
       });
 
       if (error) throw error;

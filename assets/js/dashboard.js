@@ -679,13 +679,15 @@
       ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
       : (fullName[0] || "U").toUpperCase();
 
-    // Show welcome overlay
-    if (dashWelcomeOverlay) {
+    // Show welcome overlay only on fresh sign-in (not on page refresh)
+    const alreadyWelcomed = sessionStorage.getItem("dashWelcomeShown");
+    if (dashWelcomeOverlay && !alreadyWelcomed) {
       const nameEl = $("#dashWelcomeName");
       const avatarEl = $("#dashWelcomeAvatar");
       if (nameEl) nameEl.textContent = fullName;
       if (avatarEl) avatarEl.textContent = initials;
       dashWelcomeOverlay.hidden = false;
+      sessionStorage.setItem("dashWelcomeShown", "1");
 
       // Fade out after animation completes
       setTimeout(function () {
@@ -1517,6 +1519,7 @@
   async function dashSignout() {
     const c = client();
     if (!c) return;
+    sessionStorage.removeItem("dashWelcomeShown");
     if (dashSignoutOverlay) {
       dashSignoutOverlay.hidden = false;
       await new Promise((r) => setTimeout(r, 1400));

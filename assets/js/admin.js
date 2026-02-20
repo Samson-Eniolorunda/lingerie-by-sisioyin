@@ -54,7 +54,7 @@
       .replace(/'/g, "&#039;");
   };
 
-  const AUTH_REDIRECT_URL = window.location.origin + window.location.pathname;
+  const AUTH_REDIRECT_URL = (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/admin";
 
   /* =========================
     Current user state
@@ -4655,7 +4655,7 @@
 
         const { error: otpErr } = await supabase.auth.signInWithOtp({
           email,
-          options: { emailRedirectTo: window.location.origin + "/admin?mode=login" },
+          options: { emailRedirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/admin?mode=invite" },
         });
 
         if (otpErr) {
@@ -6866,19 +6866,21 @@
       await autoGateOnce();
     }
 
-    // Hide signup tab if admins already exist or if mode=login (invite-only)
+    // Hide signup tab if admins already exist (but not in invite mode)
     const urlParams = new URLSearchParams(window.location.search);
-    const isLoginMode = urlParams.get("mode") === "login";
-    try {
-      const { count } = await supabase
-        .from("profiles")
-        .select("id", { count: "exact", head: true })
-        .eq("is_admin", true);
-      if ((count && count > 0) || isLoginMode) {
-        const signupTab = $("[data-auth-tab='signup']");
-        if (signupTab) signupTab.style.display = "none";
-      }
-    } catch (_) { /* silently ignore — signup tab stays visible on error */ }
+    const isInviteMode = urlParams.get("mode") === "invite";
+    if (!isInviteMode) {
+      try {
+        const { count } = await supabase
+          .from("profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("is_admin", true);
+        if (count && count > 0) {
+          const signupTab = $("[data-auth-tab='signup']");
+          if (signupTab) signupTab.style.display = "none";
+        }
+      } catch (_) { /* silently ignore — signup tab stays visible on error */ }
+    }
 
     console.log("[init] Initialization complete");
   }
