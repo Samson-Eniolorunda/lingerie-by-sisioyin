@@ -8055,7 +8055,9 @@ html[data-theme="dark"] .category-showcase-btn:hover {
   justify-content: center;
   animation: dashWelcomeFadeIn 0.35s ease-out;
 }
-.dash-welcome-overlay[hidden] { display: none; }
+.dash-welcome-overlay[hidden] {
+  display: none;
+}
 
 .dash-welcome-card {
   text-align: center;
@@ -8110,7 +8112,7 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 }
 
 .dash-welcome-name {
-  font-family: var(--ff-display, 'Cormorant Garamond', serif);
+  font-family: var(--ff-display, "Cormorant Garamond", serif);
   font-size: clamp(1.6rem, 5vw, 2.2rem);
   font-weight: 700;
   color: #fff;
@@ -8148,32 +8150,62 @@ html[data-theme="dark"] .category-showcase-btn:hover {
 
 /* Animations */
 @keyframes dashWelcomeFadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes dashWelcomeSlideUp {
-  from { opacity: 0; transform: translateY(24px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 @keyframes dashWelcomeAvatarPop {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 @keyframes dashWelcomeLoading {
-  0% { width: 0; }
-  100% { width: 100%; }
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
 }
 @keyframes dashWelcomeBlink {
-  0%, 100% { opacity: 0.6; }
-  50% { opacity: 0.3; }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 /* Fade out */
 .dash-welcome-overlay.dash-overlay-fade-out {
   animation: dashWelcomeFadeOut 0.45s ease-out forwards;
 }
 @keyframes dashWelcomeFadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; visibility: hidden; }
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
 }
 
 /* ─── Light mode (default): override the dark glassmorphism ─── */
@@ -8592,6 +8624,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
   max-height: 90vh;
   overflow-y: auto;
   background: var(--clr-surface, #fff);
+  border: 2px solid var(--clr-border, #e5e7eb);
   border-radius: var(--radius-lg, 16px);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
   z-index: 10001;

@@ -39,7 +39,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/styles.css?v=69" />
+    <link rel="stylesheet" href="assets/css/styles.css?v=70" />
     <style>
       .dash-status-icon {
         color: #22c55e;
@@ -1285,10 +1285,12 @@
               />
             </div>
           </div>
-          <p class="text-muted" style="font-size: 0.78rem; margin-bottom: 12px">
-            Min 8 characters, with uppercase, lowercase, number &amp; special
-            character.
-          </p>
+          <div class="password-requirements" id="setPwRequirements">
+            <div class="pw-strength-bar">
+              <div class="pw-strength-fill" id="setPwStrengthFill"></div>
+            </div>
+            <ul class="pw-rules" id="setPwRules"></ul>
+          </div>
           <button type="submit" class="forgot-modal-submit" id="setPwSubmit">
             <i class="fa-solid fa-check"></i> Update Password
           </button>
@@ -1595,7 +1597,7 @@
     </div>
 
     <!-- Scripts -->
-    <script src="assets/js/recaptcha.js?v=69"></script>
+    <script src="assets/js/recaptcha.js?v=70"></script>
     <script
       src="https://www.google.com/recaptcha/api.js?onload=onRecaptchaLoad&render=explicit"
       async
@@ -1605,12 +1607,12 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=69"></script>
-    <script defer src="assets/js/utils.js?v=69"></script>
-    <script defer src="assets/js/supabase.js?v=69"></script>
-    <script defer src="assets/js/app.js?v=69"></script>
-    <script defer src="assets/js/sync.js?v=69"></script>
-    <script defer src="assets/js/auth.js?v=69"></script>
-    <script defer src="assets/js/dashboard.js?v=69"></script>
+    <script defer src="assets/js/config.js?v=70"></script>
+    <script defer src="assets/js/utils.js?v=70"></script>
+    <script defer src="assets/js/supabase.js?v=70"></script>
+    <script defer src="assets/js/app.js?v=70"></script>
+    <script defer src="assets/js/sync.js?v=70"></script>
+    <script defer src="assets/js/auth.js?v=70"></script>
+    <script defer src="assets/js/dashboard.js?v=70"></script>
   </body>
 </html>

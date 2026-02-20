@@ -9,8 +9,8 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.69.26";
-  const APP_BUILD = 69; // numeric for comparison — middle number of version
+  const APP_VERSION = "1.70.26";
+  const APP_BUILD = 70; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 

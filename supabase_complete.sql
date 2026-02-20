@@ -158,9 +158,15 @@ CREATE POLICY "profiles: owner delete"
 -- 4) ADMIN INVITES TABLE
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.admin_invites (
-  email      TEXT        PRIMARY KEY,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  email        TEXT        PRIMARY KEY,
+  invite_token TEXT        UNIQUE,
+  invited_role TEXT        DEFAULT 'editor',
+  expires_at   TIMESTAMPTZ DEFAULT (now() + interval '7 days'),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Create index for token lookups
+CREATE INDEX IF NOT EXISTS idx_admin_invites_token ON public.admin_invites(invite_token);
 
 ALTER TABLE public.admin_invites ENABLE ROW LEVEL SECURITY;
 
@@ -173,6 +179,18 @@ CREATE POLICY "admin_invites: owner only"
   WITH CHECK (EXISTS (
     SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
   ));
+
+-- Function to validate invite token
+CREATE OR REPLACE FUNCTION public.validate_invite_token(p_token TEXT)
+RETURNS TABLE(email TEXT, invited_role TEXT) AS $$
+BEGIN
+  RETURN QUERY
+  SELECT ai.email, ai.invited_role
+  FROM public.admin_invites ai
+  WHERE ai.invite_token = p_token
+    AND ai.expires_at > now();
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================================================
 -- 5) PRODUCTS TABLE
@@ -357,6 +375,7 @@ DECLARE
   v_full_name TEXT;
   v_first TEXT;
   v_last TEXT;
+  v_invited_role TEXT;
 BEGIN
   -- Build full_name from metadata (signup sends full_name, Google sends first+last)
   v_full_name := COALESCE(
@@ -384,6 +403,9 @@ BEGIN
   IF v_first = '' THEN v_first := NULL; END IF;
   IF v_last = '' THEN v_last := NULL; END IF;
 
+  -- Get invited_role from metadata if present
+  v_invited_role := NEW.raw_user_meta_data->>'invited_role';
+
   -- First-ever user becomes owner
   SELECT NOT EXISTS (
     SELECT 1 FROM public.profiles WHERE is_admin = true
@@ -397,11 +419,14 @@ BEGIN
     );
   END IF;
 
-  -- First admin -> super_admin (owner is set manually), invited admins -> editor
+  -- Determine role:
+  -- 1. First admin becomes owner
+  -- 2. Invited admins get their invited_role or default to editor
+  -- 3. Non-admins become customer
   IF make_admin AND NOT EXISTS (SELECT 1 FROM public.profiles WHERE is_admin = true) THEN
-    user_role := 'super_admin';
+    user_role := 'owner';
   ELSIF make_admin THEN
-    user_role := 'editor';
+    user_role := COALESCE(v_invited_role, 'editor');
   ELSE
     user_role := 'customer';
   END IF;

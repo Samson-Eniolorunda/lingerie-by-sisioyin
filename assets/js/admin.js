@@ -54,7 +54,8 @@
       .replace(/'/g, "&#039;");
   };
 
-  const AUTH_REDIRECT_URL = (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/admin";
+  const AUTH_REDIRECT_URL =
+    (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/admin";
 
   /* =========================
     Current user state
@@ -868,6 +869,13 @@
     // Hide email confirmation if showing other view
     const confirmView = $("#emailConfirmationView");
     if (confirmView && name !== "confirm") confirmView.hidden = true;
+
+    // Initialize password requirements when showing setpw or signup view
+    if (name === "setpw") {
+      initAdminSetPwRequirements();
+    } else if (name === "signup") {
+      initSignupPwRequirements();
+    }
   }
 
   function showEmailConfirmationView(email) {
@@ -1716,7 +1724,10 @@
 
     await logActivity("update", "user", adminId, {
       action: "promote_to_super_admin",
-      name: `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || admin.email || "No name",
+      name:
+        `${admin.first_name || ""} ${admin.last_name || ""}`.trim() ||
+        admin.email ||
+        "No name",
     });
 
     showToast("Admin promoted to Super Admin");
@@ -1742,7 +1753,10 @@
 
     await logActivity("update", "user", adminId, {
       action: "demote_to_editor",
-      name: `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || admin.email || "No name",
+      name:
+        `${admin.first_name || ""} ${admin.last_name || ""}`.trim() ||
+        admin.email ||
+        "No name",
     });
 
     showToast("Admin demoted to Editor");
@@ -1754,7 +1768,10 @@
     const admin = adminsCache.find((a) => a.id === adminId);
     if (!admin) return;
 
-    const adminName = `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || admin.email || "No name";
+    const adminName =
+      `${admin.first_name || ""} ${admin.last_name || ""}`.trim() ||
+      admin.email ||
+      "No name";
 
     if (
       !confirm(
@@ -4622,6 +4639,17 @@
     return valid;
   }
 
+  // Generate a random invite token
+  function generateInviteToken() {
+    const chars =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let token = "";
+    for (let i = 0; i < 32; i++) {
+      token += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return token;
+  }
+
   function bindInviteModal() {
     console.log("[bindInviteModal] Binding invite modal");
     on($("#openInviteModalBtn"), "click", openInviteModal);
@@ -4636,6 +4664,7 @@
 
       const raw = ($("#inviteAdminEmail")?.value || "").trim();
       const email = raw.toLowerCase();
+      const role = $("#inviteAdminRole")?.value || "editor";
 
       if (!email) return showToast("Enter an email.");
       if (!isValidEmail(email))
@@ -4645,30 +4674,68 @@
       setBtnLoading(btn, true, "Sending...");
 
       try {
-        const { error: allowErr } = await supabase
-          .from("admin_invites")
-          .upsert({ email }, { onConflict: "email" });
+        // Generate unique invite token
+        const inviteToken = generateInviteToken();
+
+        // Store invite with token and role
+        const { error: allowErr } = await supabase.from("admin_invites").upsert(
+          {
+            email,
+            invite_token: inviteToken,
+            invited_role: role,
+            expires_at: new Date(
+              Date.now() + 7 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 7 days
+          },
+          { onConflict: "email" },
+        );
         if (allowErr) throw allowErr;
 
-        // Log activity
-        await logActivity("invite", "user", null, { email });
+        // Get current user's name for the email
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        const inviterName =
+          user?.user_metadata?.first_name || "The store owner";
 
-        const { error: otpErr } = await supabase.auth.signInWithOtp({
-          email,
-          options: { emailRedirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/admin?mode=invite" },
-        });
+        // Send invite email via edge function
+        const supabaseUrl =
+          window.APP_CONFIG?.SUPABASE_URL ||
+          "https://oriojylsilcsvcsefuux.supabase.co";
+        const emailRes = await fetch(
+          `${supabaseUrl}/functions/v1/send-admin-invite`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              email,
+              invite_token: inviteToken,
+              invited_role: role,
+              inviter_name: inviterName,
+            }),
+          },
+        );
 
-        if (otpErr) {
-          console.warn("OTP send failed (allowlist saved):", otpErr);
+        if (!emailRes.ok) {
+          console.warn(
+            "Invite email failed but invite saved:",
+            await emailRes.text(),
+          );
           showToast(
-            "Invite saved. Ask them to sign up/login with that email (OTP failed).",
+            "Invite saved. Share this link with them: " +
+              window.location.origin +
+              "/admin?invite=" +
+              inviteToken,
           );
           closeInviteModal();
           return;
         }
 
+        // Log activity
+        await logActivity("invite", "user", null, { email, role });
+
         showToast(
-          "Invite sent. When they login with that email they will become admin.",
+          "Invitation sent! They'll receive an email with signup instructions.",
         );
         closeInviteModal();
       } catch (err) {
@@ -5051,14 +5118,22 @@
         const meta = session.user.user_metadata || {};
         const first = (meta.first_name || "").trim();
         const last = (meta.last_name || "").trim();
-        displayName = `${first} ${last}`.trim() || meta.full_name || session.user.email?.split("@")[0] || "Admin";
+        displayName =
+          `${first} ${last}`.trim() ||
+          meta.full_name ||
+          session.user.email?.split("@")[0] ||
+          "Admin";
       }
     } catch (e) {
       // Fallback to metadata or email
       const meta = session.user.user_metadata || {};
       const first = (meta.first_name || "").trim();
       const last = (meta.last_name || "").trim();
-      displayName = `${first} ${last}`.trim() || meta.full_name || session.user.email?.split("@")[0] || "Admin";
+      displayName =
+        `${first} ${last}`.trim() ||
+        meta.full_name ||
+        session.user.email?.split("@")[0] ||
+        "Admin";
       console.log("Could not fetch display name, using fallback");
     }
 
@@ -5138,6 +5213,12 @@
     if (!email) return requiredMsg("Email");
     if (!p1) return requiredMsg("Password");
     if (!p2) return requiredMsg("Confirm password");
+    if (p1.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(p1)) return "Password must include an uppercase letter.";
+    if (!/[a-z]/.test(p1)) return "Password must include a lowercase letter.";
+    if (!/\d/.test(p1)) return "Password must include a number.";
+    if (!/[^A-Za-z0-9]/.test(p1))
+      return "Password must include a special character.";
     if (p1 !== p2) return "Passwords do not match.";
     console.log("[validateSignup] Validation passed");
     return null;
@@ -5157,10 +5238,151 @@
     const p2 = $("#newPassword2")?.value || "";
     if (!p1) return requiredMsg("New password");
     if (!p2) return requiredMsg("Confirm password");
-    if (p1.length < 6) return "Password must be at least 6 characters.";
+    if (p1.length < 8) return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(p1)) return "Password must include an uppercase letter.";
+    if (!/[a-z]/.test(p1)) return "Password must include a lowercase letter.";
+    if (!/\d/.test(p1)) return "Password must include a number.";
+    if (!/[^A-Za-z0-9]/.test(p1))
+      return "Password must include a special character.";
     if (p1 !== p2) return "Passwords do not match.";
     console.log("[validateSetPw] Validation passed");
     return null;
+  }
+
+  /* ── Password Requirements for Set Password Form ─── */
+  const ADMIN_SET_PW_RULES = [
+    {
+      key: "length",
+      label: "At least 8 characters",
+      test: (p) => p.length >= 8,
+    },
+    {
+      key: "upper",
+      label: "Uppercase letter (A-Z)",
+      test: (p) => /[A-Z]/.test(p),
+    },
+    {
+      key: "lower",
+      label: "Lowercase letter (a-z)",
+      test: (p) => /[a-z]/.test(p),
+    },
+    { key: "number", label: "Number (0-9)", test: (p) => /\d/.test(p) },
+    {
+      key: "special",
+      label: "Special character (!@#$…)",
+      test: (p) => /[^A-Za-z0-9]/.test(p),
+    },
+  ];
+
+  let adminSetPwInitialized = false;
+
+  function initAdminSetPwRequirements() {
+    if (adminSetPwInitialized) return;
+    const pwField = $("#newPassword");
+    const reqBox = $("#adminSetPwRequirements");
+    const rulesContainer = $("#adminSetPwRules");
+    if (!pwField || !reqBox || !rulesContainer) return;
+
+    // Inject rule list items
+    rulesContainer.innerHTML = ADMIN_SET_PW_RULES.map(
+      (r) =>
+        `<li class="pw-rule" data-rule="${r.key}"><i class="fa-solid fa-circle-xmark"></i> ${r.label}</li>`,
+    ).join("");
+
+    // Live validation as user types
+    pwField.addEventListener("input", () => {
+      if (pwField.value.length > 0) {
+        reqBox.classList.add("visible");
+      } else {
+        reqBox.classList.remove("visible");
+      }
+      checkAdminSetPwStrength(pwField.value);
+    });
+
+    adminSetPwInitialized = true;
+  }
+
+  function checkAdminSetPwStrength(pw) {
+    let passed = 0;
+    ADMIN_SET_PW_RULES.forEach((rule) => {
+      const el = document.querySelector(
+        `#adminSetPwRules .pw-rule[data-rule="${rule.key}"]`,
+      );
+      if (!el) return;
+      const ok = rule.test(pw);
+      if (ok) passed++;
+      el.classList.toggle("met", ok);
+      el.querySelector("i").className = ok
+        ? "fa-solid fa-circle-check"
+        : "fa-solid fa-circle-xmark";
+    });
+
+    // Strength bar
+    const fill = $("#adminSetPwStrengthFill");
+    if (fill) {
+      const pct = (passed / ADMIN_SET_PW_RULES.length) * 100;
+      fill.style.width = pct + "%";
+      fill.className =
+        "pw-strength-fill " +
+        (pct <= 40 ? "weak" : pct <= 70 ? "fair" : "strong");
+    }
+    return passed === ADMIN_SET_PW_RULES.length;
+  }
+
+  /* ── Password Requirements for Signup Form ─── */
+  let signupPwInitialized = false;
+
+  function initSignupPwRequirements() {
+    if (signupPwInitialized) return;
+    const pwField = $("#signupPassword");
+    const reqBox = $("#signupPwRequirements");
+    const rulesContainer = $("#signupPwRules");
+    if (!pwField || !reqBox || !rulesContainer) return;
+
+    // Inject rule list items (reuse ADMIN_SET_PW_RULES)
+    rulesContainer.innerHTML = ADMIN_SET_PW_RULES.map(
+      (r) =>
+        `<li class="pw-rule" data-rule="${r.key}"><i class="fa-solid fa-circle-xmark"></i> ${r.label}</li>`,
+    ).join("");
+
+    // Live validation as user types
+    pwField.addEventListener("input", () => {
+      if (pwField.value.length > 0) {
+        reqBox.classList.add("visible");
+      } else {
+        reqBox.classList.remove("visible");
+      }
+      checkSignupPwStrength(pwField.value);
+    });
+
+    signupPwInitialized = true;
+  }
+
+  function checkSignupPwStrength(pw) {
+    let passed = 0;
+    ADMIN_SET_PW_RULES.forEach((rule) => {
+      const el = document.querySelector(
+        `#signupPwRules .pw-rule[data-rule="${rule.key}"]`,
+      );
+      if (!el) return;
+      const ok = rule.test(pw);
+      if (ok) passed++;
+      el.classList.toggle("met", ok);
+      el.querySelector("i").className = ok
+        ? "fa-solid fa-circle-check"
+        : "fa-solid fa-circle-xmark";
+    });
+
+    // Strength bar
+    const fill = $("#signupPwStrengthFill");
+    if (fill) {
+      const pct = (passed / ADMIN_SET_PW_RULES.length) * 100;
+      fill.style.width = pct + "%";
+      fill.className =
+        "pw-strength-fill " +
+        (pct <= 40 ? "weak" : pct <= 70 ? "fair" : "strong");
+    }
+    return passed === ADMIN_SET_PW_RULES.length;
   }
 
   /* =========================
@@ -6451,7 +6673,11 @@
       customer.account_status = newStatus;
       renderCustomers(allCustomers);
 
-      const pastTense = { suspend: "suspended", ban: "banned", activate: "reactivated" };
+      const pastTense = {
+        suspend: "suspended",
+        ban: "banned",
+        activate: "reactivated",
+      };
       showToast(`Customer ${pastTense[action] || action} successfully`);
     } catch (err) {
       console.error("Customer action error:", err);
@@ -6729,12 +6955,19 @@
         const email = $("#signupEmail").value.trim();
         const password = $("#signupPassword").value;
 
+        // Include invited role if present (from invite link)
+        const invitedRole = window.__INVITED_ROLE__ || null;
+        const userData = { first_name: firstName, last_name: lastName };
+        if (invitedRole) {
+          userData.invited_role = invitedRole;
+        }
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            data: { first_name: firstName, last_name: lastName },
-            emailRedirectTo: window.location.origin + "/admin",
+            data: userData,
+            emailRedirectTo: window.location.origin + "/admin?mode=staff",
           },
         });
 
@@ -6843,6 +7076,33 @@
         const confirmView = $("#emailConfirmationView");
         if (confirmView && !confirmView.hidden) {
           showToast("Email confirmed! Redirecting to dashboard...");
+
+          // Send welcome email for new admin users
+          try {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("is_admin, first_name, role")
+              .eq("id", session.user.id)
+              .single();
+
+            if (profile?.is_admin) {
+              const supabaseUrl =
+                window.APP_CONFIG?.SUPABASE_URL ||
+                "https://oriojylsilcsvcsefuux.supabase.co";
+              fetch(`${supabaseUrl}/functions/v1/send-admin-welcome`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  email: session.user.email,
+                  first_name: profile.first_name || "Admin",
+                  role: profile.role || "editor",
+                }),
+              }).catch((err) => console.warn("Welcome email failed:", err));
+            }
+          } catch (err) {
+            console.warn("Profile check for welcome email failed:", err);
+          }
+
           setTimeout(async () => {
             await gateWithSession(session, "login");
           }, 1000);
@@ -6861,16 +7121,70 @@
     // Use captured hash since Supabase clears it before we can read it
     const hashParams = window.__RECOVERY_HASH__ || window.location.hash || "";
     if (hashParams.includes("type=recovery")) {
-      console.log("[init] Recovery URL detected — skipping autoGate, showing set-pw view");
+      console.log(
+        "[init] Recovery URL detected — skipping autoGate, showing set-pw view",
+      );
       showAuthView("setpw");
     } else {
       await autoGateOnce();
     }
 
-    // Hide signup tab if admins already exist (but not in invite mode)
+    // Handle URL parameters for invite and mode
     const urlParams = new URLSearchParams(window.location.search);
-    const isInviteMode = urlParams.get("mode") === "invite";
-    if (!isInviteMode) {
+    const inviteToken = urlParams.get("invite");
+    const mode = urlParams.get("mode");
+
+    // Handle invite token - validate and pre-fill signup form
+    if (inviteToken) {
+      console.log("[init] Invite token detected, validating...");
+      try {
+        const { data: inviteData, error: inviteErr } = await supabase.rpc(
+          "validate_invite_token",
+          { p_token: inviteToken },
+        );
+
+        if (!inviteErr && inviteData && inviteData.length > 0) {
+          const invite = inviteData[0];
+          console.log("[init] Valid invite for:", invite.email);
+
+          // Pre-fill email and show signup form
+          const signupEmail = $("#signupEmail");
+          if (signupEmail) {
+            signupEmail.value = invite.email;
+            signupEmail.readOnly = true;
+            signupEmail.style.backgroundColor =
+              "var(--clr-surface-alt, #f5f5f5)";
+          }
+
+          // Store invited role for later use during signup
+          window.__INVITED_ROLE__ = invite.invited_role;
+
+          // Show signup form
+          showAuthView("signup");
+
+          // Keep signup tab visible for invited users
+          const signupTab = $("[data-auth-tab='signup']");
+          if (signupTab) signupTab.style.display = "";
+        } else {
+          console.warn("[init] Invalid or expired invite token");
+          showToast("This invitation link has expired or is invalid.");
+        }
+      } catch (err) {
+        console.error("[init] Invite validation error:", err);
+      }
+    }
+
+    // Handle mode=staff - show login only (hide signup tab)
+    if (mode === "staff") {
+      console.log("[init] Staff mode - hiding signup tab");
+      const signupTab = $("[data-auth-tab='signup']");
+      if (signupTab) signupTab.style.display = "none";
+      showAuthView("login");
+    }
+
+    // Hide signup tab if admins exist and not in invite mode
+    const isInviteMode = !!inviteToken || mode === "invite";
+    if (!isInviteMode && mode !== "staff") {
       try {
         const { count } = await supabase
           .from("profiles")
@@ -6880,7 +7194,9 @@
           const signupTab = $("[data-auth-tab='signup']");
           if (signupTab) signupTab.style.display = "none";
         }
-      } catch (_) { /* silently ignore — signup tab stays visible on error */ }
+      } catch (_) {
+        /* silently ignore — signup tab stays visible on error */
+      }
     }
 
     console.log("[init] Initialization complete");

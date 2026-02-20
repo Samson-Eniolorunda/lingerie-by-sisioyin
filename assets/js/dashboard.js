@@ -1627,6 +1627,81 @@
   }
 
   /* ── Set New Password Modal ──────────────── */
+  /* ── Password Requirements for Set Password Modal ─── */
+  const SET_PW_RULES = [
+    {
+      key: "length",
+      label: "At least 8 characters",
+      test: (p) => p.length >= 8,
+    },
+    {
+      key: "upper",
+      label: "Uppercase letter (A-Z)",
+      test: (p) => /[A-Z]/.test(p),
+    },
+    {
+      key: "lower",
+      label: "Lowercase letter (a-z)",
+      test: (p) => /[a-z]/.test(p),
+    },
+    { key: "number", label: "Number (0-9)", test: (p) => /\d/.test(p) },
+    {
+      key: "special",
+      label: "Special character (!@#$…)",
+      test: (p) => /[^A-Za-z0-9]/.test(p),
+    },
+  ];
+
+  function initSetPwRequirements() {
+    const pwField = $("#setPwNew");
+    const reqBox = $("#setPwRequirements");
+    const rulesContainer = $("#setPwRules");
+    if (!pwField || !reqBox || !rulesContainer) return;
+
+    // Inject rule list items
+    rulesContainer.innerHTML = SET_PW_RULES.map(
+      (r) =>
+        `<li class="pw-rule" data-rule="${r.key}"><i class="fa-solid fa-circle-xmark"></i> ${r.label}</li>`,
+    ).join("");
+
+    // Live validation as user types
+    pwField.addEventListener("input", () => {
+      if (pwField.value.length > 0) {
+        reqBox.classList.add("visible");
+      } else {
+        reqBox.classList.remove("visible");
+      }
+      checkSetPwStrength(pwField.value);
+    });
+  }
+
+  function checkSetPwStrength(pw) {
+    let passed = 0;
+    SET_PW_RULES.forEach((rule) => {
+      const el = document.querySelector(
+        `#setPwRules .pw-rule[data-rule="${rule.key}"]`,
+      );
+      if (!el) return;
+      const ok = rule.test(pw);
+      if (ok) passed++;
+      el.classList.toggle("met", ok);
+      el.querySelector("i").className = ok
+        ? "fa-solid fa-circle-check"
+        : "fa-solid fa-circle-xmark";
+    });
+
+    // Strength bar
+    const fill = $("#setPwStrengthFill");
+    if (fill) {
+      const pct = (passed / SET_PW_RULES.length) * 100;
+      fill.style.width = pct + "%";
+      fill.className =
+        "pw-strength-fill " +
+        (pct <= 40 ? "weak" : pct <= 70 ? "fair" : "strong");
+    }
+    return passed === SET_PW_RULES.length;
+  }
+
   function openSetPwModal() {
     const backdrop = $("#setPwBackdrop");
     const modal = $("#setPwModal");
@@ -1650,6 +1725,9 @@
     const closeBtn = $("#setPwClose");
     const backdrop = $("#setPwBackdrop");
     if (!form) return;
+
+    // Initialize password requirements UI
+    initSetPwRequirements();
 
     closeBtn?.addEventListener("click", closeSetPwModal);
     backdrop?.addEventListener("click", closeSetPwModal);

@@ -1,7 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <script>window.__RECOVERY_HASH__=location.hash;</script>
+    <script>
+      window.__RECOVERY_HASH__ = location.hash;
+    </script>
     <meta charset="UTF-8" />
     <meta
       name="viewport"
@@ -37,7 +39,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/admin.css?v=69" />
+    <link rel="stylesheet" href="assets/css/admin.css?v=70" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -510,6 +512,13 @@
                 <i class="fa-regular fa-eye"></i>
               </button>
             </div>
+            <!-- Password Requirements -->
+            <div class="password-requirements" id="signupPwRequirements">
+              <div class="pw-strength-bar">
+                <div class="pw-strength-fill" id="signupPwStrengthFill"></div>
+              </div>
+              <ul class="pw-rules" id="signupPwRules"></ul>
+            </div>
           </div>
 
           <div class="form-group">
@@ -616,6 +625,13 @@
                 <i class="fa-regular fa-eye"></i>
               </button>
             </div>
+          </div>
+
+          <div class="password-requirements" id="adminSetPwRequirements">
+            <div class="pw-strength-bar">
+              <div class="pw-strength-fill" id="adminSetPwStrengthFill"></div>
+            </div>
+            <ul class="pw-rules" id="adminSetPwRules"></ul>
           </div>
 
           <div class="form-group">
@@ -2701,10 +2717,10 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=69"></script>
-    <script defer src="assets/js/utils.js?v=69"></script>
-    <script defer src="assets/js/supabase.js?v=69"></script>
-    <script defer src="assets/js/app.js?v=69"></script>
-    <script defer src="assets/js/admin.js?v=69"></script>
+    <script defer src="assets/js/config.js?v=70"></script>
+    <script defer src="assets/js/utils.js?v=70"></script>
+    <script defer src="assets/js/supabase.js?v=70"></script>
+    <script defer src="assets/js/app.js?v=70"></script>
+    <script defer src="assets/js/admin.js?v=70"></script>
   </body>
 </html>
