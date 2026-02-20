@@ -6858,7 +6858,8 @@
 
     // If this is a password-recovery redirect, skip auto-gate and let
     // the onAuthStateChange PASSWORD_RECOVERY event show the set-pw form.
-    const hashParams = window.location.hash || "";
+    // Use captured hash since Supabase clears it before we can read it
+    const hashParams = window.__RECOVERY_HASH__ || window.location.hash || "";
     if (hashParams.includes("type=recovery")) {
       console.log("[init] Recovery URL detected — skipping autoGate, showing set-pw view");
       showAuthView("setpw");
