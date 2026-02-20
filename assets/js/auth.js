@@ -456,7 +456,9 @@
 
     try {
       const { error } = await client.auth.resetPasswordForEmail(email, {
-        redirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/dashboard",
+        redirectTo:
+          (window.APP_CONFIG?.SITE_URL || window.location.origin) +
+          "/dashboard",
       });
 
       if (error) throw error;
@@ -973,8 +975,13 @@
     initPasswordRequirements();
 
     // If URL hash contains type=recovery, redirect to dashboard (unless already there)
-    const hash = window.location.hash;
-    if (hash && hash.includes("type=recovery") && !window.location.pathname.includes("dashboard")) {
+    // Use captured hash since Supabase clears it before we can read it
+    const hash = window.__RECOVERY_HASH__ || window.location.hash;
+    if (
+      hash &&
+      hash.includes("type=recovery") &&
+      !window.location.pathname.includes("dashboard")
+    ) {
       console.log("🔐 AUTH: Recovery hash detected, redirecting to dashboard");
       window.location.href = window.location.origin + "/dashboard" + hash;
       return;
@@ -1003,8 +1010,11 @@
             // Skip if already on dashboard (dashboard.js handles it there)
             const onDashboard = window.location.pathname.includes("dashboard");
             if (!onDashboard) {
-              console.log("🔐 AUTH: Password recovery detected, redirecting to dashboard");
-              window.location.href = window.location.origin + "/dashboard" + window.location.hash;
+              console.log(
+                "🔐 AUTH: Password recovery detected, redirecting to dashboard",
+              );
+              window.location.href =
+                window.location.origin + "/dashboard" + window.location.hash;
               return;
             }
           } else if (event === "SIGNED_IN" && session?.user) {

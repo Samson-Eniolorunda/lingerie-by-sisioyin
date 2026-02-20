@@ -673,11 +673,16 @@
     const meta = user.user_metadata || {};
     const first = (meta.first_name || "").trim();
     const last = (meta.last_name || "").trim();
-    const fullName = `${first} ${last}`.trim() || meta.full_name || user.email?.split("@")[0] || "User";
+    const fullName =
+      `${first} ${last}`.trim() ||
+      meta.full_name ||
+      user.email?.split("@")[0] ||
+      "User";
     const parts = fullName.trim().split(/\\s+/);
-    const initials = parts.length > 1
-      ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-      : (fullName[0] || "U").toUpperCase();
+    const initials =
+      parts.length > 1
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : (fullName[0] || "U").toUpperCase();
 
     // Show welcome overlay only on fresh sign-in (not on page refresh)
     const alreadyWelcomed = sessionStorage.getItem("dashWelcomeShown");
@@ -710,7 +715,11 @@
     const meta = user.user_metadata || {};
     const first = (meta.first_name || "").trim();
     const last = (meta.last_name || "").trim();
-    const name = `${first} ${last}`.trim() || meta.full_name || user.email?.split("@")[0] || "User";
+    const name =
+      `${first} ${last}`.trim() ||
+      meta.full_name ||
+      user.email?.split("@")[0] ||
+      "User";
     if (elUserName) elUserName.textContent = name;
     if (elUserEmail) elUserEmail.textContent = user.email || "";
     // Avatar: first + last initial
@@ -1666,7 +1675,12 @@
         );
         return;
       }
-      if (!/[A-Z]/.test(pw) || !/[a-z]/.test(pw) || !/\d/.test(pw) || !/[^A-Za-z0-9]/.test(pw)) {
+      if (
+        !/[A-Z]/.test(pw) ||
+        !/[a-z]/.test(pw) ||
+        !/\d/.test(pw) ||
+        !/[^A-Za-z0-9]/.test(pw)
+      ) {
         window.UTILS?.toast?.(
           "Password needs uppercase, lowercase, number & special character",
           "error",
@@ -1704,8 +1718,7 @@
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.innerHTML =
-            '<i class="fa-solid fa-check"></i> Update Password';
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Update Password';
         }
       }
     });
@@ -1715,14 +1728,17 @@
     if (c) {
       c.auth.onAuthStateChange((event) => {
         if (event === "PASSWORD_RECOVERY") {
-          console.log("🔐 DASHBOARD: PASSWORD_RECOVERY event — opening set-pw modal");
+          console.log(
+            "🔐 DASHBOARD: PASSWORD_RECOVERY event — opening set-pw modal",
+          );
           openSetPwModal();
         }
       });
     }
 
     // Also check hash on load (in case the event already fired)
-    const hash = window.location.hash || "";
+    // Use captured hash since Supabase clears it before we can read it
+    const hash = window.__RECOVERY_HASH__ || window.location.hash || "";
     if (hash.includes("type=recovery")) {
       console.log("🔐 DASHBOARD: Recovery URL detected — opening set-pw modal");
       // Small delay to let Supabase process the token
