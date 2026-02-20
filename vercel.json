@@ -2,14 +2,7 @@
   "framework": null,
   "cleanUrls": true,
   "trailingSlash": false,
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.lingeriebysisioyin.store" }],
-      "destination": "https://lingeriebysisioyin.store/:path*",
-      "permanent": true
-    }
-  ],
+  "redirects": [],
   "rewrites": [
     { "source": "/", "destination": "/home" },
     { "source": "/admin", "destination": "/admin.html" }
