@@ -8281,7 +8281,7 @@ select {
 }
 .inbox-send-btn {
   padding: 0 !important;
-  border-radius: 12px !important;
+  border-radius: 50% !important;
   font-weight: 600;
   font-size: 16px;
   background: linear-gradient(135deg, var(--clr-primary), #db2777) !important;
@@ -8289,9 +8289,9 @@ select {
   border: none !important;
   box-shadow: 0 2px 8px rgba(190, 24, 93, 0.3);
   transition: all 0.2s ease;
-  width: 40px;
-  height: 38px;
-  min-width: 40px;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8309,8 +8309,8 @@ select {
 }
 .inbox-send-btn i {
   margin: 0;
-  transform: rotate(-30deg) translateX(1px);
-  font-size: 15px;
+  transform: none;
+  font-size: 16px;
 }
 .inbox-compose-hint {
   font-size: 10px;

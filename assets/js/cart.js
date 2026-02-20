@@ -180,7 +180,7 @@
                 </div>
               </div>
               <div class="cart-item-header-actions">
-                <a href="/shop?product=${item.id || ""}" class="cart-item-edit" data-action="edit" aria-label="Edit item"><i class="fa-solid fa-pen-to-square"></i></a>
+                <button type="button" class="cart-item-edit" data-action="edit" data-product-id="${item.id || ""}" aria-label="Edit item"><i class="fa-solid fa-pen-to-square"></i></button>
                 <button type="button" class="cart-item-remove" data-action="remove" aria-label="Remove item">
                   <i class="fas fa-trash-alt"></i>
                 </button>
@@ -343,6 +343,21 @@
             window.APP?.removeFromCart?.(variantId);
             window.UTILS?.toast?.("Item removed from cart");
             break;
+          case "edit": {
+            e.preventDefault();
+            const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
+            const idx = cart.findIndex((c) => (c.variantId || c.id) === variantId);
+            const item = idx >= 0 ? cart[idx] : null;
+            const productId = target.dataset.productId || item?.id || "";
+            if (item) {
+              sessionStorage.setItem(
+                "LBS_EDIT_ITEM",
+                JSON.stringify({ idx, ...item }),
+              );
+            }
+            window.location.href = `/shop?product=${productId}`;
+            break;
+          }
         }
       });
     }

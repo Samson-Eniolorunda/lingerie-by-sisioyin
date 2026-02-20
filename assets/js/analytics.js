@@ -322,10 +322,10 @@
   /* ─────────────────────────────────────────────
    * Initialize
    * ───────────────────────────────────────────── */
-  function init() {
+  async function init() {
     initGoogleAnalytics();
     initFacebookPixel();
-    trackDeviceType();
+    await trackDeviceType();
     trackVisitorLocation();
     trackTimeSpent();
     console.log("✅ ANALYTICS: Module initialized");

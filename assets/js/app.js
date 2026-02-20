@@ -9,8 +9,8 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.63.27";
-  const APP_BUILD = 63; // numeric for comparison — middle number of version
+  const APP_VERSION = "1.64.26";
+  const APP_BUILD = 64; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
@@ -25,6 +25,14 @@
         APP_VERSION +
         "), nuking caches…",
     );
+
+    // Tell the active SW to self-destruct from inside (clears caches + unregisters)
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      try {
+        navigator.serviceWorker.controller.postMessage("FORCE_UNREGISTER");
+        console.log("[APP] Sent FORCE_UNREGISTER to active SW");
+      } catch (_) {}
+    }
 
     // Collect all async cleanup tasks
     const tasks = [];
@@ -59,8 +67,8 @@
 
     // 3. Wait for ALL cleanup to finish, then stamp version + hard reload
     Promise.all(tasks)
-      .catch((err) => console.warn("[APP] Cache cleanup error:", err))
-      .finally(() => {
+      .then(() => {
+        console.log("[APP] Cache cleanup complete");
         localStorage.setItem(VERSION_KEY, String(APP_BUILD));
         // Only reload if user already had a previous version (not first visit)
         if (storedBuild > 0) {
@@ -80,6 +88,11 @@
           // Tried twice — reset counter, continue loading
           sessionStorage.removeItem(RELOAD_KEY);
         }
+      })
+      .catch((err) => {
+        console.warn("[APP] Cache cleanup error:", err);
+        // Still stamp the version so we don't loop
+        localStorage.setItem(VERSION_KEY, String(APP_BUILD));
       });
   })();
 
@@ -2289,7 +2302,9 @@
       const swPath = basePath + swFile;
 
       try {
-        const registration = await navigator.serviceWorker.register(swPath);
+        const registration = await navigator.serviceWorker.register(swPath, {
+          updateViaCache: "none",
+        });
         console.log("📦 SW: Registered, scope:", registration.scope);
 
         // Check for updates every 30 minutes

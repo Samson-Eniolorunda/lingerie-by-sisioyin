@@ -1715,7 +1715,7 @@
 
     await logActivity("update", "user", adminId, {
       action: "promote_to_super_admin",
-      name: `${admin.first_name} ${admin.last_name}`.trim(),
+      name: `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || admin.email || "No name",
     });
 
     showToast("Admin promoted to Super Admin");
@@ -1741,7 +1741,7 @@
 
     await logActivity("update", "user", adminId, {
       action: "demote_to_editor",
-      name: `${admin.first_name} ${admin.last_name}`.trim(),
+      name: `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || admin.email || "No name",
     });
 
     showToast("Admin demoted to Editor");
@@ -1753,9 +1753,11 @@
     const admin = adminsCache.find((a) => a.id === adminId);
     if (!admin) return;
 
+    const adminName = `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || admin.email || "No name";
+
     if (
       !confirm(
-        `Delete ${admin.first_name} ${admin.last_name}? This will remove their access permanently.`,
+        `Delete ${adminName}? This will remove their access permanently.`,
       )
     )
       return;
@@ -1774,7 +1776,7 @@
     console.log("[deleteAdmin] Success");
 
     await logActivity("delete", "user", adminId, {
-      name: `${admin.first_name} ${admin.last_name}`.trim(),
+      name: adminName,
       email: admin.email,
     });
 
@@ -6348,12 +6350,12 @@
                 Authorization: `Bearer ${session?.access_token || ""}`,
               },
               body: JSON.stringify({
-                to: customer.email,
-                customerName: customer.full_name || "Customer",
-                subject: revoking
+                recipientEmail: customer.email,
+                recipientName: customer.full_name || "Customer",
+                originalSubject: revoking
                   ? "Return Privilege Revoked \u2014 Lingeries by Sisioyin"
                   : "Return Privilege Restored \u2014 Lingeries by Sisioyin",
-                message: revoking
+                replyText: revoking
                   ? "Your return privilege has been revoked due to misuse of our return policy. You will no longer be able to submit return requests. If you believe this is an error, please contact support@lingeriebysisioyin.store."
                   : "Your return privilege has been restored. You may now submit return requests again in accordance with our return policy.",
                 fromEmail: "support@lingeriebysisioyin.store",
@@ -6415,15 +6417,15 @@
               Authorization: `Bearer ${session?.access_token || ""}`,
             },
             body: JSON.stringify({
-              to: customer.email,
-              customerName: customer.full_name || "Customer",
-              subject:
+              recipientEmail: customer.email,
+              recipientName: customer.full_name || "Customer",
+              originalSubject:
                 newStatus === "active"
                   ? "Your Account Has Been Reactivated — Lingeries by Sisioyin"
                   : newStatus === "suspended"
                     ? "Your Account Has Been Temporarily Suspended — Lingeries by Sisioyin"
                     : "Your Account Has Been Deactivated — Lingeries by Sisioyin",
-              message:
+              replyText:
                 newStatus === "active"
                   ? "Great news! Your account has been reactivated. You can now log in and shop as usual. We look forward to seeing you again!"
                   : newStatus === "suspended"
@@ -6454,7 +6456,8 @@
       customer.account_status = newStatus;
       renderCustomers(allCustomers);
 
-      showToast(`Customer ${actionLabels[action]}d successfully`);
+      const pastTense = { suspend: "suspended", ban: "banned", activate: "reactivated" };
+      showToast(`Customer ${pastTense[action] || action} successfully`);
     } catch (err) {
       console.error("Customer action error:", err);
       showToast("Failed: " + err.message, "error");
@@ -6859,6 +6862,19 @@
     setStudioMode(false);
 
     await autoGateOnce();
+
+    // Hide signup tab if admins already exist (invite-only after first setup)
+    try {
+      const { count } = await supabase
+        .from("profiles")
+        .select("id", { count: "exact", head: true })
+        .eq("is_admin", true);
+      if (count && count > 0) {
+        const signupTab = $("[data-auth-tab='signup']");
+        if (signupTab) signupTab.style.display = "none";
+      }
+    } catch (_) { /* silently ignore — signup tab stays visible on error */ }
+
     console.log("[init] Initialization complete");
   }
 
