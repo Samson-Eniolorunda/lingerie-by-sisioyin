@@ -972,6 +972,14 @@
     setupEventListeners();
     initPasswordRequirements();
 
+    // If URL hash contains type=recovery, redirect to dashboard (unless already there)
+    const hash = window.location.hash;
+    if (hash && hash.includes("type=recovery") && !window.location.pathname.includes("dashboard")) {
+      console.log("🔐 AUTH: Recovery hash detected, redirecting to dashboard");
+      window.location.href = window.location.origin + "/dashboard" + hash;
+      return;
+    }
+
     // Check current session
     const client = getClient();
     if (client) {
@@ -990,7 +998,16 @@
 
           // Only update UI for explicit sign-in/sign-out events
           // Ignore TOKEN_REFRESHED with null session (mobile background/resume)
-          if (event === "SIGNED_IN" && session?.user) {
+          if (event === "PASSWORD_RECOVERY" && session?.user) {
+            // Redirect to dashboard where the set-password modal lives
+            // Skip if already on dashboard (dashboard.js handles it there)
+            const onDashboard = window.location.pathname.includes("dashboard");
+            if (!onDashboard) {
+              console.log("🔐 AUTH: Password recovery detected, redirecting to dashboard");
+              window.location.href = window.location.origin + "/dashboard" + window.location.hash;
+              return;
+            }
+          } else if (event === "SIGNED_IN" && session?.user) {
             updateAuthUI(session.user);
             window.SYNC?.onLogin?.();
           } else if (event === "SIGNED_OUT") {

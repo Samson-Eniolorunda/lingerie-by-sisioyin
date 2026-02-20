@@ -54,31 +54,33 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Ordered view: admins before customers, ranked by role priority, then by date
-CREATE OR REPLACE VIEW public.profiles_ordered AS
-SELECT *,
-  CASE role
-    WHEN 'owner'       THEN 1
-    WHEN 'developer'   THEN 2
-    WHEN 'super_admin' THEN 3
-    WHEN 'editor'      THEN 4
-    WHEN 'customer'    THEN 5
-    ELSE 6
-  END AS role_priority
-FROM public.profiles
-ORDER BY
-  CASE role
-    WHEN 'owner'       THEN 1
-    WHEN 'developer'   THEN 2
-    WHEN 'super_admin' THEN 3
-    WHEN 'editor'      THEN 4
-    WHEN 'customer'    THEN 5
-    ELSE 6
-  END ASC,
-  created_at DESC;
+-- Persisted role_priority column for Supabase Dashboard sorting
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS role_priority INTEGER DEFAULT 5;
 
-GRANT SELECT ON public.profiles_ordered TO authenticated;
-GRANT SELECT ON public.profiles_ordered TO anon;
+-- Trigger function to auto-set role_priority on INSERT or UPDATE of role
+CREATE OR REPLACE FUNCTION public.set_role_priority()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  NEW.role_priority := CASE NEW.role
+    WHEN 'owner'       THEN 1
+    WHEN 'developer'   THEN 2
+    WHEN 'super_admin' THEN 3
+    WHEN 'editor'      THEN 4
+    WHEN 'customer'    THEN 5
+    ELSE 6
+  END;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_set_role_priority ON public.profiles;
+CREATE TRIGGER trg_set_role_priority
+  BEFORE INSERT OR UPDATE OF role ON public.profiles
+  FOR EACH ROW
+  EXECUTE FUNCTION public.set_role_priority();
 
 -- ============================================================================
 -- 2) ADMIN CHECK FUNCTION (prevents policy recursion)

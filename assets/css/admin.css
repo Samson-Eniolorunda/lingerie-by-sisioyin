@@ -2091,7 +2091,7 @@ textarea {
 .content-view {
   display: none;
   padding: var(--space-6);
-  flex: 1;
+  flex: 1 1 auto;
 }
 
 .content-view.active {
