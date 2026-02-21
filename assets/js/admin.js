@@ -496,7 +496,8 @@
       document.addEventListener(
         evt,
         () => {
-          if (!$("#sessionModal")?.hidden === false) return; // Don't reset if warning is shown
+          const modal = $("#sessionModal");
+          if (modal && !modal.hidden) return; // Don't reset if warning is shown
           resetSessionTimer();
         },
         { passive: true },
@@ -7608,7 +7609,9 @@
           .single();
 
         if (!profile?.is_admin) {
-          console.log("[init] Non-admin user verified on admin site, redirecting to shop");
+          console.log(
+            "[init] Non-admin user verified on admin site, redirecting to shop",
+          );
           window.location.href = window.location.origin + "/home";
           return;
         }
@@ -7668,11 +7671,15 @@
           if (signupTab) signupTab.style.display = "";
         } else {
           console.warn("[init] Invalid or expired invite token");
-          showExpiredLinkView("This invitation link has expired or is invalid. Please request a new invitation from your administrator.");
+          showExpiredLinkView(
+            "This invitation link has expired or is invalid. Please request a new invitation from your administrator.",
+          );
         }
       } catch (err) {
         console.error("[init] Invite validation error:", err);
-        showExpiredLinkView("Unable to validate invitation link. Please request a new invitation.");
+        showExpiredLinkView(
+          "Unable to validate invitation link. Please request a new invitation.",
+        );
       }
     }
 

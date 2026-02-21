@@ -1015,7 +1015,7 @@
           window.AUTH.openModal("login");
           // Trigger forgot password view after modal opens
           setTimeout(() => {
-            const forgotLink = document.querySelector("[data-auth-forgot]");
+            const forgotLink = document.getElementById("forgotPasswordLink");
             if (forgotLink) forgotLink.click();
           }, 100);
         }
@@ -1161,7 +1161,9 @@
               .single();
 
             if (profile?.is_admin) {
-              console.log("🔐 AUTH: Admin user verified on shop site, redirecting to admin");
+              console.log(
+                "🔐 AUTH: Admin user verified on shop site, redirecting to admin",
+              );
               window.location.href = window.location.origin + "/admin";
               return;
             }

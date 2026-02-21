@@ -1255,7 +1255,7 @@
       const c = window.DB?.client;
       if (!c) {
         toast("Please log in to write a review", "warning");
-        window.APP?.toggleAuth?.();
+        window.AUTH?.openModal?.("login");
         return;
       }
 
@@ -1264,7 +1264,7 @@
       } = await c.auth.getUser();
       if (!user?.email) {
         toast("Please log in to write a review", "warning");
-        window.APP?.toggleAuth?.();
+        window.AUTH?.openModal?.("login");
         return;
       }
 
@@ -1548,7 +1548,7 @@
 
     cart[idx].qty = Math.max(1, Math.min(99, (cart[idx].qty || 1) + delta));
     localStorage.setItem("LBS_CART_V1", JSON.stringify(cart));
-    window.APP?.updateCartCount?.();
+    window.APP?.updateCartBadge?.();
     renderCartDrawer();
   }
 
@@ -1556,7 +1556,7 @@
     const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
     cart.splice(idx, 1);
     localStorage.setItem("LBS_CART_V1", JSON.stringify(cart));
-    window.APP?.updateCartCount?.();
+    window.APP?.updateCartBadge?.();
     renderCartDrawer();
     toast("Item removed", "info");
   }
