@@ -797,6 +797,11 @@
             <span>Trash</span>
           </button>
 
+          <button class="nav-item" id="adminChangePasswordBtn" type="button">
+            <i class="fa-solid fa-key"></i>
+            <span>Change Password</span>
+          </button>
+
           <div class="nav-divider"></div>
 
           <a href="/home" class="nav-item">
@@ -1034,26 +1039,6 @@
               </div>
             </div>
 
-            <div class="dashboard-card">
-              <div class="card-header">
-                <h3><i class="fa-solid fa-shield-halved"></i> Security</h3>
-              </div>
-              <div class="card-body">
-                <p
-                  class="text-muted"
-                  style="margin-bottom: var(--space-4); font-size: 0.9rem"
-                >
-                  Keep your account secure by updating your password regularly.
-                </p>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  id="adminChangePasswordBtn"
-                >
-                  <i class="fa-solid fa-key"></i> Change Password
-                </button>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -1370,7 +1355,7 @@
 
                   <!-- Size Type - kept for backwards compatibility -->
                   <div class="form-group admin-compat-hidden">
-                    <label>Available Sizes</label>
+                    <span class="form-group-label">Available Sizes</span>
                     <div class="size-stock-list" id="sizeStockList"></div>
                     <input type="hidden" id="pSizeName" value="" />
                     <input type="hidden" id="pSizeQty" value="0" />

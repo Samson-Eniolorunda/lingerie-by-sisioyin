@@ -518,7 +518,8 @@ textarea {
   margin-bottom: 0;
 }
 
-.form-group label {
+.form-group label,
+.form-group-label {
   font-weight: 500;
   font-size: var(--text-sm);
   color: var(--text-secondary);
@@ -1652,6 +1653,20 @@ textarea {
   color: var(--text-muted);
   line-height: 1.6;
   margin-bottom: var(--space-6);
+}
+
+.email-confirmation-view .confirmation-subtext {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: var(--space-6);
+}
+
+.expired-link-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
 }
 
 .email-confirmation-view .confirmation-loading {
@@ -6430,25 +6445,58 @@ html[data-theme="dark"] .bar-tooltip::after {
 .analytics-table-wrap {
   overflow-x: auto;
 }
-.analytics-table-wrap .table {
+.analytics-table-wrap .table,
+.analytics-table {
   width: 100%;
   border-collapse: collapse;
 }
 .analytics-table-wrap .table th,
-.analytics-table-wrap .table td {
+.analytics-table-wrap .table td,
+.analytics-table th,
+.analytics-table td {
   padding: var(--space-3) var(--space-4);
   text-align: left;
   font-size: var(--text-sm);
   border-bottom: 1px solid var(--border-color);
 }
-.analytics-table-wrap .table th {
+.analytics-table-wrap .table th,
+.analytics-table th {
   font-weight: 600;
   color: var(--text-muted);
   font-size: var(--text-xs);
   text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding-bottom: var(--space-2);
 }
-.analytics-table-wrap .table td {
+.analytics-table-wrap .table td,
+.analytics-table td {
   color: var(--text-primary);
+  vertical-align: middle;
+}
+.analytics-table td:first-child {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.analytics-table td:first-child i {
+  width: 20px;
+  text-align: center;
+  color: var(--clr-primary);
+  font-size: var(--text-base);
+}
+.analytics-table td:nth-child(2) {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.analytics-table td:nth-child(3) {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+.analytics-table tr:last-child td {
+  border-bottom: none;
+}
+.analytics-table tr:hover td {
+  background: var(--bg-hover);
 }
 
 /* =============================================================================
@@ -7396,10 +7444,12 @@ select {
 }
 
 /* Table improvements */
-.analytics-table-wrap .table tr:hover td {
+.analytics-table-wrap .table tr:hover td,
+.analytics-table tr:hover td {
   background: var(--bg-surface-alt);
 }
-.analytics-table-wrap .table th {
+.analytics-table-wrap .table th,
+.analytics-table th {
   background: var(--bg-surface-alt);
   font-size: 11px;
   letter-spacing: 0.06em;

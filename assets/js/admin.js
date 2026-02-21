@@ -5544,6 +5544,19 @@
       checkAdminSetPwStrength(pwField.value);
     });
 
+    // Hide requirements when focus leaves password field
+    pwField.addEventListener("blur", () => {
+      // Small delay to allow clicking on requirements if needed
+      setTimeout(() => reqBox.classList.remove("visible"), 150);
+    });
+
+    // Show requirements when password field gains focus (if has value)
+    pwField.addEventListener("focus", () => {
+      if (pwField.value.length > 0) {
+        reqBox.classList.add("visible");
+      }
+    });
+
     adminSetPwInitialized = true;
   }
 
@@ -5598,6 +5611,19 @@
         reqBox.classList.remove("visible");
       }
       checkSignupPwStrength(pwField.value);
+    });
+
+    // Hide requirements when focus leaves password field
+    pwField.addEventListener("blur", () => {
+      // Small delay to allow clicking on requirements if needed
+      setTimeout(() => reqBox.classList.remove("visible"), 150);
+    });
+
+    // Show requirements when password field gains focus (if has value)
+    pwField.addEventListener("focus", () => {
+      if (pwField.value.length > 0) {
+        reqBox.classList.add("visible");
+      }
     });
 
     signupPwInitialized = true;
@@ -7574,6 +7600,19 @@
         data: { session },
       } = await supabase.auth.getSession();
       if (session) {
+        // Check if user is actually an admin - if not, redirect to shop
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!profile?.is_admin) {
+          console.log("[init] Non-admin user verified on admin site, redirecting to shop");
+          window.location.href = window.location.origin + "/home";
+          return;
+        }
+
         // Send welcome email for new admin users
         await sendAdminWelcomeEmail(session);
 
@@ -7615,8 +7654,7 @@
           if (signupEmail) {
             signupEmail.value = invite.email;
             signupEmail.readOnly = true;
-            signupEmail.style.backgroundColor =
-              "var(--clr-surface-alt, #f5f5f5)";
+            // Let CSS handle readonly styling via .form-input[readonly]
           }
 
           // Store invited role for later use during signup
@@ -7630,10 +7668,11 @@
           if (signupTab) signupTab.style.display = "";
         } else {
           console.warn("[init] Invalid or expired invite token");
-          showToast("This invitation link has expired or is invalid.");
+          showExpiredLinkView("This invitation link has expired or is invalid. Please request a new invitation from your administrator.");
         }
       } catch (err) {
         console.error("[init] Invite validation error:", err);
+        showExpiredLinkView("Unable to validate invitation link. Please request a new invitation.");
       }
     }
 

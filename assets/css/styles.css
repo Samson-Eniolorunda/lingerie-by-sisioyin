@@ -8181,6 +8181,109 @@ html[data-theme="dark"] .email-verified-content {
 }
 
 /* =============================================================================
+   EXPIRED LINK MODAL
+   ============================================================================= */
+.expired-link-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 15, 0.7);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  backdrop-filter: blur(20px) saturate(1.4);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.expired-link-modal.active {
+  opacity: 1;
+}
+.expired-link-content {
+  text-align: center;
+  padding: 2.5rem 2rem;
+  max-width: 400px;
+  width: 90%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 24px;
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  animation: expiredLinkSlideUp 0.5s ease-out 0.1s both;
+}
+@keyframes expiredLinkSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.expired-link-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 50%;
+  font-size: 2.5rem;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+}
+.expired-link-content h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+.expired-link-text {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+}
+.expired-link-subtext {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+.expired-link-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.expired-link-actions .btn {
+  width: 100%;
+  justify-content: center;
+}
+.expired-link-actions .btn-primary {
+  background: linear-gradient(135deg, var(--clr-primary), #d6336c);
+  border: none;
+}
+.expired-link-actions .btn-outline {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+.expired-link-actions .btn-outline:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Dark theme */
+html[data-theme="dark"] .expired-link-modal {
+  background: rgba(5, 5, 10, 0.8);
+}
+html[data-theme="dark"] .expired-link-content {
+  background: rgba(30, 30, 40, 0.6);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* =============================================================================
    DASHBOARD WELCOME & SIGNOUT OVERLAY (Glassmorphism)
    ============================================================================= */
 

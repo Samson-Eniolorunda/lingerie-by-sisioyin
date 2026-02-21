@@ -970,6 +970,67 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Expired Link View
+   * ───────────────────────────────────────────── */
+  function showExpiredLinkView(errorMessage) {
+    console.log("🔐 AUTH: Showing expired link view");
+
+    // Create expired modal overlay
+    const overlay = document.createElement("div");
+    overlay.className = "expired-link-modal";
+    overlay.innerHTML = `
+      <div class="expired-link-content">
+        <div class="expired-link-icon">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <h2>Link Expired</h2>
+        <p class="expired-link-text">${escapeHtml(errorMessage) || "This link has expired or is no longer valid."}</p>
+        <p class="expired-link-subtext">Password reset links expire after 1 hour for security reasons.</p>
+        <div class="expired-link-actions">
+          <button type="button" class="btn btn-primary btn-block" id="requestNewLinkBtnShop">
+            <i class="fa-solid fa-envelope"></i>
+            Request New Link
+          </button>
+          <button type="button" class="btn btn-outline btn-block" id="backToHomeBtnShop">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Home
+          </button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => overlay.classList.add("active"));
+
+    // Bind buttons
+    const requestBtn = overlay.querySelector("#requestNewLinkBtnShop");
+    const backBtn = overlay.querySelector("#backToHomeBtnShop");
+
+    if (requestBtn) {
+      requestBtn.addEventListener("click", () => {
+        overlay.remove();
+        // Open auth modal with forgot password tab
+        if (window.AUTH?.openModal) {
+          window.AUTH.openModal("login");
+          // Trigger forgot password view after modal opens
+          setTimeout(() => {
+            const forgotLink = document.querySelector("[data-auth-forgot]");
+            if (forgotLink) forgotLink.click();
+          }, 100);
+        }
+      });
+    }
+
+    if (backBtn) {
+      backBtn.addEventListener("click", () => {
+        overlay.remove();
+        window.location.href = window.location.origin + "/home";
+      });
+    }
+  }
+
+  /* ─────────────────────────────────────────────
    * Email Verified Success View
    * ───────────────────────────────────────────── */
   function showEmailVerifiedView(userEmail) {
@@ -1071,12 +1132,10 @@
       const errorDesc =
         hashParams.get("error_description") || "Link expired or invalid";
       console.log("🔐 AUTH: Error in hash:", errorCode, errorDesc);
-      window.UTILS?.toast?.(
-        decodeURIComponent(errorDesc.replace(/\+/g, " ")),
-        "error",
-      );
       // Clear hash
       history.replaceState(null, "", window.location.pathname);
+      // Show expired link view instead of just a toast
+      showExpiredLinkView(decodeURIComponent(errorDesc.replace(/\+/g, " ")));
       return;
     }
 
@@ -1086,7 +1145,7 @@
       // Clear the hash to prevent re-processing
       history.replaceState(null, "", window.location.pathname);
 
-      // Get session and send welcome email
+      // Get session and check if user is admin
       const client = getClient();
       if (client) {
         try {
@@ -1094,9 +1153,21 @@
             data: { session },
           } = await client.auth.getSession();
           if (session?.user) {
-            // Send welcome email
+            // Check if user is an admin - redirect to admin site
+            const { data: profile } = await client
+              .from("profiles")
+              .select("is_admin")
+              .eq("id", session.user.id)
+              .single();
+
+            if (profile?.is_admin) {
+              console.log("🔐 AUTH: Admin user verified on shop site, redirecting to admin");
+              window.location.href = window.location.origin + "/admin";
+              return;
+            }
+
+            // Regular customer - send welcome email and show success
             sendUserWelcomeEmail(session);
-            // Show success view
             showEmailVerifiedView(session.user.email);
             return; // Don't continue with normal init
           }

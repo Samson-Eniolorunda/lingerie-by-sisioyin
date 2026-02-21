@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.71.26";
+  const APP_VERSION = "1.71.27";
   const APP_BUILD = 71; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
@@ -2330,18 +2330,32 @@
 
         // When the new SW takes over, reload the page seamlessly
         // Only reload if there WAS a previous controller (genuine update, not first install)
+        // Use localStorage to coordinate reloads across tabs and prevent reload loops
         const hadController = !!navigator.serviceWorker.controller;
         let refreshing = false;
+        const SW_RELOAD_KEY = "lbs_sw_reload_timestamp";
+        const SW_RELOAD_COOLDOWN = 3000; // 3 seconds cooldown between reloads
+
         navigator.serviceWorker.addEventListener("controllerchange", () => {
           if (!hadController) {
             console.log("📦 SW: First activation, no reload needed");
             return;
           }
-          if (!refreshing) {
-            refreshing = true;
-            console.log("📦 SW: Updated — reloading page...");
-            window.location.reload();
+          if (refreshing) return;
+
+          // Check if another tab recently triggered a reload
+          const lastReload = parseInt(localStorage.getItem(SW_RELOAD_KEY) || "0", 10);
+          const now = Date.now();
+          if (now - lastReload < SW_RELOAD_COOLDOWN) {
+            console.log("📦 SW: Another tab recently reloaded, skipping...");
+            return;
           }
+
+          // Mark this reload in localStorage
+          localStorage.setItem(SW_RELOAD_KEY, String(now));
+          refreshing = true;
+          console.log("📦 SW: Updated — reloading page...");
+          window.location.reload();
         });
       } catch (error) {
         console.log("📦 SW: Registration failed:", error);
