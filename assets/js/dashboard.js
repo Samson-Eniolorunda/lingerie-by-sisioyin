@@ -968,11 +968,12 @@
     });
 
     /* ─── 5. Security ─── */
-    // Change password
+    // Change password (with debounce protection against rapid double-clicks)
     $("#changePasswordBtn")?.addEventListener("click", async () => {
+      const btn = $("#changePasswordBtn");
+      if (btn.disabled) return; // Prevent double-send on rapid clicks
       const c = client();
       if (!c || !currentUser?.email) return;
-      const btn = $("#changePasswordBtn");
       const orig = btn.innerHTML;
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
@@ -1730,7 +1731,10 @@
     initSetPwRequirements();
 
     closeBtn?.addEventListener("click", closeSetPwModal);
-    backdrop?.addEventListener("click", closeSetPwModal);
+    backdrop?.addEventListener("click", (e) => {
+      // Only close if clicking directly on backdrop, not on modal content
+      if (e.target === backdrop) closeSetPwModal();
+    });
 
     document.addEventListener("keydown", (e) => {
       if (

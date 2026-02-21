@@ -9,8 +9,8 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.70.26";
-  const APP_BUILD = 70; // numeric for comparison — middle number of version
+  const APP_VERSION = "1.71.26";
+  const APP_BUILD = 71; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
@@ -2299,7 +2299,8 @@
       );
       const isAdmin = /\/admin(\.html)?$/i.test(window.location.pathname);
       const swFile = isAdmin ? "admin-sw.js" : "sw.js";
-      const swPath = basePath + swFile;
+      // Add version query param to ensure fresh SW is fetched on version bump
+      const swPath = basePath + swFile + "?v=" + APP_BUILD;
 
       try {
         const registration = await navigator.serviceWorker.register(swPath, {

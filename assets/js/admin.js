@@ -57,6 +57,10 @@
   const AUTH_REDIRECT_URL =
     (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/admin";
 
+  // Session storage keys for auth state
+  const RECOVERY_MODE_KEY = "LBS_ADMIN_RECOVERY_MODE";
+  const SIGNUP_PENDING_KEY = "LBS_ADMIN_SIGNUP_PENDING";
+
   /* =========================
     Current user state
   ========================= */
@@ -515,6 +519,45 @@
   }
 
   /* =========================
+    Security Actions (Admin Change Password)
+  ========================= */
+  function bindSecurityActions() {
+    console.log("[bindSecurityActions] Binding security action handlers");
+
+    on($("#adminChangePasswordBtn"), "click", async () => {
+      const btn = $("#adminChangePasswordBtn");
+      if (btn.disabled) return; // Prevent double-clicks
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const userEmail = session?.user?.email;
+      if (!userEmail) {
+        showToast("Unable to get user email", "error");
+        return;
+      }
+
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(userEmail, {
+          redirectTo: AUTH_REDIRECT_URL,
+        });
+        if (error) throw error;
+        showToast("Password reset email sent! Check your inbox.", "success");
+      } catch (err) {
+        console.error("[adminChangePasswordBtn] Error:", err);
+        showToast(err.message || "Failed to send reset email", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = orig;
+      }
+    });
+  }
+
+  /* =========================
     Keyboard Shortcuts
   ========================= */
   function bindKeyboardShortcuts() {
@@ -862,6 +905,10 @@
     const switcher = $("#authSwitch");
     if (switcher) switcher.hidden = !(name === "login" || name === "signup");
 
+    // Show auth brand for normal auth views
+    const authBrand = $(".auth-brand");
+    if (authBrand) authBrand.hidden = false;
+
     $$(".auth-tab").forEach((t) => t.classList.remove("active"));
     const tab = $(`[data-auth-tab='${name}']`);
     if (tab) tab.classList.add("active");
@@ -870,21 +917,31 @@
     const confirmView = $("#emailConfirmationView");
     if (confirmView && name !== "confirm") confirmView.hidden = true;
 
-    // Initialize password requirements when showing setpw or signup view
+    // Hide expired link view if showing other view
+    const expiredView = $("#expiredLinkView");
+    if (expiredView) expiredView.hidden = true;
+
+    // Manage recovery mode state
     if (name === "setpw") {
+      sessionStorage.setItem(RECOVERY_MODE_KEY, "true");
       initAdminSetPwRequirements();
-    } else if (name === "signup") {
-      initSignupPwRequirements();
+    } else {
+      sessionStorage.removeItem(RECOVERY_MODE_KEY);
+      if (name === "signup") {
+        initSignupPwRequirements();
+      }
     }
   }
 
   function showEmailConfirmationView(email) {
     console.log("[showEmailConfirmationView] Showing confirmation for:", email);
 
-    // Hide all auth forms
+    // Hide all auth forms and brand
     $$("[data-auth-view-name]").forEach((v) => (v.hidden = true));
     const switcher = $("#authSwitch");
     if (switcher) switcher.hidden = true;
+    const authBrand = $(".auth-brand");
+    if (authBrand) authBrand.hidden = true;
 
     // Show or create the confirmation view
     let confirmView = $("#emailConfirmationView");
@@ -911,12 +968,14 @@
           Back to Login
         </button>
       `;
-      const authPanel = $(".auth-panel");
-      if (authPanel) authPanel.appendChild(confirmView);
+      const authContainer = $(".auth-container");
+      if (authContainer) authContainer.appendChild(confirmView);
 
       // Bind back button
       on($("#backToLoginBtn"), "click", () => {
         confirmView.hidden = true;
+        const authBrand = $(".auth-brand");
+        if (authBrand) authBrand.hidden = false;
         showAuthView("login");
       });
     }
@@ -926,6 +985,169 @@
     if (emailEl) emailEl.textContent = email;
 
     confirmView.hidden = false;
+  }
+
+  function showEmailVerifiedView(session, callback) {
+    console.log("[showEmailVerifiedView] Showing success view");
+
+    // Hide all auth elements
+    $$("[data-auth-view-name]").forEach((v) => (v.hidden = true));
+    const switcher = $("#authSwitch");
+    if (switcher) switcher.hidden = true;
+    const authBrand = $(".auth-brand");
+    if (authBrand) authBrand.hidden = true;
+    const confirmView = $("#emailConfirmationView");
+    if (confirmView) confirmView.hidden = true;
+
+    // Show or create the verified view
+    let verifiedView = $("#emailVerifiedView");
+    if (!verifiedView) {
+      verifiedView = document.createElement("div");
+      verifiedView.id = "emailVerifiedView";
+      verifiedView.className = "email-confirmation-view";
+      verifiedView.innerHTML = `
+        <div class="confirmation-icon success">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h2>Email Verified!</h2>
+        <p class="confirmation-text">
+          Your email has been confirmed successfully. 
+          Welcome to the LBS Admin team!
+        </p>
+        <div class="confirmation-loading">
+          <div class="spinner"></div>
+          <span>Entering dashboard...</span>
+        </div>
+      `;
+      const authContainer = $(".auth-container");
+      if (authContainer) authContainer.appendChild(verifiedView);
+    }
+
+    verifiedView.hidden = false;
+
+    // Auto-proceed after 2 seconds
+    setTimeout(() => {
+      if (callback) callback();
+    }, 2000);
+  }
+
+  function showExpiredLinkView(errorMessage) {
+    console.log("[showExpiredLinkView] Showing expired link error");
+
+    // Hide all auth elements
+    $$("[data-auth-view-name]").forEach((v) => (v.hidden = true));
+    const switcher = $("#authSwitch");
+    if (switcher) switcher.hidden = true;
+    const authBrand = $(".auth-brand");
+    if (authBrand) authBrand.hidden = true;
+
+    // Show or create the expired link view
+    let expiredView = $("#expiredLinkView");
+    if (!expiredView) {
+      expiredView = document.createElement("div");
+      expiredView.id = "expiredLinkView";
+      expiredView.className = "email-confirmation-view";
+      expiredView.innerHTML = `
+        <div class="confirmation-icon expired">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+        </div>
+        <h2>Link Expired</h2>
+        <p class="confirmation-text" id="expiredLinkMessage">
+          This link has expired or is no longer valid.
+        </p>
+        <p class="confirmation-subtext">
+          Password reset and invite links expire after 1 hour for security reasons.
+        </p>
+        <div class="expired-link-actions">
+          <button type="button" class="btn btn-primary btn-block" id="requestNewLinkBtn">
+            <i class="fa-solid fa-envelope"></i>
+            Request New Link
+          </button>
+          <button type="button" class="btn btn-outline btn-block" id="backToLoginFromExpiredBtn">
+            <i class="fa-solid fa-arrow-left"></i>
+            Back to Login
+          </button>
+        </div>
+      `;
+      const authContainer = $(".auth-container");
+      if (authContainer) authContainer.appendChild(expiredView);
+
+      // Bind buttons
+      on($("#backToLoginFromExpiredBtn"), "click", () => {
+        expiredView.hidden = true;
+        const authBrand = $(".auth-brand");
+        if (authBrand) authBrand.hidden = false;
+        // Clean URL
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+        showAuthView("login");
+      });
+
+      on($("#requestNewLinkBtn"), "click", () => {
+        expiredView.hidden = true;
+        const authBrand = $(".auth-brand");
+        if (authBrand) authBrand.hidden = false;
+        // Clean URL
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+        showAuthView("reset");
+      });
+    }
+
+    // Update error message if provided
+    const msgEl = expiredView.querySelector("#expiredLinkMessage");
+    if (msgEl && errorMessage) {
+      msgEl.textContent = errorMessage;
+    }
+
+    expiredView.hidden = false;
+  }
+
+  // Helper function to send admin welcome email
+  async function sendAdminWelcomeEmail(session) {
+    if (!session?.user) return;
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("is_admin, first_name, role")
+        .eq("id", session.user.id)
+        .single();
+
+      if (profile?.is_admin) {
+        const supabaseUrl =
+          window.APP_CONFIG?.SUPABASE_URL ||
+          "https://oriojylsilcsvcsefuux.supabase.co";
+
+        console.log(
+          "[sendAdminWelcomeEmail] Sending welcome email to:",
+          session.user.email,
+        );
+
+        await fetch(`${supabaseUrl}/functions/v1/send-admin-welcome`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            email: session.user.email,
+            first_name: profile.first_name || "Admin",
+            role: profile.role || "editor",
+          }),
+        });
+
+        console.log("[sendAdminWelcomeEmail] Welcome email sent successfully");
+      }
+    } catch (err) {
+      console.warn("[sendAdminWelcomeEmail] Failed:", err);
+    }
   }
 
   /* =========================
@@ -1142,7 +1364,36 @@
       console.error("[saveProfileNames] Error:", error);
       throw error;
     }
-    console.log("[saveProfileNames] Success");
+    console.log("[saveProfileNames] Auth user updated");
+
+    // Also update the profiles table directly to ensure it's synced
+    const userId = data?.user?.id;
+    if (userId) {
+      const fullName = `${firstName} ${lastName}`.trim();
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .update({
+          first_name: firstName,
+          last_name: lastName,
+          full_name: fullName,
+        })
+        .eq("id", userId);
+
+      if (profileError) {
+        console.warn("[saveProfileNames] Profile update error:", profileError);
+      } else {
+        console.log("[saveProfileNames] Profile table updated");
+
+        // Log activity with the new name
+        await logActivity("update", "user", userId, {
+          action: "profile_completed",
+          name: fullName,
+          email: data?.user?.email,
+          admin_name: fullName,
+          admin_role: currentUserRole,
+        });
+      }
+    }
 
     const status = $("#adminStatusText");
     if (status)
@@ -1670,8 +1921,11 @@
 
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, email, first_name, last_name, role, created_at")
+      .select(
+        "id, email, first_name, last_name, role, role_priority, created_at",
+      )
       .eq("is_admin", true)
+      .order("role_priority", { ascending: true })
       .order("created_at", { ascending: true });
 
     if (error) {
@@ -1692,16 +1946,7 @@
       return;
     }
 
-    // Sort: owner first, then developers, then super_admin, then editors
-    const roleOrder = { owner: 0, developer: 1, super_admin: 2, editor: 3 };
-    adminsCache.sort((a, b) => {
-      const orderA = roleOrder[a.role] ?? 3;
-      const orderB = roleOrder[b.role] ?? 3;
-      if (orderA !== orderB) return orderA - orderB;
-      // Same role: sort by created_at
-      return new Date(a.created_at) - new Date(b.created_at);
-    });
-
+    // Data is already sorted by role_priority from database
     list.innerHTML = adminsCache.map(getAdminCard).join("");
   }
 
@@ -6410,6 +6655,7 @@
                   : `<button class="cust-act-btn cust-act-btn--success" data-customer-action="activate" data-customer-id="${c.id}" title="Unban"><i class="fa-solid fa-unlock"></i></button>`
               }
               <button class="cust-act-btn cust-act-btn--primary" data-customer-action="message" data-customer-idx="${i}" title="Send message"><i class="fa-solid fa-envelope"></i></button>
+              <button class="cust-act-btn cust-act-btn--info" data-customer-action="details" data-customer-idx="${i}" title="View details"><i class="fa-solid fa-circle-info"></i></button>
               ${
                 c.return_privilege_revoked
                   ? `<button class="cust-act-btn cust-act-btn--success" data-customer-action="restore_returns" data-customer-id="${c.id}" title="Restore return privilege"><i class="fa-solid fa-rotate-left"></i></button>`
@@ -6685,6 +6931,148 @@
     }
   }
 
+  // Show customer detail modal with geolocation and visit history
+  async function showCustomerDetails(customer) {
+    const modal = $("#customerDetailModal");
+    const body = $("#customerModalBody");
+    if (!modal || !body) return;
+
+    const fmt = (n) =>
+      "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+    const fmtDate = (d) =>
+      d
+        ? new Date(d).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "—";
+
+    // Show modal with loading state
+    body.innerHTML =
+      '<div class="text-center" style="padding:2rem"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading visitor data...</p></div>';
+    modal.hidden = false;
+
+    // Fetch site visits for this customer
+    let visits = [];
+    try {
+      const { data } = await supabase
+        .from("site_visits")
+        .select("*")
+        .eq("user_id", customer.id)
+        .order("created_at", { ascending: false })
+        .limit(50);
+      visits = data || [];
+    } catch (err) {
+      console.warn("[showCustomerDetails] Failed to fetch visits:", err);
+    }
+
+    // Get latest visit info
+    const latest = visits[0] || {};
+    const uniqueIPs = [
+      ...new Set(visits.map((v) => v.ip_address).filter(Boolean)),
+    ];
+    const uniqueCities = [
+      ...new Set(visits.map((v) => v.city).filter(Boolean)),
+    ];
+
+    body.innerHTML = `
+      <div class="customer-detail-grid">
+        <div class="customer-detail-section">
+          <h4><i class="fa-solid fa-user"></i> Profile</h4>
+          <div class="detail-row"><span>Name</span><strong>${escapeHtml(customer.full_name || "—")}</strong></div>
+          <div class="detail-row"><span>Email</span><strong>${escapeHtml(customer.email || "—")}</strong></div>
+          <div class="detail-row"><span>Phone</span><strong>${escapeHtml(customer.phone || "—")}</strong></div>
+          <div class="detail-row"><span>WhatsApp</span><strong>${customer.whatsapp_number ? '<span style="color:#25d366"><i class="fa-brands fa-whatsapp"></i> ' + escapeHtml(customer.whatsapp_number) + "</span>" : "—"}</strong></div>
+          <div class="detail-row"><span>DOB</span><strong>${customer.date_of_birth ? fmtDate(customer.date_of_birth).split(",")[0] : "—"}</strong></div>
+          <div class="detail-row"><span>Joined</span><strong>${fmtDate(customer.created_at)}</strong></div>
+          <div class="detail-row"><span>Orders</span><strong>${customer.orderCount || 0}</strong></div>
+          <div class="detail-row"><span>Total Spent</span><strong>${fmt(customer.totalSpent || 0)}</strong></div>
+          <div class="detail-row"><span>Status</span><strong><span class="status-badge status-badge--${customer.account_status === "active" ? "success" : customer.account_status === "suspended" ? "warning" : "danger"}">${(customer.account_status || "active").charAt(0).toUpperCase() + (customer.account_status || "active").slice(1)}</span></strong></div>
+        </div>
+
+        <div class="customer-detail-section">
+          <h4><i class="fa-solid fa-location-dot"></i> Location & Device</h4>
+          ${
+            visits.length
+              ? `
+            <div class="detail-row"><span>Last IP</span><strong>${escapeHtml(latest.ip_address || "—")}</strong></div>
+            <div class="detail-row"><span>Country</span><strong>${escapeHtml(latest.country || "—")} ${latest.country_code ? "(" + latest.country_code + ")" : ""}</strong></div>
+            <div class="detail-row"><span>Region</span><strong>${escapeHtml(latest.region || "—")}</strong></div>
+            <div class="detail-row"><span>City</span><strong>${escapeHtml(latest.city || "—")}</strong></div>
+            <div class="detail-row"><span>Device</span><strong>${escapeHtml(latest.device_type || "—")}</strong></div>
+            <div class="detail-row"><span>Browser</span><strong>${escapeHtml(latest.browser || "—")}</strong></div>
+            <div class="detail-row"><span>OS</span><strong>${escapeHtml(latest.os || "—")}</strong></div>
+            <div class="detail-row"><span>Device Brand</span><strong>${escapeHtml(latest.device_brand || "—")} ${latest.device_model || ""}</strong></div>
+            <div class="detail-row"><span>Screen</span><strong>${escapeHtml(latest.screen_resolution || "—")}</strong></div>
+            <div class="detail-row"><span>Known IPs</span><strong>${uniqueIPs.length > 0 ? uniqueIPs.slice(0, 3).join(", ") + (uniqueIPs.length > 3 ? " +" + (uniqueIPs.length - 3) : "") : "—"}</strong></div>
+            <div class="detail-row"><span>Known Cities</span><strong>${uniqueCities.length > 0 ? uniqueCities.slice(0, 3).join(", ") + (uniqueCities.length > 3 ? " +" + (uniqueCities.length - 3) : "") : "—"}</strong></div>
+          `
+              : '<p class="text-muted">No visit data recorded yet</p>'
+          }
+        </div>
+      </div>
+
+      ${
+        visits.length
+          ? `
+      <div class="customer-detail-section" style="margin-top:1rem">
+        <h4><i class="fa-solid fa-clock-rotate-left"></i> Recent Visits (${visits.length})</h4>
+        <div class="visit-history-table-wrap">
+          <table class="visit-history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Page</th>
+                <th>IP</th>
+                <th>Location</th>
+                <th>Device</th>
+                <th>Time Spent</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${visits
+                .slice(0, 20)
+                .map(
+                  (v) => `
+                <tr>
+                  <td>${fmtDate(v.created_at)}</td>
+                  <td>${escapeHtml(v.page || "—")}</td>
+                  <td>${escapeHtml(v.ip_address || "—")}</td>
+                  <td>${escapeHtml([v.city, v.region, v.country_code].filter(Boolean).join(", ") || "—")}</td>
+                  <td>${escapeHtml([v.device_type, v.browser].filter(Boolean).join(" · ") || "—")}</td>
+                  <td>${v.time_spent_seconds ? Math.round(v.time_spent_seconds) + "s" : "—"}</td>
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      `
+          : ""
+      }
+    `;
+
+    // Close handler
+    const closeBtn = modal.querySelector("[data-close-customer]");
+    const closeHandler = () => {
+      modal.hidden = true;
+      closeBtn?.removeEventListener("click", closeHandler);
+    };
+    closeBtn?.addEventListener("click", closeHandler);
+    modal.addEventListener(
+      "click",
+      (e) => {
+        if (e.target === modal) closeHandler();
+      },
+      { once: true },
+    );
+  }
+
   // Delegate customer action clicks
   on($("#customersBody"), "click", (e) => {
     const btn = e.target.closest("[data-customer-action]");
@@ -6700,6 +7088,12 @@
           selectComposeRecipient(customer);
         }, 300);
       }
+      return;
+    }
+    if (action === "details") {
+      const idx = parseInt(btn.dataset.customerIdx, 10);
+      const customer = allCustomers[idx];
+      if (customer) showCustomerDetails(customer);
       return;
     }
     const customerId = btn.dataset.customerId;
@@ -6892,6 +7286,7 @@
     bindExport();
     bindKeyboardShortcuts();
     bindSessionTimeout();
+    bindSecurityActions();
     console.log("[init] All bindings complete (including enhancements)");
 
     $$("[data-auth-tab]").forEach((b) =>
@@ -7039,6 +7434,9 @@
         const { error } = await supabase.auth.updateUser({ password: p1 });
         if (error) return setAuthMsg(explainError(error));
 
+        // Clear recovery mode flag
+        sessionStorage.removeItem(RECOVERY_MODE_KEY);
+
         showToast("Password updated. Please log in.");
         await supabase.auth.signOut();
         showAuthView("login");
@@ -7091,7 +7489,10 @@
                 "https://oriojylsilcsvcsefuux.supabase.co";
               fetch(`${supabaseUrl}/functions/v1/send-admin-welcome`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${session.access_token}`,
+                },
                 body: JSON.stringify({
                   email: session.user.email,
                   first_name: profile.first_name || "Admin",
@@ -7116,23 +7517,85 @@
     renderStudioSlider();
     setStudioMode(false);
 
-    // If this is a password-recovery redirect, skip auto-gate and let
-    // the onAuthStateChange PASSWORD_RECOVERY event show the set-pw form.
     // Use captured hash since Supabase clears it before we can read it
     const hashParams = window.__RECOVERY_HASH__ || window.location.hash || "";
-    if (hashParams.includes("type=recovery")) {
-      console.log(
-        "[init] Recovery URL detected — skipping autoGate, showing set-pw view",
-      );
+    const urlParams = new URLSearchParams(window.location.search);
+    const mode = urlParams.get("mode");
+
+    // Parse hash for Supabase auth params
+    const hashParamsObj = new URLSearchParams(hashParams.replace("#", ""));
+    const hashError = hashParamsObj.get("error");
+    const hashErrorCode = hashParamsObj.get("error_code");
+    const hashErrorDesc = hashParamsObj.get("error_description");
+    const hashType = hashParamsObj.get("type");
+
+    // Check for expired/error links first
+    if (hashError || hashErrorCode) {
+      console.log("[init] Error in hash detected:", hashError, hashErrorCode);
+      const errorMessage = hashErrorDesc
+        ? decodeURIComponent(hashErrorDesc.replace(/\+/g, " "))
+        : hashError === "access_denied"
+          ? "This link has expired or is no longer valid."
+          : "An error occurred. Please try again.";
+      showExpiredLinkView(errorMessage);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      return;
+    }
+
+    // Check for recovery mode (set password form)
+    if (hashType === "recovery" || hashParams.includes("type=recovery")) {
+      console.log("[init] Recovery URL detected — showing set-pw view");
       showAuthView("setpw");
+    }
+    // Check if user was in recovery mode and reloaded
+    else if (sessionStorage.getItem(RECOVERY_MODE_KEY) === "true") {
+      console.log(
+        "[init] Recovery mode active from session — showing set-pw view",
+      );
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        // User has valid recovery session, show set password form
+        showAuthView("setpw");
+      } else {
+        // Session expired, clear flag and show login
+        sessionStorage.removeItem(RECOVERY_MODE_KEY);
+        showExpiredLinkView(
+          "Your password reset session has expired. Please request a new link.",
+        );
+      }
+    }
+    // Check for email confirmation (type=signup)
+    else if (hashType === "signup" || hashParams.includes("type=signup")) {
+      console.log("[init] Email confirmation redirect detected");
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        // Send welcome email for new admin users
+        await sendAdminWelcomeEmail(session);
+
+        // Show verified view then enter dashboard
+        showEmailVerifiedView(session, async () => {
+          await gateWithSession(session, "login");
+        });
+        // Clean up URL
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
+      } else {
+        await autoGateOnce();
+      }
     } else {
       await autoGateOnce();
     }
 
-    // Handle URL parameters for invite and mode
-    const urlParams = new URLSearchParams(window.location.search);
+    // Handle URL parameters for invite and mode (re-read since we may have modified above)
     const inviteToken = urlParams.get("invite");
-    const mode = urlParams.get("mode");
 
     // Handle invite token - validate and pre-fill signup form
     if (inviteToken) {
@@ -7175,7 +7638,8 @@
     }
 
     // Handle mode=staff - show login only (hide signup tab)
-    if (mode === "staff") {
+    // Skip if we just showed the email verified view
+    if (mode === "staff" && !hashParams.includes("type=signup")) {
       console.log("[init] Staff mode - hiding signup tab");
       const signupTab = $("[data-auth-tab='signup']");
       if (signupTab) signupTab.style.display = "none";

@@ -366,6 +366,9 @@
     if (!client) return;
 
     try {
+      // Clear session-specific storage (allows welcome animation on next login)
+      sessionStorage.removeItem("dashWelcomeShown");
+
       // Show logout overlay
       const overlay = document.createElement("div");
       overlay.className = "auth-logout-overlay";
@@ -967,6 +970,89 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Email Verified Success View
+   * ───────────────────────────────────────────── */
+  function showEmailVerifiedView(userEmail) {
+    console.log("🔐 AUTH: Showing email verified success view");
+
+    // Create success modal overlay
+    const overlay = document.createElement("div");
+    overlay.className = "email-verified-modal";
+    overlay.innerHTML = `
+      <div class="email-verified-content">
+        <div class="email-verified-icon">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <h2>Email Verified!</h2>
+        <p class="email-verified-text">${userEmail ? `<strong>${escapeHtml(userEmail)}</strong> has been verified.` : "Your email has been verified."}</p>
+        <p class="email-verified-redirect">Redirecting to your dashboard<span class="loading-dots"></span></p>
+        <div class="email-verified-progress">
+          <div class="email-verified-progress-bar"></div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    // Animate in
+    requestAnimationFrame(() => overlay.classList.add("active"));
+
+    // Redirect to dashboard after 3 seconds
+    setTimeout(() => {
+      window.location.href = window.location.origin + "/dashboard";
+    }, 3000);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(
+      /[&<>"']/g,
+      (m) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[m],
+    );
+  }
+
+  // Send welcome email to new user
+  async function sendUserWelcomeEmail(session) {
+    if (!session?.user?.email) return;
+    try {
+      const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
+      if (!supabaseUrl) return;
+
+      console.log("🔐 AUTH: Sending welcome email to:", session.user.email);
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/send-user-welcome`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            email: session.user.email,
+            name:
+              session.user.user_metadata?.full_name ||
+              session.user.email.split("@")[0],
+          }),
+        },
+      );
+
+      if (response.ok) {
+        console.log("🔐 AUTH: Welcome email sent successfully");
+      } else {
+        console.warn("🔐 AUTH: Welcome email failed:", await response.text());
+      }
+    } catch (err) {
+      console.warn("🔐 AUTH: Welcome email error:", err);
+    }
+  }
+
+  /* ─────────────────────────────────────────────
    * Initialize
    * ───────────────────────────────────────────── */
   async function init() {
@@ -974,9 +1060,53 @@
     setupEventListeners();
     initPasswordRequirements();
 
-    // If URL hash contains type=recovery, redirect to dashboard (unless already there)
-    // Use captured hash since Supabase clears it before we can read it
+    // Capture hash early before Supabase clears it
     const hash = window.__RECOVERY_HASH__ || window.location.hash;
+    const hashParams = new URLSearchParams(hash.replace(/^#/, ""));
+    const authType = hashParams.get("type");
+    const errorCode = hashParams.get("error_code");
+
+    // Handle expired/invalid link errors
+    if (errorCode) {
+      const errorDesc =
+        hashParams.get("error_description") || "Link expired or invalid";
+      console.log("🔐 AUTH: Error in hash:", errorCode, errorDesc);
+      window.UTILS?.toast?.(
+        decodeURIComponent(errorDesc.replace(/\+/g, " ")),
+        "error",
+      );
+      // Clear hash
+      history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+
+    // Handle email confirmation (type=signup means email was just verified)
+    if (authType === "signup" && !window.location.pathname.includes("admin")) {
+      console.log("🔐 AUTH: Email confirmation detected");
+      // Clear the hash to prevent re-processing
+      history.replaceState(null, "", window.location.pathname);
+
+      // Get session and send welcome email
+      const client = getClient();
+      if (client) {
+        try {
+          const {
+            data: { session },
+          } = await client.auth.getSession();
+          if (session?.user) {
+            // Send welcome email
+            sendUserWelcomeEmail(session);
+            // Show success view
+            showEmailVerifiedView(session.user.email);
+            return; // Don't continue with normal init
+          }
+        } catch (err) {
+          console.error("🔐 AUTH: Email verification session error:", err);
+        }
+      }
+    }
+
+    // If URL hash contains type=recovery, redirect to dashboard (unless already there)
     if (
       hash &&
       hash.includes("type=recovery") &&
