@@ -414,8 +414,43 @@ textarea {
 }
 
 .skeleton-card {
-  height: 80px;
+  display: flex;
+  flex-direction: column;
   border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+}
+
+.skeleton-card .skeleton-img {
+  height: 140px;
+  width: 100%;
+  border-radius: 0;
+}
+
+.skeleton-card .skeleton-content {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.skeleton-card .skeleton-title {
+  height: 16px;
+  width: 75%;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-card .skeleton-price {
+  height: 14px;
+  width: 35%;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-card .skeleton-stock {
+  height: 12px;
+  width: 50%;
+  border-radius: var(--radius-sm);
 }
 
 .skeleton-stat {
@@ -430,6 +465,21 @@ textarea {
   gap: var(--space-4);
   padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--border-light);
+}
+
+.skeleton-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.w-60 {
+  width: 60%;
+}
+
+.w-40 {
+  width: 40%;
 }
 
 .skeleton-table-rows {

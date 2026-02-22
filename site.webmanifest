@@ -2,7 +2,7 @@
   "name": "Lingeries by Sisioyin",
   "short_name": "LBS",
   "description": "Premium lingerie and loungewear curated for comfort",
-  "version": "1.71.32",
+  "version": "1.71.33",
   "start_url": "/home",
   "scope": "/",
   "display": "standalone",

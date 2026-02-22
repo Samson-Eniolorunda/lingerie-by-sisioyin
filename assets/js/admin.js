@@ -22,12 +22,13 @@
   const $$ = (s, p = document) => Array.from(p.querySelectorAll(s));
   const on = (el, evt, fn) => el && el.addEventListener(evt, fn);
   function getClient() {
-      console.log("[getClient]");
+    console.log("[getClient]");
     return supabase;
   }
 
   /* ── Pre-check: hide auth/show admin instantly if we have a session token ── */
   (function preCheck() {
+    console.log("[preCheck]");
     const authView = document.querySelector("[data-auth-view]");
     const adminView = document.querySelector("[data-admin-view]");
     try {
@@ -68,7 +69,7 @@
 
   /** Return the correct auth-page URL, preserving staff mode when applicable. */
   function getAuthRedirectUrl() {
-      console.log("[getAuthRedirectUrl]");
+    console.log("[getAuthRedirectUrl]");
     const isStaff = sessionStorage.getItem(STAFF_MODE_KEY) === "true";
     return isStaff
       ? window.location.pathname + "?mode=staff"
@@ -77,7 +78,7 @@
 
   /** If staff mode is active, hide signup tab and make sure login view shows. */
   function enforceStaffMode() {
-      console.log("[enforceStaffMode]");
+    console.log("[enforceStaffMode]");
     if (sessionStorage.getItem(STAFF_MODE_KEY) !== "true") return;
     const signupTab = $("[data-auth-tab='signup']");
     if (signupTab) signupTab.style.display = "none";
@@ -140,7 +141,7 @@
   }
 
   function updateThemeToggleUI() {
-      console.log("[updateThemeToggleUI]");
+    console.log("[updateThemeToggleUI]");
     const pref = getThemePref();
     $$("[data-theme-btn]").forEach((btn) => {
       btn.classList.toggle("active", btn.dataset.themeBtn === pref);
@@ -212,7 +213,7 @@
   }
 
   function updateSidebarThemeToggleUI() {
-      console.log("[updateSidebarThemeToggleUI]");
+    console.log("[updateSidebarThemeToggleUI]");
     const themeCheckbox = $("#themeCheckbox");
     if (!themeCheckbox) return;
 
@@ -330,7 +331,7 @@
   }
 
   function hideUndoToast() {
-      console.log("[hideUndoToast]");
+    console.log("[hideUndoToast]");
     const toast = $("#undoToast");
     if (toast) toast.classList.remove("active");
     if (undoTimeout) {
@@ -355,7 +356,7 @@
     Skeleton Loading
   ========================= */
   function getSkeletonCard() {
-      console.log("[getSkeletonCard]");
+    console.log("[getSkeletonCard]");
     return `
       <div class="skeleton-card">
         <div class="skeleton-img skeleton"></div>
@@ -369,7 +370,7 @@
   }
 
   function getSkeletonRow() {
-      console.log("[getSkeletonRow]");
+    console.log("[getSkeletonRow]");
     return `
       <div class="skeleton-row">
         <div class="skeleton-avatar skeleton"></div>
@@ -382,44 +383,38 @@
   }
 
   function showSkeletonGrid(container, count = 8) {
-      console.log("[showSkeletonGrid]", container, count);
+    console.log("[showSkeletonGrid]", container, count);
     if (!container) return;
     container.innerHTML = Array(count).fill(getSkeletonCard()).join("");
   }
 
   function showSkeletonList(container, count = 5) {
-      console.log("[showSkeletonList]", container, count);
+    console.log("[showSkeletonList]", container, count);
     if (!container) return;
     container.innerHTML = Array(count).fill(getSkeletonRow()).join("");
   }
 
-  /** Skeleton for dashboard stat cards */
-  function getSkeletonStatCard() {
-      console.log("[getSkeletonStatCard]");
-    return `<div class="skeleton-stat-card"><div class="skeleton-value skeleton"></div><div class="skeleton-label skeleton"></div></div>`;
-  }
-
   /** Skeleton for widget items (recent orders, low stock, activity) */
   function getSkeletonWidgetItem() {
-      console.log("[getSkeletonWidgetItem]");
+    console.log("[getSkeletonWidgetItem]");
     return `<div class="skeleton-widget-item"><div class="skeleton-icon skeleton"></div><div class="skeleton-lines"><div class="skeleton skeleton-text" style="width:70%"></div><div class="skeleton skeleton-text" style="width:45%"></div></div><div class="skeleton-badge skeleton"></div></div>`;
   }
 
   function showSkeletonWidgets(container, count = 4) {
-      console.log("[showSkeletonWidgets]", container, count);
+    console.log("[showSkeletonWidgets]", container, count);
     if (!container) return;
     container.innerHTML = Array(count).fill(getSkeletonWidgetItem()).join("");
   }
 
   /** Skeleton for review items */
   function getSkeletonReviewItem() {
-      console.log("[getSkeletonReviewItem]");
+    console.log("[getSkeletonReviewItem]");
     return `<div class="skeleton-review-item"><div class="skeleton skeleton-text" style="width:60%"></div><div class="skeleton skeleton-text" style="width:80%"></div><div class="skeleton skeleton-text--short skeleton"></div></div>`;
   }
 
   /** Skeleton for message items */
   function getSkeletonMessageItem() {
-      console.log("[getSkeletonMessageItem]");
+    console.log("[getSkeletonMessageItem]");
     return `<div class="skeleton-message-item"><div class="skeleton-circle skeleton"></div><div class="skeleton-msg-lines"><div class="skeleton skeleton-text" style="width:50%"></div><div class="skeleton skeleton-text" style="width:75%"></div><div class="skeleton skeleton-text--short skeleton"></div></div></div>`;
   }
 
@@ -531,7 +526,7 @@
   }
 
   function hideSessionModal() {
-      console.log("[hideSessionModal]");
+    console.log("[hideSessionModal]");
     const modal = $("#sessionModal");
     if (modal) modal.hidden = true;
     if (sessionCountdownId) {
@@ -831,7 +826,9 @@
       return;
     }
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: rows[0] && rows[0].length > 6 ? "landscape" : "portrait" });
+    const doc = new jsPDF({
+      orientation: rows[0] && rows[0].length > 6 ? "landscape" : "portrait",
+    });
 
     // Title
     doc.setFontSize(16);
@@ -858,90 +855,217 @@
 
   function exportProductsPDF() {
     console.log("[exportProductsPDF]");
-    if (!productsCache.length) { showToast("No products to export"); return; }
-    const headers = ["Name", "Category", "Price (₦)", "Qty", "Sizes", "Colors", "Active", "Created"];
-    const rows = productsCache.map(p => [
-      p.name || "", p.category || "", p.price_ngn || 0, p.qty || 0,
-      (p.sizes || []).join(", "), (p.colors || []).join(", "),
-      p.is_active ? "Yes" : "No", p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : ""
+    if (!productsCache.length) {
+      showToast("No products to export");
+      return;
+    }
+    const headers = [
+      "Name",
+      "Category",
+      "Price (₦)",
+      "Qty",
+      "Sizes",
+      "Colors",
+      "Active",
+      "Created",
+    ];
+    const rows = productsCache.map((p) => [
+      p.name || "",
+      p.category || "",
+      p.price_ngn || 0,
+      p.qty || 0,
+      (p.sizes || []).join(", "),
+      (p.colors || []).join(", "),
+      p.is_active ? "Yes" : "No",
+      p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : "",
     ]);
-    exportToPDF("Products Report", headers, rows, `products_${new Date().toISOString().split("T")[0]}.pdf`);
+    exportToPDF(
+      "Products Report",
+      headers,
+      rows,
+      `products_${new Date().toISOString().split("T")[0]}.pdf`,
+    );
   }
 
   async function exportOrdersPDF() {
     console.log("[exportOrdersPDF]");
     try {
-      const { data, error } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("orders")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      if (!data?.length) { showToast("No orders to export"); return; }
-      const headers = ["Order #", "Customer", "Email", "Status", "Total (₦)", "Payment", "State", "Date"];
-      const rows = data.map(o => [
-        o.order_number || "", o.customer_name || "", o.customer_email || "",
-        o.status || "", o.total || 0, o.payment_method || "", o.delivery_state || "",
-        o.created_at ? new Date(o.created_at).toLocaleDateString("en-GB") : ""
+      if (!data?.length) {
+        showToast("No orders to export");
+        return;
+      }
+      const headers = [
+        "Order #",
+        "Customer",
+        "Email",
+        "Status",
+        "Total (₦)",
+        "Payment",
+        "State",
+        "Date",
+      ];
+      const rows = data.map((o) => [
+        o.order_number || "",
+        o.customer_name || "",
+        o.customer_email || "",
+        o.status || "",
+        o.total || 0,
+        o.payment_method || "",
+        o.delivery_state || "",
+        o.created_at ? new Date(o.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF("Orders Report", headers, rows, `orders_${new Date().toISOString().split("T")[0]}.pdf`);
-    } catch (err) { showToast("Failed to export orders PDF"); console.error("[exportOrdersPDF]", err); }
+      exportToPDF(
+        "Orders Report",
+        headers,
+        rows,
+        `orders_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+    } catch (err) {
+      showToast("Failed to export orders PDF");
+      console.error("[exportOrdersPDF]", err);
+    }
   }
 
   async function exportCustomersPDF() {
     console.log("[exportCustomersPDF]");
     try {
-      const { data, error } = await supabase.from("profiles").select("id, display_name, email, phone, is_admin, created_at")
-        .eq("is_admin", false).order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, display_name, email, phone, is_admin, created_at")
+        .eq("is_admin", false)
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      if (!data?.length) { showToast("No customers to export"); return; }
+      if (!data?.length) {
+        showToast("No customers to export");
+        return;
+      }
       const headers = ["Name", "Email", "Phone", "Joined"];
-      const rows = data.map(p => [
-        p.display_name || "", p.email || "", p.phone || "",
-        p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : ""
+      const rows = data.map((p) => [
+        p.display_name || "",
+        p.email || "",
+        p.phone || "",
+        p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF("Customers Report", headers, rows, `customers_${new Date().toISOString().split("T")[0]}.pdf`);
-    } catch (err) { showToast("Failed to export customers PDF"); console.error("[exportCustomersPDF]", err); }
+      exportToPDF(
+        "Customers Report",
+        headers,
+        rows,
+        `customers_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+    } catch (err) {
+      showToast("Failed to export customers PDF");
+      console.error("[exportCustomersPDF]", err);
+    }
   }
 
   async function exportReviewsPDF() {
     console.log("[exportReviewsPDF]");
     try {
-      const { data, error } = await supabase.from("reviews").select("*").order("created_at", { ascending: false });
+      const { data, error } = await supabase
+        .from("reviews")
+        .select("*")
+        .order("created_at", { ascending: false });
       if (error) throw error;
-      if (!data?.length) { showToast("No reviews to export"); return; }
-      const headers = ["Reviewer", "Email", "Rating", "Title", "Status", "Date"];
-      const rows = data.map(r => [
-        r.reviewer_name || "", r.reviewer_email || "", r.rating || 0,
-        r.title || "", r.status || "pending",
-        r.created_at ? new Date(r.created_at).toLocaleDateString("en-GB") : ""
+      if (!data?.length) {
+        showToast("No reviews to export");
+        return;
+      }
+      const headers = [
+        "Reviewer",
+        "Email",
+        "Rating",
+        "Title",
+        "Status",
+        "Date",
+      ];
+      const rows = data.map((r) => [
+        r.reviewer_name || "",
+        r.reviewer_email || "",
+        r.rating || 0,
+        r.title || "",
+        r.status || "pending",
+        r.created_at ? new Date(r.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF("Reviews Report", headers, rows, `reviews_${new Date().toISOString().split("T")[0]}.pdf`);
-    } catch (err) { showToast("Failed to export reviews PDF"); console.error("[exportReviewsPDF]", err); }
+      exportToPDF(
+        "Reviews Report",
+        headers,
+        rows,
+        `reviews_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+    } catch (err) {
+      showToast("Failed to export reviews PDF");
+      console.error("[exportReviewsPDF]", err);
+    }
   }
 
   async function exportActivityLogsPDF() {
     console.log("[exportActivityLogsPDF]");
     try {
-      const { data, error } = await supabase.from("admin_activity_logs").select("*")
-        .order("created_at", { ascending: false }).limit(500);
+      const { data, error } = await supabase
+        .from("admin_activity_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500);
       if (error) throw error;
-      if (!data?.length) { showToast("No activity logs to export"); return; }
+      if (!data?.length) {
+        showToast("No activity logs to export");
+        return;
+      }
       const headers = ["Action", "Entity", "Entity ID", "Admin ID", "Date"];
-      const rows = data.map(l => [
-        l.action || "", l.entity_type || "", l.entity_id || "", l.admin_id || "",
-        l.created_at ? new Date(l.created_at).toLocaleDateString("en-GB") : ""
+      const rows = data.map((l) => [
+        l.action || "",
+        l.entity_type || "",
+        l.entity_id || "",
+        l.admin_id || "",
+        l.created_at ? new Date(l.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF("Activity Logs Report", headers, rows, `activity_logs_${new Date().toISOString().split("T")[0]}.pdf`);
-    } catch (err) { showToast("Failed to export activity logs PDF"); console.error("[exportActivityLogsPDF]", err); }
+      exportToPDF(
+        "Activity Logs Report",
+        headers,
+        rows,
+        `activity_logs_${new Date().toISOString().split("T")[0]}.pdf`,
+      );
+    } catch (err) {
+      showToast("Failed to export activity logs PDF");
+      console.error("[exportActivityLogsPDF]", err);
+    }
   }
 
   function exportCustomersAsPDF() {
     console.log("[exportCustomersAsPDF]");
-    if (!allCustomers.length) { showToast("No customers to export"); return; }
-    const headers = ["Name", "Email", "Phone", "WhatsApp", "Orders", "Total Spent (₦)", "Joined"];
-    const rows = allCustomers.map(c => [
-      c.full_name || "", c.email || "", c.phone || "", c.whatsapp_number || "",
-      c.orderCount || 0, c.totalSpent || 0,
-      c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : ""
+    if (!allCustomers.length) {
+      showToast("No customers to export");
+      return;
+    }
+    const headers = [
+      "Name",
+      "Email",
+      "Phone",
+      "WhatsApp",
+      "Orders",
+      "Total Spent (₦)",
+      "Joined",
+    ];
+    const rows = allCustomers.map((c) => [
+      c.full_name || "",
+      c.email || "",
+      c.phone || "",
+      c.whatsapp_number || "",
+      c.orderCount || 0,
+      c.totalSpent || 0,
+      c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : "",
     ]);
-    exportToPDF("Customers Report", headers, rows, `customers_${new Date().toISOString().split("T")[0]}.pdf`);
+    exportToPDF(
+      "Customers Report",
+      headers,
+      rows,
+      `customers_${new Date().toISOString().split("T")[0]}.pdf`,
+    );
   }
 
   function bindExport() {
@@ -1048,7 +1172,7 @@
     Swipe helper (studio + viewer)
   ========================= */
   function bindSwipeArea(el, onPrev, onNext) {
-      console.log("[bindSwipeArea]", el, onPrev, onNext);
+    console.log("[bindSwipeArea]", el, onPrev, onNext);
     if (!el) return;
 
     let startX = 0;
@@ -1321,7 +1445,7 @@
 
   // Helper function to send admin welcome email (with retry for profile propagation)
   async function sendAdminWelcomeEmail(session) {
-      console.log("[sendAdminWelcomeEmail]", session);
+    console.log("[sendAdminWelcomeEmail]", session);
     if (!session?.user) return;
 
     const MAX_RETRIES = 3;
@@ -1343,7 +1467,9 @@
             await new Promise((r) => setTimeout(r, RETRY_DELAY));
             continue;
           }
-          console.warn("[sendAdminWelcomeEmail] Profile not admin after retries, skipping");
+          console.warn(
+            "[sendAdminWelcomeEmail] Profile not admin after retries, skipping",
+          );
           return;
         }
 
@@ -1520,7 +1646,7 @@
   }
 
   function updateSidebarUserInfo(session) {
-      console.log("[updateSidebarUserInfo]", session);
+    console.log("[updateSidebarUserInfo]", session);
     const nameEl = document.getElementById("adminName");
     const roleEl = document.getElementById("adminRole");
 
@@ -1861,7 +1987,7 @@
   ========================= */
   // Device detection helper
   function getDeviceInfo() {
-      console.log("[getDeviceInfo]");
+    console.log("[getDeviceInfo]");
     const ua = navigator.userAgent;
     let device = "Desktop";
     let browser = "Unknown";
@@ -1953,7 +2079,7 @@
   }
 
   function getActivityLogCard(log) {
-      console.log("[getActivityLogCard]", log);
+    console.log("[getActivityLogCard]", log);
     const icon = getActivityIcon(log.action);
     const color = getActivityColor(log.action);
     const meta = log.metadata || {};
@@ -2044,7 +2170,7 @@
   let activitySearchQuery = "";
 
   function renderFilteredActivityLogs() {
-      console.log("[renderFilteredActivityLogs]");
+    console.log("[renderFilteredActivityLogs]");
     const list = $("#activityLogsList");
     if (!list) return;
     let filtered = activityLogsCache;
@@ -2092,7 +2218,7 @@
   }
 
   function getAdminCard(admin) {
-      console.log("[getAdminCard]", admin);
+    console.log("[getAdminCard]", admin);
     const name =
       `${admin.first_name || ""} ${admin.last_name || ""}`.trim() || "No name";
     // Developer, owner, and super_admin can manage other admins
@@ -2288,7 +2414,7 @@
   }
 
   function bindAdminsActions() {
-      console.log("[bindAdminsActions]");
+    console.log("[bindAdminsActions]");
     on($("#adminsList"), "click", async (e) => {
       const promoteBtn = e.target?.closest("button[data-promote]");
       const demoteBtn = e.target?.closest("button[data-demote]");
@@ -2341,7 +2467,7 @@
   }
 
   function updateSiteImagePreviews() {
-      console.log("[updateSiteImagePreviews]");
+    console.log("[updateSiteImagePreviews]");
     // Hero image
     const heroUrl = siteSettingsCache.hero_image?.url || "";
     const heroPreview = $("#heroImagePreview img");
@@ -2784,7 +2910,7 @@
   }
 
   function updateOrderStats() {
-      console.log("[updateOrderStats]");
+    console.log("[updateOrderStats]");
     const pending = ordersCache.filter((o) => o.status === "pending").length;
     const processing = ordersCache.filter(
       (o) => o.status === "processing",
@@ -2806,7 +2932,7 @@
   }
 
   function renderOrdersTable() {
-      console.log("[renderOrdersTable]");
+    console.log("[renderOrdersTable]");
     const tbody = $("#ordersTableBody");
     if (!tbody) return;
 
@@ -2911,7 +3037,7 @@
   };
 
   function buildOrderTimeline(status) {
-      console.log("[buildOrderTimeline]", status);
+    console.log("[buildOrderTimeline]", status);
     const steps = [
       { key: "pending", label: "Pending", icon: "fa-clock" },
       { key: "processing", label: "Processing", icon: "fa-gear" },
@@ -2939,7 +3065,7 @@
   }
 
   function renderOrderStatusActions(status) {
-      console.log("[renderOrderStatusActions]", status);
+    console.log("[renderOrderStatusActions]", status);
     const footer = $("#orderModalFooter");
     if (!footer) return;
     const flow = STATUS_FLOW[status] || {};
@@ -3032,14 +3158,14 @@
   }
 
   function closeOrderModal() {
-      console.log("[closeOrderModal]");
+    console.log("[closeOrderModal]");
     const modal = $("#orderDetailModal");
     if (modal) modal.hidden = true;
     currentOrderId = null;
   }
 
   async function updateOrderStatusTo(newStatus) {
-      console.log("[updateOrderStatusTo]", newStatus);
+    console.log("[updateOrderStatusTo]", newStatus);
     if (!currentOrderId) return;
     if (
       newStatus === "cancelled" &&
@@ -3082,7 +3208,7 @@
 
   // Legacy wrapper
   async function updateOrderStatus() {
-      console.log("[updateOrderStatus]");
+    console.log("[updateOrderStatus]");
     const statusSelect = $("#orderStatusSelect");
     if (statusSelect?.value) await updateOrderStatusTo(statusSelect.value);
   }
@@ -3236,7 +3362,7 @@
   }
 
   function updatePaginationUI() {
-      console.log("[updatePaginationUI]");
+    console.log("[updatePaginationUI]");
     const pageInfo = $("#pageInfo");
     const prevBtn = $("#pagePrev");
     const nextBtn = $("#pageNext");
@@ -3300,7 +3426,7 @@
   }
 
   function updateBulkUI() {
-      console.log("[updateBulkUI]");
+    console.log("[updateBulkUI]");
     const bar = $("#bulkActionsBar");
     const countEl = $("#bulkCount");
 
@@ -3718,7 +3844,7 @@
     if (!dd || !trig) return;
 
     function openDD() {
-        console.log("[openDD]");
+      console.log("[openDD]");
       // Close all other form dropdowns first
       $$(".ms-wrapper--form .ms-dropdown").forEach((d) => {
         if (d !== dd) d.hidden = true;
@@ -3727,12 +3853,12 @@
       trig.setAttribute("aria-expanded", "true");
     }
     function closeDD() {
-        console.log("[closeDD]");
+      console.log("[closeDD]");
       dd.hidden = true;
       trig.setAttribute("aria-expanded", "false");
     }
     function toggleDD() {
-        console.log("[toggleDD]");
+      console.log("[toggleDD]");
       dd.hidden ? openDD() : closeDD();
     }
 
@@ -3791,7 +3917,7 @@
       if (!trig || !dd || !label) return;
 
       function openDD() {
-          console.log("[openDD]");
+        console.log("[openDD]");
         // Close all other form dropdowns first (including sizes)
         $$(".ms-wrapper--form .ms-dropdown").forEach((d) => {
           if (d !== dd) d.hidden = true;
@@ -3800,17 +3926,17 @@
       }
 
       function closeDD() {
-          console.log("[closeDD]");
+        console.log("[closeDD]");
         dd.hidden = true;
       }
 
       function toggleDD() {
-          console.log("[toggleDD]");
+        console.log("[toggleDD]");
         dd.hidden ? openDD() : closeDD();
       }
 
       function selectItem(value, text) {
-          console.log("[selectItem]", value, text);
+        console.log("[selectItem]", value, text);
         if (hiddenInput) hiddenInput.value = value;
         label.textContent = text;
         label.classList.remove("is-idle");
@@ -3911,7 +4037,7 @@
     Color Stock Management
   ========================= */
   function getColorStockData() {
-      console.log("[getColorStockData]");
+    console.log("[getColorStockData]");
     try {
       return JSON.parse($("#pColors")?.value || "[]");
     } catch {
@@ -4015,7 +4141,7 @@
   }
 
   function removeColorStock(index) {
-      console.log("[removeColorStock]", index);
+    console.log("[removeColorStock]", index);
     const colors = getColorStockData();
     if (index >= 0 && index < colors.length) {
       colors.splice(index, 1);
@@ -4084,7 +4210,7 @@
     Size Stock Management (like colors)
   ========================= */
   function getSizeStockData() {
-      console.log("[getSizeStockData]");
+    console.log("[getSizeStockData]");
     const input = $("#pSizes");
     if (!input) return [];
     try {
@@ -4102,7 +4228,7 @@
   }
 
   function setSizeStockData(data) {
-      console.log("[setSizeStockData]", data);
+    console.log("[setSizeStockData]", data);
     const input = $("#pSizes");
     if (input) {
       input.value = JSON.stringify(data);
@@ -4113,7 +4239,7 @@
   }
 
   function updateSizeCounter() {
-      console.log("[updateSizeCounter]");
+    console.log("[updateSizeCounter]");
     const counter = $("#sizeCounter");
     if (!counter) return;
     const count = getSizeStockData().length;
@@ -4122,7 +4248,7 @@
   }
 
   function updateColorCounter() {
-      console.log("[updateColorCounter]");
+    console.log("[updateColorCounter]");
     const counter = $("#colorCounter");
     if (!counter) return;
     const count = getColorStockData().length;
@@ -4131,7 +4257,7 @@
   }
 
   function renderSizeStockList() {
-      console.log("[renderSizeStockList]");
+    console.log("[renderSizeStockList]");
     const list = $("#sizeStockList");
     if (!list) return;
 
@@ -4157,7 +4283,7 @@
   }
 
   function addSizeStock() {
-      console.log("[addSizeStock]");
+    console.log("[addSizeStock]");
     const nameSelect = $("#pSizeName");
     const qtyInput = $("#pSizeQty");
 
@@ -4196,7 +4322,7 @@
   }
 
   function removeSizeStock(index) {
-      console.log("[removeSizeStock]", index);
+    console.log("[removeSizeStock]", index);
     const sizes = getSizeStockData();
     if (index >= 0 && index < sizes.length) {
       sizes.splice(index, 1);
@@ -4205,7 +4331,7 @@
   }
 
   function setupSizeStockEvents() {
-      console.log("[setupSizeStockEvents]");
+    console.log("[setupSizeStockEvents]");
     // Setup unified variant input instead of separate size/color inputs
     setupUnifiedVariantEvents();
 
@@ -4217,7 +4343,7 @@
     Variant Stock Matrix (Size + Color combinations)
   ========================= */
   function getVariantStockData() {
-      console.log("[getVariantStockData]");
+    console.log("[getVariantStockData]");
     const input = $("#pVariantStock");
     if (!input) return [];
     try {
@@ -4228,7 +4354,7 @@
   }
 
   function setVariantStockData(data) {
-      console.log("[setVariantStockData]", data);
+    console.log("[setVariantStockData]", data);
     const input = $("#pVariantStock");
     if (input) {
       input.value = JSON.stringify(data);
@@ -4237,7 +4363,7 @@
   }
 
   function updateVariantCounter() {
-      console.log("[updateVariantCounter]");
+    console.log("[updateVariantCounter]");
     const counter = $("#variantCounter");
     if (!counter) return;
     const data = getVariantStockData();
@@ -4247,7 +4373,7 @@
   }
 
   function updateVariantMatrix() {
-      console.log("[updateVariantMatrix]");
+    console.log("[updateVariantMatrix]");
     const wrapper = $("#variantMatrixWrap");
     const matrixEl = $("#variantMatrix");
     if (!wrapper || !matrixEl) return;
@@ -4360,7 +4486,7 @@
   };
 
   function getAdminColorHex(colorName) {
-      console.log("[getAdminColorHex]", colorName);
+    console.log("[getAdminColorHex]", colorName);
     const lower = String(colorName || "")
       .toLowerCase()
       .trim();
@@ -4368,7 +4494,7 @@
   }
 
   function renderVariantSummary() {
-      console.log("[renderVariantSummary]");
+    console.log("[renderVariantSummary]");
     const summaryEl = $("#variantSummary");
     if (!summaryEl) return;
 
@@ -4415,7 +4541,7 @@
   }
 
   function onVariantQtyChange(e) {
-      console.log("[onVariantQtyChange]", e);
+    console.log("[onVariantQtyChange]", e);
     const input = e.target;
     const size = input.dataset.size;
     const color = input.dataset.color;
@@ -4438,7 +4564,7 @@
   }
 
   function rebuildVariantMatrix() {
-      console.log("[rebuildVariantMatrix]");
+    console.log("[rebuildVariantMatrix]");
     // Called when sizes or colors change - rebuild matrix preserving existing values
     const sizes = getSizeStockData();
     const colors = getColorStockData();
@@ -4467,7 +4593,7 @@
     Unified Variant Input System
   ========================= */
   function addVariant() {
-      console.log("[addVariant]");
+    console.log("[addVariant]");
     const sizeSelect = $("#pVariantSize");
     const colorInput = $("#pVariantColor");
     const qtyInput = $("#pVariantQty");
@@ -4527,7 +4653,7 @@
   }
 
   function removeVariant(index) {
-      console.log("[removeVariant]", index);
+    console.log("[removeVariant]", index);
     const variants = getVariantStockData();
     if (index >= 0 && index < variants.length) {
       const removed = variants[index];
@@ -4541,7 +4667,7 @@
   }
 
   function updateVariantQty(index, newQty) {
-      console.log("[updateVariantQty]", index, newQty);
+    console.log("[updateVariantQty]", index, newQty);
     const variants = getVariantStockData();
     if (index >= 0 && index < variants.length) {
       variants[index].qty = Math.max(0, parseInt(newQty) || 0);
@@ -4552,7 +4678,7 @@
 
   // Extract unique sizes from variants and update pSizes
   function updateSizesFromVariants() {
-      console.log("[updateSizesFromVariants]");
+    console.log("[updateSizesFromVariants]");
     const variants = getVariantStockData();
     const sizeMap = {};
 
@@ -4573,7 +4699,7 @@
 
   // Extract unique colors from variants and update pColors
   function updateColorsFromVariants() {
-      console.log("[updateColorsFromVariants]");
+    console.log("[updateColorsFromVariants]");
     const variants = getVariantStockData();
     const colorMap = {};
 
@@ -4596,7 +4722,7 @@
   }
 
   function renderVariantList() {
-      console.log("[renderVariantList]");
+    console.log("[renderVariantList]");
     const list = $("#variantList");
     if (!list) return;
 
@@ -4680,7 +4806,7 @@
   }
 
   function setupUnifiedVariantEvents() {
-      console.log("[setupUnifiedVariantEvents]");
+    console.log("[setupUnifiedVariantEvents]");
     const addBtn = $("#addVariantBtn");
     const sizeSelect = $("#pVariantSize");
     const colorInput = $("#pVariantColor");
@@ -4763,7 +4889,7 @@
     Image Preview Modal
   ========================= */
   function openImagePreviewModal(src) {
-      console.log("[openImagePreviewModal]", src);
+    console.log("[openImagePreviewModal]", src);
     // Check if modal exists, create if not
     let modal = $("#imagePreviewModal");
     if (!modal) {
@@ -4799,7 +4925,7 @@
   }
 
   function closeImagePreviewModal() {
-      console.log("[closeImagePreviewModal]");
+    console.log("[closeImagePreviewModal]");
     const modal = $("#imagePreviewModal");
     if (modal) {
       modal.classList.remove("active");
@@ -5171,7 +5297,7 @@
 
   // Generate a random invite token
   function generateInviteToken() {
-      console.log("[generateInviteToken]");
+    console.log("[generateInviteToken]");
     const chars =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let token = "";
@@ -5284,9 +5410,17 @@
     console.log("[loadDashboardStats] Loading dashboard stats");
 
     // Show skeleton placeholders for stat cards
-    ["#totalProductsCount", "#totalOrdersCount", "#dashPendingCount", "#totalRevenueAmount"].forEach(sel => {
+    [
+      "#totalProductsCount",
+      "#totalOrdersCount",
+      "#dashPendingCount",
+      "#totalRevenueAmount",
+    ].forEach((sel) => {
       const el = $(sel);
-      if (el) { el.textContent = ""; el.closest(".stat-card,.dashboard-stat")?.classList.add("skeleton"); }
+      if (el) {
+        el.textContent = "";
+        el.closest(".stat-card,.dashboard-stat")?.classList.add("skeleton");
+      }
     });
 
     // Load products count
@@ -5297,7 +5431,10 @@
 
     if (!productsErr) {
       const el = $("#totalProductsCount");
-      if (el) { el.textContent = productsCount || 0; el.closest(".stat-card,.dashboard-stat")?.classList.remove("skeleton"); }
+      if (el) {
+        el.textContent = productsCount || 0;
+        el.closest(".stat-card,.dashboard-stat")?.classList.remove("skeleton");
+      }
     }
 
     // Load orders data
@@ -5316,11 +5453,23 @@
       const pendingEl = $("#dashPendingCount");
       const revenueEl = $("#totalRevenueAmount");
 
-      if (ordersEl) { ordersEl.textContent = totalOrders; ordersEl.closest(".stat-card,.dashboard-stat")?.classList.remove("skeleton"); }
-      if (pendingEl) { pendingEl.textContent = pendingOrders; pendingEl.closest(".stat-card,.dashboard-stat")?.classList.remove("skeleton"); }
+      if (ordersEl) {
+        ordersEl.textContent = totalOrders;
+        ordersEl
+          .closest(".stat-card,.dashboard-stat")
+          ?.classList.remove("skeleton");
+      }
+      if (pendingEl) {
+        pendingEl.textContent = pendingOrders;
+        pendingEl
+          .closest(".stat-card,.dashboard-stat")
+          ?.classList.remove("skeleton");
+      }
       if (revenueEl) {
         revenueEl.textContent = "₦" + totalRevenue.toLocaleString("en-NG");
-        revenueEl.closest(".stat-card,.dashboard-stat")?.classList.remove("skeleton");
+        revenueEl
+          .closest(".stat-card,.dashboard-stat")
+          ?.classList.remove("skeleton");
       }
 
       // Update pending orders badge in nav
@@ -5339,7 +5488,7 @@
   }
 
   async function loadRecentOrdersWidget() {
-      console.log("[loadRecentOrdersWidget]");
+    console.log("[loadRecentOrdersWidget]");
     const list = $("#recentOrdersList");
     if (!list) return;
     showSkeletonWidgets(list, 4);
@@ -5399,7 +5548,7 @@
   }
 
   async function loadLowStockWidget() {
-      console.log("[loadLowStockWidget]");
+    console.log("[loadLowStockWidget]");
     const list = $("#lowStockList");
     if (!list) return;
     showSkeletonWidgets(list, 4);
@@ -5454,7 +5603,7 @@
   }
 
   async function loadRecentActivityWidget() {
-      console.log("[loadRecentActivityWidget]");
+    console.log("[loadRecentActivityWidget]");
     const list = $("#recentActivityList");
     if (!list) return;
     showSkeletonWidgets(list, 4);
@@ -5559,7 +5708,7 @@
 
   /* ── Refresh All Sections (topbar refresh button) ── */
   async function refreshAllSections() {
-      console.log("[refreshAllSections]");
+    console.log("[refreshAllSections]");
     const btn = $("[data-refresh]");
     if (btn) {
       const icon = btn.querySelector("i");
@@ -5633,7 +5782,7 @@
 
   // Title-case helper: capitalises first letter of each word
   function titleCase(str) {
-      console.log("[titleCase]", str);
+    console.log("[titleCase]", str);
     if (!str) return "";
     return str
       .trim()
@@ -5644,7 +5793,7 @@
 
   // Show welcome animation after successful login
   async function showWelcomeScreen(session) {
-      console.log("[showWelcomeScreen]", session);
+    console.log("[showWelcomeScreen]", session);
     const overlay = $("#welcomeOverlay");
     const nameEl = $("#welcomeName");
     const avatarEl = $("#welcomeAvatar");
@@ -5826,7 +5975,7 @@
   let adminSetPwInitialized = false;
 
   function initAdminSetPwRequirements() {
-      console.log("[initAdminSetPwRequirements]");
+    console.log("[initAdminSetPwRequirements]");
     if (adminSetPwInitialized) return;
     const pwField = $("#newPassword");
     const reqBox = $("#adminSetPwRequirements");
@@ -5866,7 +6015,7 @@
   }
 
   function checkAdminSetPwStrength(pw) {
-      console.log("[checkAdminSetPwStrength]", pw);
+    console.log("[checkAdminSetPwStrength]", pw);
     let passed = 0;
     ADMIN_SET_PW_RULES.forEach((rule) => {
       const el = document.querySelector(
@@ -5897,7 +6046,7 @@
   let signupPwInitialized = false;
 
   function initSignupPwRequirements() {
-      console.log("[initSignupPwRequirements]");
+    console.log("[initSignupPwRequirements]");
     if (signupPwInitialized) return;
     const pwField = $("#signupPassword");
     const reqBox = $("#signupPwRequirements");
@@ -5937,7 +6086,7 @@
   }
 
   function checkSignupPwStrength(pw) {
-      console.log("[checkSignupPwStrength]", pw);
+    console.log("[checkSignupPwStrength]", pw);
     let passed = 0;
     ADMIN_SET_PW_RULES.forEach((rule) => {
       const el = document.querySelector(
@@ -6365,7 +6514,7 @@
   }
 
   function renderRevenueChart(orders, period) {
-      console.log("[renderRevenueChart]", orders, period);
+    console.log("[renderRevenueChart]", orders, period);
     const container = $("#revenueBarChart");
     if (!container) return;
 
@@ -6405,7 +6554,7 @@
   }
 
   function renderOrdersDonut(orders) {
-      console.log("[renderOrdersDonut]", orders);
+    console.log("[renderOrdersDonut]", orders);
     const container = $("#ordersDonut");
     if (!container) return;
 
@@ -6469,7 +6618,7 @@
   }
 
   function renderTrafficChart(visits, period) {
-      console.log("[renderTrafficChart]", visits, period);
+    console.log("[renderTrafficChart]", visits, period);
     const container = $("#trafficBarChart");
     if (!container) return;
 
@@ -6506,7 +6655,7 @@
   }
 
   function renderTopPages(visits) {
-      console.log("[renderTopPages]", visits);
+    console.log("[renderTopPages]", visits);
     const container = $("#topPagesTable");
     if (!container) return;
 
@@ -6549,7 +6698,7 @@
   }
 
   async function renderTopProducts() {
-      console.log("[renderTopProducts]");
+    console.log("[renderTopProducts]");
     const container = $("#topProductsTable");
     if (!container) return;
 
@@ -6628,7 +6777,7 @@
    * Device Analytics: Visits by Device Type & Browser
    * ───────────────────────────────────────────── */
   async function loadDeviceAnalytics() {
-      console.log("[loadDeviceAnalytics]");
+    console.log("[loadDeviceAnalytics]");
     const deviceEl = $("#deviceTypeTable");
     const browserEl = $("#browserTypeTable");
     const brandEl = $("#deviceBrandTable");
@@ -6757,7 +6906,7 @@
    * Geo Analytics: Visitors by Country & Nigerian State
    * ───────────────────────────────────────────── */
   async function loadGeoAnalytics() {
-      console.log("[loadGeoAnalytics]");
+    console.log("[loadGeoAnalytics]");
     const countryEl = $("#geoCountryTable");
     const stateEl = $("#geoStateTable");
     if (!countryEl && !stateEl) return;
@@ -6938,7 +7087,7 @@
   }
 
   function renderCustomers(customers) {
-      console.log("[renderCustomers]", customers);
+    console.log("[renderCustomers]", customers);
     const body = $("#customersBody");
     if (!body) return;
 
@@ -7050,7 +7199,7 @@
   })();
 
   function exportCustomersAs(format) {
-      console.log("[exportCustomersAs]", format);
+    console.log("[exportCustomersAs]", format);
     if (!allCustomers.length) {
       showToast("No customers to export");
       return;
@@ -7093,7 +7242,7 @@
   }
 
   function downloadBlob(blob, filename) {
-      console.log("[downloadBlob]", blob, filename);
+    console.log("[downloadBlob]", blob, filename);
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -7107,7 +7256,7 @@
    * Customer Account Management (Block / Suspend / Activate)
    * ───────────────────────────────────────────── */
   async function handleCustomerAction(action, customerId) {
-      console.log("[handleCustomerAction]", action, customerId);
+    console.log("[handleCustomerAction]", action, customerId);
     const customer = allCustomers.find((c) => c.id === customerId);
     if (!customer) return;
 
@@ -7280,7 +7429,7 @@
 
   // Show customer detail modal with geolocation and visit history
   async function showCustomerDetails(customer) {
-      console.log("[showCustomerDetails]", customer);
+    console.log("[showCustomerDetails]", customer);
     const modal = $("#customerDetailModal");
     const body = $("#customerModalBody");
     if (!modal || !body) return;
@@ -7454,7 +7603,7 @@
   let allReviews = [];
 
   async function loadReviews() {
-      console.log("[loadReviews]");
+    console.log("[loadReviews]");
     const list = $("#adminReviewsList");
     const statsEl = $("#reviewsStats");
     if (!list) return;
@@ -7478,7 +7627,7 @@
   }
 
   function renderReviewsStats(el, reviews) {
-      console.log("[renderReviewsStats]", el, reviews);
+    console.log("[renderReviewsStats]", el, reviews);
     if (!el) return;
     const total = reviews.length;
     const approved = reviews.filter((r) => r.status === "approved").length;
@@ -7503,7 +7652,7 @@
   }
 
   function filterAndRenderReviews() {
-      console.log("[filterAndRenderReviews]");
+    console.log("[filterAndRenderReviews]");
     const statusFilter = $("#reviewsFilterStatus")?.value || "all";
     const ratingFilter = $("#reviewsFilterRating")?.value || "all";
 
@@ -7517,7 +7666,7 @@
   }
 
   function renderReviewsList(reviews) {
-      console.log("[renderReviewsList]", reviews);
+    console.log("[renderReviewsList]", reviews);
     const list = $("#adminReviewsList");
     if (!list) return;
 
@@ -7563,7 +7712,7 @@
   }
 
   async function updateReviewStatus(reviewId, status) {
-      console.log("[updateReviewStatus]", reviewId, status);
+    console.log("[updateReviewStatus]", reviewId, status);
     try {
       const { error } = await supabase
         .from("reviews")
@@ -7578,7 +7727,7 @@
   }
 
   async function deleteReview(reviewId) {
-      console.log("[deleteReview]", reviewId);
+    console.log("[deleteReview]", reviewId);
     if (!confirm("Delete this review permanently?")) return;
     try {
       const { error } = await supabase
@@ -7600,7 +7749,7 @@
 
   // Review filter event listeners
   function bindReviewFilters() {
-      console.log("[bindReviewFilters]");
+    console.log("[bindReviewFilters]");
     const statusFilter = $("#reviewsFilterStatus");
     const ratingFilter = $("#reviewsFilterRating");
     if (statusFilter)
@@ -7958,11 +8107,7 @@
           await gateWithSession(session, "login");
         });
         // Clean up URL (preserve staff mode via query param)
-        window.history.replaceState(
-          {},
-          document.title,
-          getAuthRedirectUrl(),
-        );
+        window.history.replaceState({}, document.title, getAuthRedirectUrl());
       } else {
         await autoGateOnce();
       }
@@ -8019,10 +8164,7 @@
 
     // Handle mode=staff - show login only (hide signup tab)
     // Also honour staff mode saved in sessionStorage (survives redirects)
-    if (
-      mode === "staff" ||
-      sessionStorage.getItem(STAFF_MODE_KEY) === "true"
-    ) {
+    if (mode === "staff" || sessionStorage.getItem(STAFF_MODE_KEY) === "true") {
       // Persist so it survives page reloads and Supabase redirects
       sessionStorage.setItem(STAFF_MODE_KEY, "true");
 
@@ -8078,9 +8220,10 @@
 
   /* ── Data Loading ── */
   async function loadMessages() {
-      console.log("[loadMessages]");
+    console.log("[loadMessages]");
     const msgList = $("#messagesList");
-    if (msgList) msgList.innerHTML = Array(4).fill(getSkeletonMessageItem()).join("");
+    if (msgList)
+      msgList.innerHTML = Array(4).fill(getSkeletonMessageItem()).join("");
     try {
       const { data, error } = await supabase
         .from("contact_messages")
@@ -8127,7 +8270,7 @@
   }
 
   function updateMessagesStats() {
-      console.log("[updateMessagesStats]");
+    console.log("[updateMessagesStats]");
     const total = messagesCache.length;
     const unread = messagesCache.filter(
       (m) => m.status === "unread" || !m.status,
@@ -8142,7 +8285,7 @@
   }
 
   function updateUnreadBadge() {
-      console.log("[updateUnreadBadge]");
+    console.log("[updateUnreadBadge]");
     const badge = $("#unreadMessagesBadge");
     if (!badge) return;
     const unread = messagesCache.filter(
@@ -8154,7 +8297,7 @@
 
   /* ── Filtering ── */
   function getFilteredMessages() {
-      console.log("[getFilteredMessages]");
+    console.log("[getFilteredMessages]");
     let filtered = [...messagesCache];
     if (currentMsgStatusFilter) {
       if (currentMsgStatusFilter === "unread") {
@@ -8181,7 +8324,7 @@
 
   /* ── Render List ── */
   function renderMessagesList() {
-      console.log("[renderMessagesList]");
+    console.log("[renderMessagesList]");
     const container = $("#messagesList");
     const pagContainer = $("#messagesPagination");
     if (!container) return;
@@ -8284,7 +8427,7 @@
   }
 
   function formatMsgDate(dateStr) {
-      console.log("[formatMsgDate]", dateStr);
+    console.log("[formatMsgDate]", dateStr);
     if (!dateStr) return "";
     try {
       const d = new Date(dateStr);
@@ -8302,7 +8445,7 @@
 
   /* ── Open Message (Detail Panel) ── */
   async function openMessage(id) {
-      console.log("[openMessage]", id);
+    console.log("[openMessage]", id);
     const msg = messagesCache.find((m) => String(m.id) === String(id));
     if (!msg) return;
     openMessageId = id;
@@ -8411,7 +8554,7 @@
 
   /* ── Reply Thread ── */
   async function loadReplyThread(messageId) {
-      console.log("[loadReplyThread]", messageId);
+    console.log("[loadReplyThread]", messageId);
     const container = $("#msgReplyThread");
     if (!container) return;
     try {
@@ -8461,7 +8604,7 @@
 
   /* ── Send Reply ── */
   async function sendReply() {
-      console.log("[sendReply]");
+    console.log("[sendReply]");
     const text = $("#msgReplyText")?.value?.trim();
     if (!text) return showToast("Please type a reply", "error");
     if (!openMessageId) return;
@@ -8572,7 +8715,7 @@
 
   /* ── Delete Message ── */
   async function deleteMessage() {
-      console.log("[deleteMessage]");
+    console.log("[deleteMessage]");
     if (!openMessageId) return;
     if (!confirm("Delete this message permanently?")) return;
     try {
@@ -8599,7 +8742,7 @@
 
   /* ── Mark as Unread ── */
   async function markAsUnread() {
-      console.log("[markAsUnread]");
+    console.log("[markAsUnread]");
     if (!openMessageId) return;
     const msg = messagesCache.find(
       (m) => String(m.id) === String(openMessageId),
@@ -8626,7 +8769,7 @@
 
   /* ── Back button (mobile) ── */
   function inboxGoBack() {
-      console.log("[inboxGoBack]");
+    console.log("[inboxGoBack]");
     const listPanel = $("#inboxListPanel");
     const detailPanel = $("#inboxDetailPanel");
     listPanel?.classList.remove("hide");
@@ -8641,7 +8784,7 @@
   let composeSelectedCustomer = null;
 
   function openCompose() {
-      console.log("[openCompose]");
+    console.log("[openCompose]");
     const overlay = $("#composeOverlay");
     if (overlay) overlay.hidden = false;
     composeSelectedCustomer = null;
@@ -8659,13 +8802,13 @@
   }
 
   function closeCompose() {
-      console.log("[closeCompose]");
+    console.log("[closeCompose]");
     const overlay = $("#composeOverlay");
     if (overlay) overlay.hidden = true;
   }
 
   function handleComposeRecipientSearch(e) {
-      console.log("[handleComposeRecipientSearch]", e);
+    console.log("[handleComposeRecipientSearch]", e);
     const q = (e.target.value || "").toLowerCase().trim();
     const dropdown = $("#composeRecipientDropdown");
     if (!dropdown) return;
@@ -8710,7 +8853,7 @@
   }
 
   function selectComposeRecipient(customer) {
-      console.log("[selectComposeRecipient]", customer);
+    console.log("[selectComposeRecipient]", customer);
     composeSelectedCustomer = customer;
     const tag = $("#composeRecipientTag");
     const search = $("#composeRecipientSearch");
@@ -8727,7 +8870,7 @@
   }
 
   function removeComposeRecipient() {
-      console.log("[removeComposeRecipient]");
+    console.log("[removeComposeRecipient]");
     composeSelectedCustomer = null;
     const tag = $("#composeRecipientTag");
     const search = $("#composeRecipientSearch");
@@ -8740,7 +8883,7 @@
   }
 
   async function sendComposeMessage() {
-      console.log("[sendComposeMessage]");
+    console.log("[sendComposeMessage]");
     if (!composeSelectedCustomer) {
       showToast("Please select a customer", "error");
       return;
@@ -8813,7 +8956,7 @@
 
   /* ── Bind All Actions ── */
   function bindMessagesActions() {
-      console.log("[bindMessagesActions]");
+    console.log("[bindMessagesActions]");
     on($("#refreshMessagesBtn"), "click", loadMessages);
 
     // Filter chips

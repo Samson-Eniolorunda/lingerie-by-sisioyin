@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.71.32";
+  const APP_VERSION = "1.71.33";
   const APP_BUILD = 71; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
@@ -127,7 +127,7 @@
   const $$ = (sel, ctx = document) => ctx.querySelectorAll(sel);
 
   function getClient() {
-      console.log("[getClient]");
+    console.log("[getClient]");
     return window.DB?.client || null;
   }
 
@@ -137,14 +137,14 @@
   }
 
   function buildVariantId(productId, size, color = "") {
-      console.log("[buildVariantId]", productId, size, color);
+    console.log("[buildVariantId]", productId, size, color);
     const sizeStr = String(size || "One Size").trim();
     const colorStr = color ? `-${String(color).trim()}` : "";
     return `${productId}-${sizeStr}${colorStr}`;
   }
 
   function normalizeSizes(product) {
-      console.log("[normalizeSizes]", product);
+    console.log("[normalizeSizes]", product);
     const raw = Array.isArray(product?.sizes)
       ? product.sizes
       : UTILS.parseCSV(product?.sizes);
@@ -162,7 +162,7 @@
   }
 
   function getFirstImage(images) {
-      console.log("[getFirstImage]", images);
+    console.log("[getFirstImage]", images);
     if (Array.isArray(images) && images.length) return images[0];
     if (typeof images === "string" && images.trim())
       return images.split(",")[0].trim();
@@ -295,7 +295,7 @@
   }
 
   function isInWishlist(productId) {
-      console.log("[isInWishlist]", productId);
+    console.log("[isInWishlist]", productId);
     return getWishlist().includes(String(productId));
   }
 
@@ -305,7 +305,7 @@
 
   // Color hex helper
   function getColorHex(colorName) {
-      console.log("[getColorHex]", colorName);
+    console.log("[getColorHex]", colorName);
     const colorMap = {
       Black: "#000000",
       White: "#FFFFFF",
@@ -498,7 +498,7 @@
 
   // Cart drawer item quantity/remove handlers
   function updateCartItemQty(idx, delta) {
-      console.log("[updateCartItemQty]", idx, delta);
+    console.log("[updateCartItemQty]", idx, delta);
     const cart = getCart();
     if (!cart[idx]) return;
 
@@ -510,7 +510,7 @@
   }
 
   function removeCartItemByIndex(idx) {
-      console.log("[removeCartItemByIndex]", idx);
+    console.log("[removeCartItemByIndex]", idx);
     const cart = getCart();
     cart.splice(idx, 1);
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
@@ -527,7 +527,7 @@
   let currentImageIndex = 0;
 
   function updateGalleryImage(index) {
-      console.log("[updateGalleryImage]", index);
+    console.log("[updateGalleryImage]", index);
     const imgEl = $("#modalImg");
     const thumbs = $$("#modalThumbs .gallery-thumb");
     const prevBtn = $("#galleryPrev");
@@ -554,7 +554,7 @@
    * Image Lightbox Preview
    * ───────────────────────────────────────────── */
   function openImagePreview(startIdx = 0) {
-      console.log("[openImagePreview]", startIdx);
+    console.log("[openImagePreview]", startIdx);
     let idx = startIdx;
     const overlay = document.createElement("div");
     overlay.className = "img-lightbox";
@@ -643,14 +643,14 @@
   };
 
   function getColorValue(name) {
-      console.log("[getColorValue]", name);
+    console.log("[getColorValue]", name);
     const key = (name || "").toLowerCase().trim();
     return colorMap[key] || key || "#cccccc";
   }
 
   /* Prevent background scroll when touching modal overlay */
   function preventOverlayScroll(e) {
-      console.log("[preventOverlayScroll]", e);
+    console.log("[preventOverlayScroll]", e);
     if (!e.target.closest(".quick-modal")) e.preventDefault();
   }
 
@@ -871,7 +871,7 @@
    * Theme Management - 3 Mode System (Light, Dark, System)
    * ───────────────────────────────────────────── */
   function getSystemTheme() {
-      console.log("[getSystemTheme]");
+    console.log("[getSystemTheme]");
     return window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
       : "light";
@@ -1374,7 +1374,7 @@
   }
 
   function updateMobileThemeToggleUI(mode) {
-      console.log("[updateMobileThemeToggleUI]", mode);
+    console.log("[updateMobileThemeToggleUI]", mode);
     const mobileToggle = $("#mobileThemeToggle");
     if (!mobileToggle) return;
     const buttons = mobileToggle.querySelectorAll(".theme-btn");
@@ -1778,12 +1778,12 @@
   const MAX_RECENTLY_VIEWED = 8;
 
   function getRecentlyViewed() {
-      console.log("[getRecentlyViewed]");
+    console.log("[getRecentlyViewed]");
     return UTILS.loadJSON(RECENTLY_VIEWED_KEY, []);
   }
 
   function addToRecentlyViewed(productId) {
-      console.log("[addToRecentlyViewed]", productId);
+    console.log("[addToRecentlyViewed]", productId);
     if (!productId) return;
     let items = getRecentlyViewed();
     items = items.filter((id) => id !== productId);
@@ -1796,7 +1796,7 @@
    * Search Functionality
    * ───────────────────────────────────────────── */
   function initSearch() {
-      console.log("[initSearch]");
+    console.log("[initSearch]");
     const searchToggle = $("#searchToggle");
     const searchOverlay = $("#searchOverlay");
     const searchInput = $("#searchInput");
@@ -1808,14 +1808,14 @@
     let searchTimeout = null;
 
     function openSearch() {
-        console.log("[openSearch]");
+      console.log("[openSearch]");
       searchOverlay.classList.add("active");
       document.body.style.overflow = "hidden";
       setTimeout(() => searchInput?.focus(), 100);
     }
 
     function closeSearch() {
-        console.log("[closeSearch]");
+      console.log("[closeSearch]");
       searchOverlay.classList.remove("active");
       document.body.style.overflow = "";
       if (searchInput) searchInput.value = "";
@@ -1830,7 +1830,7 @@
     }
 
     async function performSearch(query) {
-        console.log("[performSearch]", query);
+      console.log("[performSearch]", query);
       if (!query || query.length < 2) {
         searchResults.innerHTML = `
           <div class="search-empty">
@@ -1978,7 +1978,7 @@
    * Size Guide Modal
    * ───────────────────────────────────────────── */
   function initSizeGuide() {
-      console.log("[initSizeGuide]");
+    console.log("[initSizeGuide]");
     const modal = $("#sizeGuideModal");
     const openBtn = $("#openSizeGuide");
     const closeBtn = $("#closeSizeGuide");
@@ -1986,13 +1986,13 @@
     if (!modal) return;
 
     function openSizeGuide() {
-        console.log("[openSizeGuide]");
+      console.log("[openSizeGuide]");
       modal.style.display = "flex";
       document.body.style.overflow = "hidden";
     }
 
     function closeSizeGuide() {
-        console.log("[closeSizeGuide]");
+      console.log("[closeSizeGuide]");
       modal.style.display = "none";
       document.body.style.overflow = "";
     }
@@ -2046,7 +2046,7 @@
    * Newsletter Form
    * ───────────────────────────────────────────── */
   function initNewsletter() {
-      console.log("[initNewsletter]");
+    console.log("[initNewsletter]");
     const form = $("#newsletterForm");
     if (!form) return;
 
@@ -2226,7 +2226,7 @@
   });
 
   function showInstallBanner() {
-      console.log("[showInstallBanner]");
+    console.log("[showInstallBanner]");
     // Don't show if already running as installed PWA
     if (
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -2282,7 +2282,7 @@
 
   /** iOS-specific install instructions (Safari doesn't support beforeinstallprompt) */
   function showIOSInstallBanner() {
-      console.log("[showIOSInstallBanner]");
+    console.log("[showIOSInstallBanner]");
     if (localStorage.getItem("lbs_pwa_installed") === "true") return;
     if (document.getElementById("pwa-install-banner")) return;
 
@@ -2316,7 +2316,7 @@
   }
 
   function registerServiceWorker() {
-      console.log("[registerServiceWorker]");
+    console.log("[registerServiceWorker]");
     if (!("serviceWorker" in navigator)) return;
 
     window.addEventListener("load", async () => {
@@ -2371,7 +2371,10 @@
           if (refreshing) return;
 
           // Check if another tab recently triggered a reload
-          const lastReload = parseInt(localStorage.getItem(SW_RELOAD_KEY) || "0", 10);
+          const lastReload = parseInt(
+            localStorage.getItem(SW_RELOAD_KEY) || "0",
+            10,
+          );
           const now = Date.now();
           if (now - lastReload < SW_RELOAD_COOLDOWN) {
             console.log("📦 SW: Another tab recently reloaded, skipping...");
@@ -2410,7 +2413,7 @@
 
     // Helper: match nav link href to current page + query
     function matchLink(href) {
-        console.log("[matchLink]", href);
+      console.log("[matchLink]", href);
       const clean = href.replace(/^\//, "").replace(/\.html$/, "");
       const [page, qs] = clean.split("?");
       const hrefPage = page || "home";
@@ -2441,7 +2444,7 @@
    * buttons, and phone hrefs so you only edit config.js.
    * ───────────────────────────────────────────── */
   function updateSocialLinks() {
-      console.log("[updateSocialLinks]");
+    console.log("[updateSocialLinks]");
     const social = window.APP_CONFIG?.SOCIAL || {};
 
     // ── WhatsApp: update every wa.me link, preserve ?text= param ──
@@ -2495,7 +2498,7 @@
    * Terms Acceptance Banner
    * ───────────────────────────────────────────── */
   function initTermsBanner() {
-      console.log("[initTermsBanner]");
+    console.log("[initTermsBanner]");
     const TERMS_KEY = "LBS_TERMS_ACCEPTED";
     if (localStorage.getItem(TERMS_KEY)) return;
 
@@ -2613,7 +2616,7 @@
    * Checks if user has delivered orders without reviews
    * ───────────────────────────────────────────── */
   function initPostDeliveryReview() {
-      console.log("[initPostDeliveryReview]");
+    console.log("[initPostDeliveryReview]");
     const REVIEW_KEY = "LBS_REVIEW_PROMPTED";
 
     window.addEventListener("auth:changed", async (e) => {
@@ -2667,7 +2670,7 @@
   }
 
   function showReviewPopup(order, firstName, client) {
-      console.log("[showReviewPopup]", order, firstName, client);
+    console.log("[showReviewPopup]", order, firstName, client);
     const itemName = order.items?.[0]?.name || "your order";
     const overlay = document.createElement("div");
     overlay.className = "review-popup-overlay";
@@ -2839,7 +2842,7 @@
   // Saves form inputs on change and restores on reload so users don't lose data.
   // Skipped on admin page — admin has its own form lifecycle.
   function initFormPersistence() {
-      console.log("[initFormPersistence]");
+    console.log("[initFormPersistence]");
     if (location.pathname.includes("admin")) return;
     const key = "LBS_FORM_" + location.pathname.replace(/[^a-zA-Z0-9]/g, "_");
     const saved = (() => {
@@ -2865,7 +2868,7 @@
 
     // Save on user input
     function save(e) {
-        console.log("[save]", e);
+      console.log("[save]", e);
       const el = e.target;
       if (
         !el.id ||
