@@ -27,20 +27,23 @@
 
   /* ── Pre-check: hide auth/show admin instantly if we have a session token ── */
   (function preCheck() {
+    const authView = document.querySelector("[data-auth-view]");
+    const adminView = document.querySelector("[data-admin-view]");
     try {
       const stored = localStorage.getItem("lbs-admin-auth");
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed?.currentSession || parsed?.access_token) {
-          const authView = document.querySelector("[data-auth-view]");
-          const adminView = document.querySelector("[data-admin-view]");
           if (authView) authView.hidden = true;
           if (adminView) adminView.hidden = false;
+          return;
         }
       }
     } catch (_) {
       /* ignore */
     }
+    // No valid session — show auth portal
+    if (authView) authView.hidden = false;
   })();
 
   // Escape HTML to prevent XSS
