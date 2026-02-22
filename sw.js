@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = "1.71.33";
+const SW_VERSION = "1.71.34";
 const SW_BUILD = 71;
 const CACHE_NAME = "lbs-cache-v" + SW_BUILD;
 // Only cache HTML pages and icons for offline support
@@ -61,7 +61,10 @@ self.addEventListener("activate", (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            if (cacheName !== CACHE_NAME) {
+            if (
+              cacheName.startsWith("lbs-cache-") &&
+              cacheName !== CACHE_NAME
+            ) {
               console.log("[SW] Deleting old cache:", cacheName);
               return caches.delete(cacheName);
             }
@@ -240,15 +243,13 @@ self.addEventListener("message", (event) => {
     event.source.postMessage({ type: "SW_VERSION", version: SW_VERSION });
   }
   if (event.data === "FORCE_UNREGISTER") {
-    // Nuclear option: clear everything and unregister
+    // Clear only our own caches and unregister
     caches.keys().then((names) => {
-      names.forEach((name) => caches.delete(name));
-    });
-    self.registration.unregister().then(() => {
-      self.clients.matchAll().then((clients) => {
-        clients.forEach((client) => client.navigate(client.url));
+      names.forEach((name) => {
+        if (name.startsWith("lbs-cache-")) caches.delete(name);
       });
     });
+    self.registration.unregister();
   }
 });
 

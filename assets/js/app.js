@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.71.33";
+  const APP_VERSION = "1.71.34";
   const APP_BUILD = 71; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
@@ -2328,10 +2328,13 @@
       const swFile = isAdmin ? "admin-sw.js" : "sw.js";
       // Add version query param to ensure fresh SW is fetched on version bump
       const swPath = basePath + swFile + "?v=" + APP_BUILD;
+      // Scope each SW to prevent cross-registration conflicts
+      const swScope = isAdmin ? basePath + "admin" : basePath;
 
       try {
         const registration = await navigator.serviceWorker.register(swPath, {
           updateViaCache: "none",
+          scope: swScope,
         });
         console.log("📦 SW: Registered, scope:", registration.scope);
 

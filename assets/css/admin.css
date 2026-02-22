@@ -4418,6 +4418,9 @@ html[data-theme="dark"] .btn-change-image {
   .data-table td:last-child {
     justify-content: flex-end;
     border-bottom: none;
+    padding-top: var(--space-3);
+    margin-top: var(--space-1);
+    border-top: 1px dashed var(--border-light);
   }
 
   .data-table .btn-icon {
@@ -7951,7 +7954,9 @@ select {
   color: var(--text-muted);
   cursor: pointer;
   transition: all var(--transition-fast);
-  font-size: 13px;
+  font-size: 14px;
+  width: 36px;
+  height: 36px;
 }
 
 /* Match compose btn height */
