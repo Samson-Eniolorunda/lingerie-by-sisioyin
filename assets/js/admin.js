@@ -60,6 +60,23 @@
   // Session storage keys for auth state
   const RECOVERY_MODE_KEY = "LBS_ADMIN_RECOVERY_MODE";
   const SIGNUP_PENDING_KEY = "LBS_ADMIN_SIGNUP_PENDING";
+  const STAFF_MODE_KEY = "LBS_ADMIN_STAFF_MODE";
+
+  /** Return the correct auth-page URL, preserving staff mode when applicable. */
+  function getAuthRedirectUrl() {
+    const isStaff = sessionStorage.getItem(STAFF_MODE_KEY) === "true";
+    return isStaff
+      ? window.location.pathname + "?mode=staff"
+      : window.location.pathname;
+  }
+
+  /** If staff mode is active, hide signup tab and make sure login view shows. */
+  function enforceStaffMode() {
+    if (sessionStorage.getItem(STAFF_MODE_KEY) !== "true") return;
+    const signupTab = $("[data-auth-tab='signup']");
+    if (signupTab) signupTab.style.display = "none";
+    showAuthView("login");
+  }
 
   /* =========================
     Current user state
@@ -484,7 +501,7 @@
     hideSessionModal();
     sessionStorage.removeItem("LBS_ADMIN_VIEW");
     await supabase.auth.signOut();
-    window.location.href = window.location.pathname;
+    window.location.href = getAuthRedirectUrl();
   }
 
   function bindSessionTimeout() {
@@ -515,7 +532,7 @@
       hideSessionModal();
       sessionStorage.removeItem("LBS_ADMIN_VIEW");
       await supabase.auth.signOut();
-      window.location.href = window.location.pathname;
+      window.location.href = getAuthRedirectUrl();
     });
   }
 
@@ -1110,18 +1127,33 @@
     expiredView.hidden = false;
   }
 
-  // Helper function to send admin welcome email
+  // Helper function to send admin welcome email (with retry for profile propagation)
   async function sendAdminWelcomeEmail(session) {
     if (!session?.user) return;
 
-    try {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("is_admin, first_name, role")
-        .eq("id", session.user.id)
-        .single();
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 1500; // ms
 
-      if (profile?.is_admin) {
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin, first_name, role")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!profile?.is_admin) {
+          if (attempt < MAX_RETRIES) {
+            console.log(
+              `[sendAdminWelcomeEmail] Profile not ready (attempt ${attempt}/${MAX_RETRIES}), retrying...`,
+            );
+            await new Promise((r) => setTimeout(r, RETRY_DELAY));
+            continue;
+          }
+          console.warn("[sendAdminWelcomeEmail] Profile not admin after retries, skipping");
+          return;
+        }
+
         const supabaseUrl =
           window.APP_CONFIG?.SUPABASE_URL ||
           "https://oriojylsilcsvcsefuux.supabase.co";
@@ -1145,9 +1177,18 @@
         });
 
         console.log("[sendAdminWelcomeEmail] Welcome email sent successfully");
+        return; // success — exit loop
+      } catch (err) {
+        if (attempt < MAX_RETRIES) {
+          console.warn(
+            `[sendAdminWelcomeEmail] Attempt ${attempt} failed, retrying...`,
+            err,
+          );
+          await new Promise((r) => setTimeout(r, RETRY_DELAY));
+        } else {
+          console.warn("[sendAdminWelcomeEmail] Failed after retries:", err);
+        }
       }
-    } catch (err) {
-      console.warn("[sendAdminWelcomeEmail] Failed:", err);
     }
   }
 
@@ -5298,6 +5339,7 @@
         $("[data-admin-view]") && ($("[data-admin-view]").hidden = true);
         $("[data-auth-view]") && ($("[data-auth-view]").hidden = false);
         showAuthView("login");
+        enforceStaffMode();
         return;
       }
 
@@ -7487,7 +7529,7 @@
       // Wait for animation then sign out
       await new Promise((r) => setTimeout(r, 1500));
       await supabase.auth.signOut();
-      window.location.href = window.location.pathname;
+      window.location.href = getAuthRedirectUrl();
     });
 
     // Auth state change listener - handles email confirmation redirect
@@ -7597,6 +7639,12 @@
     // Check for email confirmation (type=signup)
     else if (hashType === "signup" || hashParams.includes("type=signup")) {
       console.log("[init] Email confirmation redirect detected");
+
+      // Persist staff mode before Supabase strips the URL
+      if (mode === "staff") {
+        sessionStorage.setItem(STAFF_MODE_KEY, "true");
+      }
+
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -7623,11 +7671,11 @@
         showEmailVerifiedView(session, async () => {
           await gateWithSession(session, "login");
         });
-        // Clean up URL
+        // Clean up URL (preserve staff mode via query param)
         window.history.replaceState(
           {},
           document.title,
-          window.location.pathname,
+          getAuthRedirectUrl(),
         );
       } else {
         await autoGateOnce();
@@ -7684,12 +7732,20 @@
     }
 
     // Handle mode=staff - show login only (hide signup tab)
-    // Skip if we just showed the email verified view
-    if (mode === "staff" && !hashParams.includes("type=signup")) {
-      console.log("[init] Staff mode - hiding signup tab");
-      const signupTab = $("[data-auth-tab='signup']");
-      if (signupTab) signupTab.style.display = "none";
-      showAuthView("login");
+    // Also honour staff mode saved in sessionStorage (survives redirects)
+    if (
+      mode === "staff" ||
+      sessionStorage.getItem(STAFF_MODE_KEY) === "true"
+    ) {
+      // Persist so it survives page reloads and Supabase redirects
+      sessionStorage.setItem(STAFF_MODE_KEY, "true");
+
+      if (!hashParams.includes("type=signup")) {
+        console.log("[init] Staff mode - hiding signup tab");
+        const signupTab = $("[data-auth-tab='signup']");
+        if (signupTab) signupTab.style.display = "none";
+        showAuthView("login");
+      }
     }
 
     // Hide signup tab if admins exist and not in invite mode
