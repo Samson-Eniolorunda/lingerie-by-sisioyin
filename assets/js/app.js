@@ -9,7 +9,7 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.71.34";
+  const APP_VERSION = "1.71.35";
   const APP_BUILD = 71; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
@@ -2330,6 +2330,31 @@
       const swPath = basePath + swFile + "?v=" + APP_BUILD;
       // Scope each SW to prevent cross-registration conflicts
       const swScope = isAdmin ? basePath + "admin" : basePath;
+
+      // Auto-cleanup: unregister any old SWs with conflicting scopes
+      // (Previously both SWs shared "/" scope, causing cross-page reloads)
+      try {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) {
+          const url = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || "";
+          const scope = reg.scope;
+          const isAdminSW = url.includes("admin-sw.js");
+          const isMainSW = url.includes("sw.js") && !url.includes("admin-sw.js");
+
+          // On admin page: unregister any main sw.js that covers /admin
+          // On main page: unregister any admin-sw.js that covers /
+          const shouldRemove =
+            (isAdmin && isMainSW && scope === new URL(basePath, location.origin).href) ||
+            (!isAdmin && isAdminSW && scope === new URL(basePath, location.origin).href);
+
+          if (shouldRemove) {
+            console.log("📦 SW: Unregistering conflicting old SW:", url, "scope:", scope);
+            await reg.unregister();
+          }
+        }
+      } catch (e) {
+        console.warn("📦 SW: Cleanup error:", e);
+      }
 
       try {
         const registration = await navigator.serviceWorker.register(swPath, {
