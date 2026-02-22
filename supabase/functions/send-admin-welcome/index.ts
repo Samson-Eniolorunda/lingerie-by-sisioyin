@@ -49,10 +49,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
   ],
 };
 
-function generateWelcomeEmailHtml(
-  firstName: string,
-  role: string
-): string {
+function generateWelcomeEmailHtml(firstName: string, role: string): string {
   const loginUrl = `${SITE_URL}/admin?mode=staff`;
   const roleTitle = ROLE_DESCRIPTIONS[role] || role;
   const permissions = ROLE_PERMISSIONS[role] || ["Access the admin dashboard"];
@@ -102,7 +99,7 @@ function generateWelcomeEmailHtml(
                   As a ${roleTitle}, you have access to:
                 </p>
                 <ul style="margin:0;padding:0 0 0 20px;color:#374151;font-size:14px;line-height:1.8;">
-                  ${permissions.map(p => `<li>${p}</li>`).join("")}
+                  ${permissions.map((p) => `<li>${p}</li>`).join("")}
                 </ul>
               </div>
               
@@ -110,8 +107,14 @@ function generateWelcomeEmailHtml(
               <div style="text-align:center;margin:32px 0;">
                 <a href="${loginUrl}" 
                    style="display:inline-block;background:linear-gradient(135deg,#be185d,#9d174d);color:#fff;text-decoration:none;padding:16px 40px;border-radius:10px;font-weight:600;font-size:16px;box-shadow:0 4px 12px rgba(190,24,93,0.3);">
-                  Go to Admin Dashboard
+                  Go to Staff Login
                 </a>
+              </div>
+              
+              <!-- Login Link fallback -->
+              <div style="margin:20px 0 0;padding:16px;background:#f9fafb;border-radius:8px;">
+                <p style="margin:0 0 8px;color:#6b7280;font-size:12px;">Your staff login link (bookmark this!):</p>
+                <p style="margin:0;color:#be185d;font-size:13px;word-break:break-all;">${loginUrl}</p>
               </div>
               
               <p style="margin:24px 0 0;color:#6b7280;font-size:14px;line-height:1.6;">
@@ -170,14 +173,17 @@ serve(async (req) => {
     const body: WelcomeRequest = await req.json();
     const { email, first_name, role } = body;
 
-    if (!email || !first_name || !role) {
+    if (!email) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields: email, first_name, role" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Missing required field: email" }),
+        { status: 400, headers: { "Content-Type": "application/json" } },
       );
     }
 
-    const html = generateWelcomeEmailHtml(first_name, role);
+    const html = generateWelcomeEmailHtml(
+      first_name || "Team Member",
+      role || "editor",
+    );
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -198,28 +204,25 @@ serve(async (req) => {
       console.error("Resend error:", err);
       return new Response(
         JSON.stringify({ error: "Failed to send email", details: err }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
+        { status: 500, headers: { "Content-Type": "application/json" } },
       );
     }
 
     const data = await res.json();
     console.log("Welcome email sent to:", email, "ID:", data.id);
 
-    return new Response(
-      JSON.stringify({ success: true, id: data.id }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
-    );
+    return new Response(JSON.stringify({ success: true, id: data.id }), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
   } catch (err) {
     console.error("Error:", err);
-    return new Response(
-      JSON.stringify({ error: "Internal server error" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 });

@@ -1444,9 +1444,19 @@
   }
 
   // Helper function to send admin welcome email (with retry for profile propagation)
+  // Uses a localStorage flag so it only fires once per user.
   async function sendAdminWelcomeEmail(session) {
     console.log("[sendAdminWelcomeEmail]", session);
     if (!session?.user) return;
+
+    // One-time guard — never send twice for the same user
+    const sentKey = `LBS_WELCOME_SENT_${session.user.id}`;
+    if (localStorage.getItem(sentKey)) {
+      console.log(
+        "[sendAdminWelcomeEmail] Already sent for this user, skipping",
+      );
+      return;
+    }
 
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 1500; // ms
@@ -1482,21 +1492,31 @@
           session.user.email,
         );
 
-        await fetch(`${supabaseUrl}/functions/v1/send-admin-welcome`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${session.access_token}`,
+        const res = await fetch(
+          `${supabaseUrl}/functions/v1/send-admin-welcome`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+            body: JSON.stringify({
+              email: session.user.email,
+              first_name: profile.first_name || "Admin",
+              role: profile.role || "editor",
+            }),
           },
-          body: JSON.stringify({
-            email: session.user.email,
-            first_name: profile.first_name || "Admin",
-            role: profile.role || "editor",
-          }),
-        });
+        );
 
-        console.log("[sendAdminWelcomeEmail] Welcome email sent successfully");
-        return; // success — exit loop
+        if (res.ok) {
+          localStorage.setItem(sentKey, "1");
+          console.log(
+            "[sendAdminWelcomeEmail] Welcome email sent successfully",
+          );
+        } else {
+          console.warn("[sendAdminWelcomeEmail] Server returned", res.status);
+        }
+        return; // exit loop regardless
       } catch (err) {
         if (attempt < MAX_RETRIES) {
           console.warn(
@@ -7861,6 +7881,9 @@
           userData.invited_role = invitedRole;
         }
 
+        // Persist staff mode so it survives page reloads / SW refreshes
+        sessionStorage.setItem(STAFF_MODE_KEY, "true");
+
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -7879,6 +7902,8 @@
         } else if (data?.session) {
           // Auto-confirmed (disabled confirmation) - go to dashboard
           showToast("Account created successfully!");
+          // Send welcome email for instantly-confirmed signups
+          sendAdminWelcomeEmail(data.session).catch(() => {});
           await gateWithSession(data.session, "login");
         } else {
           showToast("Account created. Please check your email.");
@@ -7974,44 +7999,22 @@
       if (evt === "PASSWORD_RECOVERY") {
         showAuthView("setpw");
       } else if (evt === "SIGNED_IN" && session) {
-        // User just confirmed email or signed in - redirect to dashboard
+        // Case A: user confirmed on the SAME tab (confirmView visible)
         const confirmView = $("#emailConfirmationView");
         if (confirmView && !confirmView.hidden) {
           showToast("Email confirmed! Redirecting to dashboard...");
-
-          // Send welcome email for new admin users
-          try {
-            const { data: profile } = await supabase
-              .from("profiles")
-              .select("is_admin, first_name, role")
-              .eq("id", session.user.id)
-              .single();
-
-            if (profile?.is_admin) {
-              const supabaseUrl =
-                window.APP_CONFIG?.SUPABASE_URL ||
-                "https://oriojylsilcsvcsefuux.supabase.co";
-              fetch(`${supabaseUrl}/functions/v1/send-admin-welcome`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${session.access_token}`,
-                },
-                body: JSON.stringify({
-                  email: session.user.email,
-                  first_name: profile.first_name || "Admin",
-                  role: profile.role || "editor",
-                }),
-              }).catch((err) => console.warn("Welcome email failed:", err));
-            }
-          } catch (err) {
-            console.warn("Profile check for welcome email failed:", err);
-          }
+          await sendAdminWelcomeEmail(session);
 
           setTimeout(async () => {
             await gateWithSession(session, "login");
           }, 1000);
+          return;
         }
+
+        // Case B: fresh page load from confirmation redirect (hash or PKCE code)
+        // The init code will handle this — no action needed here to avoid
+        // double-processing. But if the adminView is still hidden it means
+        // init hasn't entered the dashboard yet, so we let init handle it.
       }
     });
 
@@ -8073,7 +8076,7 @@
     }
     // Check for email confirmation (type=signup)
     else if (hashType === "signup" || hashParams.includes("type=signup")) {
-      console.log("[init] Email confirmation redirect detected");
+      console.log("[init] Email confirmation redirect detected (hash)");
 
       // Persist staff mode before Supabase strips the URL
       if (mode === "staff") {
@@ -8108,6 +8111,41 @@
         });
         // Clean up URL (preserve staff mode via query param)
         window.history.replaceState({}, document.title, getAuthRedirectUrl());
+        return; // ← dashboard entered, stop init
+      } else {
+        await autoGateOnce();
+      }
+    }
+    // PKCE code-exchange flow (Supabase redirects with ?code=... instead of hash)
+    else if (urlParams.get("code")) {
+      console.log("[init] PKCE code-exchange redirect detected");
+
+      if (mode === "staff") {
+        sessionStorage.setItem(STAFF_MODE_KEY, "true");
+      }
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (session) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", session.user.id)
+          .single();
+
+        if (!profile?.is_admin) {
+          console.log("[init] Non-admin via PKCE, redirecting to shop");
+          window.location.href = window.location.origin + "/home";
+          return;
+        }
+
+        await sendAdminWelcomeEmail(session);
+        showEmailVerifiedView(session, async () => {
+          await gateWithSession(session, "login");
+        });
+        window.history.replaceState({}, document.title, getAuthRedirectUrl());
+        return; // ← dashboard entered, stop init
       } else {
         await autoGateOnce();
       }
@@ -8164,16 +8202,20 @@
 
     // Handle mode=staff - show login only (hide signup tab)
     // Also honour staff mode saved in sessionStorage (survives redirects)
-    if (mode === "staff" || sessionStorage.getItem(STAFF_MODE_KEY) === "true") {
+    // Only apply when the auth view is actually visible (not after dashboard entry).
+    const adminViewEl = $("[data-admin-view]");
+    const authIsVisible = !adminViewEl || adminViewEl.hidden;
+    if (
+      authIsVisible &&
+      (mode === "staff" || sessionStorage.getItem(STAFF_MODE_KEY) === "true")
+    ) {
       // Persist so it survives page reloads and Supabase redirects
       sessionStorage.setItem(STAFF_MODE_KEY, "true");
 
-      if (!hashParams.includes("type=signup")) {
-        console.log("[init] Staff mode - hiding signup tab");
-        const signupTab = $("[data-auth-tab='signup']");
-        if (signupTab) signupTab.style.display = "none";
-        showAuthView("login");
-      }
+      console.log("[init] Staff mode - hiding signup tab");
+      const signupTab = $("[data-auth-tab='signup']");
+      if (signupTab) signupTab.style.display = "none";
+      showAuthView("login");
     }
 
     // Hide signup tab if admins exist and not in invite mode
