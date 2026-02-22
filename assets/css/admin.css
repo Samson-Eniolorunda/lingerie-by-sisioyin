@@ -885,6 +885,7 @@ textarea {
   overflow-y: auto;
   overflow-x: hidden;
   background: var(--bg-surface);
+  border: 1px solid var(--border-light);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-xl);
   animation: scaleIn 0.2s ease;
@@ -2104,6 +2105,8 @@ html[data-theme="dark"] .pw-rule.met {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 /* Top Bar */
@@ -2241,6 +2244,8 @@ html[data-theme="dark"] .pw-rule.met {
   display: none;
   padding: var(--space-6);
   flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .content-view.active {
@@ -3026,6 +3031,7 @@ body.bulk-mode .product-card .select-checkbox {
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
+  max-width: 100%;
 }
 
 .data-table,
@@ -3598,8 +3604,9 @@ body.bulk-mode .product-card .select-checkbox {
 
 /* Hero image preview uses 3:4 portrait to match site layout */
 #heroImagePreview {
-  aspect-ratio: 3/4;
+  aspect-ratio: auto;
   max-height: 300px;
+  width: auto;
 }
 
 .image-preview img {
@@ -7259,10 +7266,18 @@ select {
 }
 
 .view-header-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
   align-items: center;
   gap: var(--space-2);
-  flex-wrap: wrap;
+}
+
+.view-header-actions .search-input {
+  width: 100%;
+}
+
+.view-header-actions .export-dropdown {
+  justify-self: end;
 }
 
 .search-input {
@@ -7301,7 +7316,7 @@ select {
   }
 
   .view-header-actions {
-    justify-content: stretch;
+    grid-template-columns: 1fr;
   }
 
   .search-input {
@@ -7315,6 +7330,10 @@ select {
   .view-header-actions .topbar-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .activity-filters {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -9091,6 +9110,24 @@ html[data-theme="dark"] .activity-card {
   background: var(--bg-surface);
   border-color: var(--border-light);
 }
+
+.activity-filters {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.activity-filters .search-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.activity-filters .form-select {
+  min-width: 0;
+  width: 100%;
+}
+
 html[data-theme="dark"] .activity-filters .search-input,
 html[data-theme="dark"] .activity-filters .form-select {
   background: var(--bg-surface);

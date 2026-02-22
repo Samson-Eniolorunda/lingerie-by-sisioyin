@@ -5,7 +5,7 @@
  * ============================================
  */
 
-const SW_VERSION = "1.71.29";
+const SW_VERSION = "1.71.30";
 const SW_BUILD = 71;
 const CACHE_NAME = "lbs-cache-v" + SW_BUILD;
 // Only cache HTML pages and icons for offline support
