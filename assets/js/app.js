@@ -2336,19 +2336,33 @@
       try {
         const regs = await navigator.serviceWorker.getRegistrations();
         for (const reg of regs) {
-          const url = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || "";
+          const url =
+            reg.active?.scriptURL ||
+            reg.installing?.scriptURL ||
+            reg.waiting?.scriptURL ||
+            "";
           const scope = reg.scope;
           const isAdminSW = url.includes("admin-sw.js");
-          const isMainSW = url.includes("sw.js") && !url.includes("admin-sw.js");
+          const isMainSW =
+            url.includes("sw.js") && !url.includes("admin-sw.js");
 
           // On admin page: unregister any main sw.js that covers /admin
           // On main page: unregister any admin-sw.js that covers /
           const shouldRemove =
-            (isAdmin && isMainSW && scope === new URL(basePath, location.origin).href) ||
-            (!isAdmin && isAdminSW && scope === new URL(basePath, location.origin).href);
+            (isAdmin &&
+              isMainSW &&
+              scope === new URL(basePath, location.origin).href) ||
+            (!isAdmin &&
+              isAdminSW &&
+              scope === new URL(basePath, location.origin).href);
 
           if (shouldRemove) {
-            console.log("📦 SW: Unregistering conflicting old SW:", url, "scope:", scope);
+            console.log(
+              "📦 SW: Unregistering conflicting old SW:",
+              url,
+              "scope:",
+              scope,
+            );
             await reg.unregister();
           }
         }
