@@ -701,18 +701,22 @@ CREATE POLICY "Customers can cancel own pending orders"
     AND status = 'cancelled'
   );
 
--- Auto-generate order number
+-- Auto-generate order number (resettable sequence, format: LBS-DDMMYYYY-NNNN)
+CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START WITH 1 INCREMENT BY 1;
+
 CREATE OR REPLACE FUNCTION public.generate_order_number()
 RETURNS TEXT LANGUAGE plpgsql AS $$
 DECLARE
   new_number TEXT;
   counter    INTEGER;
 BEGIN
-  SELECT COUNT(*) + 1 INTO counter FROM public.orders;
-  new_number := 'LBS-' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(counter::TEXT, 4, '0');
+  counter := nextval('public.order_number_seq');
+  new_number := 'LBS-' || TO_CHAR(NOW(), 'DDMMYYYY') || '-' || LPAD(counter::TEXT, 4, '0');
   RETURN new_number;
 END;
 $$;
+
+-- To reset order numbering: ALTER SEQUENCE public.order_number_seq RESTART WITH 1;
 
 CREATE OR REPLACE FUNCTION public.set_order_number()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$

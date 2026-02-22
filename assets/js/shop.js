@@ -123,6 +123,7 @@
     UTILS?.toast?.(msg, type) || console.log(`[${type}] ${msg}`);
 
   function getFirstImage(images) {
+      console.log("[getFirstImage]", images);
     if (Array.isArray(images) && images.length) return images[0];
     if (typeof images === "string" && images.trim())
       return images.split(",")[0].trim();
@@ -130,6 +131,7 @@
   }
 
   function parseArray(val) {
+      console.log("[parseArray]", val);
     if (Array.isArray(val)) return val;
     if (typeof val === "string") {
       try {
@@ -146,12 +148,14 @@
 
   // Check if product is new (only if marked as new in DB)
   function isNewProduct(createdAt, isNewFlag) {
+      console.log("[isNewProduct]", createdAt, isNewFlag);
     // Only consider products explicitly marked as new
     return isNewFlag === true;
   }
 
   // Fetch Products
   async function fetchProducts() {
+      console.log("[fetchProducts]");
     const client = window.DB?.client;
     if (!client) return [];
 
@@ -179,18 +183,21 @@
 
   // Loading States
   function showSkeleton() {
+      console.log("[showSkeleton]");
     if (skeletonGrid) skeletonGrid.hidden = false;
     if (productsGrid) productsGrid.hidden = true;
     if (noResults) noResults.hidden = true;
   }
 
   function hideSkeleton() {
+      console.log("[hideSkeleton]");
     if (skeletonGrid) skeletonGrid.hidden = true;
     if (productsGrid) productsGrid.hidden = false;
   }
 
   // Create Product Card - Clean modern design
   function createProductCard(p) {
+      console.log("[createProductCard]", p);
     const imgRaw = getFirstImage(p.images);
     const img = window.UTILS?.optimizedImg
       ? window.UTILS.optimizedImg(imgRaw, 400, 75)
@@ -240,6 +247,7 @@
 
   // Render Products
   function renderProducts(products) {
+      console.log("[renderProducts]", products);
     hideSkeleton();
     if (!productsGrid) return;
 
@@ -262,6 +270,7 @@
 
   // Filter Logic
   function applyFilters() {
+      console.log("[applyFilters]");
     let products = [...allProducts];
     const searchQuery = (searchInput?.value || "").toLowerCase().trim();
     const sortBy = sortSelect?.value || "newest";
@@ -333,6 +342,7 @@
   const debouncedFilter = debounce(applyFilters, 300);
 
   function updateActiveFiltersUI() {
+      console.log("[updateActiveFiltersUI]");
     const chips = $("#activeChips");
     const activeFiltersBar = $("#activeFiltersBar");
     if (!chips) return;
@@ -385,6 +395,7 @@
   }
 
   function updateFilterCount() {
+      console.log("[updateFilterCount]");
     const countEl = $("#activeFilterCount");
     if (!countEl) return;
 
@@ -401,6 +412,7 @@
   }
 
   function clearFilter(key, value) {
+      console.log("[clearFilter]", key, value);
     if (key === "inStockOnly") {
       activeFilters.inStockOnly = false;
       const checkbox = $("#filterInStock");
@@ -443,6 +455,7 @@
   }
 
   function resetAllFilters() {
+      console.log("[resetAllFilters]");
     activeFilters = {
       category: [],
       gender: [],
@@ -475,6 +488,7 @@
 
   // URL Params
   function applyURLParams() {
+      console.log("[applyURLParams]");
     const params = new URLSearchParams(window.location.search);
     const cat = params.get("category");
     if (cat) activeFilters.category = [cat];
@@ -486,6 +500,7 @@
 
   // Modal
   async function openModal(productOrId) {
+      console.log("[openModal]", productOrId);
     if (!productModal) return;
 
     let product = productOrId;
@@ -747,6 +762,7 @@
 
   // Check if user has received this product (delivered order) — only then show Write a Review
   async function checkCanReview(productId) {
+      console.log("[checkCanReview]", productId);
     const btn = $("#qmWriteReviewBtn");
     if (!btn) return;
     btn.hidden = true;
@@ -775,6 +791,7 @@
 
   // ── Review Functions ──────────────────────────
   async function loadProductReviews(productId) {
+      console.log("[loadProductReviews]", productId);
     const listEl = $("#qmReviewsList");
     const summaryEl = $("#qmReviewsSummary");
     if (!listEl) return;
@@ -840,6 +857,7 @@
   }
 
   function renderStars(count) {
+      console.log("[renderStars]", count);
     return Array.from(
       { length: 5 },
       (_, i) => `<i class="fa-${i < count ? "solid" : "regular"} fa-star"></i>`,
@@ -847,6 +865,7 @@
   }
 
   async function submitReview(productId) {
+      console.log("[submitReview]", productId);
     const name = $("#qmReviewName")?.value?.trim();
     const email = $("#qmReviewEmail")?.value?.trim();
     const title = $("#qmReviewTitle")?.value?.trim();
@@ -905,6 +924,7 @@
   }
 
   function closeModal() {
+      console.log("[closeModal]");
     if (!productModal) return;
     productModal.hidden = true;
     document.body.style.overflow = "";
@@ -912,6 +932,7 @@
   }
 
   function setupModalEvents() {
+      console.log("[setupModalEvents]");
     const close = $("#qmClose");
     const prev = $("#qmPrev");
     const next = $("#qmNext");
@@ -995,6 +1016,7 @@
 
     // Helper to get current max quantity based on selection
     function getMaxQuantity() {
+        console.log("[getMaxQuantity]");
       if (!modalProduct) return 99;
 
       // If BOTH size and color are selected, check variant_stock first
@@ -1043,6 +1065,7 @@
     }
 
     function updateQuantityMax() {
+        console.log("[updateQuantityMax]");
       const maxQty = getMaxQuantity();
       if (qtyI) qtyI.max = maxQty;
       if (modalQty > maxQty) {
@@ -1053,6 +1076,7 @@
 
     // Update visual availability of sizes/colors based on variant_stock
     function updateVariantAvailability() {
+        console.log("[updateVariantAvailability]");
       if (!modalProduct) return;
       const variantStock = modalProduct.variant_stock || [];
       if (!variantStock.length) return; // No variant matrix, use individual stock
@@ -1350,6 +1374,7 @@
 
   // Image Preview with Slider
   function openImagePreview(startIdx = 0) {
+      console.log("[openImagePreview]", startIdx);
     let idx = startIdx;
     const overlay = document.createElement("div");
     overlay.className = "img-lightbox";
@@ -1422,6 +1447,7 @@
 
   // Quick add to cart from card
   function quickAddToCart(productId) {
+      console.log("[quickAddToCart]", productId);
     const product = allProducts.find((p) => p.id === productId);
     if (!product) return;
 
@@ -1471,6 +1497,7 @@
   const closeCartDrawerBtn = $("#closeCartDrawer");
 
   function openCartDrawer() {
+      console.log("[openCartDrawer]");
     renderCartDrawer();
     cartDrawer?.classList.add("open");
     cartDrawerOverlay?.classList.add("open");
@@ -1479,6 +1506,7 @@
   }
 
   function closeCartDrawer() {
+      console.log("[closeCartDrawer]");
     cartDrawer?.classList.remove("open");
     cartDrawerOverlay?.classList.remove("open");
     document.body.style.overflow = "";
@@ -1486,6 +1514,7 @@
   }
 
   function renderCartDrawer() {
+      console.log("[renderCartDrawer]");
     const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
     const cartEmpty = $("#cartEmpty");
 
@@ -1543,6 +1572,7 @@
   }
 
   function updateCartItemQty(idx, delta) {
+      console.log("[updateCartItemQty]", idx, delta);
     const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
     if (!cart[idx]) return;
 
@@ -1553,6 +1583,7 @@
   }
 
   function removeCartItem(idx) {
+      console.log("[removeCartItem]", idx);
     const cart = JSON.parse(localStorage.getItem("LBS_CART_V1") || "[]");
     cart.splice(idx, 1);
     localStorage.setItem("LBS_CART_V1", JSON.stringify(cart));
@@ -1618,6 +1649,7 @@
   });
 
   function toggleWishlist(id, btn) {
+      console.log("[toggleWishlist]", id, btn);
     const wishlist = JSON.parse(localStorage.getItem("LBS_WISHLIST") || "[]");
     const idx = wishlist.indexOf(String(id));
     if (idx > -1) {
@@ -1643,6 +1675,7 @@
 
   // Event Listeners
   function setupEvents() {
+      console.log("[setupEvents]");
     // Sidebar filter checkboxes
     const shopSidebar = $("#shopSidebar");
     const sidebarOverlay = $("#sidebarOverlay");
@@ -1715,10 +1748,12 @@
     const priceMaxDisplay = $("#priceMaxDisplay");
 
     function formatPriceDisplay(val) {
+        console.log("[formatPriceDisplay]", val);
       return "₦" + Number(val).toLocaleString();
     }
 
     function updatePriceSlider() {
+        console.log("[updatePriceSlider]");
       const min = parseInt(priceMinSlider?.value || 0);
       const max = parseInt(priceMaxSlider?.value || 500000);
 
@@ -1741,6 +1776,7 @@
     }
 
     function updatePriceFromInputs() {
+        console.log("[updatePriceFromInputs]");
       let min = parseInt(priceMinInput?.value || 0);
       let max = parseInt(priceMaxInput?.value || 500000);
 
@@ -1938,6 +1974,7 @@
 
   // Init
   function syncCheckboxesToFilters() {
+      console.log("[syncCheckboxesToFilters]");
     // Uncheck all checkboxes first to prevent browser autofill issues
     $$(".shop-sidebar input[type='checkbox']").forEach((cb) => {
       cb.checked = false;
@@ -1968,6 +2005,7 @@
   }
 
   async function init() {
+      console.log("[init]");
     showSkeleton();
     setupEvents();
     applyURLParams();

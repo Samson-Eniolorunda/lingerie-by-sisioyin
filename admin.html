@@ -39,7 +39,7 @@
     />
 
     <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/admin.css?v=71" />
+    <link rel="stylesheet" href="assets/css/admin.css?v=72" />
     <script>
       try {
         var t = JSON.parse(localStorage.getItem("LBS_THEME"));
@@ -905,6 +905,42 @@
                   data-export="activity"
                 >
                   <i class="fa-solid fa-clock-rotate-left"></i> Activity Logs
+                </button>
+                <hr style="margin: 4px 0; border: none; border-top: 1px solid var(--border-light)" />
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="products-pdf"
+                >
+                  <i class="fa-solid fa-file-pdf"></i> Products (PDF)
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="orders-pdf"
+                >
+                  <i class="fa-solid fa-file-pdf"></i> Orders (PDF)
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="customers-pdf"
+                >
+                  <i class="fa-solid fa-file-pdf"></i> Customers (PDF)
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="reviews-pdf"
+                >
+                  <i class="fa-solid fa-file-pdf"></i> Reviews (PDF)
+                </button>
+                <button
+                  type="button"
+                  class="export-option"
+                  data-export="activity-pdf"
+                >
+                  <i class="fa-solid fa-file-pdf"></i> Activity Logs (PDF)
                 </button>
               </div>
             </div>
@@ -2236,6 +2272,13 @@
                   >
                     <i class="fa-solid fa-file-lines"></i> Plain Text
                   </button>
+                  <button
+                    type="button"
+                    class="export-option"
+                    data-customer-export="pdf"
+                  >
+                    <i class="fa-solid fa-file-pdf"></i> PDF
+                  </button>
                 </div>
               </div>
             </div>
@@ -2743,10 +2786,18 @@
       defer
       src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
     ></script>
-    <script defer src="assets/js/config.js?v=71"></script>
-    <script defer src="assets/js/utils.js?v=71"></script>
-    <script defer src="assets/js/supabase.js?v=71"></script>
-    <script defer src="assets/js/app.js?v=71"></script>
-    <script defer src="assets/js/admin.js?v=71"></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"
+    ></script>
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"
+    ></script>
+    <script defer src="assets/js/config.js?v=72"></script>
+    <script defer src="assets/js/utils.js?v=72"></script>
+    <script defer src="assets/js/supabase.js?v=72"></script>
+    <script defer src="assets/js/app.js?v=72"></script>
+    <script defer src="assets/js/admin.js?v=72"></script>
   </body>
 </html>

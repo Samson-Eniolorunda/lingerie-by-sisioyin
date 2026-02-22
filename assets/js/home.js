@@ -69,6 +69,7 @@
    * Render Product Card
    * ───────────────────────────────────────────── */
   function getFirstImage(images) {
+      console.log("[getFirstImage]", images);
     if (Array.isArray(images) && images.length) return images[0];
     if (typeof images === "string" && images.trim())
       return images.split(",")[0].trim();
@@ -128,6 +129,7 @@
   }
 
   function generateStars(rating) {
+      console.log("[generateStars]", rating);
     const fullStars = Math.floor(rating);
     const hasHalf = rating % 1 >= 0.5;
     let stars = "";
@@ -276,6 +278,7 @@
   }
 
   function renderTestimonials(testimonials) {
+      console.log("[renderTestimonials]", testimonials);
     if (!testimonialsGrid) return;
 
     testimonialsGrid.innerHTML = testimonials
@@ -302,6 +305,7 @@
   }
 
   function generateStars(rating) {
+      console.log("[generateStars]", rating);
     const fullStars = Math.floor(rating);
     const hasHalf = rating % 1 >= 0.5;
     let stars = "";
@@ -319,6 +323,7 @@
   }
 
   function showEmptyTestimonials() {
+      console.log("[showEmptyTestimonials]");
     if (testimonialsGrid) {
       testimonialsGrid.innerHTML = `
         <div class="wishlist-empty" style="grid-column: 1 / -1;">
@@ -333,6 +338,7 @@
 
   // Review Modal
   function openReviewModal() {
+      console.log("[openReviewModal]");
     if (reviewModal) {
       reviewModal.style.display = "flex";
       document.body.style.overflow = "hidden";
@@ -340,6 +346,7 @@
   }
 
   function closeReviewModal() {
+      console.log("[closeReviewModal]");
     if (reviewModal) {
       reviewModal.style.display = "none";
       document.body.style.overflow = "";
@@ -348,12 +355,14 @@
   }
 
   function resetReviewForm() {
+      console.log("[resetReviewForm]");
     if (reviewForm) reviewForm.reset();
     selectedRating = 0;
     updateRatingStars();
   }
 
   function updateRatingStars() {
+      console.log("[updateRatingStars]");
     if (!ratingInput) return;
     const stars = ratingInput.querySelectorAll(".rating-star");
     stars.forEach((star, index) => {
@@ -567,6 +576,7 @@
 
   // Helper: reveal image and hide skeleton
   function _revealImage(img) {
+      console.log("[_revealImage]", img);
     if (!img) return;
     // Support both class-based and inline style approaches
     if (img.classList.contains("category-img-loading")) {
@@ -583,6 +593,7 @@
 
   // Helper: set image src and attach load listener for fade-in
   function applyImage(img, url) {
+      console.log("[applyImage]", img, url);
     if (!img || !url) return;
 
     // Use Image() preloader for more reliable loading on mobile Chrome
@@ -638,6 +649,7 @@
 
   // Queue image for lazy load via IntersectionObserver, or load immediately if unsupported
   function lazyApplyImage(img, url) {
+      console.log("[lazyApplyImage]", img, url);
     if (!img || !url) return;
     if (_lazyObserver) {
       _pendingUrls.set(img, url);
@@ -649,6 +661,7 @@
 
   // Set placeholder images immediately (direct load, no IntersectionObserver — these are key above-fold content)
   function setPlaceholderImages() {
+      console.log("[setPlaceholderImages]");
     const heroImg = document.getElementById("heroImage");
     if (heroImg && !heroImg.src) heroImg.src = PLACEHOLDER_IMAGES.hero;
 

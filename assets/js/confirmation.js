@@ -3,10 +3,12 @@
   "use strict";
 
   function formatNaira(amount) {
+      console.log("[formatNaira]", amount);
     return "₦" + Number(amount || 0).toLocaleString("en-NG");
   }
 
   function init() {
+      console.log("[init]");
     // Get order data from sessionStorage
     const orderDataStr = sessionStorage.getItem("LBS_CONFIRMED_ORDER");
 

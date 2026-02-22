@@ -439,6 +439,103 @@ textarea {
   overflow: hidden;
 }
 
+/* Skeleton stat card */
+.skeleton-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-stat-card .skeleton-value {
+  height: 28px;
+  width: 60%;
+  border-radius: var(--radius-md);
+}
+
+.skeleton-stat-card .skeleton-label {
+  height: 14px;
+  width: 45%;
+  border-radius: var(--radius-sm);
+}
+
+/* Skeleton widget item */
+.skeleton-widget-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.skeleton-widget-item:last-child {
+  border-bottom: none;
+}
+
+.skeleton-widget-item .skeleton-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.skeleton-widget-item .skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.skeleton-widget-item .skeleton-badge {
+  width: 60px;
+  height: 22px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Skeleton chart */
+.skeleton-chart {
+  height: 200px;
+  border-radius: var(--radius-lg);
+  margin-top: var(--space-3);
+}
+
+/* Skeleton image card */
+.skeleton-image-card {
+  height: 140px;
+  border-radius: var(--radius-lg);
+}
+
+/* Skeleton review item */
+.skeleton-review-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+}
+
+/* Skeleton message item */
+.skeleton-message-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.skeleton-message-item .skeleton-msg-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 /* =============================================================================
    5. BUTTONS
    ============================================================================= */
@@ -3912,6 +4009,10 @@ html[data-theme="dark"] .btn-change-image {
     display: none;
   }
 
+  .topbar-btn .export-chevron {
+    display: none;
+  }
+
   .topbar-btn {
     padding: var(--space-2);
     width: 40px;
@@ -4264,15 +4365,8 @@ html[data-theme="dark"] .btn-change-image {
     margin-right: var(--space-3);
   }
 
-  .data-table td:last-child::before {
-    display: none;
-  }
-
   .data-table td:last-child {
     justify-content: flex-end;
-    padding-top: var(--space-2);
-    margin-top: var(--space-1);
-    border-top: 1px solid var(--border-light);
     border-bottom: none;
   }
 

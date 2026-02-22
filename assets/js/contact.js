@@ -3,6 +3,7 @@
   "use strict";
 
   function init() {
+      console.log("[init]");
     const form = document.getElementById("contactForm");
     const submitBtn = document.getElementById("contactSubmitBtn");
     const formSuccess = document.getElementById("formSuccess");

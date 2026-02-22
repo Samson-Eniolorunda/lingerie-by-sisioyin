@@ -25,6 +25,7 @@
 
   // Get cart from localStorage
   function getCart() {
+      console.log("[getCart]");
     try {
       return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
     } catch {
@@ -34,11 +35,13 @@
 
   // Format currency
   function formatNaira(amount) {
+      console.log("[formatNaira]", amount);
     return "₦" + Number(amount || 0).toLocaleString("en-NG");
   }
 
   // Calculate delivery fee based on state — reads from config.js
   function getDeliveryFee(state) {
+      console.log("[getDeliveryFee]", state);
     const fees = window.APP_CONFIG?.DELIVERY_FEES || {};
     const fallback = window.APP_CONFIG?.DELIVERY_FEE_DEFAULT ?? 2500;
     return state in fees ? fees[state] : fallback;
@@ -46,6 +49,7 @@
 
   // Update progress steps — uses new ck-step markup
   function updateProgressSteps() {
+      console.log("[updateProgressSteps]");
     const steps = document.querySelectorAll(".ck-step");
     const lines = document.querySelectorAll(".ck-step-line");
     if (!steps.length) return;
@@ -117,6 +121,7 @@
 
   // Toggle section accordion — new ck-accordion markup
   function toggleSection(sectionName) {
+      console.log("[toggleSection]", sectionName);
     const card = document.querySelector(`[data-section="${sectionName}"]`);
     const allCards = document.querySelectorAll(".ck-accordion");
 
@@ -147,6 +152,7 @@
 
   // Complete section and move to next
   function completeSection(sectionName) {
+      console.log("[completeSection]", sectionName);
     const sectionOrder = ["contact", "delivery", "payment"];
     const currentIndex = sectionOrder.indexOf(sectionName);
 
@@ -197,6 +203,7 @@
 
   // Validate section fields
   function validateSection(sectionName) {
+      console.log("[validateSection]", sectionName);
     let isValid = true;
     let fields = [];
 
@@ -225,6 +232,7 @@
 
   // Render cart items in summary
   function renderSummaryItems() {
+      console.log("[renderSummaryItems]");
     const cart = getCart();
     const container = document.getElementById("summaryItems");
     const emptyEl = document.getElementById("checkoutEmpty");
@@ -275,6 +283,7 @@
 
   // Calculate and update totals
   function updateTotals() {
+      console.log("[updateTotals]");
     const cart = getCart();
     const stateSelect = document.getElementById("state");
     const state = stateSelect?.value || "Lagos";
@@ -297,6 +306,7 @@
 
   // Handle payment method selection — auto-complete payment section
   function setupPaymentMethods() {
+      console.log("[setupPaymentMethods]");
     const options = document.querySelectorAll(
       ".payment-option:not(.payment-option--disabled)",
     );
@@ -429,6 +439,7 @@
 
   // Show toast notification
   function showToast(message, type = "info") {
+      console.log("[showToast]", message, type);
     if (window.UTILS?.toast) {
       UTILS.toast(message, type);
     } else {
@@ -443,6 +454,7 @@
 
   // Validate entire form
   function validateForm() {
+      console.log("[validateForm]");
     const required = [
       "firstName",
       "lastName",
@@ -469,6 +481,7 @@
 
   // Build order data
   function buildOrderData() {
+      console.log("[buildOrderData]");
     const cart = getCart();
     const state = document.getElementById("state").value;
     const subtotal = cart.reduce(
@@ -504,6 +517,7 @@
 
   // Save completed order to Supabase (fires the email trigger)
   async function saveOrderToDatabase(orderData) {
+      console.log("[saveOrderToDatabase]", orderData);
     const c = window.DB?.client;
     if (!c) {
       console.warn(
@@ -551,6 +565,7 @@
   let _isProcessingPayment = false;
 
   function handlePlaceOrder() {
+      console.log("[handlePlaceOrder]");
     if (_isProcessingPayment) return;
     if (!validateForm()) {
       showToast("Please fill in all required fields", "error");
@@ -587,6 +602,7 @@
 
   // Process bank transfer order with receipt upload
   async function processBankTransferOrder() {
+      console.log("[processBankTransferOrder]");
     const btn = document.getElementById("placeOrderBtn");
     btn.disabled = true;
     btn.innerHTML =
@@ -662,6 +678,7 @@
 
   // Handle state select for floating label
   function setupStateSelect() {
+      console.log("[setupStateSelect]");
     const stateSelect = document.getElementById("state");
     if (stateSelect) {
       stateSelect.addEventListener("change", function () {
@@ -678,6 +695,7 @@
   // Initialize checkout page
   /* ── Google Places Autocomplete for address ── */
   function initPlacesAutocomplete() {
+      console.log("[initPlacesAutocomplete]");
     const addressInput = document.getElementById("address");
     if (!addressInput) return;
 
@@ -694,6 +712,7 @@
     };
 
     function attach() {
+        console.log("[attach]");
       if (!window.google?.maps?.places) return false;
       const autocomplete = new google.maps.places.Autocomplete(addressInput, {
         componentRestrictions: { country: "ng" },
@@ -774,6 +793,7 @@
 
   /* ── Saved address picker ── */
   function loadSavedAddresses() {
+      console.log("[loadSavedAddresses]");
     const picker = document.getElementById("savedAddrPicker");
     const select = document.getElementById("savedAddrSelect");
     if (!picker || !select) return;
@@ -832,6 +852,7 @@
   let _cachedUserFields = null;
 
   async function prefillUserInfo() {
+      console.log("[prefillUserInfo]");
     try {
       const user = await window.AUTH?.getUser?.();
       if (!user) return;
@@ -877,6 +898,7 @@
 
   // Re-show profile info banner if saved data exists and contact fields are empty
   function reshowProfileBanner() {
+      console.log("[reshowProfileBanner]");
     if (!_cachedUserFields) return;
     const hasData = Object.values(_cachedUserFields).some((v) => v.trim());
     if (!hasData) return;
@@ -894,6 +916,7 @@
 
   // Re-show saved address picker when delivery section is opened
   function reshowSavedAddresses() {
+      console.log("[reshowSavedAddresses]");
     const picker = document.getElementById("savedAddrPicker");
     if (!picker) return;
     let addrs = [];
@@ -907,6 +930,7 @@
   }
 
   function init() {
+      console.log("[init]");
     // Check if we're on checkout page
     if (!document.getElementById("checkoutWrapper")) return;
 

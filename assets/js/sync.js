@@ -46,15 +46,18 @@
    * Helpers
    * ───────────────────────────────────────────── */
   function getClient() {
+      console.log("[getClient]");
     return window.DB?.client || null;
   }
 
   function getUserId() {
+      console.log("[getUserId]");
     const user = window.AUTH?.getUser?.();
     return user?.id || null;
   }
 
   function loadLocal(field) {
+      console.log("[loadLocal]", field);
     try {
       const raw = localStorage.getItem(KEYS[field]);
       return raw ? JSON.parse(raw) : field === "dashboard_settings" ? {} : [];
@@ -64,6 +67,7 @@
   }
 
   function saveLocal(field, data) {
+      console.log("[saveLocal]", field, data);
     try {
       localStorage.setItem(KEYS[field], JSON.stringify(data));
     } catch (e) {
@@ -79,6 +83,7 @@
    * Merge wishlist: union of product IDs (no duplicates)
    */
   function mergeWishlist(local, remote) {
+      console.log("[mergeWishlist]", local, remote);
     const set = new Set([...(local || []), ...(remote || [])]);
     return [...set];
   }
@@ -88,6 +93,7 @@
    * but add remote items not present locally
    */
   function mergeCart(local, remote) {
+      console.log("[mergeCart]", local, remote);
     if (!remote?.length) return local || [];
     if (!local?.length) return remote;
     const localIds = new Set(local.map((i) => i.variantId));
@@ -104,6 +110,7 @@
    * Merge addresses: union by street+city key (no duplicates)
    */
   function mergeAddresses(local, remote) {
+      console.log("[mergeAddresses]", local, remote);
     if (!remote?.length) return local || [];
     if (!local?.length) return remote;
     const key = (a) =>
@@ -124,6 +131,7 @@
    * textSize is device-local — never overwrite from remote.
    */
   function mergeSettings(local, remote) {
+      console.log("[mergeSettings]", local, remote);
     const merged = { ...(remote || {}), ...(local || {}) };
     // Preserve device-local textSize (don't adopt remote value)
     if (local && local.textSize !== undefined) {
@@ -145,6 +153,7 @@
    * Push to Supabase (debounced)
    * ───────────────────────────────────────────── */
   async function pushField(field) {
+      console.log("[pushField]", field);
     const uid = getUserId();
     const client = getClient();
     if (!uid || !client) return;
@@ -172,6 +181,7 @@
   }
 
   function debouncedPush(field) {
+      console.log("[debouncedPush]", field);
     if (_timers[field]) clearTimeout(_timers[field]);
     _timers[field] = setTimeout(() => pushField(field), DEBOUNCE_MS);
   }
@@ -180,6 +190,7 @@
    * Pull from Supabase + Merge (on login)
    * ───────────────────────────────────────────── */
   async function pullAndMerge() {
+      console.log("[pullAndMerge]");
     const uid = getUserId();
     const client = getClient();
     if (!uid || !client) return;
@@ -236,6 +247,7 @@
    * Listens for changes to the user's profile row
    * ───────────────────────────────────────────── */
   function subscribeRealtime() {
+      console.log("[subscribeRealtime]");
     const uid = getUserId();
     const client = getClient();
     if (!uid || !client) return;
@@ -291,6 +303,7 @@
   }
 
   function unsubscribeRealtime() {
+      console.log("[unsubscribeRealtime]");
     if (_realtimeChannel) {
       const client = getClient();
       if (client) {

@@ -7,24 +7,28 @@
 
 // Callback when login reCAPTCHA is completed — hide widget smoothly
 function onLoginRecaptchaSuccess() {
+    console.log("[onLoginRecaptchaSuccess]");
   const field = document.querySelector("#loginForm .recaptcha-field");
   if (field) field.classList.add("verified");
 }
 
 // Callback when login reCAPTCHA expires — show widget again
 function onLoginRecaptchaExpired() {
+    console.log("[onLoginRecaptchaExpired]");
   const field = document.querySelector("#loginForm .recaptcha-field");
   if (field) field.classList.remove("verified");
 }
 
 // Callback when signup reCAPTCHA is completed — hide widget smoothly
 function onSignupRecaptchaSuccess() {
+    console.log("[onSignupRecaptchaSuccess]");
   const field = document.querySelector("#signupForm .recaptcha-field");
   if (field) field.classList.add("verified");
 }
 
 // Callback when signup reCAPTCHA expires — show widget again
 function onSignupRecaptchaExpired() {
+    console.log("[onSignupRecaptchaExpired]");
   const field = document.querySelector("#signupForm .recaptcha-field");
   if (field) field.classList.remove("verified");
 }

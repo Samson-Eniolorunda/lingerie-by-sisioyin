@@ -41,11 +41,13 @@
   let orders = [];
 
   function client() {
+      console.log("[client]");
     return window.DB?.client || null;
   }
 
   /* helper: hide loading skeleton */
   function hideLoading() {
+      console.log("[hideLoading]");
     if (loading) loading.hidden = true;
   }
 
@@ -86,6 +88,7 @@
 
   /* ── Helpers ──────────────────────────────── */
   function fmtPrice(n) {
+      console.log("[fmtPrice]", n);
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
@@ -94,6 +97,7 @@
   }
 
   function fmtDate(iso) {
+      console.log("[fmtDate]", iso);
     return new Date(iso).toLocaleDateString("en-NG", {
       year: "numeric",
       month: "short",
@@ -102,6 +106,7 @@
   }
 
   function statusClass(s) {
+      console.log("[statusClass]", s);
     const map = {
       confirmed: "green",
       delivered: "green",
@@ -115,6 +120,7 @@
 
   /* ── Tab Navigation ──────────────────────── */
   function switchTab(id) {
+      console.log("[switchTab]", id);
     navItems.forEach((t) =>
       t.classList.toggle("active", t.dataset.section === id),
     );
@@ -128,6 +134,7 @@
 
   /* ── Order Rendering ─────────────────────── */
   function orderCard(o) {
+      console.log("[orderCard]", o);
     const id = o.id?.substring(0, 8) || "N/A";
     const status = o.status || "pending";
     const items = Array.isArray(o.items) ? o.items : [];
@@ -156,6 +163,7 @@
   }
 
   function renderOrders() {
+      console.log("[renderOrders]");
     if (elTotalOrders) elTotalOrders.textContent = orders.length;
 
     // Total spent
@@ -179,6 +187,7 @@
   }
 
   function renderFilteredOrders() {
+      console.log("[renderFilteredOrders]");
     if (!elAllOrders) return;
     const filter = orderFilter?.value || "all";
     const list =
@@ -196,6 +205,7 @@
   }
 
   function emptyHTML(icon, msg, shopLink) {
+      console.log("[emptyHTML]", icon, msg, shopLink);
     return `
       <div class="dash-empty">
         <div class="dash-empty-icon"><i class="fa-solid ${icon}"></i></div>
@@ -207,6 +217,7 @@
 
   /* ── Order/Address skeleton helpers ─── */
   function orderSkeleton(count) {
+      console.log("[orderSkeleton]", count);
     count = count || 3;
     var html = "";
     for (var i = 0; i < count; i++) {
@@ -225,6 +236,7 @@
 
   /* ── Data Loading ────────────────────────── */
   async function loadOrders() {
+      console.log("[loadOrders]");
     const c = client();
     if (!c || !currentUser) return;
     // Show skeleton on both recent + all orders while loading
@@ -245,6 +257,7 @@
   }
 
   function loadWishlist() {
+      console.log("[loadWishlist]");
     try {
       const w = JSON.parse(localStorage.getItem("LBS_WISHLIST") || "[]");
       if (elWishlist) elWishlist.textContent = w.length;
@@ -255,6 +268,7 @@
 
   /* ── Profile ─────────────────────────────── */
   async function loadProfile() {
+      console.log("[loadProfile]");
     if (!currentUser) return;
     const meta = currentUser.user_metadata || {};
     const full = meta.full_name || "";
@@ -303,6 +317,7 @@
   }
 
   async function saveProfile(fd) {
+      console.log("[saveProfile]", fd);
     const c = client();
     if (!c || !currentUser) return;
     try {
@@ -353,6 +368,7 @@
   const ADDR_KEY = "LBS_ADDRESSES";
 
   function getAddresses() {
+      console.log("[getAddresses]");
     try {
       return JSON.parse(localStorage.getItem(ADDR_KEY) || "[]");
     } catch (_) {
@@ -361,12 +377,14 @@
   }
 
   function saveAddresses(list) {
+      console.log("[saveAddresses]", list);
     localStorage.setItem(ADDR_KEY, JSON.stringify(list));
     // Cross-device sync
     window.SYNC?.pushAddresses?.();
   }
 
   function renderAddresses() {
+      console.log("[renderAddresses]");
     const grid = $("#addressesGrid");
     if (!grid) return;
     const addrs = getAddresses();
@@ -474,6 +492,7 @@
   ];
 
   function attachSuggestions(input, suggestions) {
+      console.log("[attachSuggestions]", input, suggestions);
     let listEl = null;
     input.addEventListener("input", () => {
       const val = input.value.trim().toLowerCase();
@@ -510,6 +529,7 @@
   }
 
   function promptAddress() {
+      console.log("[promptAddress]");
     const overlay = document.createElement("div");
     overlay.className = "dash-modal-overlay active";
     overlay.innerHTML = `
@@ -658,6 +678,7 @@
   }
 
   function deleteAddress(index) {
+      console.log("[deleteAddress]", index);
     if (!confirm("Delete this address?")) return;
     const addrs = getAddresses();
     addrs.splice(index, 1);
@@ -667,6 +688,7 @@
   }
 
   function show(user) {
+      console.log("[show]", user);
     currentUser = user;
 
     // Prepare welcome overlay data
@@ -712,6 +734,7 @@
   }
 
   function finishShow(user) {
+      console.log("[finishShow]", user);
     const meta = user.user_metadata || {};
     const first = (meta.first_name || "").trim();
     const last = (meta.last_name || "").trim();
@@ -739,6 +762,7 @@
   }
 
   function hide() {
+      console.log("[hide]");
     currentUser = null;
     hideLoading();
     gate.hidden = false;
@@ -747,6 +771,7 @@
 
   /* ── Greeting ────────────────────────── */
   function updateGreeting(name) {
+      console.log("[updateGreeting]", name);
     const el = $("#dashGreetingMain");
     if (!el) return;
     const h = new Date().getHours();
@@ -759,6 +784,7 @@
   const SETTINGS_KEY = "LBS_DASH_SETTINGS";
 
   function getSettings() {
+      console.log("[getSettings]");
     try {
       return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
     } catch (_) {
@@ -766,6 +792,7 @@
     }
   }
   function saveSettings(obj) {
+      console.log("[saveSettings]", obj);
     const merged = { ...getSettings(), ...obj };
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
     // Cross-device sync
@@ -773,6 +800,7 @@
   }
 
   function initSettings() {
+      console.log("[initSettings]");
     const prefs = getSettings();
 
     /* ─── 1. Appearance — Theme dropdown ─── */
@@ -851,6 +879,7 @@
     const waStatus = $("#whatsappStatus");
 
     async function loadWhatsAppPrefs() {
+        console.log("[loadWhatsAppPrefs]");
       const c = client();
       if (!c || !currentUser) return;
       try {
@@ -871,6 +900,7 @@
     }
 
     function showWaStatus(msg, type) {
+        console.log("[showWaStatus]", msg, type);
       if (!waStatus) return;
       waStatus.textContent = msg;
       waStatus.className = "dash-whatsapp-status " + type;
@@ -1231,6 +1261,7 @@
   ];
 
   function buildTimeline(status, order) {
+      console.log("[buildTimeline]", status, order);
     if (status === "cancelled") {
       return `
         <div class="track-timeline">
@@ -1284,6 +1315,7 @@
 
   /* ── Order detail modal — Live Tracking UI ── */
   function viewOrder(id) {
+      console.log("[viewOrder]", id);
     const o = orders.find((x) => x.id === id);
     if (!o) return;
     const items = Array.isArray(o.items) ? o.items : [];
@@ -1527,6 +1559,7 @@
 
   /* ── Dashboard Signout with Overlay ──────── */
   async function dashSignout() {
+      console.log("[dashSignout]");
     const c = client();
     if (!c) return;
     sessionStorage.removeItem("dashWelcomeShown");
@@ -1554,6 +1587,7 @@
 
   /* ── Event Listeners ─────────────────────── */
   function bind() {
+      console.log("[bind]");
     signInBtn?.addEventListener("click", () => {
       if (window.AUTH?.openModal) return window.AUTH.openModal("login");
       const btn = document.getElementById("loginBtn");
@@ -1654,6 +1688,7 @@
   ];
 
   function initSetPwRequirements() {
+      console.log("[initSetPwRequirements]");
     const pwField = $("#setPwNew");
     const reqBox = $("#setPwRequirements");
     const rulesContainer = $("#setPwRules");
@@ -1677,6 +1712,7 @@
   }
 
   function checkSetPwStrength(pw) {
+      console.log("[checkSetPwStrength]", pw);
     let passed = 0;
     SET_PW_RULES.forEach((rule) => {
       const el = document.querySelector(
@@ -1704,6 +1740,7 @@
   }
 
   function openSetPwModal() {
+      console.log("[openSetPwModal]");
     const backdrop = $("#setPwBackdrop");
     const modal = $("#setPwModal");
     if (!backdrop || !modal) return;
@@ -1714,6 +1751,7 @@
   }
 
   function closeSetPwModal() {
+      console.log("[closeSetPwModal]");
     const backdrop = $("#setPwBackdrop");
     const modal = $("#setPwModal");
     backdrop?.classList.remove("active");
@@ -1722,6 +1760,7 @@
   }
 
   function bindSetPwModal() {
+      console.log("[bindSetPwModal]");
     const form = $("#setPwForm");
     const closeBtn = $("#setPwClose");
     const backdrop = $("#setPwBackdrop");
@@ -1830,6 +1869,7 @@
 
   /* ── Init ─────────────────────────────────── */
   async function init() {
+      console.log("[init]");
     bind();
     const c = client();
     if (!c) return setTimeout(init, 200);

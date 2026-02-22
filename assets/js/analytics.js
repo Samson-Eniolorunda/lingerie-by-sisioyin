@@ -323,6 +323,7 @@
    * Initialize
    * ───────────────────────────────────────────── */
   async function init() {
+      console.log("[init]");
     initGoogleAnalytics();
     initFacebookPixel();
     await trackDeviceType();
@@ -335,6 +336,7 @@
    * Device Type Tracking
    * ───────────────────────────────────────────── */
   async function trackDeviceType() {
+      console.log("[trackDeviceType]");
     try {
       if (sessionStorage.getItem("lbs_device_tracked")) return;
 
@@ -490,6 +492,7 @@
    * Uses ip-api.com (free, no key needed, 45 req/min)
    * ───────────────────────────────────────────── */
   async function trackVisitorLocation() {
+      console.log("[trackVisitorLocation]");
     try {
       // Avoid duplicate tracking within the same session
       if (sessionStorage.getItem("lbs_geo_tracked")) return;
@@ -580,6 +583,7 @@
    * Updates the site_visits row with duration on page unload
    * ───────────────────────────────────────────── */
   function trackTimeSpent() {
+      console.log("[trackTimeSpent]");
     const startTime = Date.now();
 
     const updateDuration = () => {

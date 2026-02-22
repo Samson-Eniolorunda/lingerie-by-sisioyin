@@ -27,6 +27,7 @@
     window.UTILS?.formatNaira?.(n) ?? `₦${Number(n || 0).toLocaleString()}`;
 
   function getDeliveryFee() {
+      console.log("[getDeliveryFee]");
     const deliverySelect = $("#deliveryArea");
     const selected = deliverySelect?.value;
     if (!selected) return 0;
@@ -36,12 +37,14 @@
   }
 
   function generateOrderId() {
+      console.log("[generateOrderId]");
     const now = Date.now();
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
     return `LBS-${now.toString(36).toUpperCase()}-${rand}`;
   }
 
   function getCart() {
+      console.log("[getCart]");
     try {
       // Method 1: Direct localStorage read
       const raw = localStorage.getItem(CART_KEY);
@@ -216,6 +219,7 @@
      UPDATE ORDER SUMMARY
   ------------------------- */
   function updateSummary(subtotal = 0) {
+      console.log("[updateSummary]", subtotal);
     const subtotalEl = $("#summarySubtotal");
     const deliveryEl = $("#summaryDelivery");
     const totalEl = $("#summaryTotal");
@@ -256,6 +260,7 @@
      CALCULATE CURRENT SUBTOTAL
   ------------------------- */
   function calculateSubtotal() {
+      console.log("[calculateSubtotal]");
     const cart = getCart();
     return cart.reduce((sum, item) => {
       return sum + Number(item.qty || 1) * Number(item.price_ngn || 0);
@@ -266,6 +271,7 @@
      PROMO CODE HANDLERS
   ------------------------- */
   async function applyPromoCode() {
+      console.log("[applyPromoCode]");
     const promoInput = $("#promoInput");
     const promoFormContainer = $("#promoFormContainer");
     const promoApplied = $("#promoApplied");
@@ -294,6 +300,7 @@
   }
 
   function removePromoCode() {
+      console.log("[removePromoCode]");
     const promoInput = $("#promoInput");
     const promoFormContainer = $("#promoFormContainer");
     const promoApplied = $("#promoApplied");
@@ -311,6 +318,7 @@
      SETUP EVENT HANDLERS
   ------------------------- */
   function setupEventHandlers() {
+      console.log("[setupEventHandlers]");
     const cartItemsList = $("#cartItemsList");
     const clearCartBtn = $("#clearCartBtn");
     const applyPromoBtn = $("#applyPromoBtn");
@@ -454,6 +462,7 @@
   }
 
   function populateDeliveryDropdown() {
+      console.log("[populateDeliveryDropdown]");
     const select = $("#deliveryArea");
     if (!select) return;
     const fees = window.APP_CONFIG?.DELIVERY_FEES || {};

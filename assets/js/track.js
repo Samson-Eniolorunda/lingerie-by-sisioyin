@@ -14,10 +14,12 @@
   if (!form) return;
 
   function client() {
+      console.log("[client]");
     return window.DB?.client || null;
   }
 
   function fmtPrice(n) {
+      console.log("[fmtPrice]", n);
     return new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
@@ -26,6 +28,7 @@
   }
 
   function fmtDate(iso) {
+      console.log("[fmtDate]", iso);
     return new Date(iso).toLocaleDateString("en-NG", {
       year: "numeric",
       month: "short",
@@ -67,6 +70,7 @@
   ];
 
   function buildTimeline(status, createdAt) {
+      console.log("[buildTimeline]", status, createdAt);
     if (status === "cancelled") {
       return `<div class="track-timeline"><div class="track-step cancelled"><div class="track-step-indicator"><div class="track-step-dot"><i class="fa-solid fa-ban"></i></div></div><div class="track-step-content"><span class="track-step-label">Order Cancelled</span><span class="track-step-desc">This order has been cancelled</span></div></div></div>`;
     }
@@ -93,6 +97,7 @@
   }
 
   function renderOrder(order) {
+      console.log("[renderOrder]", order);
     const status = order.status || "pending";
     const orderNum = order.order_number || `#${order.id.substring(0, 8)}`;
     const items = Array.isArray(order.items) ? order.items : [];
@@ -139,6 +144,7 @@
   }
 
   function renderNotFound(query) {
+      console.log("[renderNotFound]", query);
     result.innerHTML = `
       <div class="track-not-found">
         <i class="fa-solid fa-box-open"></i>
@@ -148,6 +154,7 @@
   }
 
   async function trackOrder(query) {
+      console.log("[trackOrder]", query);
     const c = client();
     if (!c) {
       window.UTILS?.toast?.("Service unavailable. Please try later.", "error");

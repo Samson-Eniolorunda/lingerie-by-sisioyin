@@ -13,6 +13,7 @@
 
   /** Validate email format */
   function isValidEmail(email) {
+      console.log("[isValidEmail]", email);
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
@@ -60,6 +61,7 @@
   ];
 
   function initPasswordRequirements() {
+      console.log("[initPasswordRequirements]");
     const pwField = $("#signupPassword");
     if (!pwField) return;
 
@@ -98,6 +100,7 @@
   }
 
   function checkPasswordStrength(pw) {
+      console.log("[checkPasswordStrength]", pw);
     let passed = 0;
     PW_RULES.forEach((rule) => {
       const el = document.querySelector(`.pw-rule[data-rule="${rule.key}"]`);
@@ -198,6 +201,7 @@
   })();
 
   function switchTab(tab) {
+      console.log("[switchTab]", tab);
     authTabs.forEach((t) => {
       t.classList.toggle("active", t.dataset.tab === tab);
     });
@@ -227,6 +231,7 @@
    * Helper to get Supabase client
    * ───────────────────────────────────────────── */
   function getClient() {
+      console.log("[getClient]");
     return window.DB?.client || null;
   }
 
@@ -421,6 +426,7 @@
    * Forgot Password Modal
    * ───────────────────────────────────────────── */
   function openForgotModal() {
+      console.log("[openForgotModal]");
     const backdrop = document.getElementById("forgotBackdrop");
     const modal = document.getElementById("forgotModal");
     if (!backdrop || !modal) return;
@@ -444,6 +450,7 @@
   }
 
   function closeForgotModal() {
+      console.log("[closeForgotModal]");
     const backdrop = document.getElementById("forgotBackdrop");
     const modal = document.getElementById("forgotModal");
     backdrop?.classList.remove("active");
@@ -451,6 +458,7 @@
   }
 
   async function handleForgotPassword(email) {
+      console.log("[handleForgotPassword]", email);
     const client = getClient();
     if (!client) {
       window.UTILS?.toast?.("Authentication service unavailable", "error");
@@ -480,6 +488,7 @@
    * UI Updates
    * ───────────────────────────────────────────── */
   function getInitials(user) {
+      console.log("[getInitials]", user);
     const name = user?.user_metadata?.full_name || "";
     if (name) {
       const parts = name.trim().split(/\s+/);
@@ -491,6 +500,7 @@
   }
 
   function updateAuthUI(user) {
+      console.log("[updateAuthUI]", user);
     currentUser = user;
 
     if (loginBtn) {
@@ -538,6 +548,7 @@
    * Password Toggle Setup
    * ───────────────────────────────────────────── */
   function setupPasswordToggles() {
+      console.log("[setupPasswordToggles]");
     // Find all password inputs in auth modal
     const passwordInputs =
       authModal?.querySelectorAll('input[type="password"]') || [];
@@ -577,6 +588,7 @@
    * Event Listeners
    * ───────────────────────────────────────────── */
   function setupEventListeners() {
+      console.log("[setupEventListeners]");
     // Setup password toggles
     setupPasswordToggles();
 
@@ -620,6 +632,7 @@
     const loginEmailInput = loginForm?.querySelector('[name="email"]');
 
     function showLoginRecaptcha() {
+        console.log("[showLoginRecaptcha]");
       if (!loginForm) return;
       const field = loginForm.querySelector(".recaptcha-field");
       if (field) {
@@ -665,6 +678,7 @@
 
     // Detect browser-autofilled credentials and show reCAPTCHA
     function checkAutofill() {
+        console.log("[checkAutofill]");
       if (!loginForm) return;
       try {
         const pwAutoFilled = loginPasswordInput?.matches?.(":-webkit-autofill");
@@ -1064,6 +1078,7 @@
   }
 
   function escapeHtml(str) {
+      console.log("[escapeHtml]", str);
     if (!str) return "";
     return str.replace(
       /[&<>"']/g,
@@ -1080,6 +1095,7 @@
 
   // Send welcome email to new user
   async function sendUserWelcomeEmail(session) {
+      console.log("[sendUserWelcomeEmail]", session);
     if (!session?.user?.email) return;
     try {
       const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
