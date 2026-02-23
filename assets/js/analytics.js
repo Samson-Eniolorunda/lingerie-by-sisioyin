@@ -532,17 +532,54 @@
       // Avoid duplicate tracking within the same session
       if (sessionStorage.getItem("lbs_geo_tracked")) return;
 
-      const res = await fetch("https://ipapi.co/json/", { cache: "no-store" });
-      if (!res.ok) return;
+      // Try primary geo API, then fallback
+      let geo = null;
+      try {
+        const res = await fetch("https://ipapi.co/json/", {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const j = await res.json();
+          if (!j.error) geo = j;
+        }
+      } catch (_) {
+        /* primary failed */
+      }
 
-      const geo = await res.json();
-      if (geo.error) return;
+      // Fallback to ip-api.com if primary failed
+      if (!geo) {
+        try {
+          const res2 = await fetch(
+            "https://ip-api.com/json/?fields=status,query,country,countryCode,regionName,city",
+            { cache: "no-store" },
+          );
+          if (res2.ok) {
+            const j2 = await res2.json();
+            if (j2.status === "success") {
+              geo = {
+                ip: j2.query,
+                country_name: j2.country,
+                country_code: j2.countryCode,
+                region: j2.regionName,
+                city: j2.city,
+              };
+            }
+          }
+        } catch (_) {
+          /* fallback also failed */
+        }
+      }
+
+      if (!geo) {
+        console.log("📊 ANALYTICS: All geo APIs failed, skipping");
+        return;
+      }
 
       const locationData = {
-        ip: geo.ip || null,
-        country: geo.country_name || "Unknown",
-        country_code: geo.country_code || "",
-        region: geo.region || "",
+        ip: geo.ip || geo.query || null,
+        country: geo.country_name || geo.country || "Unknown",
+        country_code: geo.country_code || geo.countryCode || "",
+        region: geo.region || geo.regionName || "",
         city: geo.city || "",
       };
 
@@ -581,29 +618,41 @@
         } catch (_) {
           /* anonymous visitor */
         }
-        const { data } = await c
-          .from("site_visits")
-          .insert({
-            ip_address: locationData.ip,
-            country: locationData.country,
-            country_code: locationData.country_code,
-            region: locationData.region,
-            city: locationData.city,
-            page: window.location.pathname,
-            referrer: document.referrer || null,
-            device_type: dev.device_type || null,
-            browser: dev.browser || null,
-            os: dev.os || null,
-            device_brand: dev.device_brand || null,
-            device_model: dev.device_model || null,
-            screen_resolution: screenRes,
-            viewport_size: viewportSize,
-            user_id: userId,
-          })
-          .select("id")
-          .single();
-        // Store visit ID so time-spent can update this row on unload
-        if (data?.id) window._lbsVisitId = data.id;
+        // Generate UUID client-side so we don't need SELECT permission after insert
+        const visitId = crypto.randomUUID
+          ? crypto.randomUUID()
+          : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (ch) => {
+              const r = (Math.random() * 16) | 0;
+              return (ch === "x" ? r : (r & 0x3) | 0x8).toString(16);
+            });
+        const { error: insertErr } = await c.from("site_visits").insert({
+          id: visitId,
+          ip_address: locationData.ip,
+          country: locationData.country,
+          country_code: locationData.country_code,
+          region: locationData.region,
+          city: locationData.city,
+          page: window.location.pathname,
+          referrer: document.referrer || null,
+          device_type: dev.device_type || null,
+          browser: dev.browser || null,
+          os: dev.os || null,
+          device_brand: dev.device_brand || null,
+          device_model: dev.device_model || null,
+          screen_resolution: screenRes,
+          viewport_size: viewportSize,
+          user_id: userId,
+        });
+
+        if (insertErr) {
+          console.warn(
+            "📊 ANALYTICS: site_visits insert failed:",
+            insertErr.message,
+          );
+        } else {
+          // Store visit ID so time-spent & linkVisitToUser can reference this row
+          window._lbsVisitId = visitId;
+        }
       }
 
       sessionStorage.setItem("lbs_geo_tracked", "1");

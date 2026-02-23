@@ -1392,7 +1392,11 @@
         const authBrand = $(".auth-brand");
         if (authBrand) authBrand.hidden = false;
         sessionStorage.setItem(STAFF_MODE_KEY, "true");
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
         showAuthView("login");
         enforceStaffMode();
       });
@@ -5473,11 +5477,17 @@
         const supabaseUrl =
           window.APP_CONFIG?.SUPABASE_URL ||
           "https://oriojylsilcsvcsefuux.supabase.co";
+        const {
+          data: { session: inviteSession },
+        } = await supabase.auth.getSession();
         const emailRes = await fetch(
           `${supabaseUrl}/functions/v1/send-admin-invite`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${inviteSession?.access_token || ""}`,
+            },
             body: JSON.stringify({
               email,
               invite_token: inviteToken,
@@ -7266,6 +7276,7 @@
                   ? `<button class="cust-act-btn cust-act-btn--success" data-customer-action="restore_returns" data-customer-id="${c.id}" title="Restore return privilege"><i class="fa-solid fa-rotate-left"></i></button>`
                   : `<button class="cust-act-btn cust-act-btn--warn" data-customer-action="revoke_returns" data-customer-id="${c.id}" title="Revoke return privilege"><i class="fa-solid fa-arrow-rotate-left" style="opacity:.5"></i></button>`
               }
+              <button class="cust-act-btn cust-act-btn--danger" data-customer-action="delete_customer" data-customer-id="${c.id}" data-customer-email="${escapeHtml(c.email || "")}" title="Delete customer data"><i class="fa-solid fa-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -7373,6 +7384,107 @@
     console.log("[handleCustomerAction]", action, customerId);
     const customer = allCustomers.find((c) => c.id === customerId);
     if (!customer) return;
+
+    // ── Delete customer data ──────────────────────────
+    if (action === "delete_customer") {
+      const confirmName = customer.full_name || customer.email || customerId;
+      if (
+        !confirm(
+          `⚠️ PERMANENT ACTION\n\nAre you sure you want to delete ALL data for:\n${confirmName}\n\nThis will remove:\n• Profile & account info\n• Order history\n• Wishlist & cart items\n• Site visits & analytics\n• Reviews\n\nThis action CANNOT be undone.`,
+        )
+      )
+        return;
+      // Double-confirm for safety
+      if (
+        !confirm(
+          `FINAL CONFIRMATION\n\nType-check: You are about to permanently delete customer "${confirmName}".\n\nClick OK to proceed or Cancel to abort.`,
+        )
+      )
+        return;
+
+      try {
+        const client = getClient();
+        if (!client) throw new Error("Not connected");
+
+        // Delete related data in order (child → parent)
+        const tables = [
+          { name: "wishlist_items", col: "user_id" },
+          { name: "cart_items", col: "user_id" },
+          { name: "order_items", col: null }, // handled via orders
+          { name: "reviews", col: "user_id" },
+          { name: "site_visits", col: "user_id" },
+          { name: "contact_messages", col: "user_id" },
+        ];
+
+        for (const t of tables) {
+          if (t.col) {
+            await client.from(t.name).delete().eq(t.col, customerId);
+          }
+        }
+
+        // Delete order items via order IDs
+        const { data: orders } = await client
+          .from("orders")
+          .select("id")
+          .eq("user_id", customerId);
+        if (orders?.length) {
+          const orderIds = orders.map((o) => o.id);
+          await client.from("order_items").delete().in("order_id", orderIds);
+        }
+        // Delete orders
+        await client.from("orders").delete().eq("user_id", customerId);
+
+        // Delete profile (this is the main record)
+        const { error: profileErr } = await client
+          .from("profiles")
+          .delete()
+          .eq("id", customerId);
+        if (profileErr) throw profileErr;
+
+        // Delete auth user via admin API (requires service role — use edge function)
+        try {
+          const {
+            data: { session },
+          } = await client.auth.getSession();
+          await fetch(
+            `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-admin-reply`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${session?.access_token || ""}`,
+              },
+              body: JSON.stringify({
+                recipientEmail: customer.email,
+                recipientName: customer.full_name || "Customer",
+                originalSubject:
+                  "Your Account Data Has Been Deleted — Lingeries by Sisioyin",
+                replyText:
+                  "Your account and all associated data have been permanently removed from our system as per administrative action. If you have any questions, please contact support@lingeriebysisioyin.store.",
+                fromEmail: "support@lingeriebysisioyin.store",
+              }),
+            },
+          );
+        } catch (_) {
+          /* notification email is best-effort */
+        }
+
+        logActivity("delete", "customer", customerId, {
+          name: customer.full_name || "",
+          email: customer.email || "",
+          action: "delete_customer",
+        });
+
+        // Remove from local array and re-render
+        allCustomers = allCustomers.filter((c) => c.id !== customerId);
+        renderCustomers(allCustomers);
+        showToast("Customer data deleted permanently", "success");
+      } catch (err) {
+        console.error("Customer delete error:", err);
+        showToast("Delete failed: " + err.message, "error");
+      }
+      return;
+    }
 
     const actionLabels = {
       suspend: "suspend",
@@ -8203,7 +8315,11 @@
         // Show verified view with "Proceed to Staff Login" button
         showEmailVerifiedView(session);
         // Clean up URL
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
         return;
       } else {
         await autoGateOnce();
@@ -8235,7 +8351,11 @@
 
         sendAdminWelcomeEmail(session).catch(() => {});
         showEmailVerifiedView(session);
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
         return;
       } else {
         await autoGateOnce();

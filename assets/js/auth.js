@@ -342,23 +342,6 @@
         "success",
       );
       closeAuthModal();
-
-      // Send welcome email to new customer (fire-and-forget)
-      try {
-        fetch(
-          `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-user-welcome`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              name: fullName || "Customer",
-              email: email,
-            }),
-          },
-        );
-      } catch (_) {
-        /* non-critical */
-      }
     } catch (err) {
       console.error("🔐 AUTH: Signup error:", err);
       window.UTILS?.toast?.(err.message || "Signup failed", "error");
@@ -1154,10 +1137,20 @@
     );
   }
 
-  // Send welcome email to new user
+  // Send welcome email to new user (only after email verification)
   async function sendUserWelcomeEmail(session) {
     console.log("[sendUserWelcomeEmail]", session);
     if (!session?.user?.email) return;
+
+    // One-time guard — never send twice for the same user
+    const sentKey = `LBS_USER_WELCOME_SENT_${session.user.id}`;
+    if (localStorage.getItem(sentKey)) {
+      console.log(
+        "🔐 AUTH: Welcome email already sent for this user, skipping",
+      );
+      return;
+    }
+
     try {
       const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
       if (!supabaseUrl) return;
@@ -1181,6 +1174,7 @@
       );
 
       if (response.ok) {
+        localStorage.setItem(sentKey, "1");
         console.log("🔐 AUTH: Welcome email sent successfully");
       } else {
         console.warn("🔐 AUTH: Welcome email failed:", await response.text());
@@ -1244,7 +1238,7 @@
               window.location.href = window.location.origin + "/admin";
               return;
             }
-            sendUserWelcomeEmail(data.session);
+            await sendUserWelcomeEmail(data.session);
             showEmailVerifiedView(data.session.user.email);
           }
         } catch (err) {
@@ -1286,7 +1280,7 @@
             }
 
             // Regular customer - send welcome email and show success
-            sendUserWelcomeEmail(session);
+            await sendUserWelcomeEmail(session);
             showEmailVerifiedView(session.user.email);
             return; // Don't continue with normal init
           }
