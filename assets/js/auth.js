@@ -1311,8 +1311,21 @@
           data: { session },
         } = await client.auth.getSession();
         if (session?.user) {
-          console.log("🔐 AUTH: Existing session found");
-          updateAuthUI(session.user);
+          // Verify user profile still exists (admin may have deleted them)
+          const { data: profile } = await client
+            .from("profiles")
+            .select("id, account_status")
+            .eq("id", session.user.id)
+            .single();
+
+          if (!profile || profile.account_status === "deleted") {
+            console.warn("🔐 AUTH: Profile deleted/missing, signing out");
+            await client.auth.signOut();
+            updateAuthUI(null);
+          } else {
+            console.log("🔐 AUTH: Existing session found");
+            updateAuthUI(session.user);
+          }
         }
 
         // Listen for auth changes

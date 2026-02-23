@@ -7390,7 +7390,7 @@
       const confirmName = customer.full_name || customer.email || customerId;
       if (
         !confirm(
-          `⚠️ PERMANENT ACTION\n\nAre you sure you want to delete ALL data for:\n${confirmName}\n\nThis will remove:\n• Profile & account info\n• Order history\n• Wishlist & cart items\n• Site visits & analytics\n• Reviews\n\nThis action CANNOT be undone.`,
+          `⚠️ PERMANENT ACTION\n\nAre you sure you want to delete ALL data for:\n${confirmName}\n\nThis will remove:\n• Profile & account info\n• Wishlist & cart items\n• Site visits & analytics\n• Reviews\n\nOrder history will be kept for business records.\n\nThis action CANNOT be undone.`,
         )
       )
         return;
@@ -7407,32 +7407,25 @@
         if (!client) throw new Error("Not connected");
 
         // Delete related data in order (child → parent)
+        // NOTE: Orders & order_items are KEPT for business records
+        //       (user_id FK has ON DELETE SET NULL so it auto-clears)
         const tables = [
           { name: "wishlist_items", col: "user_id" },
           { name: "cart_items", col: "user_id" },
-          { name: "order_items", col: null }, // handled via orders
           { name: "reviews", col: "user_id" },
           { name: "site_visits", col: "user_id" },
           { name: "contact_messages", col: "user_id" },
         ];
 
         for (const t of tables) {
-          if (t.col) {
-            await client.from(t.name).delete().eq(t.col, customerId);
-          }
+          await client.from(t.name).delete().eq(t.col, customerId);
         }
 
-        // Delete order items via order IDs
-        const { data: orders } = await client
+        // Nullify user_id on orders so they're kept but de-linked
+        await client
           .from("orders")
-          .select("id")
+          .update({ user_id: null })
           .eq("user_id", customerId);
-        if (orders?.length) {
-          const orderIds = orders.map((o) => o.id);
-          await client.from("order_items").delete().in("order_id", orderIds);
-        }
-        // Delete orders
-        await client.from("orders").delete().eq("user_id", customerId);
 
         // Delete profile (this is the main record)
         const { error: profileErr } = await client
@@ -8333,9 +8326,18 @@
         sessionStorage.setItem(STAFF_MODE_KEY, "true");
       }
 
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      // Exchange the PKCE code for a session first
+      const code = urlParams.get("code");
+      const { data: exchangeData, error: exchangeErr } =
+        await supabase.auth.exchangeCodeForSession(code);
+
+      if (exchangeErr) {
+        console.warn("[init] PKCE code exchange failed:", exchangeErr.message);
+        await autoGateOnce();
+        return;
+      }
+
+      const session = exchangeData?.session;
       if (session) {
         const { data: profile } = await supabase
           .from("profiles")

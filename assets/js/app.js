@@ -9,8 +9,8 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.71.41";
-  const APP_BUILD = 78; // numeric for comparison — middle number of version
+  const APP_VERSION = "1.71.43";
+  const APP_BUILD = 80; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
@@ -922,6 +922,7 @@
     const mode = saved || "system";
     applyTheme(mode);
     updateThemeToggleUI(mode);
+    updateMobileThemeToggleUI(mode);
 
     // Listen for system theme changes
     window
@@ -1661,6 +1662,8 @@
 
     // Initial check after a small delay
     setTimeout(fallbackReveal, 200);
+    // Expose fallback so skeleton removal can re-trigger reveal
+    window._lbsScrollRevealFallback = fallbackReveal;
   }
 
   /* ─────────────────────────────────────────────
@@ -2855,6 +2858,11 @@
     setTimeout(() => {
       pageSkelEl.hidden = true;
       pageSkelEl.remove();
+      // Re-trigger scroll reveal after skeleton is gone so IntersectionObserver
+      // correctly detects elements that were hidden behind the fixed skeleton
+      if (typeof window._lbsScrollRevealFallback === "function") {
+        window._lbsScrollRevealFallback();
+      }
     }, 350);
   }
 
@@ -2992,7 +3000,6 @@
       renderCartDrawer();
     });
   }
-  });
 
   // ── Mobile Keyboard: Scroll focused input into view ────────────
   // Prevents virtual keyboard from covering the input field on mobile devices.

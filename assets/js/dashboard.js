@@ -1883,7 +1883,35 @@
       const {
         data: { session },
       } = await c.auth.getSession();
-      session?.user ? show(session.user) : hide();
+      if (!session?.user) {
+        hide();
+        return;
+      }
+
+      // Verify user still exists server-side (catches deleted accounts)
+      const { data: userData, error: userErr } = await c.auth.getUser();
+      if (userErr || !userData?.user) {
+        console.warn("[init] User no longer exists server-side, signing out");
+        await c.auth.signOut();
+        hide();
+        return;
+      }
+
+      // Also check profile exists (admin may have deleted profile but not auth user)
+      const { data: profile } = await c
+        .from("profiles")
+        .select("id, account_status")
+        .eq("id", session.user.id)
+        .single();
+
+      if (!profile || profile.account_status === "deleted") {
+        console.warn("[init] Profile missing or deleted, signing out");
+        await c.auth.signOut();
+        hide();
+        return;
+      }
+
+      show(session.user);
     } catch (_) {
       hide();
     }

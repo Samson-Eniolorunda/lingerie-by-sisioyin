@@ -546,21 +546,20 @@
         /* primary failed */
       }
 
-      // Fallback to ip-api.com if primary failed
+      // Fallback to ipwho.is if primary failed (free, HTTPS, no key needed)
       if (!geo) {
         try {
-          const res2 = await fetch(
-            "https://ip-api.com/json/?fields=status,query,country,countryCode,regionName,city",
-            { cache: "no-store" },
-          );
+          const res2 = await fetch("https://ipwho.is/", {
+            cache: "no-store",
+          });
           if (res2.ok) {
             const j2 = await res2.json();
-            if (j2.status === "success") {
+            if (j2.success !== false) {
               geo = {
-                ip: j2.query,
+                ip: j2.ip,
                 country_name: j2.country,
-                country_code: j2.countryCode,
-                region: j2.regionName,
+                country_code: j2.country_code,
+                region: j2.region,
                 city: j2.city,
               };
             }
@@ -570,21 +569,25 @@
         }
       }
 
-      if (!geo) {
-        console.log("📊 ANALYTICS: All geo APIs failed, skipping");
-        return;
-      }
+      // Build location data (may be empty if all geo APIs failed)
+      const locationData = geo
+        ? {
+            ip: geo.ip || geo.query || null,
+            country: geo.country_name || geo.country || null,
+            country_code: geo.country_code || geo.countryCode || null,
+            region: geo.region || geo.regionName || null,
+            city: geo.city || null,
+          }
+        : {
+            ip: null,
+            country: null,
+            country_code: null,
+            region: null,
+            city: null,
+          };
 
-      const locationData = {
-        ip: geo.ip || geo.query || null,
-        country: geo.country_name || geo.country || "Unknown",
-        country_code: geo.country_code || geo.countryCode || "",
-        region: geo.region || geo.regionName || "",
-        city: geo.city || "",
-      };
-
-      // Send to GA4 as custom event
-      if (window.gtag && GA_ID) {
+      // Send to GA4 as custom event (only if we have geo data)
+      if (geo && window.gtag && GA_ID) {
         window.gtag("event", "visitor_location", {
           country: locationData.country,
           country_code: locationData.country_code,
@@ -602,7 +605,7 @@
         }
       }
 
-      // Store in Supabase site_visits table if available
+      // ALWAYS store visit in Supabase — even without geo data
       const c = window.DB?.client;
       if (c) {
         const dev = window._lbsDeviceInfo || {};
@@ -657,9 +660,9 @@
 
       sessionStorage.setItem("lbs_geo_tracked", "1");
       console.log(
-        "📊 ANALYTICS: Visitor location tracked:",
-        locationData.country,
-        locationData.region,
+        "📊 ANALYTICS: Visitor tracked:",
+        locationData.country || "(no geo)",
+        locationData.region || "",
       );
     } catch (err) {
       // Silently fail — geo tracking is non-critical

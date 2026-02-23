@@ -22936,9 +22936,16 @@ html[data-theme="dark"] .page-loader-text span {
 
 /* ---- Wrapper ---- */
 .page-skel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 250;
   padding-top: var(--header-height);
-  min-height: 100vh;
   background: var(--bg-base);
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 .page-skel[hidden] {
   display: none !important;
