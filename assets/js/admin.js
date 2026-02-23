@@ -819,11 +819,38 @@
   /* =========================
     PDF Export (jsPDF + autotable)
   ========================= */
-  function exportToPDF(title, headers, rows, filename) {
+  function _loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.crossOrigin = "anonymous";
+      s.onload = resolve;
+      s.onerror = () => reject(new Error("Failed to load " + src));
+      document.head.appendChild(s);
+    });
+  }
+
+  async function _ensureJsPDF() {
+    if (window.jspdf) return;
+    await _loadScript(
+      "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js",
+    );
+    await _loadScript(
+      "https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js",
+    );
+  }
+
+  async function exportToPDF(title, headers, rows, filename) {
     console.log("[exportToPDF]", title, rows.length, "rows");
     if (!window.jspdf) {
-      showToast("PDF library not loaded yet — please try again");
-      return;
+      showToast("Loading PDF library…");
+      try {
+        await _ensureJsPDF();
+      } catch (e) {
+        showToast("Failed to load PDF library — check your connection");
+        console.error("[exportToPDF] load error", e);
+        return;
+      }
     }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({
@@ -853,7 +880,7 @@
     showToast(`Exported ${rows.length} items as PDF`);
   }
 
-  function exportProductsPDF() {
+  async function exportProductsPDF() {
     console.log("[exportProductsPDF]");
     if (!productsCache.length) {
       showToast("No products to export");
@@ -879,7 +906,7 @@
       p.is_active ? "Yes" : "No",
       p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : "",
     ]);
-    exportToPDF(
+    await exportToPDF(
       "Products Report",
       headers,
       rows,
@@ -919,7 +946,7 @@
         o.delivery_state || "",
         o.created_at ? new Date(o.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF(
+      await exportToPDF(
         "Orders Report",
         headers,
         rows,
@@ -951,7 +978,7 @@
         p.phone || "",
         p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF(
+      await exportToPDF(
         "Customers Report",
         headers,
         rows,
@@ -991,7 +1018,7 @@
         r.status || "pending",
         r.created_at ? new Date(r.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF(
+      await exportToPDF(
         "Reviews Report",
         headers,
         rows,
@@ -1024,7 +1051,7 @@
         l.admin_id || "",
         l.created_at ? new Date(l.created_at).toLocaleDateString("en-GB") : "",
       ]);
-      exportToPDF(
+      await exportToPDF(
         "Activity Logs Report",
         headers,
         rows,
@@ -1036,7 +1063,7 @@
     }
   }
 
-  function exportCustomersAsPDF() {
+  async function exportCustomersAsPDF() {
     console.log("[exportCustomersAsPDF]");
     if (!allCustomers.length) {
       showToast("No customers to export");
@@ -1060,7 +1087,7 @@
       c.totalSpent || 0,
       c.created_at ? new Date(c.created_at).toLocaleDateString("en-GB") : "",
     ]);
-    exportToPDF(
+    await exportToPDF(
       "Customers Report",
       headers,
       rows,
@@ -1321,7 +1348,7 @@
     confirmView.hidden = false;
   }
 
-  function showEmailVerifiedView(session, callback) {
+  function showEmailVerifiedView(session) {
     console.log("[showEmailVerifiedView] Showing success view");
 
     // Hide all auth elements
@@ -1333,6 +1360,9 @@
     const confirmView = $("#emailConfirmationView");
     if (confirmView) confirmView.hidden = true;
 
+    // Sign the user out so they arrive at a clean staff login screen
+    supabase.auth.signOut().catch(() => {});
+
     // Show or create the verified view
     let verifiedView = $("#emailVerifiedView");
     if (!verifiedView) {
@@ -1343,26 +1373,32 @@
         <div class="confirmation-icon success">
           <i class="fa-solid fa-circle-check"></i>
         </div>
-        <h2>Email Verified!</h2>
+        <h2>Email Verified Successfully!</h2>
         <p class="confirmation-text">
-          Your email has been confirmed successfully. 
-          Welcome to the LBS Admin team!
+          Your email has been confirmed and your staff account is now active.
+          A welcome email with your staff login link and account details has been sent to your inbox.
         </p>
-        <div class="confirmation-loading">
-          <div class="spinner"></div>
-          <span>Entering dashboard...</span>
-        </div>
+        <button type="button" class="btn btn-primary btn-block" id="proceedToStaffLoginBtn" style="margin-top:1.5rem;">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          Proceed to Staff Login
+        </button>
       `;
       const authContainer = $(".auth-container");
       if (authContainer) authContainer.appendChild(verifiedView);
+
+      // Bind the proceed button
+      on($("#proceedToStaffLoginBtn"), "click", () => {
+        verifiedView.hidden = true;
+        const authBrand = $(".auth-brand");
+        if (authBrand) authBrand.hidden = false;
+        sessionStorage.setItem(STAFF_MODE_KEY, "true");
+        window.history.replaceState({}, document.title, window.location.pathname);
+        showAuthView("login");
+        enforceStaffMode();
+      });
     }
 
     verifiedView.hidden = false;
-
-    // Auto-proceed after 2 seconds
-    setTimeout(() => {
-      if (callback) callback();
-    }, 2000);
   }
 
   function showExpiredLinkView(errorMessage, linkType) {
@@ -1456,7 +1492,9 @@
           const { error } = await supabase.auth.resend({
             type: "signup",
             email,
-            options: { emailRedirectTo: window.location.origin + "/admin?mode=staff" },
+            options: {
+              emailRedirectTo: window.location.origin + "/admin?mode=staff",
+            },
           });
           if (error) throw error;
           showToast("Confirmation email resent! Check your inbox.", "success");
@@ -1466,7 +1504,10 @@
           showAuthView("login");
         } catch (err) {
           console.error("[expired] Resend confirmation error:", err);
-          showToast(err.message || "Failed to resend email. Please try again.", "error");
+          showToast(
+            err.message || "Failed to resend email. Please try again.",
+            "error",
+          );
         } finally {
           btn.disabled = false;
           btn.innerHTML = origHTML;
@@ -8055,12 +8096,10 @@
         // Case A: user confirmed on the SAME tab (confirmView visible)
         const confirmView = $("#emailConfirmationView");
         if (confirmView && !confirmView.hidden) {
-          showToast("Email confirmed! Redirecting to dashboard...");
-          await sendAdminWelcomeEmail(session);
-
-          setTimeout(async () => {
-            await gateWithSession(session, "login");
-          }, 1000);
+          // Send welcome email in background
+          sendAdminWelcomeEmail(session).catch(() => {});
+          // Show "Email Verified" with "Proceed to Staff Login" button
+          showEmailVerifiedView(session);
           return;
         }
 
@@ -8098,7 +8137,8 @@
           ? "This link has expired or is no longer valid."
           : "An error occurred. Please try again.";
       // Determine if this was a signup confirmation or password reset
-      const isSignupExpiry = mode === "staff" || hashErrorCode === "otp_expired";
+      const isSignupExpiry =
+        mode === "staff" || hashErrorCode === "otp_expired";
       showExpiredLinkView(errorMessage, isSignupExpiry ? "signup" : "reset");
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
@@ -8158,15 +8198,13 @@
         }
 
         // Send welcome email for new admin users
-        await sendAdminWelcomeEmail(session);
+        sendAdminWelcomeEmail(session).catch(() => {});
 
-        // Show verified view then enter dashboard
-        showEmailVerifiedView(session, async () => {
-          await gateWithSession(session, "login");
-        });
-        // Clean up URL (preserve staff mode via query param)
-        window.history.replaceState({}, document.title, getAuthRedirectUrl());
-        return; // ← dashboard entered, stop init
+        // Show verified view with "Proceed to Staff Login" button
+        showEmailVerifiedView(session);
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
       } else {
         await autoGateOnce();
       }
@@ -8195,12 +8233,10 @@
           return;
         }
 
-        await sendAdminWelcomeEmail(session);
-        showEmailVerifiedView(session, async () => {
-          await gateWithSession(session, "login");
-        });
-        window.history.replaceState({}, document.title, getAuthRedirectUrl());
-        return; // ← dashboard entered, stop init
+        sendAdminWelcomeEmail(session).catch(() => {});
+        showEmailVerifiedView(session);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
       } else {
         await autoGateOnce();
       }

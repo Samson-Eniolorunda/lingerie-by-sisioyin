@@ -9,8 +9,8 @@
   // ═══════════════════════════════════════════════════════════════════════════
   // FORCE CACHE CLEAR - Nuclear cache buster for stubborn devices
   // ═══════════════════════════════════════════════════════════════════════════
-  const APP_VERSION = "1.71.39";
-  const APP_BUILD = 76; // numeric for comparison — middle number of version
+  const APP_VERSION = "1.71.40";
+  const APP_BUILD = 77; // numeric for comparison — middle number of version
   const VERSION_KEY = "LBS_APP_VERSION";
   const RELOAD_KEY = "LBS_CACHE_RELOAD";
 
@@ -2948,36 +2948,50 @@
     document.addEventListener("change", save);
   }
 
-  initHeader();
-  initMobileNav();
-  initNavActiveState();
-  initDrawer();
-  initModal();
-  initKeyboardNav();
-  initWhatsAppWidget();
-  updateSocialLinks();
-  initScrollReveal();
-  initCounterAnimation();
-  initWishlist();
-  initSearch();
-  initSizeGuide();
-  initNewsletter();
-  updateCartBadge();
-  renderCartDrawer();
-  initRealtime();
-  registerServiceWorker();
-  initTermsBanner();
-  initPostDeliveryReview();
-  initFormPersistence();
+  // ── Admin page guard: skip all shopping-site UI on /admin ──
+  const _isAdminPage =
+    /\/admin(\.html)?$/i.test(window.location.pathname) ||
+    document.body.classList.contains("admin-page") ||
+    document.body.classList.contains("admin-body");
 
-  // Listen for cross-device sync events to update cart badge & drawer
-  window.addEventListener("cart:updated", () => {
+  if (_isAdminPage) {
+    // Only run essentials: theme is already applied, register SW, keyboard nav
+    initKeyboardNav();
+    registerServiceWorker();
+    console.log("✅ APP: Admin page — skipped shopping-site UI");
+  } else {
+    initHeader();
+    initMobileNav();
+    initNavActiveState();
+    initDrawer();
+    initModal();
+    initKeyboardNav();
+    initWhatsAppWidget();
+    updateSocialLinks();
+    initScrollReveal();
+    initCounterAnimation();
+    initWishlist();
+    initSearch();
+    initSizeGuide();
+    initNewsletter();
     updateCartBadge();
     renderCartDrawer();
-  });
-  window.addEventListener("sync:complete", () => {
-    updateCartBadge();
-    renderCartDrawer();
+    initRealtime();
+    registerServiceWorker();
+    initTermsBanner();
+    initPostDeliveryReview();
+    initFormPersistence();
+
+    // Listen for cross-device sync events to update cart badge & drawer
+    window.addEventListener("cart:updated", () => {
+      updateCartBadge();
+      renderCartDrawer();
+    });
+    window.addEventListener("sync:complete", () => {
+      updateCartBadge();
+      renderCartDrawer();
+    });
+  }
   });
 
   // ── Mobile Keyboard: Scroll focused input into view ────────────

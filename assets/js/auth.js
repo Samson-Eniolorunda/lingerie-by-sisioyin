@@ -316,7 +316,8 @@
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/home",
+          emailRedirectTo:
+            (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/home",
         },
       });
 
@@ -1030,7 +1031,9 @@
     const backBtn = overlay.querySelector("#backToHomeBtnShop");
 
     // Detect if this was a signup confirmation error (error_code=otp_expired typically)
-    const isSignupExpiry = (errorMessage || "").toLowerCase().includes("expired");
+    const isSignupExpiry = (errorMessage || "")
+      .toLowerCase()
+      .includes("expired");
     if (isSignupExpiry && resendGroup && requestBtn) {
       resendGroup.style.display = "";
       requestBtn.style.display = "none";
@@ -1046,21 +1049,32 @@
         }
         const origHTML = resendBtn.innerHTML;
         resendBtn.disabled = true;
-        resendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+        resendBtn.innerHTML =
+          '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
         try {
           const cl = getClient();
           if (!cl) throw new Error("Auth service unavailable");
           const { error } = await cl.auth.resend({
             type: "signup",
             email,
-            options: { emailRedirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/home" },
+            options: {
+              emailRedirectTo:
+                (window.APP_CONFIG?.SITE_URL || window.location.origin) +
+                "/home",
+            },
           });
           if (error) throw error;
-          window.UTILS?.toast?.("Confirmation email resent! Check your inbox.", "success");
+          window.UTILS?.toast?.(
+            "Confirmation email resent! Check your inbox.",
+            "success",
+          );
           overlay.remove();
         } catch (err) {
           console.error("🔐 AUTH: Resend confirmation error:", err);
-          window.UTILS?.toast?.(err.message || "Failed to resend email.", "error");
+          window.UTILS?.toast?.(
+            err.message || "Failed to resend email.",
+            "error",
+          );
         } finally {
           resendBtn.disabled = false;
           resendBtn.innerHTML = origHTML;
@@ -1209,10 +1223,14 @@
       const client = getClient();
       if (client) {
         try {
-          const { data, error } = await client.auth.exchangeCodeForSession(urlParams.get("code"));
+          const { data, error } = await client.auth.exchangeCodeForSession(
+            urlParams.get("code"),
+          );
           if (error) {
             console.error("🔐 AUTH: PKCE code exchange failed:", error);
-            showExpiredLinkView(error.message || "This link has expired or is no longer valid.");
+            showExpiredLinkView(
+              error.message || "This link has expired or is no longer valid.",
+            );
           } else if (data?.session?.user) {
             console.log("🔐 AUTH: PKCE session established");
             updateAuthUI(data.session.user);
