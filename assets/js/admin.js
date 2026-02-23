@@ -747,12 +747,12 @@
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, email, phone, is_admin, created_at")
+        .select("id, full_name, email, phone, is_admin, created_at")
         .eq("is_admin", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
       const exportData = (data || []).map((p) => ({
-        name: p.display_name || "",
+        name: p.full_name || "",
         email: p.email || "",
         phone: p.phone || "",
         created_at: p.created_at || "",
@@ -963,7 +963,7 @@
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, display_name, email, phone, is_admin, created_at")
+        .select("id, full_name, email, phone, is_admin, created_at")
         .eq("is_admin", false)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -973,7 +973,7 @@
       }
       const headers = ["Name", "Email", "Phone", "Joined"];
       const rows = data.map((p) => [
-        p.display_name || "",
+        p.full_name || "",
         p.email || "",
         p.phone || "",
         p.created_at ? new Date(p.created_at).toLocaleDateString("en-GB") : "",
