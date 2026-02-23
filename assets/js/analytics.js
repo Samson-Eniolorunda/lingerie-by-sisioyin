@@ -579,6 +579,33 @@
   }
 
   /* ─────────────────────────────────────────────
+   * Link visit to user after login
+   * Called from auth state change so the visit row
+   * gets the correct user_id even when tracking ran
+   * before the user logged in.
+   * ───────────────────────────────────────────── */
+  async function linkVisitToUser() {
+    console.log("[linkVisitToUser]");
+    try {
+      const visitId = window._lbsVisitId;
+      const c = window.DB?.client;
+      if (!visitId || !c) return;
+
+      const { data: { session } } = await c.auth.getSession();
+      if (!session?.user?.id) return;
+
+      await c.from("site_visits")
+        .update({ user_id: session.user.id })
+        .eq("id", visitId)
+        .is("user_id", null);
+
+      console.log("📊 ANALYTICS: Visit linked to user", session.user.id);
+    } catch (err) {
+      console.log("📊 ANALYTICS: linkVisitToUser skipped:", err.message);
+    }
+  }
+
+  /* ─────────────────────────────────────────────
    * Time Spent Tracking
    * Updates the site_visits row with duration on page unload
    * ───────────────────────────────────────────── */
@@ -623,6 +650,7 @@
 
   // Expose globally
   window.Analytics = Analytics;
+  window.Analytics.linkVisitToUser = linkVisitToUser;
 
   // Initialize when DOM is ready
   if (document.readyState === "loading") {

@@ -92,9 +92,9 @@
       checkPasswordStrength(pwField.value);
     });
     pwField.addEventListener("blur", () => {
-      // Hide after a short delay if password meets all requirements or is empty
+      // Hide after a short delay so click-on-confirmPw works
       setTimeout(() => {
-        if (!pwField.value.length) reqBox.classList.remove("visible");
+        reqBox.classList.remove("visible");
       }, 200);
     });
   }
@@ -341,18 +341,16 @@
       );
       closeAuthModal();
 
-      // Notify admin of new customer signup (fire-and-forget)
+      // Send welcome email to new customer (fire-and-forget)
       try {
         fetch(
-          `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-contact-email`,
+          `${window.APP_CONFIG?.SUPABASE_URL || ""}/functions/v1/send-user-welcome`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              name: fullName || "New Customer",
+              name: fullName || "Customer",
               email: email,
-              subject: "New Customer Signup Notification",
-              message: `A new customer has signed up!\n\nName: ${fullName || "Not provided"}\nEmail: ${email}\nDate: ${new Date().toLocaleString("en-GB")}\n\nYou can view this customer in your admin panel under the Customers section.`,
             }),
           },
         );
@@ -1239,6 +1237,10 @@
           } else if (event === "SIGNED_IN" && session?.user) {
             updateAuthUI(session.user);
             window.SYNC?.onLogin?.();
+            // Link current visit to the newly-signed-in user
+            if (typeof window.Analytics?.linkVisitToUser === "function") {
+              window.Analytics.linkVisitToUser();
+            }
           } else if (event === "SIGNED_OUT") {
             updateAuthUI(null);
           } else if (event === "TOKEN_REFRESHED" && session?.user) {
