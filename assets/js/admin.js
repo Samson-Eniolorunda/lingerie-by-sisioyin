@@ -1365,7 +1365,7 @@
     }, 2000);
   }
 
-  function showExpiredLinkView(errorMessage) {
+  function showExpiredLinkView(errorMessage, linkType) {
     console.log("[showExpiredLinkView] Showing expired link error");
 
     // Hide all auth elements
@@ -1390,12 +1390,19 @@
           This link has expired or is no longer valid.
         </p>
         <p class="confirmation-subtext">
-          Password reset and invite links expire after 1 hour for security reasons.
+          Confirmation and invite links expire after 1 hour for security reasons.
         </p>
         <div class="expired-link-actions">
-          <button type="button" class="btn btn-primary btn-block" id="requestNewLinkBtn">
+          <div id="resendConfirmGroup" class="resend-confirm-group" style="display:none; width:100%;">
+            <input type="email" id="resendConfirmEmail" class="form-control" placeholder="Enter your email address" style="margin-bottom:0.75rem;"/>
+            <button type="button" class="btn btn-primary btn-block" id="resendConfirmBtn">
+              <i class="fa-solid fa-paper-plane"></i>
+              Resend Confirmation Email
+            </button>
+          </div>
+          <button type="button" class="btn btn-primary btn-block" id="requestNewLinkBtn" style="display:none;">
             <i class="fa-solid fa-envelope"></i>
-            Request New Link
+            Request Password Reset
           </button>
           <button type="button" class="btn btn-outline btn-block" id="backToLoginFromExpiredBtn">
             <i class="fa-solid fa-arrow-left"></i>
@@ -1432,12 +1439,58 @@
         );
         showAuthView("reset");
       });
+
+      // Bind resend confirmation button
+      on($("#resendConfirmBtn"), "click", async () => {
+        const emailInput = $("#resendConfirmEmail");
+        const email = emailInput?.value?.trim();
+        if (!email) {
+          showToast("Please enter your email address.", "error");
+          return;
+        }
+        const btn = $("#resendConfirmBtn");
+        const origHTML = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+        try {
+          const { error } = await supabase.auth.resend({
+            type: "signup",
+            email,
+            options: { emailRedirectTo: window.location.origin + "/admin?mode=staff" },
+          });
+          if (error) throw error;
+          showToast("Confirmation email resent! Check your inbox.", "success");
+          expiredView.hidden = true;
+          const authBrand = $(".auth-brand");
+          if (authBrand) authBrand.hidden = false;
+          showAuthView("login");
+        } catch (err) {
+          console.error("[expired] Resend confirmation error:", err);
+          showToast(err.message || "Failed to resend email. Please try again.", "error");
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = origHTML;
+        }
+      });
     }
 
     // Update error message if provided
     const msgEl = expiredView.querySelector("#expiredLinkMessage");
     if (msgEl && errorMessage) {
       msgEl.textContent = errorMessage;
+    }
+
+    // Show the correct action based on link type
+    const resendGroup = expiredView.querySelector("#resendConfirmGroup");
+    const resetBtn = expiredView.querySelector("#requestNewLinkBtn");
+    if (linkType === "signup") {
+      // Staff signup confirmation expired — show resend form
+      if (resendGroup) resendGroup.style.display = "";
+      if (resetBtn) resetBtn.style.display = "none";
+    } else {
+      // Password reset or generic — show password reset button
+      if (resendGroup) resendGroup.style.display = "none";
+      if (resetBtn) resetBtn.style.display = "";
     }
 
     expiredView.hidden = false;
@@ -8044,7 +8097,9 @@
         : hashError === "access_denied"
           ? "This link has expired or is no longer valid."
           : "An error occurred. Please try again.";
-      showExpiredLinkView(errorMessage);
+      // Determine if this was a signup confirmation or password reset
+      const isSignupExpiry = mode === "staff" || hashErrorCode === "otp_expired";
+      showExpiredLinkView(errorMessage, isSignupExpiry ? "signup" : "reset");
       // Clean URL
       window.history.replaceState({}, document.title, window.location.pathname);
       return;

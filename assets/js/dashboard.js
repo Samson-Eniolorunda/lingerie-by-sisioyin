@@ -1860,8 +1860,13 @@
     // Also check hash on load (in case the event already fired)
     // Use captured hash since Supabase clears it before we can read it
     const hash = window.__RECOVERY_HASH__ || window.location.hash || "";
-    if (hash.includes("type=recovery")) {
+    const dashUrlParams = new URLSearchParams(window.location.search);
+    if (hash.includes("type=recovery") || dashUrlParams.get("setpw") === "1") {
       console.log("🔐 DASHBOARD: Recovery URL detected — opening set-pw modal");
+      // Clean the URL query param if present
+      if (dashUrlParams.get("setpw")) {
+        history.replaceState(null, "", window.location.pathname);
+      }
       // Small delay to let Supabase process the token
       setTimeout(openSetPwModal, 600);
     }

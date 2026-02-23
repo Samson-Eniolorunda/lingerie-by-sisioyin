@@ -323,7 +323,7 @@
    * Initialize
    * ───────────────────────────────────────────── */
   async function init() {
-      console.log("[init]");
+    console.log("[init]");
     initGoogleAnalytics();
     initFacebookPixel();
     await trackDeviceType();
@@ -336,7 +336,7 @@
    * Device Type Tracking
    * ───────────────────────────────────────────── */
   async function trackDeviceType() {
-      console.log("[trackDeviceType]");
+    console.log("[trackDeviceType]");
     try {
       if (sessionStorage.getItem("lbs_device_tracked")) return;
 
@@ -372,8 +372,18 @@
         if (sm) {
           const code = sm[1].toUpperCase();
           let model = code;
-          if (/^S9[012]\d/.test(code)) model = "Galaxy S2" + (code[2] === "0" ? "4" : code[2] === "1" ? "4" : code[2] === "2" ? "5" : "x");
-          else if (/^S7[0-9]\d/.test(code)) model = "Galaxy S2" + (parseInt(code[2]) < 5 ? "3" : "3");
+          if (/^S9[012]\d/.test(code))
+            model =
+              "Galaxy S2" +
+              (code[2] === "0"
+                ? "4"
+                : code[2] === "1"
+                  ? "4"
+                  : code[2] === "2"
+                    ? "5"
+                    : "x");
+          else if (/^S7[0-9]\d/.test(code))
+            model = "Galaxy S2" + (parseInt(code[2]) < 5 ? "3" : "3");
           else if (/^A\d{3}/.test(code)) model = "Galaxy A" + code.slice(1, 3);
           else if (/^F\d{3}/.test(code)) model = "Galaxy Z Fold";
           else if (/^N\d{3}/.test(code)) model = "Galaxy Note";
@@ -390,20 +400,27 @@
 
         // Google Pixel
         const pixel = ua.match(/Pixel\s?(\d[a-zA-Z]?\s?(?:Pro|XL)?)/i);
-        if (pixel) return { brand: "Google", model: "Pixel " + pixel[1].trim() };
+        if (pixel)
+          return { brand: "Google", model: "Pixel " + pixel[1].trim() };
         if (/Pixel/i.test(ua)) return { brand: "Google", model: "Pixel" };
 
         // Xiaomi / Redmi / POCO
-        const xiaomi = ua.match(/(Redmi\s?Note\s?\d+\s?\w*|Redmi\s?\d+\w*|POCO\s?\w+\d*|Mi\s?\d+\w*)/i);
+        const xiaomi = ua.match(
+          /(Redmi\s?Note\s?\d+\s?\w*|Redmi\s?\d+\w*|POCO\s?\w+\d*|Mi\s?\d+\w*)/i,
+        );
         if (xiaomi) return { brand: "Xiaomi", model: xiaomi[1].trim() };
         if (/Xiaomi/i.test(ua)) return { brand: "Xiaomi", model: "Xiaomi" };
 
         // Huawei
-        const huawei = ua.match(/HUAWEI\s?(\S+)/i) || ua.match(/(VOG|ELS|NOH|OCE|ABR|CET|ALN)-\w+/i);
+        const huawei =
+          ua.match(/HUAWEI\s?(\S+)/i) ||
+          ua.match(/(VOG|ELS|NOH|OCE|ABR|CET|ALN)-\w+/i);
         if (huawei) return { brand: "Huawei", model: huawei[1] };
 
         // OnePlus
-        const oneplus = ua.match(/(ONEPLUS\s?\w+|IN20\d{2}|KB20\d{2}|CPH\d{4}|NE2\d{3})/i);
+        const oneplus = ua.match(
+          /(ONEPLUS\s?\w+|IN20\d{2}|KB20\d{2}|CPH\d{4}|NE2\d{3})/i,
+        );
         if (oneplus) return { brand: "OnePlus", model: oneplus[1] };
 
         // Oppo
@@ -441,11 +458,16 @@
         // Windows desktop
         if (/Windows NT/i.test(ua)) return { brand: "PC", model: "Windows PC" };
         // Linux desktop
-        if (/Linux/i.test(ua) && !/Android/i.test(ua)) return { brand: "PC", model: "Linux PC" };
+        if (/Linux/i.test(ua) && !/Android/i.test(ua))
+          return { brand: "PC", model: "Linux PC" };
         // Generic Android
         if (/Android/i.test(ua)) {
           const genericModel = ua.match(/;\s*([^;)]+)\s*Build/i);
-          if (genericModel) return { brand: "Android", model: genericModel[1].trim().slice(0, 30) };
+          if (genericModel)
+            return {
+              brand: "Android",
+              model: genericModel[1].trim().slice(0, 30),
+            };
           return { brand: "Android", model: "Android" };
         }
 
@@ -453,14 +475,24 @@
       })();
 
       // Try high-entropy UA data for better model info (Chromium only)
-      let heBrand = deviceBrand, heModel = deviceModel;
+      let heBrand = deviceBrand,
+        heModel = deviceModel;
       try {
-        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
-          const he = await navigator.userAgentData.getHighEntropyValues(["model", "platform"]);
+        if (
+          navigator.userAgentData &&
+          navigator.userAgentData.getHighEntropyValues
+        ) {
+          const he = await navigator.userAgentData.getHighEntropyValues([
+            "model",
+            "platform",
+          ]);
           if (he.model) heModel = he.model;
-          if (he.platform === "Android" && heBrand === "Unknown") heBrand = "Android";
+          if (he.platform === "Android" && heBrand === "Unknown")
+            heBrand = "Android";
         }
-      } catch (_) { /* not supported */ }
+      } catch (_) {
+        /* not supported */
+      }
 
       // Send to GA4
       if (window.gtag && GA_ID) {
@@ -477,8 +509,11 @@
 
       // Store device info in window for geo tracking to pick up
       window._lbsDeviceInfo = {
-        device_type: deviceType, browser, os,
-        device_brand: heBrand, device_model: heModel,
+        device_type: deviceType,
+        browser,
+        os,
+        device_brand: heBrand,
+        device_model: heModel,
       };
 
       sessionStorage.setItem("lbs_device_tracked", "1");
@@ -492,7 +527,7 @@
    * Uses ip-api.com (free, no key needed, 45 req/min)
    * ───────────────────────────────────────────── */
   async function trackVisitorLocation() {
-      console.log("[trackVisitorLocation]");
+    console.log("[trackVisitorLocation]");
     try {
       // Avoid duplicate tracking within the same session
       if (sessionStorage.getItem("lbs_geo_tracked")) return;
@@ -539,10 +574,15 @@
         // Get current user ID if logged in (for fraud detection linking)
         let userId = null;
         try {
-          const { data: { session } } = await c.auth.getSession();
+          const {
+            data: { session },
+          } = await c.auth.getSession();
           userId = session?.user?.id || null;
-        } catch (_) { /* anonymous visitor */ }
-        const { data } = await c.from("site_visits")
+        } catch (_) {
+          /* anonymous visitor */
+        }
+        const { data } = await c
+          .from("site_visits")
           .insert({
             ip_address: locationData.ip,
             country: locationData.country,
@@ -591,10 +631,13 @@
       const c = window.DB?.client;
       if (!visitId || !c) return;
 
-      const { data: { session } } = await c.auth.getSession();
+      const {
+        data: { session },
+      } = await c.auth.getSession();
       if (!session?.user?.id) return;
 
-      await c.from("site_visits")
+      await c
+        .from("site_visits")
         .update({ user_id: session.user.id })
         .eq("id", visitId)
         .is("user_id", null);
@@ -610,7 +653,7 @@
    * Updates the site_visits row with duration on page unload
    * ───────────────────────────────────────────── */
   function trackTimeSpent() {
-      console.log("[trackTimeSpent]");
+    console.log("[trackTimeSpent]");
     const startTime = Date.now();
 
     const updateDuration = () => {

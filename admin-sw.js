@@ -5,8 +5,8 @@
  * ============================================
  */
 
-const SW_VERSION = "1.71.35";
-const SW_BUILD = 71;
+const SW_VERSION = "1.71.39";
+const SW_BUILD = 76;
 const CACHE_NAME = "lbs-admin-cache-v" + SW_BUILD;
 
 const STATIC_ASSETS = [
@@ -133,6 +133,15 @@ self.addEventListener("message", (event) => {
   if (event.data === "SKIP_WAITING") self.skipWaiting();
   if (event.data === "GET_VERSION") {
     event.source.postMessage({ type: "SW_VERSION", version: SW_VERSION });
+  }
+  if (event.data === "FORCE_UNREGISTER") {
+    // Clear only admin caches and unregister
+    caches.keys().then((names) => {
+      names.forEach((name) => {
+        if (name.startsWith("lbs-admin-cache-")) caches.delete(name);
+      });
+    });
+    self.registration.unregister();
   }
 });
 

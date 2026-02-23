@@ -13,7 +13,7 @@
 
   /** Validate email format */
   function isValidEmail(email) {
-      console.log("[isValidEmail]", email);
+    console.log("[isValidEmail]", email);
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   }
 
@@ -61,7 +61,7 @@
   ];
 
   function initPasswordRequirements() {
-      console.log("[initPasswordRequirements]");
+    console.log("[initPasswordRequirements]");
     const pwField = $("#signupPassword");
     if (!pwField) return;
 
@@ -100,7 +100,7 @@
   }
 
   function checkPasswordStrength(pw) {
-      console.log("[checkPasswordStrength]", pw);
+    console.log("[checkPasswordStrength]", pw);
     let passed = 0;
     PW_RULES.forEach((rule) => {
       const el = document.querySelector(`.pw-rule[data-rule="${rule.key}"]`);
@@ -201,7 +201,7 @@
   })();
 
   function switchTab(tab) {
-      console.log("[switchTab]", tab);
+    console.log("[switchTab]", tab);
     authTabs.forEach((t) => {
       t.classList.toggle("active", t.dataset.tab === tab);
     });
@@ -231,7 +231,7 @@
    * Helper to get Supabase client
    * ───────────────────────────────────────────── */
   function getClient() {
-      console.log("[getClient]");
+    console.log("[getClient]");
     return window.DB?.client || null;
   }
 
@@ -316,6 +316,7 @@
           data: {
             full_name: fullName,
           },
+          emailRedirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/home",
         },
       });
 
@@ -424,7 +425,7 @@
    * Forgot Password Modal
    * ───────────────────────────────────────────── */
   function openForgotModal() {
-      console.log("[openForgotModal]");
+    console.log("[openForgotModal]");
     const backdrop = document.getElementById("forgotBackdrop");
     const modal = document.getElementById("forgotModal");
     if (!backdrop || !modal) return;
@@ -448,7 +449,7 @@
   }
 
   function closeForgotModal() {
-      console.log("[closeForgotModal]");
+    console.log("[closeForgotModal]");
     const backdrop = document.getElementById("forgotBackdrop");
     const modal = document.getElementById("forgotModal");
     backdrop?.classList.remove("active");
@@ -456,7 +457,7 @@
   }
 
   async function handleForgotPassword(email) {
-      console.log("[handleForgotPassword]", email);
+    console.log("[handleForgotPassword]", email);
     const client = getClient();
     if (!client) {
       window.UTILS?.toast?.("Authentication service unavailable", "error");
@@ -486,7 +487,7 @@
    * UI Updates
    * ───────────────────────────────────────────── */
   function getInitials(user) {
-      console.log("[getInitials]", user);
+    console.log("[getInitials]", user);
     const name = user?.user_metadata?.full_name || "";
     if (name) {
       const parts = name.trim().split(/\s+/);
@@ -498,7 +499,7 @@
   }
 
   function updateAuthUI(user) {
-      console.log("[updateAuthUI]", user);
+    console.log("[updateAuthUI]", user);
     currentUser = user;
 
     if (loginBtn) {
@@ -546,7 +547,7 @@
    * Password Toggle Setup
    * ───────────────────────────────────────────── */
   function setupPasswordToggles() {
-      console.log("[setupPasswordToggles]");
+    console.log("[setupPasswordToggles]");
     // Find all password inputs in auth modal
     const passwordInputs =
       authModal?.querySelectorAll('input[type="password"]') || [];
@@ -586,7 +587,7 @@
    * Event Listeners
    * ───────────────────────────────────────────── */
   function setupEventListeners() {
-      console.log("[setupEventListeners]");
+    console.log("[setupEventListeners]");
     // Setup password toggles
     setupPasswordToggles();
 
@@ -630,7 +631,7 @@
     const loginEmailInput = loginForm?.querySelector('[name="email"]');
 
     function showLoginRecaptcha() {
-        console.log("[showLoginRecaptcha]");
+      console.log("[showLoginRecaptcha]");
       if (!loginForm) return;
       const field = loginForm.querySelector(".recaptcha-field");
       if (field) {
@@ -676,7 +677,7 @@
 
     // Detect browser-autofilled credentials and show reCAPTCHA
     function checkAutofill() {
-        console.log("[checkAutofill]");
+      console.log("[checkAutofill]");
       if (!loginForm) return;
       try {
         const pwAutoFilled = loginPasswordInput?.matches?.(":-webkit-autofill");
@@ -997,11 +998,18 @@
         </div>
         <h2>Link Expired</h2>
         <p class="expired-link-text">${escapeHtml(errorMessage) || "This link has expired or is no longer valid."}</p>
-        <p class="expired-link-subtext">Password reset links expire after 1 hour for security reasons.</p>
+        <p class="expired-link-subtext">Links expire after 1 hour for security reasons.</p>
         <div class="expired-link-actions">
+          <div id="resendConfirmGroupShop" style="display:none; width:100%;">
+            <input type="email" id="resendConfirmEmailShop" class="form-control" placeholder="Enter your email address" style="margin-bottom:0.75rem;"/>
+            <button type="button" class="btn btn-primary btn-block" id="resendConfirmBtnShop">
+              <i class="fa-solid fa-paper-plane"></i>
+              Resend Confirmation Email
+            </button>
+          </div>
           <button type="button" class="btn btn-primary btn-block" id="requestNewLinkBtnShop">
             <i class="fa-solid fa-envelope"></i>
-            Request New Link
+            Request Password Reset
           </button>
           <button type="button" class="btn btn-outline btn-block" id="backToHomeBtnShop">
             <i class="fa-solid fa-arrow-left"></i>
@@ -1017,7 +1025,48 @@
 
     // Bind buttons
     const requestBtn = overlay.querySelector("#requestNewLinkBtnShop");
+    const resendGroup = overlay.querySelector("#resendConfirmGroupShop");
+    const resendBtn = overlay.querySelector("#resendConfirmBtnShop");
     const backBtn = overlay.querySelector("#backToHomeBtnShop");
+
+    // Detect if this was a signup confirmation error (error_code=otp_expired typically)
+    const isSignupExpiry = (errorMessage || "").toLowerCase().includes("expired");
+    if (isSignupExpiry && resendGroup && requestBtn) {
+      resendGroup.style.display = "";
+      requestBtn.style.display = "none";
+    }
+
+    if (resendBtn) {
+      resendBtn.addEventListener("click", async () => {
+        const emailInput = overlay.querySelector("#resendConfirmEmailShop");
+        const email = emailInput?.value?.trim();
+        if (!email) {
+          window.UTILS?.toast?.("Please enter your email address.", "error");
+          return;
+        }
+        const origHTML = resendBtn.innerHTML;
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending…';
+        try {
+          const cl = getClient();
+          if (!cl) throw new Error("Auth service unavailable");
+          const { error } = await cl.auth.resend({
+            type: "signup",
+            email,
+            options: { emailRedirectTo: (window.APP_CONFIG?.SITE_URL || window.location.origin) + "/home" },
+          });
+          if (error) throw error;
+          window.UTILS?.toast?.("Confirmation email resent! Check your inbox.", "success");
+          overlay.remove();
+        } catch (err) {
+          console.error("🔐 AUTH: Resend confirmation error:", err);
+          window.UTILS?.toast?.(err.message || "Failed to resend email.", "error");
+        } finally {
+          resendBtn.disabled = false;
+          resendBtn.innerHTML = origHTML;
+        }
+      });
+    }
 
     if (requestBtn) {
       requestBtn.addEventListener("click", () => {
@@ -1076,7 +1125,7 @@
   }
 
   function escapeHtml(str) {
-      console.log("[escapeHtml]", str);
+    console.log("[escapeHtml]", str);
     if (!str) return "";
     return str.replace(
       /[&<>"']/g,
@@ -1093,7 +1142,7 @@
 
   // Send welcome email to new user
   async function sendUserWelcomeEmail(session) {
-      console.log("[sendUserWelcomeEmail]", session);
+    console.log("[sendUserWelcomeEmail]", session);
     if (!session?.user?.email) return;
     try {
       const supabaseUrl = window.APP_CONFIG?.SUPABASE_URL;
@@ -1153,6 +1202,42 @@
       return;
     }
 
+    // Handle PKCE code-exchange redirect (?code=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("code") && !window.location.pathname.includes("admin")) {
+      console.log("🔐 AUTH: PKCE code-exchange redirect detected");
+      const client = getClient();
+      if (client) {
+        try {
+          const { data, error } = await client.auth.exchangeCodeForSession(urlParams.get("code"));
+          if (error) {
+            console.error("🔐 AUTH: PKCE code exchange failed:", error);
+            showExpiredLinkView(error.message || "This link has expired or is no longer valid.");
+          } else if (data?.session?.user) {
+            console.log("🔐 AUTH: PKCE session established");
+            updateAuthUI(data.session.user);
+            // Check if admin
+            const { data: profile } = await client
+              .from("profiles")
+              .select("is_admin")
+              .eq("id", data.session.user.id)
+              .single();
+            if (profile?.is_admin) {
+              window.location.href = window.location.origin + "/admin";
+              return;
+            }
+            sendUserWelcomeEmail(data.session);
+            showEmailVerifiedView(data.session.user.email);
+          }
+        } catch (err) {
+          console.error("🔐 AUTH: PKCE exchange error:", err);
+        }
+      }
+      // Clean URL
+      history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+
     // Handle email confirmation (type=signup means email was just verified)
     if (authType === "signup" && !window.location.pathname.includes("admin")) {
       console.log("🔐 AUTH: Email confirmation detected");
@@ -1200,7 +1285,9 @@
       !window.location.pathname.includes("dashboard")
     ) {
       console.log("🔐 AUTH: Recovery hash detected, redirecting to dashboard");
-      window.location.href = window.location.origin + "/dashboard" + hash;
+      // Don't append raw hash — detectSessionInUrl already consumed the tokens.
+      // Pass a query flag so dashboard knows to open the set-password modal.
+      window.location.href = window.location.origin + "/dashboard?setpw=1";
       return;
     }
 
@@ -1231,7 +1318,7 @@
                 "🔐 AUTH: Password recovery detected, redirecting to dashboard",
               );
               window.location.href =
-                window.location.origin + "/dashboard" + window.location.hash;
+                window.location.origin + "/dashboard?setpw=1";
               return;
             }
           } else if (event === "SIGNED_IN" && session?.user) {
