@@ -64,7 +64,10 @@ export function BottomNav() {
         <span className="relative">
           <ShoppingBag size={24} strokeWidth={1.5} aria-hidden="true" />
           {bag > 0 ? (
-            <span className="absolute -top-1.5 -right-2.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.6875rem] leading-4 font-medium text-on-primary">
+            <span
+              aria-hidden="true"
+              className="absolute -top-1.5 -right-2.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.6875rem] leading-4 font-medium text-on-primary"
+            >
               {bag}
             </span>
           ) : null}

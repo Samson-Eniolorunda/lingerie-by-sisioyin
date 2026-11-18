@@ -63,7 +63,7 @@ const seeds: readonly Seed[] = [
     description: "Breathable cotton with a soft waistband that stays flat under fitted clothes.",
     sizes: ["S", "M", "L", "XL"],
     colours: ["Black", "Nude", "White"],
-    stock: (s) => (s === "XL" ? 2 : 14),
+    stock: (s) => (s === "XL" ? 2 : 500),
     rating: [4.8, 41],
     images: 2,
   },

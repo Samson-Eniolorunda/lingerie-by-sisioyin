@@ -1,0 +1,850 @@
+{
+  "updated": "February 15, 2026",
+  "intro": [
+    {
+      "t": "p",
+      "c": [
+        "At Lingeries by Sisioyin (\"LBS,\" \"we,\" \"us,\" or \"our\"), we are committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website at ",
+        {
+          "t": "strong",
+          "c": ["lingeriebysisioyin.store"]
+        },
+        " and make purchases from us."
+      ]
+    },
+    {
+      "t": "p",
+      "c": [
+        "Please read this privacy policy carefully. If you do not agree with the terms of this policy, please do not access our website."
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "information-collect",
+      "title": "Information We Collect",
+      "body": [
+        {
+          "t": "p",
+          "c": ["We collect information that you provide directly to us, including:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Account Information:"]
+                },
+                " First name, last name, email address, phone number, date of birth, and gender when you create an account or update your profile. You may also sign in using Google, which provides your name, email, and profile picture. Account registration is required to make purchases."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Order Information:"]
+                },
+                " Shipping address, order details, and delivery preferences when you place an order."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Payment Receipts:"]
+                },
+                " Screenshots or photos of bank transfer receipts that you upload during checkout to confirm payment. These are stored securely in cloud storage. We do not collect or store credit card or debit card details."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Communication Data:"]
+                },
+                " Messages you send via our contact form or WhatsApp, including your name, email, and message content."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Newsletter:"]
+                },
+                " Your email address if you subscribe to our newsletter."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Reviews:"]
+                },
+                " Your name, rating, and comments if you submit a product review."
+              ]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": ["We also automatically collect:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                "IP address and approximate location (country, region, and city) \u2014 stored in our database for analytics"
+              ]
+            },
+            {
+              "t": "li",
+              "c": ["Pages visited, time spent, and referring website"]
+            },
+            {
+              "t": "li",
+              "c": ["Screen resolution and viewport size"]
+            },
+            {
+              "t": "li",
+              "c": ["Device type, browser, operating system, device brand, and model"]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            "This data is collected using a third-party geolocation service (ipapi.co) and stored in our own database alongside Google Analytics and Meta Pixel."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "how-we-use",
+      "title": "How We Use Your Information",
+      "body": [
+        {
+          "t": "p",
+          "c": ["We use the information we collect to:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                "Process and fulfil your orders, including verifying payment receipts and arranging delivery"
+              ]
+            },
+            {
+              "t": "li",
+              "c": ["Create and manage your account"]
+            },
+            {
+              "t": "li",
+              "c": ["Communicate with you about orders, delivery updates, and customer support"]
+            },
+            {
+              "t": "li",
+              "c": ["Respond to your inquiries and messages"]
+            },
+            {
+              "t": "li",
+              "c": ["Send order confirmation and shipping notification emails"]
+            },
+            {
+              "t": "li",
+              "c": ["Improve our website, products, and services through analytics"]
+            },
+            {
+              "t": "li",
+              "c": ["Personalise your shopping experience (e.g., wishlist, recently viewed)"]
+            },
+            {
+              "t": "li",
+              "c": ["Detect and prevent fraudulent activity"]
+            }
+          ]
+        },
+        {
+          "t": "div",
+          "c": [
+            {
+              "t": "p",
+              "c": [
+                "We will never sell your personal information to third parties for marketing purposes."
+              ]
+            }
+          ],
+          "callout": true
+        }
+      ]
+    },
+    {
+      "id": "information-sharing",
+      "title": "Information Sharing",
+      "body": [
+        {
+          "t": "p",
+          "c": ["We may share your information with:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Hosting & Database Provider:"]
+                },
+                " Our website data, including account and order information, is stored securely on Supabase, a cloud-based platform."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Logistics Partners:"]
+                },
+                " Your name, phone number, and delivery address are shared with our shipping partners to fulfil your order."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Analytics Providers:"]
+                },
+                " We use Google Analytics and Meta (Facebook) Pixel to understand how visitors use our site. These services collect anonymised browsing data. We also use ipapi.co to determine visitor location from IP addresses."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Email Services:"]
+                },
+                " We use third-party email services (including Resend and Cloudflare Workers) to send order confirmations and notifications."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Google Services:"]
+                },
+                " We use Google Fonts for typography (which may transmit your IP to Google), Google Maps Places API for address autocomplete, and Google reCAPTCHA for security."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Legal Requirements:"]
+                },
+                " When required by Nigerian law, court order, or government regulation."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cookies",
+      "title": "Cookies & Tracking",
+      "body": [
+        {
+          "t": "p",
+          "c": ["We use the following technologies to enhance your experience:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Local Storage:"]
+                },
+                " We store your theme preference (light/dark mode), shopping cart contents, wishlist items, saved addresses, dashboard preferences, form drafts, and authentication session locally in your browser. If you are logged in, some of this data (cart, wishlist, addresses, and preferences) is also synced to our servers for cross-device access."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Session Storage:"]
+                },
+                " We use temporary session storage for analytics flags, order confirmation data, and page state. This data is automatically cleared when you close your browser tab."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Google Analytics:"]
+                },
+                " We use Google Analytics to collect anonymised data about site traffic, page views, and user behaviour. This helps us understand which products and pages are most popular."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Meta (Facebook) Pixel:"]
+                },
+                " We use the Meta Pixel to measure the effectiveness of our social media advertising and understand how visitors interact with our site after seeing an ad."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Google reCAPTCHA:"]
+                },
+                " We use reCAPTCHA on login and registration forms to prevent automated abuse."
+              ]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            "You can control cookies and local storage through your browser settings. Disabling these may affect some features of the website, such as your saved cart or theme preference."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-security",
+      "title": "Data Security",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "We take the security of your information seriously and implement appropriate measures to protect it:"
+          ]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["SSL Encryption:"]
+                },
+                " All data transmitted between your browser and our website is encrypted using SSL/TLS."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Secure Hosting:"]
+                },
+                " Your data is stored on Supabase with row-level security policies that restrict access to authorised users only."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["No Card Data:"]
+                },
+                " We do not collect, process, or store any credit or debit card information. Payment is made directly via bank transfer to our Moniepoint MFB account (Account Name: Oyindamola Adelugba (LingeriesbySisioyin))."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Password Security:"]
+                },
+                " Account passwords are hashed and never stored in plain text."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Access Control:"]
+                },
+                " Only authorised team members can access customer order and account data."
+              ]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            "While we strive to protect your information, no method of transmission over the internet is 100% secure. We encourage you to keep your account password confidential."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "your-rights",
+      "title": "Your Rights",
+      "body": [
+        {
+          "t": "p",
+          "c": ["Under the Nigeria Data Protection Regulation (NDPR), you have the right to:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Access:"]
+                },
+                " Request a copy of the personal information we hold about you."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Correction:"]
+                },
+                " Update or correct inaccurate information in your account settings or by contacting us."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Deletion:"]
+                },
+                " Request deletion of your personal data, subject to legal retention requirements."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Data Portability:"]
+                },
+                " Request your data in a portable format."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Objection:"]
+                },
+                " Object to the processing of your data for specific purposes."
+              ]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            "To exercise any of these rights, please ",
+            {
+              "t": "a",
+              "c": ["contact us"],
+              "href": "/contact"
+            },
+            " or send a message via WhatsApp at ",
+            {
+              "t": "a",
+              "c": ["+234 903 334 4860"],
+              "href": "https://wa.me/2349033344860"
+            },
+            ". We will respond within 30 days."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-retention",
+      "title": "Data Retention",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "We retain your personal information for as long as necessary to fulfil the purposes described in this policy:"
+          ]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Account data:"]
+                },
+                " Retained while your account is active. You can request deletion at any time."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Order records:"]
+                },
+                " Retained for up to 7 years for tax, legal, and dispute resolution purposes."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Payment receipts:"]
+                },
+                " Retained for the duration of order processing and verification, then archived."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Messages & inquiries:"]
+                },
+                " Retained for up to 2 years for customer service quality purposes."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Analytics data:"]
+                },
+                " Site visit records (IP, location, device info) stored in our database are retained indefinitely in anonymised form. Analytics data held by Google and Meta is retained according to their respective policies."
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-deletion",
+      "title": "Data Deletion Instructions",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "You have the right to request deletion of your personal data at any time. We make this process simple and transparent."
+          ]
+        },
+        {
+          "t": "h3",
+          "c": ["How to Request Data Deletion"]
+        },
+        {
+          "t": "p",
+          "c": ["To request deletion of your personal data, you can:"]
+        },
+        {
+          "t": "ol",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Account Dashboard (Recommended):"]
+                },
+                " Log in to your ",
+                {
+                  "t": "a",
+                  "c": ["Account Settings"],
+                  "href": "/dashboard#settings"
+                },
+                " and click \"Delete Account\" in the Danger Zone section. This is the fastest way to delete your account and data."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Contact Form:"]
+                },
+                " Visit our ",
+                {
+                  "t": "a",
+                  "c": ["Contact Page"],
+                  "href": "/contact"
+                },
+                " and submit a data deletion request with the subject \"Data Deletion Request\"."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["WhatsApp:"]
+                },
+                " Send a message to ",
+                {
+                  "t": "a",
+                  "c": ["+234 903 334 4860"],
+                  "href": "https://wa.me/2349033344860?text=Data%20Deletion%20Request"
+                },
+                " requesting data deletion."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Email:"]
+                },
+                " Send an email to ",
+                {
+                  "t": "a",
+                  "c": ["support@lingeriebysisioyin.store"],
+                  "href": "mailto:support@lingeriebysisioyin.store"
+                },
+                " with the subject \"Data Deletion Request\"."
+              ]
+            }
+          ]
+        },
+        {
+          "t": "h3",
+          "c": ["What Data Will Be Deleted"]
+        },
+        {
+          "t": "p",
+          "c": [
+            "Upon receiving your request, we will delete the following data associated with your account:"
+          ]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                "Account profile information (name, email, phone number, date of birth, gender)"
+              ]
+            },
+            {
+              "t": "li",
+              "c": ["Saved addresses and delivery preferences"]
+            },
+            {
+              "t": "li",
+              "c": ["Wishlist items and shopping cart contents"]
+            },
+            {
+              "t": "li",
+              "c": ["Browsing history and search history"]
+            },
+            {
+              "t": "li",
+              "c": ["Communication history (messages, inquiries)"]
+            },
+            {
+              "t": "li",
+              "c": ["Notification, privacy, and marketing preferences"]
+            },
+            {
+              "t": "li",
+              "c": ["WhatsApp notification preferences"]
+            }
+          ]
+        },
+        {
+          "t": "h3",
+          "c": ["Data We May Retain"]
+        },
+        {
+          "t": "p",
+          "c": ["Certain data may be retained for legal and regulatory compliance:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Order records:"]
+                },
+                " Transaction history is retained for up to 7 years for tax and legal purposes."
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Payment records:"]
+                },
+                " Required for financial auditing and dispute resolution."
+              ]
+            }
+          ]
+        },
+        {
+          "t": "h3",
+          "c": ["Processing Time"]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Self-service deletion (via Dashboard):"]
+            },
+            " Your account is locked immediately. Your data is permanently deleted after a 30-day grace period, during which you may contact support to recover your account. ",
+            {
+              "t": "strong",
+              "c": ["Manual requests (via email, WhatsApp, or contact form):"]
+            },
+            " We will process your deletion request within ",
+            {
+              "t": "strong",
+              "c": ["30 days"]
+            },
+            " of receipt. You will receive confirmation once your data has been deleted."
+          ]
+        },
+        {
+          "t": "h3",
+          "c": ["Third-Party Data"]
+        },
+        {
+          "t": "p",
+          "c": [
+            "If you have interacted with our services through third-party platforms (e.g., Meta/Facebook, Google), you may also need to manage your data directly with those services:"
+          ]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "a",
+                  "c": ["Facebook Data Deletion"],
+                  "href": "https://www.facebook.com/help/delete_account"
+                }
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "a",
+                  "c": ["Google Account Data"],
+                  "href": "https://myaccount.google.com/delete-services-or-account"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "Contact Us",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "If you have any questions about this Privacy Policy or how we handle your data, please reach out:"
+          ]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Contact Form:"]
+                },
+                " ",
+                {
+                  "t": "a",
+                  "c": ["Contact Page"],
+                  "href": "/contact"
+                }
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["WhatsApp:"]
+                },
+                " ",
+                {
+                  "t": "a",
+                  "c": ["+234 903 334 4860"],
+                  "href": "https://wa.me/2349033344860"
+                }
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Instagram:"]
+                },
+                " ",
+                {
+                  "t": "a",
+                  "c": ["@lingeries_bysisioyin"],
+                  "href": "https://instagram.com/lingeries_bysisioyin"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

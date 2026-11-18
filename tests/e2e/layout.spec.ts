@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { horizontalOverflow, PHONE_WIDTHS } from "./helpers";
 
 const ROUTES = [
@@ -7,6 +7,15 @@ const ROUTES = [
   "/shop?category=Lingerie&sort=price-asc",
   "/products/ribbed-lounge-set",
   "/products/satin-slip-nightdress",
+  "/cart",
+  "/checkout",
+  "/track",
+  "/wishlist",
+  "/faq",
+  "/size",
+  "/contact",
+  "/privacy",
+  "/terms",
 ];
 
 for (const width of PHONE_WIDTHS) {

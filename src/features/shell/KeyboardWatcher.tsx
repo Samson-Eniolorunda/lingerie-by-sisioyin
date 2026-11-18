@@ -9,6 +9,7 @@ import { useEffect } from "react";
 export function KeyboardWatcher() {
   useEffect(() => {
     const root = document.documentElement;
+    root.dataset.hydrated = "";
     const isField = (el: EventTarget | null): boolean =>
       el instanceof HTMLElement &&
       /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) &&

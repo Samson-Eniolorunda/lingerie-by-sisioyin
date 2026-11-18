@@ -1,0 +1,617 @@
+[
+  {
+    "id": "orders",
+    "title": "Orders",
+    "items": [
+      {
+        "q": "How do I place an order?",
+        "a": [
+          {
+            "t": "p",
+            "c": ["Placing an order is simple:"]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  "Browse our ",
+                  {
+                    "t": "a",
+                    "c": ["shop"],
+                    "href": "/shop"
+                  },
+                  " and add items to your cart"
+                ]
+              },
+              {
+                "t": "li",
+                "c": ["Click the cart icon and proceed to checkout"]
+              },
+              {
+                "t": "li",
+                "c": ["Fill in your shipping details and select your state"]
+              },
+              {
+                "t": "li",
+                "c": ["Transfer the total amount to our bank account"]
+              },
+              {
+                "t": "li",
+                "c": ["Upload your payment receipt and confirm the order"]
+              }
+            ]
+          },
+          {
+            "t": "p",
+            "c": ["You'll receive an email confirmation once your order is placed."]
+          }
+        ]
+      },
+      {
+        "q": "How do I track my order?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Once your order ships, you'll receive an email with a tracking update. You can also check your order status by:"
+            ]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  "Logging into your ",
+                  {
+                    "t": "a",
+                    "c": ["account dashboard"],
+                    "href": "/dashboard"
+                  }
+                ]
+              },
+              {
+                "t": "li",
+                "c": ["Clicking on the order in your order history"]
+              },
+              {
+                "t": "li",
+                "c": [
+                  "Using the ",
+                  {
+                    "t": "a",
+                    "c": ["Track Order"],
+                    "href": "/track"
+                  },
+                  " page with your order number"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "q": "Can I modify or cancel my order?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Orders can be modified or cancelled within 30 minutes of placing them. After that window, the order enters processing and cannot be changed. Please ",
+              {
+                "t": "a",
+                "c": ["contact us"],
+                "href": "/contact"
+              },
+              " or send a WhatsApp message to ",
+              {
+                "t": "strong",
+                "c": ["+234 903 334 4860"]
+              },
+              " immediately if you need to make changes."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "What happens if an item is out of stock?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "If an item becomes unavailable after you place your order, we'll contact you via email or WhatsApp to offer alternatives. You can choose to wait for restock, select a different item, or receive a full refund."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "shipping",
+    "title": "Shipping",
+    "items": [
+      {
+        "q": "Where do you deliver to?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "We currently deliver across Nigeria. Delivery fees vary by state and are calculated automatically at checkout when you select your state."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "What are the delivery fees?",
+        "a": [
+          {
+            "t": "p",
+            "c": ["Delivery fees depend on your location:"]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Lagos:"]
+                  },
+                  " Free delivery"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Ogun:"]
+                  },
+                  " \u20a62,000"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Oyo, Osun, Ondo:"]
+                  },
+                  " \u20a62,500"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Ekiti:"]
+                  },
+                  " \u20a63,000"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Abuja (FCT):"]
+                  },
+                  " \u20a63,500"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Other states:"]
+                  },
+                  " \u20a62,500"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "q": "How long does delivery take?",
+        "a": [
+          {
+            "t": "p",
+            "c": ["Delivery times depend on your location:"]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Lagos:"]
+                  },
+                  " 1\u20133 business days"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["South-West states:"]
+                  },
+                  " 2\u20134 business days"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Abuja & other states:"]
+                  },
+                  " 3\u20135 business days"
+                ]
+              }
+            ]
+          },
+          {
+            "t": "p",
+            "c": ["Please allow extra time during public holidays and peak periods."]
+          }
+        ]
+      },
+      {
+        "q": "How is my order packaged?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "All orders are carefully packaged in discreet, unmarked packaging for your privacy. Items are wrapped to ensure they arrive in perfect condition."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "Do you ship internationally?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "We currently only ship within Nigeria. We're working on expanding to international delivery. Follow us on ",
+              {
+                "t": "a",
+                "c": ["Instagram"],
+                "href": "https://instagram.com/lingeries_bysisioyin"
+              },
+              " to be the first to know when we launch international shipping."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "returns",
+    "title": "Returns & Exchanges",
+    "items": [
+      {
+        "q": "What is your return policy?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "We accept returns within 7 days of delivery for unworn items with original tags and packaging intact. Due to hygiene reasons, underwear, panties, and bodysuits cannot be returned unless they arrive damaged or defective."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "How do I initiate a return or exchange?",
+        "a": [
+          {
+            "t": "p",
+            "c": ["To start a return or exchange:"]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  "Send us a message via our ",
+                  {
+                    "t": "a",
+                    "c": ["Contact page"],
+                    "href": "/contact"
+                  },
+                  " or WhatsApp (",
+                  {
+                    "t": "strong",
+                    "c": ["+234 903 334 4860"]
+                  },
+                  ")"
+                ]
+              },
+              {
+                "t": "li",
+                "c": ["Include your order number and the reason for the return"]
+              },
+              {
+                "t": "li",
+                "c": ["Share clear photos of the item(s)"]
+              },
+              {
+                "t": "li",
+                "c": ["Our team will review and respond within 24 hours"]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "q": "Can I exchange for a different size?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Yes! We offer size exchanges within 7 days of delivery, subject to stock availability. Reach out to us via ",
+              {
+                "t": "a",
+                "c": ["Contact"],
+                "href": "/contact"
+              },
+              " or WhatsApp and we'll sort it out. Check our ",
+              {
+                "t": "a",
+                "c": ["Size Guide"],
+                "href": "/size"
+              },
+              " beforehand to find your perfect fit."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "How long do refunds take?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Once we receive and inspect the returned item, approved refunds are processed within 3\u20135 business days via bank transfer to the account you provide."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "payment",
+    "title": "Payment",
+    "items": [
+      {
+        "q": "What payment methods do you accept?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "We currently accept ",
+              {
+                "t": "strong",
+                "c": ["bank transfer"]
+              },
+              " as our payment method. Here are our account details:"
+            ]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Bank:"]
+                  },
+                  " Moniepoint MFB"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Account Number:"]
+                  },
+                  " 6327082294"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  {
+                    "t": "strong",
+                    "c": ["Account Name:"]
+                  },
+                  " Oyindamola Adelugba (LingeriesBySisioyin)"
+                ]
+              }
+            ]
+          },
+          {
+            "t": "p",
+            "c": [
+              "After transferring, upload your payment receipt at checkout to confirm the order. Card payment (Visa, Mastercard, Verve) is coming soon!"
+            ]
+          }
+        ]
+      },
+      {
+        "q": "Is my payment secure?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Yes. Our website uses SSL encryption to protect your data. Payment is made directly through your bank's transfer channels, so your banking details are never shared with us. We only receive the payment receipt you upload."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "What happens after I make a transfer?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "After transferring, upload your payment receipt (screenshot or photo) at checkout. Once we verify the payment, your order will be confirmed and you'll receive an email notification. Verification usually takes a few hours during business hours."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "sizing",
+    "title": "Sizing",
+    "items": [
+      {
+        "q": "How do I find my size?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "We have a detailed ",
+              {
+                "t": "a",
+                "c": ["Size Guide"],
+                "href": "/size"
+              },
+              " with measurement instructions, size charts for bras, panties, loungewear and bodysuits, plus a quick bra size calculator. Take your measurements and match them to our charts for the best fit."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "What if I'm between sizes?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "If you're between sizes, we generally recommend sizing up for comfort, especially for bras and bodysuits. For a more fitted look, size down. You can also reach out via WhatsApp (",
+              {
+                "t": "strong",
+                "c": ["+234 903 334 4860"]
+              },
+              ") for personalized sizing advice."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "Do your sizes run true to size?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Our sizing is based on standard UK sizing. Different styles and fabrics may fit slightly differently \u2014 stretchy materials like lace and mesh tend to be more forgiving, while cotton pieces fit more true to size. Always check the product description for specific fit notes."
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "account",
+    "title": "Account",
+    "items": [
+      {
+        "q": "How do I create an account?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Click the user icon in the header and select \"Register\". You'll need your name, email, and a password. Benefits include order tracking, saved addresses, wishlist, and faster checkout."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "I forgot my password. What do I do?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "Click \"Login\", then \"Forgot Password?\" on the sign-in form. Enter your email and we'll send a password reset link. The link expires in 24 hours for security."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "Can I shop without an account?",
+        "a": [
+          {
+            "t": "p",
+            "c": [
+              "You can browse our products freely, but you'll need an account to complete a purchase. Creating one takes less than a minute and gives you access to order history, a personal wishlist, and faster future checkouts."
+            ]
+          }
+        ]
+      },
+      {
+        "q": "How do I contact customer support?",
+        "a": [
+          {
+            "t": "p",
+            "c": ["You can reach us through:"]
+          },
+          {
+            "t": "ul",
+            "c": [
+              {
+                "t": "li",
+                "c": [
+                  "Our ",
+                  {
+                    "t": "a",
+                    "c": ["Contact page"],
+                    "href": "/contact"
+                  },
+                  " \u2014 fill out the form and we'll reply via email"
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  "WhatsApp: ",
+                  {
+                    "t": "a",
+                    "c": ["+234 903 334 4860"],
+                    "href": "https://wa.me/2349033344860"
+                  }
+                ]
+              },
+              {
+                "t": "li",
+                "c": [
+                  "Instagram DM: ",
+                  {
+                    "t": "a",
+                    "c": ["@lingeries_bysisioyin"],
+                    "href": "https://instagram.com/lingeries_bysisioyin"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "t": "p",
+            "c": ["We aim to respond within 24 hours."]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,9 +1,19 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 import { smallTargets } from "./helpers";
 
 test.describe("phone", () => {
   test("12.3 tap targets are 44 px or more", async ({ page }) => {
-    for (const route of ["/", "/shop", "/products/ribbed-lounge-set"]) {
+    for (const route of [
+      "/",
+      "/shop",
+      "/products/ribbed-lounge-set",
+      "/faq",
+      "/size",
+      "/contact",
+      "/privacy",
+      "/track",
+      "/cart",
+    ]) {
       await page.goto(route);
       expect(await smallTargets(page), route).toEqual([]);
     }
@@ -86,5 +96,18 @@ test.describe("phone", () => {
     expect(box && box.width >= 44 && box.height >= 44).toBe(true);
     await more.click();
     await expect(page.getByText("₦57,000").first()).toBeVisible();
+  });
+
+  test("12.7 the bras and panties charts show one unit at a time on a phone", async ({
+    page,
+    isMobile,
+  }) => {
+    test.skip(!isMobile, "The unit control is for phone widths");
+    await page.goto("/size");
+    const table = page.getByRole("table", { name: /Bras size chart/ });
+    await expect(table.getByRole("columnheader", { name: "Underbust (cm)" })).toBeVisible();
+    await expect(table.getByRole("columnheader", { name: "Underbust (in)" })).toBeHidden();
+    await page.getByRole("radio", { name: "inches" }).click();
+    await expect(table.getByRole("columnheader", { name: "Underbust (in)" })).toBeVisible();
   });
 });

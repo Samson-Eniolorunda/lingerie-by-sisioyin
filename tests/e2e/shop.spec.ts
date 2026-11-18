@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 test("S-02 to S-11 filters and sort come from the URL and show as removable chips", async ({
   page,

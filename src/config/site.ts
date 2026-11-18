@@ -9,6 +9,9 @@ export const BRAND = {
 
 export const CONTACT = {
   whatsappNumber: publicEnv.NEXT_PUBLIC_WHATSAPP_NUMBER,
+  phoneDisplay: "+234 903 334 4860",
+  phoneLink: "tel:+2349033344860",
+  email: "support@lingeriebysisioyin.store",
   instagram: "https://instagram.com/lingeries_bysisioyin",
   tiktok: "https://tiktok.com/@lingeries_bysisioyin",
 } as const;

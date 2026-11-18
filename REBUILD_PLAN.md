@@ -42,11 +42,11 @@ There are three audiences:
 - [x] R-07 `/track` public order tracking (`track.html`)
 - [x] R-08 `/wishlist` wishlist (`wishlist.html`)
 - [ ] R-09 `/dashboard` customer account (`dashboard.html`)
-- [ ] R-10 `/contact` contact page (`contact.html`)
-- [ ] R-11 `/faq` frequently asked questions (`faq.html`)
-- [ ] R-12 `/size` size guide (`size.html`)
-- [ ] R-13 `/privacy` privacy policy (`privacy.html`)
-- [ ] R-14 `/terms` terms of service (`terms.html`)
+- [x] R-10 `/contact` contact page (`contact.html`)
+- [x] R-11 `/faq` frequently asked questions (`faq.html`)
+- [x] R-12 `/size` size guide (`size.html`)
+- [x] R-13 `/privacy` privacy policy (`privacy.html`)
+- [x] R-14 `/terms` terms of service (`terms.html`)
 - [ ] R-15 `/admin` staff panel (`admin.html`, rewrite at `vercel.json:8`), `noindex` and `X-Frame-Options: DENY`
 - [ ] R-16 Custom 404 page with links to popular pages (`404.html`)
 - [ ] R-17 Clean URLs: `*.html` requests redirect to the extension-less path (`vercel.json:3`)
@@ -221,27 +221,27 @@ There are three audiences:
 
 ### 2.12 Content pages (P)
 
-- [ ] P-01 Contact form: name, email, phone, subject (order, product, sizing, returns, wholesale, other), order ID, message
+- [x] P-01 Contact form: name, email, phone, subject (order, product, sizing, returns, wholesale, other), order ID, message
 - [ ] P-02 Contact submission stored in `contact_messages` and emailed through `send-contact-email`; success panel with "send another"
-- [ ] P-03 Contact fallback to a pre-filled WhatsApp message when submission throws
-- [ ] P-04 Contact channels: WhatsApp, phone, email, Instagram, TikTok
-- [ ] P-05 FAQ: category tabs (all, orders, shipping, returns, payment, sizing, account), accordion, live search with a no-results state
-- [ ] P-06 Size guide: how to measure (bust, underbust, waist, hips)
-- [ ] P-07 Size charts with tabs: bras, panties, bodysuits, loungewear
-- [ ] P-08 Bra size calculator from underbust and bust measurements in centimetres (`assets/js/size.js:27-57`): both fields required; band 30 to 42 in 5 cm underbust steps starting below 68 cm (`:38-44`); cup A, B, C, D, DD or E in 3 cm steps of bust minus underbust starting below 11 cm (`:49-54`); result shown as band plus cup *(defect today: BUG-32)*
-- [ ] P-09 Privacy policy with a table of contents that highlights the section in view (9 sections)
-- [ ] P-10 Terms of service with the same table of contents behaviour (10 sections)
-- [ ] P-11 FAQ content: 23 questions in six groups (Orders 4, Shipping 5, Returns & Exchanges 4, Payment 3, Sizing 3, Account 4), each answer keeping its links to `/shop`, `/dashboard`, `/track`, `/contact`, `/size`, WhatsApp and Instagram (`faq.html:438-1002`)
-- [ ] P-12 FAQ behaviour in detail: search field in the page hero; one answer open at a time; choosing a tab clears the search; the search waits 300 ms, matches question and answer text across all groups, hides groups with no match and deselects the tabs; "Clear Search" restores everything (`faq.html:385-394`; `assets/js/faq.js:11-33`, `:36-51`, `:54-101`, `:104-107`) *(defect today: BUG-30)*
+- [x] P-03 Contact fallback to a pre-filled WhatsApp message when submission throws
+- [x] P-04 Contact channels: WhatsApp, phone, email, Instagram, TikTok
+- [x] P-05 FAQ: category tabs (all, orders, shipping, returns, payment, sizing, account), accordion, live search with a no-results state
+- [x] P-06 Size guide: how to measure (bust, underbust, waist, hips)
+- [x] P-07 Size charts with tabs: bras, panties, bodysuits, loungewear
+- [x] P-08 Bra size calculator from underbust and bust measurements in centimetres (`assets/js/size.js:27-57`): both fields required; band 30 to 42 in 5 cm underbust steps starting below 68 cm (`:38-44`); cup A, B, C, D, DD or E in 3 cm steps of bust minus underbust starting below 11 cm (`:49-54`); result shown as band plus cup *(defect today: BUG-32)*
+- [x] P-09 Privacy policy with a table of contents that highlights the section in view (9 sections)
+- [x] P-10 Terms of service with the same table of contents behaviour (10 sections)
+- [x] P-11 FAQ content: 23 questions in six groups (Orders 4, Shipping 5, Returns & Exchanges 4, Payment 3, Sizing 3, Account 4), each answer keeping its links to `/shop`, `/dashboard`, `/track`, `/contact`, `/size`, WhatsApp and Instagram (`faq.html:438-1002`)
+- [x] P-12 FAQ behaviour in detail: search field in the page hero; one answer open at a time; choosing a tab clears the search; the search waits 300 ms, matches question and answer text across all groups, hides groups with no match and deselects the tabs; "Clear Search" restores everything (`faq.html:385-394`; `assets/js/faq.js:11-33`, `:36-51`, `:54-101`, `:104-107`) *(defect today: BUG-30)*
 - [ ] P-13 FAQ answers that repeat operational data and must stay in step with it: cancellation window, delivery fees per state, delivery times, return window, refund time, bank details (`faq.html:512`, `:580-585`, `:601-607`, `:680`, `:745`, `:777-781`) *(defect today: BUG-31)*
-- [ ] P-14 FAQ closing panel "Still have questions?" linking to `/contact` (`faq.html:1021-1033`)
-- [ ] P-15 Size guide introduction and measuring advice (lightweight underwear, a soft tape, snug but not tight) above the four measuring cards (`size.html:371-375`, `:387-392`)
-- [ ] P-16 Size chart data: bras 32A to 38D (eight rows: underbust in centimetres and inches, cup, bust in centimetres); panties XS to XXL (waist and hips in centimetres and inches); loungewear XS to XXL (bust, waist, hips in centimetres, UK size 6 to 16); bodysuits XS to XL (bust, waist, hips and torso length in centimetres) (`size.html:453`, `:535`, `:603`, `:671`)
-- [ ] P-17 Fit tips: between sizes, torso length, fabric and stretch, when to measure (`size.html:732-784`)
-- [ ] P-18 Size guide closing panel "Still Not Sure?" linking to `/contact` (`size.html:833-842`)
-- [ ] P-19 Legal page furniture on both pages: "Last updated" date in the hero, introduction, table of contents that stays in view on desktop, section anchors offset below the fixed header, highlighted call-out paragraphs, closing contact panel (`privacy.html:337`, `:344-377`, `:484-489`, `:843-849`; `assets/css/styles.css:18568-18574`, `:18641-18644`; `assets/js/legal.js:5-19`)
-- [ ] P-20 Privacy "Data Deletion Instructions" section: four request routes (dashboard, contact form, WhatsApp with pre-filled text, email), lists of data deleted and data retained, processing time, links to the Facebook and Google data controls (`privacy.html:696-807`)
-- [ ] P-21 Terms sections in order: Acceptance of Terms, Eligibility, Account Registration, Orders & Payment, Shipping & Delivery, Returns & Refunds, Intellectual Property, Prohibited Activities, Limitation of Liability, Contact Us (`terms.html:394-711`); the terms state the 30-minute cancellation window, the delivery fee table, the seven-day return rules and the 3–5 day refund time (`terms.html:518-524`, `:540-545`, `:565-601`)
+- [x] P-14 FAQ closing panel "Still have questions?" linking to `/contact` (`faq.html:1021-1033`)
+- [x] P-15 Size guide introduction and measuring advice (lightweight underwear, a soft tape, snug but not tight) above the four measuring cards (`size.html:371-375`, `:387-392`)
+- [x] P-16 Size chart data: bras 32A to 38D (eight rows: underbust in centimetres and inches, cup, bust in centimetres); panties XS to XXL (waist and hips in centimetres and inches); loungewear XS to XXL (bust, waist, hips in centimetres, UK size 6 to 16); bodysuits XS to XL (bust, waist, hips and torso length in centimetres) (`size.html:453`, `:535`, `:603`, `:671`)
+- [x] P-17 Fit tips: between sizes, torso length, fabric and stretch, when to measure (`size.html:732-784`)
+- [x] P-18 Size guide closing panel "Still Not Sure?" linking to `/contact` (`size.html:833-842`)
+- [x] P-19 Legal page furniture on both pages: "Last updated" date in the hero, introduction, table of contents that stays in view on desktop, section anchors offset below the fixed header, highlighted call-out paragraphs, closing contact panel (`privacy.html:337`, `:344-377`, `:484-489`, `:843-849`; `assets/css/styles.css:18568-18574`, `:18641-18644`; `assets/js/legal.js:5-19`)
+- [x] P-20 Privacy "Data Deletion Instructions" section: four request routes (dashboard, contact form, WhatsApp with pre-filled text, email), lists of data deleted and data retained, processing time, links to the Facebook and Google data controls (`privacy.html:696-807`)
+- [x] P-21 Terms sections in order: Acceptance of Terms, Eligibility, Account Registration, Orders & Payment, Shipping & Delivery, Returns & Refunds, Intellectual Property, Prohibited Activities, Limitation of Liability, Contact Us (`terms.html:394-711`); the terms state the 30-minute cancellation window, the delivery fee table, the seven-day return rules and the 3–5 day refund time (`terms.html:518-524`, `:540-545`, `:565-601`)
 
 ### 2.13 Admin — access and shell (M)
 
