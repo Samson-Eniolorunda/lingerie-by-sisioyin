@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-label="Placeholder image">
+<rect width="900" height="1200" fill="#EFE3D8"/>
+<rect x="40" y="40" width="820" height="1120" fill="none" stroke="#E2D2C2" stroke-width="2"/>
+<path d="M40 40L860 1160M860 40L40 1160" stroke="#E2D2C2" stroke-width="1"/>
+<text x="450" y="600" text-anchor="middle" font-family="Georgia, serif" font-size="34" fill="#766A6C">Placeholder image</text>
+<text x="450" y="650" text-anchor="middle" font-family="Georgia, serif" font-size="24" fill="#766A6C">Photograph to follow</text>
+</svg>

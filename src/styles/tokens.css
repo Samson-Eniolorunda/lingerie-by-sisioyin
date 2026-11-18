@@ -1,0 +1,157 @@
+/*
+ * The only source of design tokens. Raw palette first, then semantic roles
+ * per theme, then the Tailwind theme that exposes the roles as utilities.
+ */
+:root {
+  --ivory: #faf6f0;
+  --white: #ffffff;
+  --nude-100: #f3eae0;
+  --nude-200: #e8dbcd;
+  --nude-300: #d8c5b3;
+  --blush: #f1ddd6;
+  --ink-900: #1c1517;
+  --ink-700: #3d3235;
+  --ink-600: #5c4f52;
+  --ink-500: #766a6c;
+  --ink-450: #8e8284;
+  --wine-600: #832a3b;
+  --wine-700: #6b1f2e;
+  --wine-800: #551622;
+  --wine-900: #3f0f18;
+  --wine-100: #f4e4e6;
+  --brass: #8a6a2f;
+
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --header-h: 56px;
+  --bottom-nav-h: 56px;
+  --bar-h: 72px;
+  --gutter: 16px;
+  --font-scale: 1;
+}
+
+/* Light theme roles (default). */
+:root,
+:root[data-theme="light"] {
+  color-scheme: light;
+  --c-page: var(--ivory);
+  --c-surface: var(--white);
+  --c-tint: var(--nude-100);
+  --c-line: var(--nude-200);
+  --c-rule: var(--nude-300);
+  --c-control: var(--ink-450);
+  --c-ink: var(--ink-900);
+  --c-ink-strong: var(--ink-700);
+  --c-muted: var(--ink-600);
+  --c-subtle: var(--ink-500);
+  --c-primary: var(--wine-700);
+  --c-primary-hover: var(--wine-600);
+  --c-primary-press: var(--wine-800);
+  --c-on-primary: var(--ivory);
+  --c-primary-tint: var(--wine-100);
+  --c-selected: var(--blush);
+  --c-accent: var(--brass);
+  --c-overlay: rgb(28 21 23 / 0.5);
+  --c-success: #2f6b4a;
+  --c-success-bg: #e6f0ea;
+  --c-warning: #8a5a12;
+  --c-warning-bg: #f7ecd9;
+  --c-error: #a12a2a;
+  --c-error-bg: #f8e5e3;
+  --c-info: #2f5570;
+  --c-info-bg: #e4edf2;
+  --c-footer: var(--ink-900);
+  --c-on-footer: var(--ivory);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-page: #161012;
+  --c-surface: #211a1c;
+  --c-tint: #2a2123;
+  --c-line: #3a2f32;
+  --c-rule: #4a3d40;
+  --c-control: #8b7e80;
+  --c-ink: #f3eae0;
+  --c-ink-strong: #e6dccf;
+  --c-muted: #b9aba9;
+  --c-subtle: #a2938f;
+  --c-primary: #e0a3ae;
+  --c-primary-hover: #ebb9c2;
+  --c-primary-press: #cf8c99;
+  --c-on-primary: #161012;
+  --c-primary-tint: #35222a;
+  --c-selected: #3a2830;
+  --c-accent: #d4b06a;
+  --c-overlay: rgb(0 0 0 / 0.6);
+  --c-success: #7fc79e;
+  --c-success-bg: #1d2e25;
+  --c-warning: #e0b671;
+  --c-warning-bg: #33291a;
+  --c-error: #f0a1a1;
+  --c-error-bg: #3a1f1f;
+  --c-info: #9cc2dc;
+  --c-info-bg: #1d2a33;
+  --c-footer: #0f0a0c;
+  --c-on-footer: #f3eae0;
+}
+
+@theme inline {
+  --color-page: var(--c-page);
+  --color-surface: var(--c-surface);
+  --color-tint: var(--c-tint);
+  --color-line: var(--c-line);
+  --color-rule: var(--c-rule);
+  --color-control: var(--c-control);
+  --color-ink: var(--c-ink);
+  --color-ink-strong: var(--c-ink-strong);
+  --color-muted: var(--c-muted);
+  --color-subtle: var(--c-subtle);
+  --color-primary: var(--c-primary);
+  --color-primary-hover: var(--c-primary-hover);
+  --color-primary-press: var(--c-primary-press);
+  --color-on-primary: var(--c-on-primary);
+  --color-primary-tint: var(--c-primary-tint);
+  --color-selected: var(--c-selected);
+  --color-accent: var(--c-accent);
+  --color-overlay: var(--c-overlay);
+  --color-success: var(--c-success);
+  --color-success-bg: var(--c-success-bg);
+  --color-warning: var(--c-warning);
+  --color-warning-bg: var(--c-warning-bg);
+  --color-error: var(--c-error);
+  --color-error-bg: var(--c-error-bg);
+  --color-info: var(--c-info);
+  --color-info-bg: var(--c-info-bg);
+  --color-footer: var(--c-footer);
+  --color-on-footer: var(--c-on-footer);
+
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans:
+    var(--font-instrument), "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+
+  --breakpoint-xs: 30rem;
+  --breakpoint-sm: 48rem;
+  --breakpoint-md: 64rem;
+  --breakpoint-lg: 80rem;
+  --breakpoint-xl: 96rem;
+
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+
+  --shadow-sm: 0 1px 2px rgb(28 21 23 / 0.06);
+  --shadow-md: 0 8px 24px rgb(28 21 23 / 0.1);
+  --shadow-lg: 0 24px 48px rgb(28 21 23 / 0.16);
+
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  --z-header: 30;
+  --z-bar: 40;
+  --z-whatsapp: 45;
+  --z-sheet: 60;
+  --z-toast: 80;
+}

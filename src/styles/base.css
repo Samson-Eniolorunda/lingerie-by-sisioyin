@@ -1,0 +1,103 @@
+@layer base {
+  html {
+    font-size: calc(16px * var(--font-scale));
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + var(--safe-top) + 8px);
+    background: var(--c-page);
+  }
+
+  body {
+    margin: 0;
+    background: var(--c-page);
+    color: var(--c-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.625;
+    font-variant-numeric: lining-nums;
+    text-rendering: optimizeLegibility;
+    overflow-wrap: break-word;
+  }
+
+  :where(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  :where(a) {
+    color: var(--c-primary);
+    text-underline-offset: 0.2em;
+  }
+  :where(a:hover) {
+    color: var(--c-primary-hover);
+  }
+
+  :where(input, select, textarea, button) {
+    font: inherit;
+    color: inherit;
+  }
+  :where(input, select, textarea) {
+    font-size: max(1rem, 16px);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--c-selected);
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+    white-space: nowrap;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  @media print {
+    [data-print="hide"] {
+      display: none !important;
+    }
+  }
+}
+
+@layer components {
+  html[data-keyboard-open] [data-keyboard-hide] {
+    display: none;
+  }
+
+  .whatsapp-fab {
+    position: fixed;
+    right: max(16px, var(--safe-right));
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);
+    z-index: var(--z-whatsapp);
+  }
+  html[data-bar] .whatsapp-fab {
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + var(--bar-h) + 16px);
+  }
+  @media (min-width: 48rem) {
+    .whatsapp-fab,
+    html[data-bar] .whatsapp-fab {
+      bottom: 24px;
+    }
+  }
+}

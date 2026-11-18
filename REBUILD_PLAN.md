@@ -33,9 +33,9 @@ There are three audiences:
 
 ### 2.1 Routes and pages (R)
 
-- [ ] R-01 `/` serves the home page (Vercel rewrite `/` → `/home`, `vercel.json:7`)
+- [x] R-01 `/` serves the home page (Vercel rewrite `/` → `/home`, `vercel.json:7`)
 - [ ] R-02 `/home` home page (`home.html`); `index.html` is a near-identical copy
-- [ ] R-03 `/shop` catalogue (`shop.html`)
+- [x] R-03 `/shop` catalogue (`shop.html`)
 - [ ] R-04 `/cart` cart page (`cart.html`)
 - [ ] R-05 `/checkout` checkout (`checkout.html`)
 - [ ] R-06 `/confirmation` order confirmation (`confirmation.html`)
@@ -58,17 +58,17 @@ There are three audiences:
 
 - [ ] G-01 Header with logo, primary navigation (Home, Shop, Women, Men, Kids) and active-link state
 - [ ] G-02 Account button: opens the sign-in modal when signed out; shows initials and links to `/dashboard` when signed in
-- [ ] G-03 Cart button with live item-count badge
+- [x] G-03 Cart button with live item-count badge
 - [ ] G-04 Mobile navigation drawer: account block, Home, Shop, New Arrivals, Cart, Wishlist; category shortcuts (Women, Men, Kids, Lingerie, Loungewear, Underwear); support links (FAQs, Size Guide, Contact, Terms, Privacy)
 - [ ] G-05 Theme: light, dark and system, persisted, applied before first paint, switchable from the floating control, the mobile drawer and the dashboard
-- [ ] G-06 Search overlay: opens from the header or Ctrl/Cmd+K, closes on Escape or backdrop; debounced product search over name, category and description (8 results)
-- [ ] G-07 Search fallback: six latest products under "You might like" when nothing matches, plus a "View all results" link to `/shop?search=`
+- [x] G-06 Search overlay: opens from the header or Ctrl/Cmd+K, closes on Escape or backdrop; debounced product search over name, category and description (8 results)
+- [x] G-07 Search fallback: six latest products under "You might like" when nothing matches, plus a "View all results" link to `/shop?search=`
 - [ ] G-08 Cart drawer: line items with image, size, colour; quantity up/down; remove; subtotal; checkout link; continue shopping; empty state
-- [ ] G-09 Footer: shop links, help links (My Account, Track Order, FAQs, Size Guide, Contact), legal links, social links (Instagram, TikTok, WhatsApp from `config.js:25-29`), current year
+- [x] G-09 Footer: shop links, help links (My Account, Track Order, FAQs, Size Guide, Contact), legal links, social links (Instagram, TikTok, WhatsApp from `config.js:25-29`), current year
 - [ ] G-10 Floating WhatsApp button with a small pop-up card and a pre-filled enquiry message
 - [ ] G-11 Cookie and consent dialog: Essential (locked), Analytics, Marketing, Functional; "Accept All", "Save Preferences", "Essential Only"; choice stored *(defect today: not enforced on later page loads)*
-- [ ] G-12 Toast notifications (success, error, info, warning)
-- [ ] G-13 Skip-to-content link
+- [x] G-12 Toast notifications (success, error, info, warning)
+- [x] G-13 Skip-to-content link
 - [ ] G-14 Loading skeletons per page and a slow-network spinner after three seconds
 - [ ] G-15 Scroll-reveal entrance animation, with a reduced-motion rule
 - [ ] G-16 Form persistence for the session: non-password field values on checkout and contact survive a reload
@@ -101,9 +101,9 @@ There are three audiences:
 
 ### 2.4 Home page (H)
 
-- [ ] H-01 Hero: headline, supporting line, link to the shop, link to new arrivals
+- [x] H-01 Hero: headline, supporting line, link to the shop, link to new arrivals
 - [ ] H-02 Hero image supplied from the admin (site setting `hero_image`)
-- [ ] H-03 New Arrivals grid: up to eight active products flagged `is_new`, falling back to the latest products
+- [x] H-03 New Arrivals grid: up to eight active products flagged `is_new`, falling back to the latest products
 - [ ] H-04 Product cards: image, name, price, rating stars, "new" marker, wishlist toggle, quick-view and quick-add actions
 - [ ] H-05 Category showcase for Lingerie, Loungewear and Underwear with admin-managed images, each linking to the filtered shop
 - [ ] H-06 Service facts row (delivery, quality, returns, WhatsApp support)
@@ -113,28 +113,28 @@ There are three audiences:
 
 ### 2.5 Shop and product (S)
 
-- [ ] S-01 Catalogue grid of all active, non-deleted products with skeleton loading
-- [ ] S-02 Filter by category (Lingerie, Loungewear, Underwear, Accessories)
-- [ ] S-03 Filter by gender (Women, Men, Kids, Unisex)
+- [x] S-01 Catalogue grid of all active, non-deleted products with skeleton loading
+- [x] S-02 Filter by category (Lingerie, Loungewear, Underwear, Accessories)
+- [x] S-03 Filter by gender (Women, Men, Kids, Unisex)
 - [ ] S-04 Price range filter with dual sliders and numeric inputs (0–500,000)
-- [ ] S-05 Filter by delivery type (express, standard)
-- [ ] S-06 "In stock only" and "New arrivals only" toggles
-- [ ] S-07 In-page text search over name, category and description
-- [ ] S-08 Sort: newest, most reviewed, price ascending, price descending, name
-- [ ] S-09 Result count, active-filter chips with individual removal, "clear all", mobile filter toggle with an active-filter count
-- [ ] S-10 "No products found" state with a clear-filters action
-- [ ] S-11 Filters and search pre-applied from URL parameters
-- [ ] S-12 Product quick view: gallery with thumbnails, previous/next and a full-screen image viewer opened by double-click or double-tap (`assets/js/shop.js:995-1015`, `:1940-1962`). The storefront gallery has no swipe today; swipe exists only in the admin viewer (MI-02). The rebuild adds it (section 12.7)
+- [x] S-05 Filter by delivery type (express, standard)
+- [x] S-06 "In stock only" and "New arrivals only" toggles
+- [x] S-07 In-page text search over name, category and description
+- [x] S-08 Sort: newest, most reviewed, price ascending, price descending, name
+- [x] S-09 Result count, active-filter chips with individual removal, "clear all", mobile filter toggle with an active-filter count
+- [x] S-10 "No products found" state with a clear-filters action
+- [x] S-11 Filters and search pre-applied from URL parameters
+- [x] S-12 Product quick view: gallery with thumbnails, previous/next and a full-screen image viewer opened by double-click or double-tap (`assets/js/shop.js:995-1015`, `:1940-1962`). The storefront gallery has no swipe today; swipe exists only in the admin viewer (MI-02). The rebuild adds it (section 12.7)
 - [ ] S-13 Product quick view: name, category, price, description, pack type, delivery-type tag, stock indicator
-- [ ] S-14 Size selection with per-size availability
+- [x] S-14 Size selection with per-size availability
 - [ ] S-15 Colour selection with swatches (when the product allows it), per-colour availability, "Assorted" handling
-- [ ] S-16 Quantity stepper capped by variant, colour, size or product stock (`shop.js:1018-1065`)
-- [ ] S-17 Add to cart from quick view; opens the cart drawer
+- [x] S-16 Quantity stepper capped by variant, colour, size or product stock (`shop.js:1018-1065`)
+- [x] S-17 Add to cart from quick view; opens the cart drawer
 - [ ] S-18 Edit a cart line from the cart or checkout: reopens quick view pre-filled and replaces the line
 - [ ] S-19 Quick add from a card for products without size or colour choices
-- [ ] S-20 Wishlist toggle on cards and in quick view
+- [x] S-20 Wishlist toggle on cards and in quick view
 - [ ] S-21 Share: Facebook, X, Instagram, TikTok, WhatsApp, copy link
-- [ ] S-22 Size-guide link from quick view
+- [x] S-22 Size-guide link from quick view
 - [ ] S-23 Reviews in quick view: average, count, list of up to 20 approved reviews
 - [ ] S-24 "Write a review" available only to signed-in customers with a delivered order containing the product; form with name, email, title, star rating, comment; held for approval
 - [ ] S-25 `/shop?product=<id>` opens that product directly
