@@ -36,11 +36,11 @@ There are three audiences:
 - [x] R-01 `/` serves the home page (Vercel rewrite `/` → `/home`, `vercel.json:7`)
 - [ ] R-02 `/home` home page (`home.html`); `index.html` is a near-identical copy
 - [x] R-03 `/shop` catalogue (`shop.html`)
-- [ ] R-04 `/cart` cart page (`cart.html`)
-- [ ] R-05 `/checkout` checkout (`checkout.html`)
-- [ ] R-06 `/confirmation` order confirmation (`confirmation.html`)
-- [ ] R-07 `/track` public order tracking (`track.html`)
-- [ ] R-08 `/wishlist` wishlist (`wishlist.html`)
+- [x] R-04 `/cart` cart page (`cart.html`)
+- [x] R-05 `/checkout` checkout (`checkout.html`)
+- [x] R-06 `/confirmation` order confirmation (`confirmation.html`)
+- [x] R-07 `/track` public order tracking (`track.html`)
+- [x] R-08 `/wishlist` wishlist (`wishlist.html`)
 - [ ] R-09 `/dashboard` customer account (`dashboard.html`)
 - [ ] R-10 `/contact` contact page (`contact.html`)
 - [ ] R-11 `/faq` frequently asked questions (`faq.html`)
@@ -63,7 +63,7 @@ There are three audiences:
 - [ ] G-05 Theme: light, dark and system, persisted, applied before first paint, switchable from the floating control, the mobile drawer and the dashboard
 - [x] G-06 Search overlay: opens from the header or Ctrl/Cmd+K, closes on Escape or backdrop; debounced product search over name, category and description (8 results)
 - [x] G-07 Search fallback: six latest products under "You might like" when nothing matches, plus a "View all results" link to `/shop?search=`
-- [ ] G-08 Cart drawer: line items with image, size, colour; quantity up/down; remove; subtotal; checkout link; continue shopping; empty state
+- [x] G-08 Cart drawer: line items with image, size, colour; quantity up/down; remove; subtotal; checkout link; continue shopping; empty state
 - [x] G-09 Footer: shop links, help links (My Account, Track Order, FAQs, Size Guide, Contact), legal links, social links (Instagram, TikTok, WhatsApp from `config.js:25-29`), current year
 - [ ] G-10 Floating WhatsApp button with a small pop-up card and a pre-filled enquiry message
 - [ ] G-11 Cookie and consent dialog: Essential (locked), Analytics, Marketing, Functional; "Accept All", "Save Preferences", "Essential Only"; choice stored *(defect today: not enforced on later page loads)*
@@ -143,52 +143,52 @@ There are three audiences:
 ### 2.6 Wishlist (W)
 
 - [ ] W-01 Wishlist stored on the device and synchronised to the account
-- [ ] W-02 Wishlist page: grid of saved products with image, price, rating and "new" marker
-- [ ] W-03 Remove one item; clear the whole wishlist
-- [ ] W-04 Item count and empty state with a link to the shop
+- [x] W-02 Wishlist page: grid of saved products with image, price, rating and "new" marker
+- [x] W-03 Remove one item; clear the whole wishlist
+- [x] W-04 Item count and empty state with a link to the shop
 - [ ] W-05 Open quick view or add to cart from a wishlist card
 
 ### 2.7 Cart (C)
 
 - [ ] C-01 Cart stored on the device (`LBS_CART_V1`) and synchronised to the account
-- [ ] C-02 Cart page: line items with image, name, size, colour, unit price and line total
+- [x] C-02 Cart page: line items with image, name, size, colour, unit price and line total
 - [ ] C-03 Quantity up/down, remove, edit (S-18)
-- [ ] C-04 Clear cart with confirmation
-- [ ] C-05 Promo code entry: validated against `promo_codes` (active, not expired, under usage limit); percentage discount shown; removable *(defect today: discount never reaches the order)*
-- [ ] C-06 Delivery estimator: state selector populated from the configured fee table, "Free" for zero
-- [ ] C-07 Summary: subtotal, discount, delivery, total
+- [x] C-04 Clear cart with confirmation
+- [x] C-05 Promo code entry: validated against `promo_codes` (active, not expired, under usage limit); percentage discount shown; removable *(defect today: discount never reaches the order)*
+- [x] C-06 Delivery estimator: state selector populated from the configured fee table, "Free" for zero
+- [x] C-07 Summary: subtotal, discount, delivery, total
 - [ ] C-08 Proceeding to checkout requires sign-in; the sign-in modal opens otherwise
 - [ ] C-09 Progress indicator (Cart, Shipping, Payment, Done) and breadcrumb
-- [ ] C-10 Empty-cart state
+- [x] C-10 Empty-cart state
 
 ### 2.8 Checkout and payment (K)
 
-- [ ] K-01 Three-step accordion: Contact, Delivery, Payment, with per-step validation, completion ticks and edit buttons
-- [ ] K-02 Contact step: first name, last name, email, phone
+- [x] K-01 Three-step accordion: Contact, Delivery, Payment, with per-step validation, completion ticks and edit buttons
+- [x] K-02 Contact step: first name, last name, email, phone
 - [ ] K-03 "Use my profile details" banner for signed-in customers
-- [ ] K-04 Delivery step: address, city, state (Lagos, Ogun, Oyo, Osun, Ondo, Ekiti, Abuja FCT), landmark, order notes
+- [x] K-04 Delivery step: address, city, state (Lagos, Ogun, Oyo, Osun, Ondo, Ekiti, Abuja FCT), landmark, order notes
 - [ ] K-05 Saved-address picker that fills the delivery fields
 - [ ] K-06 Google Places address autocomplete restricted to Nigeria, when a Maps key is configured (currently blank)
-- [ ] K-07 Delivery fee by state from the configured table; totals update on change
-- [ ] K-08 Payment method: Bank Transfer (active) and Pay with Card (shown as "Coming Soon", disabled)
-- [ ] K-09 Bank details panel (bank, account number, account name) with copy-to-clipboard
-- [ ] K-10 Receipt upload: image or PDF, 5 MB limit, file name preview, remove
-- [ ] K-11 "I have sent the payment" confirmation, enabled only once a receipt is attached
-- [ ] K-12 Order summary: items with edit links, subtotal, discount row, delivery, total
+- [x] K-07 Delivery fee by state from the configured table; totals update on change
+- [x] K-08 Payment method: Bank Transfer (active) and Pay with Card (shown as "Coming Soon", disabled)
+- [x] K-09 Bank details panel (bank, account number, account name) with copy-to-clipboard
+- [x] K-10 Receipt upload: image or PDF, 5 MB limit, file name preview, remove
+- [x] K-11 "I have sent the payment" confirmation, enabled only once a receipt is attached
+- [x] K-12 Order summary: items with edit links, subtotal, discount row, delivery, total
 - [ ] K-13 Place Order: uploads the receipt, creates the order, clears and synchronises the cart, redirects to the confirmation page *(defect today)*
 - [ ] K-14 Order numbers generated by the database in the form `LBS-DDMMYYYY-NNNN`
-- [ ] K-15 Double-submit guard and button loading state
-- [ ] K-16 Empty-cart state on the checkout page
+- [x] K-15 Double-submit guard and button loading state
+- [x] K-16 Empty-cart state on the checkout page
 - [ ] K-17 Order confirmation email to the customer and notification to the store (trigger and `send-order-email`, not tracked: `README.md:78-80`)
 
 ### 2.9 Confirmation and tracking (T)
 
-- [ ] T-01 Confirmation page: order number, items, subtotal, delivery, total, delivery address, contact details, note that an email is on its way
-- [ ] T-02 Confirmation page redirects to the shop when opened without an order
-- [ ] T-03 Track page: look up by order number (`LBS…`) or by order-id prefix *(defect today for guests)*
-- [ ] T-04 Track result: status badge, five-step timeline (Placed, Confirmed, Processing, Shipped, Delivered), cancelled state, items and total
+- [x] T-01 Confirmation page: order number, items, subtotal, delivery, total, delivery address, contact details, note that an email is on its way
+- [x] T-02 Confirmation page redirects to the shop when opened without an order
+- [x] T-03 Track page: look up by order number (`LBS…`) or by order-id prefix *(defect today for guests)*
+- [x] T-04 Track result: status badge, five-step timeline (Placed, Confirmed, Processing, Shipped, Delivered), cancelled state, items and total
 - [ ] T-05 Track page auto-search from `?order=` / `?id=`
-- [ ] T-06 "Not found" state
+- [x] T-06 "Not found" state
 
 ### 2.10 Customer dashboard (D)
 

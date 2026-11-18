@@ -19,6 +19,35 @@ for (const theme of themes) {
       colorScheme: theme,
     });
     await context.addInitScript((t) => localStorage.setItem("LBS_THEME", t), theme);
+    if (process.env.SEED_CART) {
+      await context.addInitScript(() =>
+        localStorage.setItem(
+          "LBS_CART_V1",
+          JSON.stringify([
+            {
+              variantId: "a-M-Black",
+              id: "fixture-02",
+              name: "Cotton high-waist brief",
+              price_ngn: 6500,
+              selectedSize: "M",
+              selectedColor: "Black",
+              image: "/placeholders/product-1.svg",
+              qty: 2,
+            },
+            {
+              variantId: "b-S-Wine",
+              id: "fixture-03",
+              name: "Satin slip nightdress with a very long product name to test wrapping",
+              price_ngn: 32000,
+              selectedSize: "S",
+              selectedColor: "Champagne",
+              image: "/placeholders/product-2.svg",
+              qty: 1,
+            },
+          ]),
+        ),
+      );
+    }
     const page = await context.newPage();
     for (const route of routes) {
       await page.goto(base + route, { waitUntil: "load" });
