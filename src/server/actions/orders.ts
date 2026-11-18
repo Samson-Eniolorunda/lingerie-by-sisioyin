@@ -63,7 +63,7 @@ export async function placeOrder(formData: FormData): Promise<PlaceOrderState> {
   const problem = receiptProblem(receipt);
   if (problem) return { ok: false, message: problem, fieldErrors: { receipt: problem } };
 
-  const result = placeMockOrder(parsed.data);
+  const result = placeMockOrder(parsed.data, new Date(), { receiptName: receipt.name });
   if (!result.ok) return { ok: false, message: result.message };
 
   (await cookies()).set(LAST_ORDER_COOKIE, result.order.orderNumber, {

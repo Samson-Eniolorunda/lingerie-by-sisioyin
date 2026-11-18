@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
 import { whatsappLink } from "@/config/site";
 import { trackOrder, type TrackState } from "@/server/actions/orders";
+import { timelineStep } from "@/lib/order-rules";
 import { OrderSummary } from "./OrderSummary";
+import { StatusBadge } from "./StatusBadge";
 import { OrderTimeline } from "./OrderTimeline";
 
 export function TrackForm({ initialOrder }: { readonly initialOrder: string }) {
@@ -71,9 +72,12 @@ export function TrackForm({ initialOrder }: { readonly initialOrder: string }) {
           <div className="flex flex-col gap-6">
             <p className="flex items-center gap-3 text-base">
               <span className="tabular font-semibold">{result.order.orderNumber}</span>
-              <Badge tone="warning">Awaiting payment check</Badge>
+              <StatusBadge status={result.order.status} />
             </p>
-            <OrderTimeline reached={0} placedAt={result.order.createdAt} />
+            <OrderTimeline
+              reached={timelineStep(result.order.status)}
+              placedAt={result.order.createdAt}
+            />
             <OrderSummary order={result.order} />
           </div>
         ) : null}

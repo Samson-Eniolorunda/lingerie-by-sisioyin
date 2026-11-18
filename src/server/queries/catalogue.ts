@@ -1,4 +1,4 @@
-import { FIXTURE_PRODUCTS } from "@/data/fixtures";
+import { getDb } from "@/server/mock/db";
 import type { Category, Gender, Product } from "@/types/domain";
 
 export type SortKey = "newest" | "reviews" | "price-asc" | "price-desc" | "name";
@@ -15,9 +15,9 @@ export interface CatalogueQuery {
   readonly sort?: SortKey | undefined;
 }
 
-/** The single read path for products. Today it serves the development fixtures. */
+/** The single read path for products. Today it serves the development store; hidden and trashed products never reach the shop. */
 async function allProducts(): Promise<readonly Product[]> {
-  return FIXTURE_PRODUCTS;
+  return getDb().products.filter((p) => p.active && p.deletedAt === null);
 }
 
 export function matchesSearch(product: Product, term: string): boolean {

@@ -111,3 +111,13 @@ test.describe("phone", () => {
     await expect(table.getByRole("columnheader", { name: "Underbust (in)" })).toBeVisible();
   });
 });
+
+test("G-04 the menu carries the account block, bag and wishlist", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Menu" }).click();
+  const menu = page.getByRole("dialog", { name: "Menu" });
+  await expect(menu.getByRole("link", { name: "Sign in" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Create account" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Bag" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Wishlist" })).toBeVisible();
+});

@@ -1,9 +1,10 @@
-import { FIXTURE_PRODUCTS } from "@/data/fixtures";
 import { computeTotals } from "@/lib/pricing";
 import { formatOrderNumber } from "@/lib/order-number";
 import { maxQuantity } from "@/lib/stock";
 import type { OrderInput } from "@/schemas/checkout";
+import type { OrderStatus, PaymentStatus, PromoRecord } from "@/types/account";
 import type { Product } from "@/types/domain";
+import { getDb, resetDb } from "./db";
 
 /**
  * Development order store, held in memory. It stands in for the database `place_order` function
@@ -35,53 +36,30 @@ export interface StoredOrder {
   readonly delivery: number;
   readonly total: number;
   readonly promoCode: string | null;
-  readonly status: "pending";
-  readonly paymentStatus: "awaiting_confirmation";
+  readonly status: OrderStatus;
+  readonly paymentStatus: PaymentStatus;
+  readonly receiptName: string | null;
+  readonly notes: string;
   readonly createdAt: string;
+  readonly updatedAt: string;
 }
 
-export interface PromoCode {
-  readonly code: string;
-  readonly percent: number;
-  readonly active: boolean;
-  readonly expiresAt: string | null;
-  readonly usageLimit: number | null;
-  usedCount: number;
-}
+export type PromoCode = PromoRecord;
 
 export type PlaceOrderResult =
   | { readonly ok: true; readonly order: StoredOrder }
   | { readonly ok: false; readonly message: string };
 
-const orders = new Map<string, StoredOrder>();
-const stock = new Map<string, Product>();
-const promos: PromoCode[] = [
-  { code: "WELCOME10", percent: 10, active: true, expiresAt: null, usageLimit: null, usedCount: 0 },
-  { code: "ONEUSE", percent: 20, active: true, expiresAt: null, usageLimit: 1, usedCount: 0 },
-  {
-    code: "EXPIRED",
-    percent: 15,
-    active: true,
-    expiresAt: "2020-01-01T00:00:00.000Z",
-    usageLimit: null,
-    usedCount: 0,
-  },
-];
-let sequence = 0;
-
 function product(id: string): Product | undefined {
-  return stock.get(id) ?? FIXTURE_PRODUCTS.find((p) => p.id === id);
+  return getDb().products.find((p) => p.id === id && p.deletedAt === null);
 }
 
 export function resetMockStore(): void {
-  orders.clear();
-  stock.clear();
-  sequence = 0;
-  for (const promo of promos) promo.usedCount = 0;
+  resetDb();
 }
 
 export function findPromo(code: string, now = new Date()): PromoCode | null {
-  const promo = promos.find((p) => p.code === code.trim().toUpperCase());
+  const promo = getDb().promos.find((p) => p.code === code.trim().toUpperCase());
   if (!promo || !promo.active) return null;
   if (promo.expiresAt && new Date(promo.expiresAt) < now) return null;
   if (promo.usageLimit !== null && promo.usedCount >= promo.usageLimit) return null;
@@ -98,7 +76,11 @@ function decrement(p: Product, size: string, colour: string, qty: number): Produ
   return { ...p, qty: p.qty - qty, variantStock, sizes };
 }
 
-export function placeMockOrder(input: OrderInput, now = new Date()): PlaceOrderResult {
+export function placeMockOrder(
+  input: OrderInput,
+  now = new Date(),
+  options: { readonly receiptName?: string } = {},
+): PlaceOrderResult {
   const working = new Map<string, Product>();
   const lines: StoredLine[] = [];
 
@@ -145,9 +127,10 @@ export function placeMockOrder(input: OrderInput, now = new Date()): PlaceOrderR
     { promoPercent: promo?.percent ?? 0, stateId: input.delivery.state },
   );
 
-  sequence += 1;
+  const db = getDb();
+  db.sequence += 1;
   const order: StoredOrder = {
-    orderNumber: formatOrderNumber(now, sequence),
+    orderNumber: formatOrderNumber(now, db.sequence),
     email: input.contact.email.toLowerCase(),
     phone: input.contact.phone,
     customerName: `${input.contact.firstName} ${input.contact.lastName}`,
@@ -159,22 +142,32 @@ export function placeMockOrder(input: OrderInput, now = new Date()): PlaceOrderR
     promoCode: promo?.code ?? null,
     status: "pending",
     paymentStatus: "awaiting_confirmation",
+    receiptName: options.receiptName ?? null,
+    notes: input.delivery.notes ?? "",
     createdAt: now.toISOString(),
+    updatedAt: now.toISOString(),
   };
 
-  for (const [id, updated] of working) stock.set(id, updated);
-  if (promo) promo.usedCount += 1;
-  orders.set(order.orderNumber, order);
+  for (const [id, updated] of working) {
+    const index = db.products.findIndex((p) => p.id === id);
+    const existing = db.products[index];
+    if (existing) db.products[index] = { ...existing, ...updated };
+  }
+  if (promo) {
+    const index = db.promos.findIndex((p) => p.id === promo.id);
+    db.promos[index] = { ...promo, usedCount: promo.usedCount + 1 };
+  }
+  db.orders.set(order.orderNumber, order);
   return { ok: true, order };
 }
 
 export function getMockOrder(orderNumber: string): StoredOrder | undefined {
-  return orders.get(orderNumber);
+  return getDb().orders.get(orderNumber);
 }
 
 /** The guest lookup: the order number and the email used together, so numbers alone reveal nothing. */
 export function findMockOrder(orderNumber: string, email: string): StoredOrder | null {
-  const order = orders.get(orderNumber);
+  const order = getDb().orders.get(orderNumber);
   return order && order.email === email.trim().toLowerCase() ? order : null;
 }
 

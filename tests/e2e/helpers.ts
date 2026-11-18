@@ -34,3 +34,42 @@ export async function smallTargets(page: Page): Promise<string[]> {
     return found;
   });
 }
+
+export const DEMO_CUSTOMER = {
+  email: "demo.customer@example.test",
+  password: "Demo-Pass1!",
+} as const;
+export const DEMO_OWNER = { email: "owner@example.test", password: "Owner-Pass1!" } as const;
+export const DEMO_EDITOR = { email: "editor@example.test", password: "Editor-Pass1!" } as const;
+
+let counter = 0;
+export function uniqueEmail(prefix: string): string {
+  counter += 1;
+  return `${prefix}.${Date.now()}.${counter}.${Math.floor(Math.random() * 1e6)}@example.test`;
+}
+
+export async function signInAs(
+  page: Page,
+  who: { email: string; password: string },
+  path = "/sign-in",
+): Promise<void> {
+  await page.goto(path);
+  await page.getByLabel("Email address").fill(who.email);
+  await page.getByLabel("Password", { exact: true }).fill(who.password);
+  await page.getByRole("button", { name: "Sign in", exact: true }).click();
+}
+
+/** Creates a throwaway customer through the sign-up screen and leaves the page signed in. */
+export async function signUpFresh(page: Page, password = "Fresh-Pass1!"): Promise<string> {
+  const email = uniqueEmail("fresh");
+  await page.goto("/sign-up");
+  await page.getByLabel("First name").fill("Test");
+  await page.getByLabel("Last name").fill("Person");
+  await page.getByLabel("Email address").fill(email);
+  await page.getByLabel("Password", { exact: true }).fill(password);
+  await page.getByLabel("Confirm password").fill(password);
+  await page.getByRole("checkbox").check();
+  await page.getByRole("button", { name: "Create account" }).click();
+  await page.waitForURL("**/dashboard");
+  return email;
+}
