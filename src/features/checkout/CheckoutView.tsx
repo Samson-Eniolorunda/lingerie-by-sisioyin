@@ -44,8 +44,13 @@ const readSaved = () => readStorage(FORM_KEY);
 export function CheckoutView() {
   const saved = useSyncExternalStore(noopSubscribe, readSaved, () => undefined);
   const choices = useCheckoutChoices();
-  if (saved === undefined)
-    return <div className="mx-auto min-h-[60dvh] max-w-[560px] px-4 pt-10" aria-busy="true" />;
+  if (saved === undefined) {
+    return (
+      <div className="mx-auto min-h-[60dvh] max-w-[560px] px-4 pt-4 sm:pt-10" aria-busy="true">
+        <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
+      </div>
+    );
+  }
   return <CheckoutForm initial={parseSaved(saved, choices.state)} />;
 }
 

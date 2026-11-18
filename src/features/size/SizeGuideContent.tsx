@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useId, useState } from "react";
-import { Tabs } from "@/components/ui/Tabs";
+import { Tabs, tabPanelProps } from "@/components/ui/Tabs";
 import { SIZE_CHARTS, type ChartId } from "@/data/size-charts";
 import { BraCalculator } from "./BraCalculator";
 import { SizeChartTable } from "./SizeChartTable";
@@ -25,6 +25,7 @@ export function SizeGuideContent({
           Size charts
         </h3>
         <Tabs
+          idBase={`${base}-chart`}
           label="Size charts"
           items={SIZE_CHARTS.map((c) => ({ id: c.id, label: c.title }))}
           value={active}
@@ -32,7 +33,7 @@ export function SizeGuideContent({
           className="mt-2"
         />
         {chart ? (
-          <div role="tabpanel" className="mt-3">
+          <div {...tabPanelProps(`${base}-chart`, chart.id)} className="mt-3">
             <SizeChartTable key={chart.id} chart={chart} />
           </div>
         ) : null}

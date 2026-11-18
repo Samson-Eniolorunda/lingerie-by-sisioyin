@@ -9,7 +9,6 @@ export function Wordmark({ className }: { readonly className?: string }) {
   return (
     <Link
       href="/"
-      aria-label="Lingerie by Sisioyin, home"
       className={cn(
         "inline-flex min-h-11 flex-col justify-center leading-none text-ink no-underline hover:text-ink",
         className,

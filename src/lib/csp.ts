@@ -20,16 +20,7 @@ export function buildCsp({
   const supabase = supabaseUrl ? [new URL(supabaseUrl).origin, wsOrigin(supabaseUrl)] : [];
   const directives: Record<string, readonly string[]> = {
     "default-src": ["'self'"],
-    "script-src": [
-      "'self'",
-      `'nonce-${nonce}'`,
-      "'strict-dynamic'",
-      "https://www.googletagmanager.com",
-      "https://connect.facebook.net",
-      "https://www.google.com/recaptcha/",
-      "https://www.gstatic.com/recaptcha/",
-      ...(isDev ? ["'unsafe-eval'"] : []),
-    ],
+    "script-src": [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": [
       "'self'",

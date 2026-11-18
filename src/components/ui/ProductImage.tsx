@@ -23,6 +23,7 @@ export function ProductImage({
           fill
           sizes={sizes}
           priority={priority ?? false}
+          fetchPriority={priority ? "high" : "auto"}
           unoptimized={image.src.endsWith(".svg")}
           className="object-cover"
         />

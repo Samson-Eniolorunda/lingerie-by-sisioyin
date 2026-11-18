@@ -4,7 +4,7 @@ test("S-02 to S-11 filters and sort come from the URL and show as removable chip
   page,
 }) => {
   await page.goto("/shop?category=Underwear&gender=Men&sort=price-asc");
-  const names = await page.locator("article h3").allTextContents();
+  const names = await page.locator("article h2").allTextContents();
   expect(names.length).toBeGreaterThan(0);
   await expect(page.getByRole("link", { name: "Underwear Remove filter" })).toBeVisible();
   await page.getByRole("link", { name: "Men Remove filter" }).click();
@@ -20,7 +20,7 @@ test("S-10 no products found offers to clear the filters", async ({ page }) => {
 
 test("R-18 legacy ?q= is honoured", async ({ page }) => {
   await page.goto("/shop?q=lace");
-  await expect(page.locator("article h3").first()).toContainText(/lace/i);
+  await expect(page.locator("article h2").first()).toContainText(/lace/i);
 });
 
 test("S-12 to S-17 choose size and colour, add to bag, count updates", async ({

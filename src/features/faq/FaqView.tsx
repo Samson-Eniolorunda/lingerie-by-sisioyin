@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ChevronDown, Search, X } from "lucide-react";
 import { useDeferredValue, useId, useMemo, useState } from "react";
 import { RichText } from "@/components/ui/RichText";
-import { Tabs } from "@/components/ui/Tabs";
+import { Tabs, tabPanelProps } from "@/components/ui/Tabs";
 import { FAQ_GROUPS } from "@/content";
 import type { ContentNode } from "@/content/schema";
 import { whatsappLink } from "@/config/site";
@@ -74,6 +74,7 @@ export function FaqView() {
       </form>
 
       <Tabs
+        idBase={`${base}-groups`}
         label="Question groups"
         className="mt-3"
         items={[
@@ -92,67 +93,69 @@ export function FaqView() {
         {total} {total === 1 ? "question" : "questions"}
       </p>
 
-      {total === 0 ? (
-        <div className="py-12 text-center">
-          <p className="font-display text-2xl">No questions match</p>
-          <p className="mt-2 text-base text-muted">
-            <button
-              type="button"
-              className="min-h-11 text-primary underline underline-offset-4"
-              onClick={() => setQuery("")}
-            >
-              Clear search
-            </button>{" "}
-            or{" "}
-            <a
-              href={whatsappLink("Hello, I have a question.")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              ask us on WhatsApp
-            </a>
-            .
-          </p>
-        </div>
-      ) : (
-        groups.map((group) => (
-          <section key={group.id} aria-labelledby={`${base}-${group.id}`} className="mt-6">
-            <h2 id={`${base}-${group.id}`} className="font-display text-2xl">
-              {group.title}
-            </h2>
-            <div className="mt-2 border-t border-line">
-              {group.items.map((item, i) => {
-                const id = `${group.id}-${i}`;
-                const isOpen = open === id;
-                return (
-                  <div key={id} className="border-b border-line">
-                    <h3 className="font-sans">
-                      <button
-                        type="button"
-                        aria-expanded={isOpen}
-                        aria-controls={`${base}-a-${id}`}
-                        onClick={() => setOpen(isOpen ? null : id)}
-                        className="flex min-h-14 w-full items-center justify-between gap-4 py-3 text-left text-base font-medium"
-                      >
-                        <span>{item.q}</span>
-                        <ChevronDown
-                          size={20}
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                          className={cn("shrink-0", isOpen && "rotate-180")}
-                        />
-                      </button>
-                    </h3>
-                    <div id={`${base}-a-${id}`} hidden={!isOpen} className="pb-4">
-                      <RichText nodes={item.a} />
+      <div {...tabPanelProps(`${base}-groups`, deferred === "" ? tab : "all")}>
+        {total === 0 ? (
+          <div className="py-12 text-center">
+            <p className="font-display text-2xl">No questions match</p>
+            <p className="mt-2 text-base text-muted">
+              <button
+                type="button"
+                className="min-h-11 text-primary underline underline-offset-4"
+                onClick={() => setQuery("")}
+              >
+                Clear search
+              </button>{" "}
+              or{" "}
+              <a
+                href={whatsappLink("Hello, I have a question.")}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                ask us on WhatsApp
+              </a>
+              .
+            </p>
+          </div>
+        ) : (
+          groups.map((group) => (
+            <section key={group.id} aria-labelledby={`${base}-${group.id}`} className="mt-6">
+              <h2 id={`${base}-${group.id}`} className="font-display text-2xl">
+                {group.title}
+              </h2>
+              <div className="mt-2 border-t border-line">
+                {group.items.map((item, i) => {
+                  const id = `${group.id}-${i}`;
+                  const isOpen = open === id;
+                  return (
+                    <div key={id} className="border-b border-line">
+                      <h3 className="font-sans">
+                        <button
+                          type="button"
+                          aria-expanded={isOpen}
+                          aria-controls={`${base}-a-${id}`}
+                          onClick={() => setOpen(isOpen ? null : id)}
+                          className="flex min-h-14 w-full items-center justify-between gap-4 py-3 text-left text-base font-medium"
+                        >
+                          <span>{item.q}</span>
+                          <ChevronDown
+                            size={20}
+                            strokeWidth={1.5}
+                            aria-hidden="true"
+                            className={cn("shrink-0", isOpen && "rotate-180")}
+                          />
+                        </button>
+                      </h3>
+                      <div id={`${base}-a-${id}`} hidden={!isOpen} className="pb-4">
+                        <RichText nodes={item.a} />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        ))
-      )}
+                  );
+                })}
+              </div>
+            </section>
+          ))
+        )}
+      </div>
 
       <section className="mt-14 border-t border-line pt-8 text-center">
         <h2 className="font-display text-3xl">Still have questions?</h2>

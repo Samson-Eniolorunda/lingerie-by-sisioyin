@@ -112,7 +112,7 @@ export default async function ShopPage({
             <ul className="mt-5 grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 md:gap-x-6 lg:grid-cols-4">
               {shown.map((product, index) => (
                 <li key={product.id}>
-                  <ProductCard product={product} priority={index < 2} />
+                  <ProductCard product={product} priority={index < 2} headingLevel="h2" />
                 </li>
               ))}
             </ul>

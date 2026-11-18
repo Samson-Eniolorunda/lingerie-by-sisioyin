@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, type KeyboardEvent } from "react";
+import { useRef, type KeyboardEvent } from "react";
 import { cn } from "@/lib/cn";
 
 export interface TabItem {
@@ -14,15 +14,17 @@ export function Tabs({
   value,
   onChange,
   label,
+  idBase,
   className,
 }: {
   readonly items: readonly TabItem[];
   readonly value: string;
   readonly onChange: (id: string) => void;
   readonly label: string;
+  /** Prefix for the tab ids and the panel id (`<idBase>-panel`) the tabs control. */
+  readonly idBase: string;
   readonly className?: string;
 }) {
-  const base = useId();
   const refs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -52,11 +54,11 @@ export function Tabs({
             ref={(node) => {
               refs.current[item.id] = node;
             }}
-            id={`${base}-tab-${item.id}`}
+            id={`${idBase}-tab-${item.id}`}
             role="tab"
             type="button"
             aria-selected={selected}
-            aria-controls={`${base}-panel-${item.id}`}
+            aria-controls={`${idBase}-panel`}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(item.id)}
             className={cn(
@@ -74,10 +76,10 @@ export function Tabs({
   );
 }
 
-export function tabPanelProps(base: string, id: string) {
+export function tabPanelProps(idBase: string, activeId: string) {
   return {
     role: "tabpanel",
-    id: `${base}-panel-${id}`,
-    "aria-labelledby": `${base}-tab-${id}`,
+    id: `${idBase}-panel`,
+    "aria-labelledby": `${idBase}-tab-${activeId}`,
   } as const;
 }
