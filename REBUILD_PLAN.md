@@ -4,6 +4,7 @@ Audit and plan only. Nothing in the repository has been changed other than the a
 
 - Repository: `Samson-Eniolorunda/lingerie-by-sisioyin`, branch `rebuild/production` (HEAD `4387196`)
 - Audit date: 18 November 2026
+- Revised the same day to make mobile the priority: section 12 (mobile first), section 13 (quality gates) and section 14 (what will make it stand out) were added, and section 8 was reworked so that the mobile work and the gates are part of the phases
 - Scope read: 68 tracked files, about 86,000 lines (16 HTML pages, 2 stylesheets, 20 scripts, 2 service workers, 2 manifests, 1 schema file, 6 migrations, 2 edge functions, `vercel.json`, documentation)
 
 ---
@@ -123,7 +124,7 @@ There are three audiences:
 - [ ] S-09 Result count, active-filter chips with individual removal, "clear all", mobile filter toggle with an active-filter count
 - [ ] S-10 "No products found" state with a clear-filters action
 - [ ] S-11 Filters and search pre-applied from URL parameters
-- [ ] S-12 Product quick view: gallery with thumbnails, previous/next, swipe and a full-screen image viewer
+- [ ] S-12 Product quick view: gallery with thumbnails, previous/next and a full-screen image viewer opened by double-click or double-tap (`assets/js/shop.js:995-1015`, `:1940-1962`). The storefront gallery has no swipe today; swipe exists only in the admin viewer (MI-02). The rebuild adds it (section 12.7)
 - [ ] S-13 Product quick view: name, category, price, description, pack type, delivery-type tag, stock indicator
 - [ ] S-14 Size selection with per-size availability
 - [ ] S-15 Colour selection with swatches (when the product allows it), per-colour availability, "Assorted" handling
@@ -792,8 +793,8 @@ lingerie-by-sisioyin/
 │   │   ├── sitemap.ts  robots.ts  not-found.tsx  error.tsx  layout.tsx
 │   │   └── sw.ts                   service worker source
 │   ├── components/
-│   │   ├── ui/                     Button, Input, Select, Dialog, Drawer, Toast, Badge, Table, Skeleton, Stepper, Tabs
-│   │   └── layout/                 Header, Footer, MobileNav, SearchOverlay
+│   │   ├── ui/                     Button, Input, Select, Dialog, Drawer, BottomSheet, StickyActionBar, Toast, Badge, Table, Skeleton, Stepper, Tabs
+│   │   └── layout/                 Header, Footer, MobileNav, BottomNav, SearchOverlay
 │   ├── features/
 │   │   ├── catalogue/  product/  cart/  wishlist/  checkout/  orders/
 │   │   ├── account/  auth/  reviews/  contact/  consent/  analytics/  pwa/
@@ -815,7 +816,7 @@ lingerie-by-sisioyin/
 │   └── seed.sql                    local development data only
 ├── tests/
 │   ├── unit/                       pricing, merge rules, validators
-│   └── e2e/                        parity flows, accessibility, viewport checks
+│   └── e2e/                        parity flows (phone and desktop projects), mobile suite, accessibility, viewport checks
 ├── next.config.ts  tsconfig.json  eslint.config.mjs  postcss.config.mjs
 ├── package.json  package-lock.json  .nvmrc  .env.example (names only)
 └── README.md
@@ -936,7 +937,7 @@ Prices use tabular figures. The customer text-size setting (G-18) scales the roo
 
 - **Grid:** 4 columns below 768 px, 8 from 768, 12 from 1024. Gutters 16 / 24 / 32 px.
 - **Containers:** content 1200 px, wide 1360 px for the shop and admin, reading width 680 px for legal pages and FAQs.
-- **Breakpoints (one set):** 480, 768, 1024, 1280, 1536. Designs are checked at 360, 390, 768, 1024, 1280 and 1536.
+- **Breakpoints (one set):** 480, 768, 1024, 1280, 1536. Layouts are designed first at 360, 390 and 430 (section 12.2) and checked at 360, 390, 430, 768, 1024, 1280 and 1536.
 - **Rhythm:** sections are separated by 96 px on desktop and 56 px on mobile. Product imagery is 4:5, hero and category imagery 3:4, matching `IMAGE_SIZING_GUIDE.md` so existing photographs fit without re-cropping.
 - **Admin:** fixed 248 px sidebar from 1024 px, drawer below; denser spacing and `body-sm` as the base.
 
@@ -949,6 +950,8 @@ Prices use tabular figures. The customer text-size setting (G-18) scales the roo
 - **Motion:** 120 ms for colour and opacity, 200 ms for drawers and dialogs, 320 ms as the maximum for a gallery cross-fade; one easing curve (`cubic-bezier(0.2, 0, 0, 1)`). Motion only confirms an action or shows where something came from. No scroll-triggered entrance animations beyond a single short fade on first paint of imagery, no counters, no parallax. `prefers-reduced-motion` removes all movement.
 
 ### 7.6 Key screens
+
+Each screen below is designed at phone width first; the phone behaviour (bottom navigation, sticky action bars, sheets, safe areas) is specified in section 12 and takes precedence where this section describes only the desktop arrangement.
 
 **Home (`/`).**
 1. A slim announcement line: delivery states and the WhatsApp number, in `label` type.
@@ -970,9 +973,9 @@ Prices use tabular figures. The customer text-size setting (G-18) scales the roo
 
 **Confirmation and tracking.** Confirmation: serif "Thank you", the order number large in tabular figures with a copy button, what happens next in three plain sentences (payment is checked by a person, then a confirmation email), then the order summary. Tracking: order number field plus the email or phone used (see section 9), then a vertical timeline using real timestamps.
 
-**Account (`/dashboard`).** Left navigation list on desktop, bottom tab bar on mobile. Overview shows three figures in a single bordered row and the latest orders as a list. Orders are rows, not cards; a row opens a detail panel with the timeline, items and the cancel or return action when available. Settings are grouped under plain headings with switches.
+**Account (`/dashboard`).** Left navigation list on desktop; on mobile a one-tap section switcher, either a tab row under the header with the shop's bottom navigation kept, or the present bottom tab bar (section 12.3 and decision 11 in 9.6). Overview shows three figures in a single bordered row and the latest orders as a list. Orders are rows, not cards; a row opens a detail panel with the timeline, items and the cancel or return action when available. Settings are grouped under plain headings with switches.
 
-**Admin (`/admin`).** Utilitarian and dense: ivory ground, white tables with hairline rows, wine reserved for the primary action in each view. Sidebar with grouped links and counts for pending orders and unread messages. Orders and customers are tables with sticky headers that become stacked rows below 768 px; detail opens in a right-hand drawer. The product editor is a two-column form (details and variants on the left, images and visibility on the right) with a sticky save bar. Order detail shows the receipt beside the total with two explicit actions, "Confirm payment" and "Reject receipt".
+**Admin (`/admin`).** Utilitarian and dense: ivory ground, white tables with hairline rows, wine reserved for the primary action in each view. Sidebar with grouped links and counts for pending orders and unread messages. Orders and customers are tables with sticky headers that become stacked rows below 768 px; detail opens in a right-hand drawer on desktop and as a full screen with a bottom action bar on phones (section 12.7). The product editor is a two-column form (details and variants on the left, images and visibility on the right) with a sticky save bar. Order detail shows the receipt beside the total with two explicit actions, "Confirm payment" and "Reject receipt".
 
 **Emails.** White background, wordmark at the top, serif heading, body in a system sans fallback, one flat wine button, no gradients or emoji.
 
@@ -982,100 +985,116 @@ Prices use tabular figures. The customer text-size setting (G-18) scales the roo
 
 ### 8.1 Phases and commits
 
-**Phase 0 — Foundations (3 days)**
+**How the work is ordered.** Mobile is the priority (section 12), so every screen is designed and built at 360, 390 and 430 px first and widened afterwards; no phase builds a desktop layout and "makes it responsive" later. Each phase closes only when the pages it delivers pass the gates of section 13 that can already be run on them (type check, lint, tests at the phone size and the desktop size, build, the page-by-page mobile checklist in 12.9, and screenshots at every width). Nothing is called done, and no pull request is opened, until every gate in section 13 passes.
+
+**Phase 0 — Foundations (3.5 days)**
 1. `chore: scaffold Next.js 16 app with TypeScript strict, ESLint and Prettier`
 2. `chore: add environment schema and .env.example (names only)`
 3. `db: add baseline migration captured from the live schema`
 4. `chore: generate database types and add Supabase clients`
 5. `ci: add build, lint, type-check, unit and e2e workflows`
-6. `feat: add proxy with session refresh, security headers and CSP nonce`
+6. `ci: add phone and desktop Playwright projects, viewport screenshot run and Lighthouse mobile budgets`
+7. `feat: add proxy with session refresh, security headers and CSP nonce`
 
-**Phase 1 — Design system (4 days)**
-7. `feat(ui): add design tokens and global styles`
-8. `feat(ui): add fonts and type scale`
-9. `feat(ui): add Button, Input, Select, Checkbox, Switch, Badge`
-10. `feat(ui): add Dialog, Drawer, Toast, Tabs, Skeleton, Table, Stepper`
-11. `feat(brand): add redrawn wordmark, monogram and icon set`
-12. `feat(layout): add header, footer, mobile navigation and theme control`
+Before any legacy file is touched, "before" screenshots of all sixteen current pages are captured at 360, 390, 430, 768, 1024, 1280 and 1536 px in both themes and kept for the pull request (gate (e) in section 13). This is a recorded task, not a commit.
 
-**Phase 2 — Catalogue (7 days)**
-13. `feat(catalogue): add product queries and domain types`
-14. `feat(home): add opening spread, new arrivals, categories, testimonials`
-15. `feat(shop): add grid, filters, sort, search and URL state`
-16. `feat(product): add product page with gallery, variants and stock rules`
-17. `feat(product): add quick view dialog`
-18. `feat(search): add search overlay with keyboard shortcut`
-19. `feat(wishlist): add wishlist store and page`
-20. `feat(reviews): add review list, eligibility check and submission`
-21. `feat(catalogue): add realtime refresh`
-22. `feat(seo): add product metadata, structured data and legacy product redirect`
+**Phase 1 — Design system, phone first (5.5 days)**
+8. `feat(ui): add design tokens and global styles`
+9. `feat(ui): add fonts and type scale`
+10. `feat(ui): add Button, Input, Select, Checkbox, Switch, Badge`
+11. `feat(ui): add Dialog, Drawer, Toast, Tabs, Skeleton, Table, Stepper`
+12. `feat(ui): add BottomSheet, StickyActionBar and safe-area layout utilities`
+13. `feat(brand): add redrawn wordmark, monogram and icon set`
+14. `feat(layout): add header, footer, mobile navigation drawer and theme control`
+15. `feat(layout): add mobile bottom navigation`
 
-**Phase 3 — Cart, checkout, orders (6 days)**
-23. `feat(cart): add cart store on existing storage keys, drawer and page`
-24. `db: add place_order and validate_promo functions with stock decrement`
-25. `feat(cart): add promo code and delivery estimate`
-26. `feat(checkout): add contact, delivery and payment steps with validation`
-27. `feat(checkout): add private receipt upload and place-order action`
-28. `feat(orders): add confirmation page`
-29. `feat(orders): add tracking page with verified lookup`
-30. `feat(email): add order confirmation and store notification`
+**Phase 2 — Catalogue (9 days)**
+16. `feat(catalogue): add product queries and domain types`
+17. `feat(home): add opening spread, new arrivals, categories, testimonials`
+18. `feat(shop): add grid, filter sheet, sort, search and URL state`
+19. `feat(product): add product page with variants and stock rules`
+20. `feat(product): add swipe gallery with counter and pinch-zoom viewer`
+21. `feat(product): add size guide sheet and sticky add-to-bag bar`
+22. `feat(product): add quick view sheet and dialog`
+23. `feat(search): add search overlay with keyboard shortcut`
+24. `feat(wishlist): add wishlist store and page`
+25. `feat(reviews): add review list, eligibility check and submission`
+26. `feat(catalogue): add realtime refresh`
+27. `feat(seo): add product metadata, structured data and legacy product redirect`
+
+**Phase 3 — Cart, checkout, orders (7 days)**
+28. `feat(cart): add cart store on existing storage keys, drawer and page`
+29. `db: add place_order and validate_promo functions with stock decrement`
+30. `feat(cart): add promo code and delivery estimate`
+31. `feat(cart): add sticky checkout bar and one-thumb quantity steppers`
+32. `feat(checkout): add contact, delivery and payment steps with mobile keyboards, autofill and inline validation`
+33. `feat(checkout): add private receipt upload and place-order action`
+34. `feat(orders): add confirmation page`
+35. `feat(orders): add tracking page with verified lookup`
+36. `feat(email): add order confirmation and store notification`
 
 **Phase 4 — Authentication and account (5 days)**
-31. `feat(auth): add sign-in, sign-up, Google sign-in and callback route`
-32. `feat(auth): add reset, set-password, verification and expired-link screens`
-33. `feat(auth): add server-side captcha verification and account-status enforcement`
-34. `feat(account): add overview and orders with cancel and return actions`
-35. `feat(account): add addresses and profile`
-36. `feat(account): add settings, data export, deactivation and deletion`
-37. `feat(sync): add cross-device merge and realtime updates`
-38. `feat(email): add customer welcome and account emails`
+37. `feat(auth): add sign-in, sign-up, Google sign-in and callback route`
+38. `feat(auth): add reset, set-password, verification and expired-link screens`
+39. `feat(auth): add server-side captcha verification and account-status enforcement`
+40. `feat(account): add overview and orders with cancel and return actions`
+41. `feat(account): add addresses and profile`
+42. `feat(account): add settings, data export, deactivation and deletion`
+43. `feat(sync): add cross-device merge and realtime updates`
+44. `feat(email): add customer welcome and account emails`
 
 **Phase 5 — Content pages (3 days)**
-39. `feat(contact): add contact form, message storage and email`
-40. `feat(faq): add categories, accordion and search`
-41. `feat(size): add measuring guide, charts and calculator`
-42. `feat(legal): add privacy and terms with section navigation`
-43. `feat: add not-found and error pages`
+45. `feat(contact): add contact form, message storage and email`
+46. `feat(faq): add categories, accordion and search`
+47. `feat(size): add measuring guide, charts and calculator`
+48. `feat(legal): add privacy and terms with section navigation`
+49. `feat: add not-found and error pages`
 
-**Phase 6 — Admin (14 days)**
-44. `feat(admin): add server gate, staff sign-in and invitation sign-up`
-45. `feat(admin): add shell, navigation, idle timeout and activity logging`
-46. `feat(admin): add dashboard view`
-47. `feat(admin): add inventory list, filters and bulk actions`
-48. `feat(admin): add product editor with variants and image upload`
-49. `feat(admin): add trash`
-50. `feat(admin): add orders table, detail, status flow and payment confirmation`
-51. `feat(admin): add customers table, detail and account actions`
-52. `feat(admin): add messages inbox, reply and compose`
-53. `feat(admin): add reviews moderation`
-54. `feat(admin): add site images`
-55. `feat(admin): add staff management and invitations`
-56. `feat(admin): add activity log`
-57. `feat(admin): add analytics views`
-58. `feat(admin): add CSV, JSON, TXT and PDF exports`
-59. `feat(email): add staff invitation, welcome and customer reply emails`
+**Phase 6 — Admin, usable from a phone (15.5 days)**
+50. `feat(admin): add server gate, staff sign-in and invitation sign-up`
+51. `feat(admin): add shell, phone navigation, idle timeout and activity logging`
+52. `feat(admin): add dashboard view`
+53. `feat(admin): add inventory list, filters and bulk actions`
+54. `feat(admin): add product editor with variants and image upload`
+55. `feat(admin): add trash`
+56. `feat(admin): add orders list, detail, status flow and payment confirmation`
+57. `feat(admin): add phone order detail with receipt viewer and bottom action bar`
+58. `feat(admin): add customers table, detail and account actions`
+59. `feat(admin): add messages inbox, reply and compose`
+60. `feat(admin): add reviews moderation`
+61. `feat(admin): add site images`
+62. `feat(admin): add staff management and invitations`
+63. `feat(admin): add activity log`
+64. `feat(admin): add analytics views`
+65. `feat(admin): add CSV, JSON, TXT and PDF exports`
+66. `feat(email): add staff invitation, welcome and customer reply emails`
 
 **Phase 7 — Consent, analytics, PWA (4 days)**
-60. `feat(consent): add consent dialog and enforcement`
-61. `feat(analytics): add GA4 and Meta Pixel events behind consent`
-62. `feat(analytics): add first-party visit recording through the server`
-63. `feat(pwa): add manifests, service worker, install prompt and update flow`
-64. `feat(pwa): add time-boxed admin worker retirement`
+67. `feat(consent): add consent dialog and enforcement`
+68. `feat(analytics): add GA4 and Meta Pixel events behind consent`
+69. `feat(analytics): add first-party visit recording through the server`
+70. `feat(pwa): add manifests, service worker, offline page, install prompt and update flow`
+71. `feat(pwa): add time-boxed admin worker retirement`
 
 **Phase 8 — Hardening and SEO (3 days)**
-65. `db: tighten row-level policies and role functions`
-66. `db: make receipts private and add signed access`
-67. `feat(seo): add sitemap, robots, canonical rules and Open Graph images`
-68. `chore: add redirects for legacy URLs`
-69. `chore: remove edge functions and order-email trigger after parity sign-off`
+72. `db: tighten row-level policies and role functions`
+73. `db: make receipts private and add signed access`
+74. `feat(seo): add sitemap, robots, canonical rules and Open Graph images`
+75. `chore: add redirects for legacy URLs`
+76. `chore: remove edge functions and order-email trigger after parity sign-off`
 
-**Phase 9 — Verification and cut-over (5 days)**
-70. `test: add parity e2e suite`
-71. `test: add accessibility and viewport suites`
-72. `docs: rewrite README and add operations notes`
-73. `chore: remove legacy static files`
+**Phase 9 — Quality gates and cut-over (7 days)**
+77. `test: add parity e2e suite at phone and desktop sizes`
+78. `test: add accessibility and viewport suites`
+79. `test: add mobile suite for gestures, keyboards, safe areas and sticky bars`
+80. `docs: rewrite README and add operations notes`
+81. `chore: remove legacy static files`
+
+Phase 9 then runs the gates of section 13 in order on a preview deployment: "after" screenshots at every width and in both themes, Lighthouse mobile on the listed pages, the independent review of the finished diff with every finding fixed and re-checked (fixes are ordinary `fix:` commits, each with its test), and finally the owner's approval. The pull request is opened only after gates (a) to (h) pass, and nothing is merged or deployed before gate (i).
 
 ### 8.2 Verification plan
+
+Section 13 is the authority on what must pass and how it is checked; this table lists the checks in the order they are run.
 
 | Area | Check | Pass condition |
 |---|---|---|
@@ -1084,34 +1103,38 @@ Prices use tabular figures. The customer text-size setting (G-18) scales the roo
 | Types | `tsc --noEmit` | 0 errors; no suppressions in the tree (searched for in CI) |
 | Unit | `vitest run` | Pricing, promo, delivery fee, stock cap, merge rules, validators all pass |
 | Parity | Section 2 checklist, each of the 354 items ticked against a Playwright test or a recorded manual check on a staging Supabase project | 354 of 354 |
-| Viewports | Playwright screenshots of every route at 360, 390, 768, 1024, 1280, 1536 | No horizontal scroll, no overlap, no clipped text |
-| Accessibility | `@axe-core/playwright` on every route in both themes; manual keyboard and screen-reader pass through shop → product → cart → checkout and through admin orders | No WCAG 2.2 AA violations; zoom allowed; visible focus; dialogs trap and return focus |
-| Lighthouse | Mobile, production build, on home, shop, product, cart, checkout, track | 90 or more in all four categories (cart, checkout and track assessed on the three categories other than SEO, as they are deliberately `noindex`, and separately confirmed as `noindex`) |
+| End-to-end | `playwright test` with the `phone` (390 × 844, touch) and `desktop` (1280 × 800) projects; the flows are listed in section 13 (b) | Every flow passes in both projects |
+| Mobile checklist | Section 12.9, every entry, checked at 360, 390 and 430 px | Every entry ticked, with the test or screenshot that shows it |
+| Viewports | Playwright screenshots of every route at 360, 390, 430, 768, 1024, 1280, 1536, in light and dark | No horizontal scroll, no overlap, no clipped text, nothing hidden behind a fixed bar |
+| Accessibility | `@axe-core/playwright` on every route in both themes; manual keyboard and screen-reader pass through shop → product → cart → checkout and through admin orders | No WCAG 2.2 AA violations; zoom allowed; visible focus; dialogs and sheets trap and return focus |
+| Lighthouse | Mobile, production build on a preview deployment, on home, shop, product, cart, checkout, track | 90 or more in all four categories, LCP under 2.5 s, CLS under 0.1, and the budgets of 12.6 met (cart, checkout and track are deliberately `noindex`, which Lighthouse counts against SEO; see gate (h) in section 13 and decision 12 in 9.6) |
 | Security headers | Response check on a preview deployment | HSTS, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`, and a CSP with nonces and no `'unsafe-inline'` script |
 | Database | Policy tests as `anon`, customer, editor, super admin, owner | Each role can do exactly what section 10 specifies and nothing more |
 | SEO assets | Automated check | Unique title and description per route; canonical; Open Graph and Twitter images that resolve; `sitemap.xml` with products; `robots.txt`; favicon set; both manifests valid |
 | Redirects | Scripted requests for every row of the URL map in 3.5 | Expected status and target |
-| Payments | Staging walk-through: place order, upload receipt, staff confirm, stock reduced, emails sent; forced failure shows an error and keeps the cart | As described |
+| Payments | Staging walk-through on a phone: place order, upload receipt from the photo library, staff confirm from a phone, stock reduced, emails sent; forced failure shows an error and keeps the cart | As described |
+| Independent review | Section 13 (f) | No open finding |
+| Owner approval | Section 13 (i) | Given in writing on the pull request |
 
 ### 8.3 Effort estimate
 
 | Phase | Working days |
 |---|---|
-| 0 Foundations | 3 |
-| 1 Design system | 4 |
-| 2 Catalogue | 7 |
-| 3 Cart, checkout, orders | 6 |
+| 0 Foundations | 3.5 |
+| 1 Design system, phone first | 5.5 |
+| 2 Catalogue | 9 |
+| 3 Cart, checkout, orders | 7 |
 | 4 Authentication and account | 5 |
 | 5 Content pages | 3 |
-| 6 Admin | 14 |
+| 6 Admin, usable from a phone | 15.5 |
 | 7 Consent, analytics, PWA | 4 |
 | 8 Hardening and SEO | 3 |
-| 9 Verification and cut-over | 5 |
-| **Total** | **54** |
+| 9 Quality gates and cut-over | 7 |
+| **Total** | **62.5** |
 
-Revised from 51.5 days after the line-by-line read of the admin and the content pages: the admin gained 51 checklist items (variant editor, per-customer visit history, compose, export contracts, staff sign-up rules) and 12 newly verified defects (BUG-19 to BUG-29, SEC-26), so Phase 6 moves from 12 to 14 days; the content pages gained 11 items and four defects, so Phase 5 moves from 2.5 to 3 days.
+The estimate has been revised twice. It moved from 51.5 to 54 days after the line-by-line read of the admin and the content pages: the admin gained 51 checklist items (variant editor, per-customer visit history, compose, export contracts, staff sign-up rules) and 12 newly verified defects (BUG-19 to BUG-29, SEC-26), so Phase 6 moved from 12 to 14 days; the content pages gained 11 items and four defects, so Phase 5 moved from 2.5 to 3 days. It then moved from 54 to 62.5 days when the mobile-first work of section 12 and the gates of section 13 were made part of the phases: Phase 0 +0.5 (phone and desktop test projects, screenshot run, Lighthouse budgets), Phase 1 +1.5 (bottom sheet, sticky action bar, safe-area utilities, bottom navigation), Phase 2 +2 (swipe gallery and viewer, size-guide sheet, sticky add-to-bag bar, filter sheet), Phase 3 +1 (one-thumb cart and checkout, keyboards and inline validation), Phase 6 +1.5 (admin phone layouts, from 14 to 15.5) and Phase 9 +2 (mobile test suite, screenshots, Lighthouse runs, independent review and one round of fixes).
 
-The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and that the live schema matches what the client code implies. Card payments through Monnify are not included (about 4 further days if approved).
+The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and that the live schema matches what the client code implies. A second round of review fixes is not included. Card payments through Monnify are not included (about 4 further days if approved).
 
 ### 8.4 Risks and mitigations
 
@@ -1127,6 +1150,9 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 | Orders arriving during cut-over | Launch in a quiet window; the database is unchanged, so no order is lost; old pages keep working until DNS points to the new deployment |
 | Tracked product photographs are of mixed size and ratio | Fixed 4:5 and 3:4 frames with `object-fit: cover`; flag unsuitable images to the owner before launch |
 | Scope creep in the admin (twelve views) | The parity checklist is the scope; additions go to a follow-up list |
+| Existing product photographs are too heavy or the wrong ratio for the image budgets in 12.6 | Budgets are enforced on the rendered sizes, not the originals; images that cannot meet them at acceptable quality are listed for the owner (9.4) before Phase 2 ends |
+| Phone behaviour differs between emulation and real devices (keyboard, safe areas, the round trip to a banking app) | The Playwright phone project is the gate, and the checkout, receipt upload and admin payment confirmation are also walked through on a real Android phone and a real iPhone before the pull request (8.2) |
+| Lighthouse scores vary between runs | Three runs per page with the median reported, on a preview deployment, with the version recorded (section 13, gate (h)) |
 
 ---
 
@@ -1138,6 +1164,8 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 2. The source of the edge functions `send-contact-email`, `send-admin-reply`, `send-user-welcome` and `send-order-email`, and the SQL of the order-email trigger.
 3. A staging Supabase project (or approval to create one) for rehearsal.
 4. Confirmation of the Supabase plan, specifically whether image transformation is enabled.
+5. An export of device brand, model and viewport width from the `site_visits` table (N-03), or read access to it, so that the phone widths in section 12.2 can be checked against real visitors.
+6. The phones the owner and staff use to manage the shop (make and model), so the admin is tested on them, and the name of the person who will give the final approval on the pull request (gate (i), section 13).
 
 ### 9.2 Environment variable names (values to be set in Vercel, never committed)
 
@@ -1160,6 +1188,7 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 - Product photography review: every product needs at least one 4:5 image of 1600 × 2000 px; the owner to confirm which current images should be re-shot.
 - Measuring diagrams for the size guide (bust, underbust, waist, hips) or approval for simple line drawings to be commissioned.
 - A neutral fallback tile for products without an image (to replace the external placeholder service).
+- Approval for a maskable app icon to be drawn from the monogram with the required safe zone (the manifests reuse the ordinary 192 px icon today: `site.webmanifest:26-31`).
 
 ### 9.5 Copy and content
 
@@ -1169,6 +1198,7 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 - The delivery states and fees to be shown, and whether delivery outside the seven listed states is offered (the home page says "Nationwide shipping", the checkout offers seven states).
 - The returns policy in two sentences for product pages and checkout.
 - Bank details to display at checkout, held in one place.
+- Whether checkout must accept phone numbers from outside Nigeria (section 12.5 validates Nigerian numbers unless told otherwise).
 - Review of the FAQ, privacy policy and terms; these will be carried over verbatim unless edited.
 - Real testimonials with permission, or agreement to omit the section until there are some.
 
@@ -1184,6 +1214,9 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 8. **Visit tracking.** Whether to keep storing visitor IP addresses, and for how long.
 9. **Account deletion.** Whether "delete" should remove the Auth user after 30 days, as the confirmation email promises (`assets/js/dashboard.js:1200`).
 10. **The other branch.** Permission to delete `copilot/vscode-mla2s7fz-afeb`.
+11. **Mobile navigation in the account.** A shop-wide bottom navigation (Shop, Search, Wishlist, Bag, Account) with the five account sections as a tab row under the header (recommended), or the present account-only bottom bar with the shop navigation hidden on `/dashboard` (section 12.3).
+12. **Lighthouse SEO on `noindex` pages.** `/cart`, `/checkout` and `/track` are deliberately `noindex`, which Lighthouse counts against the SEO category. Accept 90 or more in the other three categories for those pages (recommended), or make them indexable (section 13, gate (h)).
+13. **Units in the size guide.** Inches are shown today for bras and panties only. Keep that (recommended for launch), or also offer inches for loungewear, bodysuits and the calculator, converted from the centimetre figures (section 12.7).
 
 ---
 
@@ -1235,8 +1268,507 @@ These govern the rebuild. Any change that cannot meet them is fixed at its cause
 - The design must not look AI-built. No purple, blue or pink gradients, no gradient text, no neon glows, no glassmorphism, no blurred blobs. No emoji as icons and no mixed icon sets. Not the stock template (centred hero with two buttons, three identical feature cards, testimonials, call-to-action banner). Not every card in `rounded-2xl` with `shadow-lg` and hover-scale.
 - This copy is not used: "Unlock", "Elevate", "Seamless", "Revolutionize", "Supercharge", "Empower", "Next-level", "Your all-in-one solution", "Built for the future". Copy is plain, specific and in a human voice.
 - Motion is subtle, quick and purposeful.
+
+**Mobile and gates**
+- Mobile first: every screen is designed and built at 360, 390 and 430 px before any wider layout, to the rules of section 12 (44 px targets, 16 px text and controls, safe-area insets, correct keyboards and autofill, the budgets of 12.6). A screen that is right on desktop and wrong on a phone is not done.
+- Nothing is called done until every gate in section 13 passes; no check is silenced, skipped or loosened to get there.
 - Instead: a design system for the project (colour tokens, a type scale, a 4/8-based spacing scale, one radius scale, one shadow scale); a restrained palette (one primary, at most one accent, a well-built neutral scale); a deliberate font pairing; a strong grid and generous white space; one icon set; real images through `next/image` with correct `sizes` and alt text.
 
 ---
 
-No rebuild work will start until the owner approves this plan.
+## 12. Mobile first (the priority)
+
+Most customers of this shop arrive on a phone, from Instagram, TikTok or a WhatsApp link (`assets/js/config.js:25-29`), and the owner is likely to manage orders from a phone as well. The phone is therefore the primary design target for every page, the storefront and the admin alike; tablet and desktop layouts are derived from it. This section records what the code does on a phone today, what the rebuild will do instead, and a checklist for every page. It is part of the build order (section 8.1) and of the gates (section 13), not an addition after the fact.
+
+### 12.1 Present mobile state (evidence)
+
+Read from the code; nothing in this table was measured on a device.
+
+| Area | What the code does today | Evidence | What must change |
+|---|---|---|---|
+| Viewport | Every one of the sixteen pages sets `maximum-scale=1, user-scalable=no`, with `interactive-widget=resizes-content` and `viewport-fit=cover` | `home.html:9-10`, `checkout.html:9-10`, `admin.html:9-10` (identical on all pages) | Allow zoom (A11Y-01). Keep `viewport-fit=cover` and `interactive-widget=resizes-content` |
+| Breakpoints | Written desktop-first: base rules, then `max-width` overrides. 40 distinct media queries in the storefront stylesheet; the most used are `max-width: 480px` (59 blocks), `768px` (49), `640px` (34), `380px` (27) and `360px` (21). The admin stylesheet has 18 distinct queries | `assets/css/styles.css` and `assets/css/admin.css` (counted with a pattern search) | One mobile-first set (7.4): base styles are the 360 px layout; `min-width` queries only |
+| Horizontal scroll | Overflow is hidden rather than prevented: `overflow-x: hidden` on `html` and `body`, further `!important` overrides in the phone blocks, and a script that resets the horizontal scroll position after each checkout step | `assets/css/styles.css:255`, `:265`, `:26861`, `:27007`, `:27162`; `assets/js/checkout.js:193-197` | No element may be wider than the viewport; no `overflow-x: hidden` on the root as a mask |
+| Header | Fixed, 72 px high, with the top safe-area inset applied as padding inside that fixed height, so the inset eats into the bar on notched phones. A 64 px mobile height token is defined and never used | `assets/css/styles.css:1460-1466`, `:234-235` | Header height grows by the inset; 56 px on phones |
+| Header actions on a phone | Below 768 px the search and account buttons are hidden; only the bag and the menu remain. The search overlay opens only from that hidden button or from Ctrl/Cmd+K, and the mobile drawer has no search entry, so product search (G-06) cannot be reached on a phone outside the shop page's own search box | `assets/css/styles.css:1578-1589`; `assets/js/app.js:1939-1941`, `:1963-1970`; `home.html:329-480` | Search, wishlist, bag and account one tap away in the bottom navigation (12.3) |
+| Safe-area insets | Used in five places only: header, drawer header, dashboard bottom bar, dashboard content padding, and the WhatsApp button on the dashboard. Not applied to the toast, the WhatsApp button elsewhere, the install banner or the cart drawer; not used anywhere in the admin stylesheet | `assets/css/styles.css:1466`, `:12532`, `:13196`, `:16083`, `:16119`; toast `:1411-1413`; WhatsApp `:12913-12916`; install banner `:11958-11966` | Every fixed or sticky element uses the insets (12.5) |
+| Fixed and sticky elements | 37 `position: fixed` or `sticky` declarations in the storefront stylesheet and 11 in the admin. Z-indices are set outside the token scale (`9999 !important`, `10000 !important`, `99999`) | `assets/css/styles.css:1675`, `:4889`, `:6080`, `:11963`, `:19783` | One layering scale; an inventory of fixed elements per page (12.5) |
+| Viewport units | `100vh` is used 18 times in the storefront stylesheet and `100dvh` twice; the quick view is capped at `90vh`, which is taller than the visible area when the browser bars are showing | `assets/css/styles.css:264`, `:4905`, `:9442`, `:6078-6079` | `dvh`/`svh` units for full-height sheets and drawers |
+| Tap targets below 44 px | Wishlist heart on cards 34 px; quick-view close 32 px on phones; cart-drawer steppers 28 px (24 px below 480 px, 36 px on touch devices); cart-page steppers 36 px; cart edit and remove 32 px; checkout edit button, copy-account button and receipt remove 28 px; sign-in close 34 px; dashboard bottom-bar labels at 0.62 rem with 0.3 rem padding | `assets/css/styles.css:4476-4481`, `:2986-2992`, `:9449-9454`, `:6300-6302`, `:9588-9591`, `:9785-9788`, `:6773-6775`, `:6829-6834`, `:12173-12175`, `:11826-11828`, `:10614-10619`, `:10718-10720`, `:8628-8638`, `:16087-16098` | 44 px minimum everywhere, 48 px for primary actions (12.3) |
+| Tap targets that are adequate | Header buttons 48 px; size buttons raised to 44 px and quantity buttons to 44 px on touch devices; lightbox close 44 px and arrows 48 px | `assets/css/styles.css:1591-1594`, `:9768-9783`, `:6542-6547`, `:6578-6583` | Keep the sizes |
+| Text size | The base is 16 px, but a pattern search finds 1,165 font-size declarations below 16 px in the storefront stylesheet. Examples on phones: buttons 14 px, card names 13 px, track input 14 px, sign-in inputs 0.9 rem, dashboard selects 0.82 rem, size tables 11 px. Inputs below 16 px make iOS Safari zoom on focus, which the disabled zoom currently hides | `assets/css/styles.css:151`, `:616`, `:9361-9362`, `:20276`, `:8792`, `:16901`, `:20405-20408` | 16 px body and 16 px form controls (12.4) |
+| Product gallery | Previous and next arrows, thumbnails, and a full-screen viewer opened by double-click or double-tap. There are no touch handlers on the gallery, so it cannot be swiped; swipe exists only in the admin image viewer. The viewer has arrows, a counter and a download button, and no pinch-zoom | `assets/js/shop.js:995-1015`, `:1376-1446`, `:1940-1962`; `assets/js/admin.js:1201` | Swipe, counter and pinch-zoom (12.7) |
+| Gallery images | The main quick-view image is cropped to a square on phones although product photographs are 4:5; it is loaded from the original URL at full size, while cards request a 400 px rendition. Thumbnails have no `alt`. No `<img>` in any page or script carries `width` and `height`. A `srcset` helper exists and is never called | `assets/css/styles.css:5017-5019`, `:9468-9470`; `assets/js/shop.js:588`, `:595`, `:202-203`, `:222`; `assets/js/utils.js:468-492` | 4:5 frames, responsive sources, reserved space (12.6, 12.7) |
+| Quick view on a phone | Below 480 px it is a bottom sheet with its own inner scroll. "Add to Cart" sits inside the scrolling area after description, size, colour and quantity, and a chevron "scroll hint" is added to tell the customer there is more below | `assets/css/styles.css:9440-9460`, `:5630-5634`; `assets/js/shop.js:663-677`, `:965-984` | Sticky add-to-bag bar (12.7) |
+| Home cards | On touch devices the first tap on a new-arrival card reveals its buttons and a second tap acts | `assets/js/home.js:535-561` | One tap opens the product |
+| Size guide from a product | A plain link to `/size`, which leaves the product and discards the chosen size, colour and quantity | `assets/js/shop.js:619` | Bottom sheet over the product (12.7) |
+| Size tables | Four charts of five columns each. Bras and panties give centimetres and inches side by side as separate columns; loungewear and bodysuits are in centimetres only; the calculator takes centimetres only. There is no unit switch. Below 640 px the tables are given a 480 px minimum width, 11 px text and horizontal scrolling. The calculator inputs are `type="number"` without `inputmode`, are read with `parseInt`, and report errors with `alert()` (BUG-32) | `size.html:463-469`, `:545-551`, `:615-617`, `:683-686`, `:796-813`; `assets/css/styles.css:20395-20410`; `assets/js/size.js:28-33` | Tables that fit 360 px (12.7) |
+| Checkout fields | `type` and `autocomplete` are largely correct already: `given-name`, `family-name`, `email` (`type="email"`), `tel` (`type="tel"`), `street-address`, `address-level2`, `address-level1`; landmark and notes are `off`. No field anywhere in the product has `inputmode` or `enterkeyhint` | `checkout.html:571-613`, `:659-717` | Complete the attributes (12.5) |
+| Checkout validation | Checks only that required fields are not empty; marks the border red and shows one generic toast. No format check on email or phone | `assets/js/checkout.js:205-231` | Inline messages per field (12.5) |
+| Checkout primary action | "Place Order" is the last element of the order-summary panel, below the three steps; it is not fixed. Step edit buttons are 28 px | `checkout.html:956-962`; `assets/css/styles.css:11444-11451`, `:11826-11828` | Bottom-anchored action bar (12.3) |
+| Receipt upload | A hidden file input inside a label, accepting `image/*,.pdf`; no `capture` attribute, so the phone offers the photo library and files | `checkout.html:876-881` | Keep this behaviour; enlarge the target |
+| Account forms | Profile and address fields carry `autocomplete`; the date-of-birth field uses `autocomplete="birthday"`, which is not a valid token (the token is `bday`); the address form takes the state as free text although checkout uses a list | `dashboard.html:575-621`; `assets/js/dashboard.js:548-574` | Correct tokens; one state list |
+| Keyboard handling | Focused fields are scrolled to the centre after 350 ms on user agents that look mobile; the sign-in modal is repositioned from `visualViewport` | `assets/js/app.js:3007-3021`; `assets/js/auth.js:176-195` | Layout that does not need scripting (12.5) |
+| Dashboard | A five-item bottom bar (Home, Profile, Orders, Address, Settings) below 768 px, with the bottom inset | `dashboard.html:1036-1052`; `assets/css/styles.css:16072-16121` | See 12.3 and decision 11 in 9.6 |
+| WhatsApp button | Fixed 24 px from the bottom-right corner, 60 px (52 px below 480 px), shown after a delay; moved above the bottom bar only on the dashboard | `assets/css/styles.css:12913-12935`, `:13186-13199` | Positioned from the insets and above any bottom bar |
+| Themes | Light, dark and system exist in both the storefront and the admin (344 and 76 dark-theme selectors). `theme-color` is the brand pink on every page; the manifest uses `#0b0b0f` | `assets/css/styles.css:7481`; `home.html:18`; `site.webmanifest:9-10` | Both themes kept and checked on every page (12.8) |
+| Fonts and icons | A render-blocking Google Fonts stylesheet requesting nine weights (Inter 300–700, Cormorant Garamond 400–700) and the whole Font Awesome stylesheet from a CDN | `home.html:61-71` | Self-hosted subset fonts; one tree-shaken icon set (12.6) |
+| Admin on a phone | Same viewport restrictions. The sidebar becomes a drawer below 992 px; tables become stacked rows below 768 px; buttons, navigation items and pagination get a 44 px minimum on touch devices, but product-card buttons stay at 40 px and toggles at 40 px. The messages view switches to list-then-detail at 900 px and below (MM-06). Scrollbars are hidden on phones. Price and quantity fields are `type="number"` without `inputmode`. The bulk-actions bar is styled as fixed 24 px from the bottom with no inset, and is in any case never displayed (BUG-19). No safe-area inset is used anywhere in the admin stylesheet. The receipt opens as a link in a new tab. The customers table is not paginated (MC-08) | `assets/css/admin.css:4081-4098`, `:4347-4364`, `:5171-5196`, `:179-186`, `:958-960`; `admin.html:1300`, `:1351`, `:1454`; `assets/js/admin.js:3248` | Admin phone layouts (12.7) |
+| Service worker | Pre-caches fourteen page URLs and four icons; navigations are network-first with the cached page or `/home` as the fallback; CSS and JavaScript are deliberately never cached, so a page served offline arrives without its stylesheet or scripts. Images are served stale-while-revalidate; an offline image request gets a transparent 1 × 1 GIF | `sw.js:13-33`, `:110-126`, `:129-138`, `:140-187` | A styled offline page and cached static assets (12.8) |
+| Manifests and install | Both manifests declare `"scope": "/"`, while the admin worker is registered with the `/admin` scope. The same 192 px icon is declared as the maskable icon. The install banner is fixed to the bottom at z-index 99999 with no inset and appears three seconds after the browser offers installation (five seconds on iOS). Push handlers exist in the worker; nothing in the scripts subscribes to push | `site.webmanifest:6-7`, `:26-31`; `admin.webmanifest:6-7`; `assets/js/app.js:2203-2219`, `:2330-2335`; `assets/css/styles.css:11958-11975`; `sw.js:193-214` | 12.8 |
+
+Lighthouse on the present static shell is in section 4.1; it already reports `meta-viewport` (zoom disabled) as a failure.
+
+### 12.2 Layouts designed at 360, 390 and 430 px first
+
+- Every screen is drawn and built at **360 px** (the narrowest phone still common on Android), **390 px** and **430 px** before any wider layout exists. The 360 px layout is the base stylesheet; wider layouts are added with `min-width` queries at the breakpoints of 7.4 (480, 768, 1024, 1280, 1536).
+- Side gutter 16 px at all three widths. Content never depends on a particular width between 360 and 430: tiles and fields are fluid, and nothing is positioned with fixed pixel offsets from both sides.
+- The acceptance check at each of the three widths is the same: no horizontal scroll, no text clipped or truncated where it carries meaning (product names may wrap to two lines; prices never wrap or truncate), the primary action visible without scrolling on arrival where 12.3 says so, and nothing under a fixed bar.
+- A product name of 60 characters, a price of `₦1,250,000`, a seven-size product, a ten-colour product, a bag of twelve lines and an account with no orders are used as the test content, so the layouts are proved against awkward data and not only the tidy case.
+- The first-party visit records already store device brand, model, screen and viewport size (N-03); the owner is asked in 9.1 for that breakdown so the three widths can be confirmed against real visitors before Phase 1 ends.
+
+### 12.3 Thumb reach, primary actions and tap targets
+
+**Bottom navigation (storefront, below 768 px).** Five destinations: Shop, Search, Wishlist, Bag (with the live count, G-03) and Account (initials when signed in, G-02). It suits this product because the present header hides search and account on phones (12.1), the wishlist is two taps deep in the drawer, and the dashboard already uses a bottom bar. The bar is 56 px high plus the bottom inset, labels are 12 px under 24 px icons, and each item is at least 64 px wide. The header keeps the wordmark, the menu button (categories, support and legal links, theme) and nothing else on phones. The bottom navigation is not shown on `/checkout` (a focused flow with its own action bar) or in the admin.
+
+**Account sections.** The dashboard's five sections become a horizontally scrolling tab row directly under the header, so that the global bottom navigation stays in place with Account highlighted. This keeps what D-02 provides (one tap between the five sections on a phone) in a different position; because it changes where an existing control sits, it is held for the owner as decision 11 in 9.6. If the owner prefers the present arrangement, the dashboard keeps its own bottom bar and the global one is hidden there.
+
+**Primary action per page, in the thumb zone.**
+
+| Page | Primary action on a phone | Placement |
+|---|---|---|
+| Product page and quick view | Add to bag | Sticky bar at the bottom: price, chosen size and colour in one line, and a 48 px full-width button. Until a size is chosen the button reads "Select a size" and opens the size picker. The bar replaces the bottom navigation on the product page |
+| Shop | Filter and sort | A two-button bar (Filter with the active count, Sort) pinned under the header while scrolling up, opening bottom sheets; "Show N items" at the bottom of the filter sheet |
+| Cart | Checkout | Sticky bar above the bottom navigation: total and a 48 px "Checkout" button |
+| Checkout | Continue, then Place order | One bottom-anchored bar whose label follows the step ("Continue to delivery", "Continue to payment", "Place order — ₦…"). The order total is always in the bar |
+| Confirmation | Track this order | Full-width button under the order number; WhatsApp as the secondary action |
+| Track | Track order | Button directly under the two fields |
+| Wishlist | Add to bag on each tile | 44 px button under each tile |
+| Contact, size calculator, sign-in, profile, address | Submit | Full-width 48 px button at the end of the form, never under the keyboard |
+| Admin order detail | Confirm payment / next status | Bottom action bar (12.7) |
+
+**Tap targets.** Every interactive element is at least 44 × 44 px, with at least 8 px between adjacent targets; primary buttons are 48 px high. Where the visible control is smaller by design (the wishlist heart on a tile, a remove icon, a copy icon, a close button), the hit area is extended to 44 px. This applies in particular to the elements listed as too small in 12.1. Destructive actions (remove from bag, clear bag, cancel order, delete address) are never adjacent to the primary action.
+
+### 12.4 Type, line length and no horizontal scroll
+
+- Body text is 16 px (`body`, 7.3) on phones; nothing a customer must read to buy is below 14 px (`body-sm`: secondary lines, table cells), and 12 px (`caption`) is reserved for timestamps and meta. The present 11 px table text, 0.62 rem tab labels and 13 px product names go.
+- **All form controls are 16 px or larger**, so iOS Safari does not zoom on focus and zoom no longer has to be disabled. Pinch-zoom is allowed on every page (`user-scalable=no` and `maximum-scale=1` are removed).
+- Line length: at 360–430 px with 16 px gutters, body copy runs to roughly 40–50 characters; long-form pages (FAQ answers, privacy, terms) keep the 680 px reading width of 7.4 on larger screens. No justified text.
+- Headings use the mobile sizes already set in 7.3 (for example `display-xl` 40/44 below 768 px) and may wrap; no heading is scaled with viewport units alone.
+- Prices use tabular figures and `white-space: nowrap`.
+- The customer text-size preference (G-18) scales the root size; the layouts are checked at the large setting at 360 px.
+- No horizontal page scroll at any width from 360 px upwards. The only horizontally scrolling regions are deliberate ones with visible affordance: the new-arrivals row, the gallery, the account tab row and filter chips. A Playwright assertion (`document.documentElement.scrollWidth <= clientWidth`) runs on every route at 360, 390 and 430 px.
+
+### 12.5 Sticky bars, safe areas and forms
+
+**Fixed and sticky elements.** One inventory, one layering scale, and insets everywhere.
+
+| Element | Position on a phone | Rule |
+|---|---|---|
+| Header | Sticky top, 56 px plus `env(safe-area-inset-top)` | Content starts below it; in-page anchors use `scroll-margin-top` equal to the header height |
+| Bottom navigation | Fixed bottom, 56 px plus `env(safe-area-inset-bottom)` | The page reserves the same height as bottom padding, so the footer and last line are never covered |
+| Sticky action bars (add to bag, checkout, place order, admin actions) | Fixed bottom, above or instead of the bottom navigation, with the bottom inset | Hidden while the on-screen keyboard is open, so they never cover the field being typed in |
+| Shop filter and sort bar | Sticky under the header | Appears on scroll up, leaves on scroll down |
+| WhatsApp button (G-10) | 48 px, bottom right, offset by the height of whatever bar is present plus 16 px plus the inset | Never overlaps a bar, a toast or the last tile's button |
+| Toasts (G-12) | Above the bottom bars, inside the insets | Announced through a live region (A11Y-05) |
+| Consent dialog (G-11), install prompt (Q-05) | Bottom sheet inside the insets | Never shown over an open sheet or the checkout action bar |
+| Sheets and drawers (bag, filters, size guide, quick view, sign-in) | `100dvh` maximum, their own scroll, bottom inset on the last control | Background inert; focus trapped and returned; closed by the close button, the backdrop, Escape and a downward drag |
+
+Left and right insets are applied to the page gutters for landscape use. The `theme-color` meta follows the theme (12.8).
+
+**Forms.** Every field has a visible label above it (no placeholder-only labels), a 16 px control at least 48 px high, the attributes below, and validation that runs when the field loses focus and again on submit. An error appears as text directly under the field, tied to it with `aria-describedby`, and the first invalid field receives focus; errors are never shown by colour alone (A11Y-04). The same zod schema validates on the server. Checkout and contact values continue to survive a reload (G-16). `enterkeyhint="next"` is set on every field but the last of a form, which takes `done` or `send`.
+
+*Checkout (`/checkout`), K-02 and K-04:*
+
+| Field | `type` | `inputmode` | `autocomplete` | Other attributes and validation |
+|---|---|---|---|---|
+| First name | `text` | — | `given-name` | `autocapitalize="words"`; required |
+| Last name | `text` | — | `family-name` | `autocapitalize="words"`; required |
+| Email | `email` | `email` | `email` | `autocapitalize="none"`, `spellcheck="false"`; required, valid address |
+| Phone | `tel` | `tel` | `tel` | Required; accepts `0XXXXXXXXXX` or `+234XXXXXXXXXX`, stored in international form (see 9.5 for numbers outside Nigeria) |
+| Saved address (K-05) | `select` | — | `off` | Fills the fields below |
+| Address | `text` | — | `shipping address-line1` | Required. (`street-address`, used today, is meant for a multi-line control) |
+| City | `text` | — | `shipping address-level2` | `autocapitalize="words"`; required |
+| State | `select` | — | `shipping address-level1` | Options from the delivery-fee table (SC-05), not typed twice (STR-09); the total updates on change (K-07) |
+| Landmark | `text` | — | `off` | Optional |
+| Order notes | `textarea` | — | `off` | Optional; 500-character limit shown |
+| Payment method (K-08) | `radio` | — | — | Each option a 56 px row; "Pay with card" shown as unavailable |
+| Receipt (K-10) | `file` | — | — | `accept="image/*,application/pdf"`, no `capture`, so the customer can pick the screenshot their banking app has just saved or take a photograph; 5 MB limit explained before selection and enforced on the server |
+| "I have sent the payment" (K-11) | `checkbox` | — | — | 44 px row; replaces the present two-second timer |
+
+*Cart (`/cart`):* promo code — `type="text"`, `autocomplete="off"`, `autocapitalize="characters"`, `spellcheck="false"`, `enterkeyhint="done"`; delivery state — `select` from the same fee table.
+
+*Sign-in, sign-up and password forms (A-01 to A-07, M-01 to M-04):* sign-in email — `type="email"`, `inputmode="email"`, `autocomplete="username"`; sign-in password — `autocomplete="current-password"`; sign-up first and last name — `given-name`, `family-name`; sign-up email — `autocomplete="email"`; new password and confirmation — `autocomplete="new-password"`; the show/hide toggle (A-15) is a 44 px button. The password rules (A-03) are listed under the field and tick off as they are met.
+
+*Account (`/dashboard`):* profile first name `given-name`; last name `family-name`; email `type="email"`, read-only; phone `type="tel"`, `inputmode="tel"`, `autocomplete="tel"`; date of birth `type="date"`, `autocomplete="bday"`; gender `select`, `autocomplete="sex"`; WhatsApp number (D-12) `type="tel"`, `inputmode="tel"`, `autocomplete="tel"`. Address form: label `text`, `autocomplete="off"`; street `address-line1`; city `address-level2`; state `select` with `address-level1` and the same list as checkout; phone `tel`.
+
+*Contact (`/contact`), P-01:* name `autocomplete="name"`; email `type="email"`, `inputmode="email"`, `autocomplete="email"`; phone `type="tel"`, `inputmode="tel"`, `autocomplete="tel"`; subject `select`; order number `type="text"`, `autocapitalize="characters"`, `autocomplete="off"`, with the real format `LBS-DDMMYYYY-NNNN` as the hint (the present placeholder shows a format the shop does not issue: `contact.html:459-465`); message `textarea`, `enterkeyhint="send"` on the form's last control.
+
+*Track (`/track`):* order number `type="text"`, `autocapitalize="characters"`, `spellcheck="false"`, `autocomplete="off"`; email `type="email"`, `inputmode="email"`, `autocomplete="email"` (or phone, per decision 2 in 9.6).
+
+*Search (overlay, shop, FAQ, admin lists):* `type="search"`, `inputmode="search"`, `enterkeyhint="search"`, `autocomplete="off"`, with a 44 px clear button.
+
+*Numbers:* quantity inputs `type="text"`, `inputmode="numeric"`, `pattern="[0-9]*"`; price filter (S-04) the same; size calculator (P-08) `inputmode="decimal"` with the unit shown in the label, and its result shown in the page instead of an alert; admin price and stock fields `inputmode="numeric"`.
+
+*Reviews (S-24, G-20):* name `autocomplete="name"`, email `type="email"`, title and comment with `autocapitalize="sentences"`; star rating as five 44 px radio buttons.
+
+### 12.6 Performance on a mid-range Android over mobile data
+
+**Targets.** Measured with Lighthouse in its default mobile configuration (emulated mid-range Android, throttled mobile network) against a production build on a Vercel preview, three runs per page, median taken:
+
+- Performance, Accessibility, Best Practices and SEO each 90 or more (gate (h), section 13);
+- Largest Contentful Paint under 2.5 s; Cumulative Layout Shift under 0.1; Total Blocking Time under 200 ms;
+- Interaction to Next Paint under 200 ms. Lighthouse does not report INP in a page-load run, so it is checked separately: the Playwright phone project replays the key interactions (open the filter sheet, choose a size, add to bag, change a quantity, move between checkout steps) under 4× CPU throttling and asserts that the longest interaction, read from the browser's Event Timing entries, is under 200 ms.
+
+None of these figures has been measured for the rebuild; they are targets. The present figures for the static shell are in 4.1.
+
+**Budgets (compressed transfer size unless stated).**
+
+| Item | Budget |
+|---|---|
+| JavaScript on first load, storefront routes | 180 KB per route |
+| JavaScript on first load, admin routes | 300 KB; jsPDF and AutoTable load only when an export is requested and are not part of this figure |
+| CSS | 40 KB in total (the present stylesheet is 612 KB uncompressed, PERF-01) |
+| Fonts | Two families, at most six WOFF2 files, Latin subset, 150 KB in total; only the body regular weight and the display weight used above the fold are preloaded; `font-display: swap` with size-adjusted fallbacks so the swap does not move the layout |
+| Hero image (LCP on home) | 160 KB at phone widths, AVIF or WebP, preloaded with `fetchpriority="high"`; its URL is rendered on the server, not swapped in after load (PERF-04) |
+| Product tile image | 35 KB each at phone widths (two columns: `sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"`) |
+| Product gallery image | 140 KB at phone widths (`sizes="100vw"` below 768 px); the first is eager, the rest lazy |
+| Total transfer before scrolling, home and shop | 900 KB |
+| Total transfer before scrolling, other pages | 700 KB |
+| Third-party scripts before interaction | None. reCAPTCHA loads when the sign-in sheet opens; GA4 and Meta Pixel load only after consent (SEC-21); no geo-IP request from the browser (PERF-05) |
+| Requests to render the first screen | 25 or fewer |
+
+**How the budgets are met.** Server-rendered pages with the product data in the HTML; `next/image` with explicit `width` and `height` (or a fixed aspect-ratio frame) on every image so nothing shifts; the catalogue paginated on the server instead of fetched whole (PERF-02); below-the-fold images lazy; sheets and the admin exports loaded on demand; no `backdrop-filter` layers (PERF-06); hashed static assets cached for a year instead of the present `no-store` and `no-cache` headers (STR-07). The budgets are enforced in CI by the Lighthouse budget file added in commit 6 and by a bundle-size check on the build output.
+
+### 12.7 Touch patterns for this shop
+
+**Product gallery.** A horizontally scrolling strip with CSS scroll-snap (one image per snap, full width, 4:5 frame, edge to edge), so swiping is native and needs no gesture library. A counter ("2 / 5") sits in the bottom corner of the frame and dots are not used above five images. The first image is eager and prioritised; the others are lazy. Every image has reserved space from its aspect ratio, so the gallery never shifts the page. Tapping an image opens the full-screen viewer: swipe between images, pinch to zoom and double-tap to zoom to 2×, pan while zoomed, a 44 px close button inside the top inset, and the counter. Zoom in the viewer is handled with `touch-action` and pointer events; page-level pinch-zoom also remains available everywhere. The "download image" button of the present viewer is kept for parity inside the viewer's menu. On desktop the same component shows thumbnails in a column (7.6).
+
+**Variant and size selection.** Size buttons are at least 48 × 48 px in a wrapping row with 8 px gaps; an unavailable size stays visible, struck through, and is announced as unavailable (S-14). Colour swatches are 44 px with the chosen colour's name written beside the label (S-15); "Assorted" is text, not a swatch. The quantity stepper has 44 px buttons and a numeric field capped by the stock rules (S-16); at the cap the plus button is disabled and the reason is shown ("Only 2 left in this size"). Choosing a variant never scrolls the page.
+
+**Size guide without losing one's place.** "Size guide" beside the size label opens a bottom sheet over the product (and over the quick view) with the chart for that product's category selected, the how-to-measure notes, and the bra calculator; closing it returns to the product with the chosen size, colour and quantity intact. The `/size` page remains (R-12, P-06 to P-08) and shares the same components. Tables are built to fit 360 px without sideways scrolling: the size column is fixed at the left, measurements are ranges in 14 px tabular figures, and every chart keeps all of its data (P-16). The product has no unit switch today: the bra and panty charts print centimetres and inches as adjacent columns, the loungewear and bodysuit charts are in centimetres only, and the calculator takes centimetres (`size.html:463-469`, `:545-551`, `:615-617`, `:683-686`, `:796-806`). Two columns per measurement is what forces the present tables to 480 px. At phone widths each chart therefore shows one unit at a time behind a two-option control (cm / in) placed above the table, with centimetres first; from 768 px both units appear side by side as now. For the two charts that carry inches today the control only changes how existing data is shown. Whether inches should also be offered for loungewear, bodysuits and the calculator (converted from the centimetre figures) is the owner's decision 13 in 9.6; until it is made, those stay in centimetres and show no control.
+
+**Quick view.** On phones a bottom sheet at up to `100dvh` with the same gallery, selectors and sticky add-to-bag bar as the product page, and the product name linking to the full page. One tap on a tile opens the product page; the quick-view and quick-add buttons (H-04, S-19) are visible on the tile without a first "reveal" tap.
+
+**One-thumb bag and checkout.**
+- Adding to the bag confirms in place (the button shows "Added", the count in the bottom navigation updates, and a toast offers "View bag"); the drawer opens as a bottom sheet rather than a 280 px side panel (`assets/css/styles.css:6072-6077`).
+- Bag lines: image, name, size and colour, a 44 px stepper, line total, and "Edit" and "Remove" as text buttons with 44 px targets. Removing shows an undo toast for five seconds instead of a confirmation dialog.
+- The sticky checkout bar shows the total and "Checkout"; the promo field and the delivery estimate sit above it in the summary.
+- Checkout is one column. The order summary is a collapsed row at the top showing the item count and total, expanding in place. Each completed step collapses to a one-line summary with an "Edit" button of 44 px.
+- **Payment hand-off, as the code implements it today and as it stays:** there is no redirect to a payment gateway. The customer transfers the total from their own banking app to the shop's account at Moniepoint MFB and uploads the receipt (`checkout.html:808-929`). On a phone this means leaving the browser and coming back, so the payment step is built for that round trip: the account number and the exact amount each have a 44 px copy button with a "Copied" confirmation; the account name is shown in full; the step states plainly that the page can be left and will be as it was on return (the form state already persists, G-16, and the bag is stored on the device, C-01); the receipt control opens the photo library or files; the selected file is shown with its name and a thumbnail; and "Place order" stays disabled, with the reason beside it, until the receipt is attached and the confirmation is ticked. "Pay with card" remains listed as unavailable (K-08). Payment is confirmed by a member of staff, and the page says so.
+- If placing the order fails, the bag is kept, the error is shown above the action bar, and nothing redirects (BUG-01).
+
+**Confirmation and tracking.** The confirmation shows the order number in large tabular figures with a copy button, what happens next in three sentences, "Track this order" as the primary button and "Message us on WhatsApp" (pre-filled with the order number) as the secondary one. Tracking is a vertical timeline with real timestamps (SC-04), the current step first on a phone, and the lookup fields pre-filled from the link (T-05).
+
+**Account.** Orders are rows that open a full-screen detail on phones; "Cancel order" shows the remaining time (D-06) and sits away from "Track"; a return request opens WhatsApp or the contact form with the order number filled in (D-07). Switches are 44 px rows whose whole width is the target.
+
+**Admin on a phone.** The owner must be able to run the day from a phone, so the four frequent jobs are designed there first: confirming a payment, moving an order on, answering a message and correcting stock.
+- Navigation: a top bar with the view title, and a bottom bar with Orders, Inventory, Messages, Dashboard and More (the remaining views in a sheet, filtered by role). The pending-order and unread-message counts (MD-04) sit on the bottom bar.
+- Orders: a list of rows (order number, customer, item count, total, status badge, time), newest first, ten per page as today (MO-06), with the status filter as chips (MO-07); pull to refresh in addition to the refresh button (MO-02). Order detail is a full screen: status and timeline, items, totals, the delivery address, the customer's phone number as a `tel:` link and a WhatsApp link, and the receipt shown in the page through a signed URL (SC-14), opening in the same pinch-zoom viewer as the storefront. A bottom action bar carries the one valid next step: "Confirm payment" first (the step that is missing today, BUG-22, and that 7.6 adds), then "Process order", "Ship order" and "Mark delivered" (MO-04). "Reject receipt" and "Cancel" (offered while an order is pending or processing, MO-08) sit in an overflow menu behind a confirmation.
+- Inventory and product editor: a single-column form; price and stock with numeric keyboards; images added from the camera or the photo library, several at once, compressed on the device as today (MI-07, MI-17), each with a 44 px remove control (images cannot be reordered today, and reordering is not added without the owner asking); the variant entry row (MI-13) as stacked fields with the quick-size buttons at 44 px, and the variant list (MI-14) as one row per variant with a 44 px stepper; required-field errors shown under the fields (MI-19, BUG-25); a sticky "Save" bar above the inset. Bulk selection uses a bar inside the inset that is actually shown (BUG-19).
+- Messages: list, then detail with the reply box fixed above the keyboard (MM-06); status chips and the category list in a filter sheet (MM-07); compose as a full screen with the recipient search and sender address as 48 px rows (MM-10, MM-11).
+- Customers, reviews, staff, activity, trash: stacked rows with a label before each value, as the present card layout does (M-29), and the row's actions in a sheet with text labels instead of seven icon-only buttons (A11Y-11). The customer list is paginated on the server (PERF-07). The customer detail, including the visit history table (MC-11), is a full screen whose visit rows stack. Analytics: indicators in a two-column grid, charts at full width with values readable at 360 px; tables of devices and locations as ranked lists. The export menu (MA-14) and "refresh all" (M-24) move into the More sheet on phones; exports (MA-08, MA-09) hand the file to the system share or download dialog. The open view stays in the URL hash (R-19), so the phone's back gesture moves between views and out of a detail screen instead of leaving the admin.
+- Idle timeout warning (M-12), confirm dialog and undo toast (M-15) are bottom sheets and toasts inside the insets.
+
+### 12.8 Themes and the installed app
+
+**Light and dark.** The product has both, plus "system", in the storefront and the admin (G-05, M-14), and both are kept with the palettes of 7.2. Every page is checked in both themes at every width (gate (e)). The theme is applied before first paint from the stored preference, as today, with one storage key instead of three (BUG-14); the existing `LBS_THEME` value is read so a returning customer keeps their choice. `theme-color` and the manifest colours follow the theme (`#FAF6F0` light, `#161012` dark) so the browser bar and the installed app's status bar match the page. Product photographs sit on `nude-100` placeholders in light and the surface colour in dark, never on pure white in the dark theme.
+
+**Progressive web app, as found and as rebuilt.**
+- Kept: both manifests at their present URLs, standalone display, the storefront worker at `/sw.js`, the install prompt on Android and the instructions on iOS with dismissal remembered, the update flow, and the push and notification-click handlers in the storefront worker (Q-01 to Q-07). The admin's shell and static files are cached by the same new worker so that an installed admin still opens (Q-08, Q-09), while `/admin-sw.js` is retired as described in 3.5. Nothing subscribes to push today, and the rebuild does not add a subscription.
+- Changed: hashed CSS and JavaScript are cached by the worker, so a page opened offline is styled and works; a small offline page explains that the connection is down, keeps the bottom navigation, and shows the bag from the device; `/checkout`, `/dashboard`, admin data and all Supabase requests are never served from the cache; images are cached with a cap (60 entries, 30 days). The storefront `start_url` becomes `/`. The admin manifest's scope becomes `/admin` to match its purpose, and `/admin-sw.js` is retired as described in 3.5. A proper maskable icon with a safe zone replaces the reused 192 px icon (9.4).
+- Install prompt: not shown during a first visit or over any sheet or action bar. It is offered after an order is placed and from an "Install the app" row in the menu; dismissal is remembered for seven days as today. In standalone mode the layouts use the insets and there is an in-app back control on the product and order-detail pages, since the browser's own is absent.
+
+### 12.9 Page-by-page mobile checklist
+
+Built from the routes and features of section 2. Each entry is checked at 360, 390 and 430 px, in light and dark, and is ticked only against a Playwright test or a screenshot. These entries are in addition to the 354 parity items and do not change that count.
+
+**Every page (global shell: G-01 to G-22)**
+- [ ] Zoom is allowed; no horizontal scroll; body text 16 px; all targets 44 px or more
+- [ ] Header 56 px plus the top inset; wordmark and menu button only on phones; anchors are not hidden under it
+- [ ] Bottom navigation with Shop, Search, Wishlist, Bag (live count) and Account, inside the bottom inset; the active item is marked; the page's last content clears it
+- [ ] Menu drawer lists categories, support and legal links and the theme control; closes by button, backdrop, Escape and swipe; focus returns to the menu button
+- [ ] Search opens from the bottom navigation with the keyboard up, a `search` keyboard and results as 56 px rows; "View all results" reaches `/shop?search=`
+- [ ] Bag opens as a bottom sheet with 44 px steppers, undo on remove and the checkout button inside the inset
+- [ ] Sign-in opens as a full-height sheet; fields are not covered by the keyboard; password managers fill both fields; Google sign-in is a 48 px button
+- [ ] Consent dialog is a bottom sheet with labelled switches, usable with one hand, and does not cover the page's primary action once dismissed
+- [ ] WhatsApp button sits above whatever bottom bar is present and never overlaps a toast or button
+- [ ] Toasts appear above the bottom bars and are announced
+- [ ] Skeletons match the final layout so nothing shifts when content arrives (CLS under 0.1)
+- [ ] Footer links are 44 px rows in single-column groups; the copyright line passes contrast
+- [ ] Light and dark both correct; the browser bar colour follows the theme
+- [ ] Printing from a phone (G-23) hides the header, bottom navigation, action bars, sheets and the WhatsApp button
+
+**Home (`/`, R-01, R-02; H-01 to H-09)**
+- [ ] Hero photograph first at full width in a 3:4 frame, preloaded; headline, one sentence and the shop link visible without scrolling at 390 × 844
+- [ ] "New in" row scrolls sideways with snap, shows part of the next tile as the cue, and does not trap vertical scrolling
+- [ ] Tiles: one tap opens the product; wishlist heart with a 44 px target; name wraps to two lines; price never truncates
+- [ ] Category mosaic stacks to one column with captions under the images
+- [ ] Service line reads as plain text with a `tel:`/WhatsApp link, no icon cards
+- [ ] Testimonial section is omitted when empty and shows one quotation at a time when not
+
+**Shop (`/shop`, R-03; S-01 to S-11)**
+- [ ] Two-column grid of 4:5 tiles with 12 px gaps; images sized for 50vw
+- [ ] Filter and sort bar pinned under the header; filter opens a full-height sheet with category, gender, price, delivery, stock and new-arrival controls as 48 px rows, "Show N items" and "Clear all" in a bar inside the inset
+- [ ] Price range: two numeric fields with numeric keyboards; the dual slider has 44 px thumbs that cannot overlap
+- [ ] Active filters as chips in one scrolling row, each removable with a 44 px target
+- [ ] Sort opens a sheet of five options, not a native select clipped by the bar
+- [ ] Search field uses the `search` keyboard and filters without layout shift
+- [ ] Result count stays visible; the empty state has a "Clear filters" button
+- [ ] Pagination or "Load more" is a 48 px full-width button; scroll position is restored on return from a product (G-17)
+- [ ] Filters from URL parameters are reflected in the chips on arrival
+
+**Product page (`/products/<slug>`, new; S-12 to S-26)**
+- [ ] Gallery swipes with snap, shows the counter, reserves its 4:5 space and loads the first image eagerly
+- [ ] Viewer: swipe, pinch-zoom, double-tap zoom, 44 px close inside the top inset
+- [ ] Name, price and stock note directly under the gallery; price visible without scrolling at 390 × 844
+- [ ] Size buttons 48 px; unavailable sizes struck through and not selectable; colour swatches 44 px with the name written out
+- [ ] Size guide opens as a sheet and returns with the selection intact
+- [ ] Quantity stepper 44 px; cap reason shown
+- [ ] Sticky add-to-bag bar inside the inset shows price and selection; prompts for a size when none is chosen; never covers the size buttons when they are scrolled to
+- [ ] Wishlist toggle 44 px; share uses the system share sheet where available, with the listed links (S-21) and "Copy link" as the fallback
+- [ ] Description, delivery and returns as disclosure rows of 48 px
+- [ ] Reviews: summary, list, and the review form with 44 px stars and correct keyboards
+- [ ] `/shop?product=<id>` lands on this page; the back control returns to the grid at the same position
+
+**Quick view (S-12 to S-25)**
+- [ ] Bottom sheet up to `100dvh`, own scroll, drag to close, same gallery and sticky bar as the product page
+- [ ] Editing a bag line (S-18) opens it pre-filled and the bar reads "Update bag"
+
+**Wishlist (`/wishlist`, R-08; W-01 to W-05)**
+- [ ] Two-column grid; remove with a 44 px target and undo; "Add to bag" under each tile
+- [ ] "Clear wishlist" is away from the tiles and confirms in a sheet
+- [ ] Empty state has one button to the shop
+
+**Cart (`/cart`, R-04; C-01 to C-10)**
+- [ ] Lines readable at 360 px: 72 px image, name on two lines, size and colour, stepper, line total
+- [ ] Edit and Remove with 44 px targets; undo on remove; "Clear cart" confirms in a sheet
+- [ ] Promo field with capitals keyboard; applied code shown as a removable chip; error text under the field
+- [ ] Delivery estimate select uses the native picker; "Free" shown for Lagos
+- [ ] Summary rows in tabular figures; sticky bar with total and "Checkout" above the bottom navigation
+- [ ] Signed-out checkout opens the sign-in sheet and returns to the cart afterwards (C-08)
+- [ ] Progress indicator fits one line at 360 px
+
+**Checkout (`/checkout`, R-05; K-01 to K-17)**
+- [ ] No bottom navigation; header shows the wordmark and a "Back to bag" link only
+- [ ] Order summary collapsed at the top with count and total; expands in place
+- [ ] Every field in the table of 12.5 has the stated type, keyboard and autofill; browser autofill completes contact and address in one action
+- [ ] Inline error text under each invalid field; first invalid field focused; no toast-only errors
+- [ ] "Use my profile details" and the saved-address picker are 48 px rows
+- [ ] State select updates the delivery fee and the total in the action bar immediately
+- [ ] Completed steps collapse to one line with a 44 px "Edit"
+- [ ] Bank details: account number and amount each with a 44 px copy button and a "Copied" confirmation; nothing truncated at 360 px
+- [ ] Receipt: opens the photo library or files; shows file name, thumbnail and remove (44 px); oversize or wrong-type files explained in text
+- [ ] The page survives leaving for the banking app and returning: fields, step and bag intact
+- [ ] Action bar inside the inset, hidden while the keyboard is open, label follows the step, shows the total; disabled state explains what is missing
+- [ ] Double submission is impossible and the button shows progress (K-15)
+- [ ] Failure keeps the bag and shows the error above the bar
+
+**Confirmation (`/confirmation`, R-06; T-01, T-02)**
+- [ ] Order number large with a copy button; what happens next in three sentences
+- [ ] "Track this order" as the primary button, WhatsApp as the secondary one, both 48 px
+- [ ] Items, totals and address in one column, tabular figures, nothing truncated
+
+**Track (`/track`, R-07; T-03 to T-06)**
+- [ ] Two fields with correct keyboards and capitals for the order number; button under the fields
+- [ ] Result: status badge, vertical timeline with real times, items and total; cancelled state distinct without relying on colour
+- [ ] `?order=` pre-fills and searches; "not found" is plain text with a WhatsApp link
+
+**Account (`/dashboard`, R-09; D-01 to D-19)**
+- [ ] Sign-in gate is the same sheet as elsewhere
+- [ ] Section switcher reachable with one thumb (tab row or bottom bar, per decision 11) and scrolls the active tab into view
+- [ ] Overview figures in one bordered row that fits 360 px; recent orders as rows
+- [ ] Orders: status filter as chips; a row opens a full-screen detail with timeline, items, totals
+- [ ] Cancel shows the countdown, confirms in a sheet and is not beside another button; return request opens WhatsApp or the contact form pre-filled
+- [ ] Addresses: add form with the attributes of 12.5; delete with undo
+- [ ] Profile: correct keyboards; native date picker for date of birth; save button above the keyboard
+- [ ] Settings: switches as full-width 44 px rows; theme and text size take effect immediately
+- [ ] Data download works on a phone (file handed to the system dialog); deactivate and delete each confirm in two steps and sit at the end of the page
+- [ ] Set-new-password (`?setpw=1`) sheet shows the rules and is not covered by the keyboard
+
+**Contact (`/contact`, R-10; P-01 to P-04)**
+- [ ] Channels first as 56 px rows: WhatsApp, call (`tel:`), email (`mailto:`), Instagram, TikTok
+- [ ] Form fields as in 12.5; subject uses the native picker; `?subject=` pre-selects
+- [ ] Success panel replaces the form; a failed save says so and offers WhatsApp (BUG-11)
+
+**FAQ (`/faq`, R-11; P-05, P-11 to P-14)**
+- [ ] Search field at the top with the `search` keyboard and a 44 px clear button; matches across all six groups; no-results state offers "Clear search" and WhatsApp (P-12)
+- [ ] Category tabs in one scrolling row with the active tab visible and announced; "All" shows all 23 questions on arrival (BUG-30)
+- [ ] Questions are rows of at least 48 px that wrap rather than truncate; only the tapped answer opens; the opened question stays in view; answers at 16 px
+- [ ] Links inside answers (shop, dashboard, track, contact, size guide, WhatsApp, Instagram: P-11) have 44 px targets and do not sit on adjacent lines without spacing
+- [ ] Fees, times and bank details in the answers (P-13) fit 360 px, with the account number copyable
+- [ ] "Still have questions?" panel (P-14) ends the page with one 48 px button to `/contact`, clear of the bottom navigation
+
+**Size guide (`/size`, R-12; P-06 to P-08, P-15 to P-18)**
+- [ ] Introduction and measuring advice (P-15) above the four measuring cards, which stack in one column with diagrams that fit the width
+- [ ] Chart tabs (bras, panties, bodysuits, loungewear) in one row, 44 px, with the selected tab announced
+- [ ] Each chart keeps every row and value of P-16 and fits 360 px without sideways scrolling, in 14 px tabular figures, with the size column fixed; the cm / in control shows on the charts that carry both units
+- [ ] Calculator: two fields with decimal keyboards and "cm" in the labels; out-of-range values explained under the field; no empty result shown before a calculation; result in the page, not an alert (BUG-32)
+- [ ] Fit tips (P-17) as plain paragraphs or disclosure rows of 48 px
+- [ ] "Still not sure?" panel (P-18) with one 48 px button to `/contact`
+- [ ] The same charts and calculator render inside the product's size-guide sheet
+
+**Privacy and terms (`/privacy`, `/terms`, R-13, R-14, R-20; P-09, P-10, P-19 to P-21)**
+- [ ] "Last updated" date and introduction first (P-19); table of contents is a collapsed "On this page" row at the top on phones, not a sticky sidebar, and marks the section in view
+- [ ] 16 px text at reading width; call-out paragraphs keep their emphasis without shrinking the text
+- [ ] Section anchors, including `/privacy#data-deletion` and `/dashboard#settings` (R-20), land below the header
+- [ ] Data-deletion routes (P-20) as four 48 px rows: dashboard, contact form, WhatsApp with the pre-filled text, email
+- [ ] The delivery-fee table and other tabular terms (P-21) fit 360 px without sideways scrolling
+- [ ] Closing contact panel clear of the bottom navigation
+
+**Not found and error (R-16)**
+- [ ] Message, a button to the shop and the bottom navigation; no dead end
+
+**Admin — access and shell (`/admin`, R-15, R-19; M-01 to M-31)**
+- [ ] Zoom allowed; no horizontal scroll; 16 px controls; all targets 44 px or more, in both themes (A11Y-11)
+- [ ] Staff sign-in, invitation sign-up, reset, set-password, verified and expired-link screens: single column, correct keyboards and autofill, 48 px buttons, validation messages under the fields (M-01 to M-05, M-18 to M-23)
+- [ ] Complete-profile prompt as a sheet with a working close control (M-07, BUG-28)
+- [ ] Top bar with the view title and the staff name and role; bottom bar with Orders, Inventory, Messages, Dashboard and More; counts on Orders and Messages (M-09, M-11, M-24, MD-04)
+- [ ] More sheet lists the remaining views in their groups (Store, Customers, Insights, Settings), Invite, Change password, View store, the export menu, refresh all, the theme switch and Logout (M-13, M-14, M-24, M-25); role-restricted entries absent for editors (M-10)
+- [ ] The open view is kept in the URL hash and restored on reload; the back gesture moves between views (R-19)
+- [ ] Skeletons match the phone layouts (M-27); each view's refresh control is 44 px and pull to refresh works where a refresh button exists (M-26)
+- [ ] Confirm dialog, toast and the five-second undo toast appear inside the insets and above the bottom bar, and the undo toast is actually shown (M-15, BUG-19)
+- [ ] Idle warning with "Stay signed in" as a 48 px button (M-12); welcome and sign-out overlays fit 360 px (M-08)
+- [ ] Dialogs and sheets trap and return focus and are labelled (A11Y-09)
+
+**Admin — dashboard (MD-01 to MD-06)**
+- [ ] Four totals in a two-column grid in tabular figures; revenue labelled as delivered orders (MD-01, MD-05)
+- [ ] Recent orders and low stock as rows with real quantities; "View all" links are 44 px and work (MD-02, MD-03, MD-06, BUG-23, BUG-28)
+
+**Admin — inventory and product editor (MI-01 to MI-19)**
+- [ ] Inventory as two-column cards at 360 px with image, name, price, stock, Edit and Remove at 44 px, and a selection control reachable by touch and keyboard (MI-12)
+- [ ] Search with a clear button and the live count; category and stock filters in a sheet, and working (MI-01, MI-11, BUG-20); pagination as 48 px controls
+- [ ] Card image viewer swipes, with previous and next at 44 px, dots and a count (MI-02)
+- [ ] Bulk selection bar inside the inset with the count, "Move to trash" and "Cancel" (MI-03)
+- [ ] Editor in one column: name, price, description, category, gender, quantity, delivery type, colour type and pack type as full-width 48 px controls; numeric keyboards for price and quantities (MI-04, MI-05, MI-16)
+- [ ] Variant entry: size picker, colour field with suggestions as a list that does not cover the field, quantity with a numeric keyboard, quick-size buttons at 44 px, and the keyboard's "done" key adds the variant (MI-13)
+- [ ] Variant list grouped by size, one row per colour with a 44 px stepper and remove, low and out-of-stock markers, totals in the footer (MI-06, MI-14)
+- [ ] Images: several picked at once from the camera or library; preview swipes; remove at 44 px; a failed upload is reported (MI-07, MI-17, BUG-25)
+- [ ] "Live" and "New arrival" switches as full-width 44 px rows (MI-08)
+- [ ] Sticky bar with Save (and Delete or "Clear form" in the overflow) above the inset, hidden while the keyboard is open; required-field errors under the fields (MI-09, MI-18, MI-19)
+
+**Admin — orders (MO-01 to MO-10)**
+- [ ] Four counters in a two-column grid that stay correct when a filter is applied (MO-01, BUG-27)
+- [ ] Orders as rows: order number, date, customer, item count, total, status badge; status filter as chips in one scrolling row; ten per page with 48 px pagination (MO-02, MO-06, MO-07)
+- [ ] Order detail as a full screen: header with order number, date and time; customer and contact with the phone number as `tel:` and WhatsApp links; delivery address; items; totals with discount and promo code; notes; payment method and reference (MO-03, MO-10)
+- [ ] Receipt shown in the page through a signed URL and opened in the pinch-zoom viewer; a PDF receipt opens in the system viewer
+- [ ] One next-step action in the bottom bar inside the inset; cancel and reject behind a confirmation; delivered and cancelled orders show a final-status label and no action (MO-04, MO-08)
+- [ ] After a status change the detail updates in place with a toast, and the list is current on return (MO-09)
+- [ ] Timeline vertical with real times (MO-05)
+
+**Admin — customers (MC-01 to MC-12)**
+- [ ] Totals in a row that fits 360 px; search with the `search` keyboard (MC-01, MC-10)
+- [ ] Customers as stacked rows with a label before each value (name, email, phone, WhatsApp, orders, total spent, joined, status), paginated (MC-08, MC-09, M-29)
+- [ ] Row actions in a sheet with text labels: Details, Message, Suspend, Ban, Reactivate, Revoke or restore returns, Delete; each destructive action confirms, delete twice (MC-03 to MC-06, MC-12); the action always applies to the customer shown, including after a search (BUG-21)
+- [ ] Customer detail as a full screen; phone and WhatsApp number are tappable links; "Location & Device" and the 20 recent visits as stacked rows, not a table wider than the screen (MC-02, MC-11)
+- [ ] Customer export (CSV, JSON, TXT, PDF) from a sheet, file handed to the system dialog (MC-07)
+
+**Admin — messages (MM-01 to MM-11)**
+- [ ] Counters in one row; status chips in a scrolling row; category list and search in a filter sheet; 20 per page (MM-01, MM-07)
+- [ ] List cards with initials, name, category, status badge, a two-line preview and the relative time, each at least 64 px high (MM-08)
+- [ ] Detail as a full screen with a 44 px back control; the thread in time order, scrolled to the latest; opening marks it read and updates the bottom-bar count (MM-02, MM-06, MM-09)
+- [ ] Reply box fixed above the keyboard with the sender address as a native picker and a 48 px Send; mark unread and delete in the overflow, delete confirmed (MM-03, MM-04, MM-10)
+- [ ] Compose as a full screen: recipient search with 56 px result rows, the chosen recipient as a removable tag, subject, message, sender address; works when opened directly from Messages; a failed send says so (MM-05, MM-11, BUG-26)
+
+**Admin — reviews, site images, staff, activity, trash (MX-01 to MX-15)**
+- [ ] Reviews: counters two per row; status and rating filters as native pickers; cards with Approve, Reject and Delete at 44 px, delete confirmed (MX-01, MX-02, MX-10)
+- [ ] Site images: one image per section with the preview at full width, the recommended dimensions as text, a URL field (`type="url"`, `inputmode="url"`), upload from the library, and a sticky Save (MX-03, MX-04, MX-11)
+- [ ] Staff: rows with role badge, "You" and "Protected" markers; promote, demote and remove in a sheet, removal confirmed (MX-05, MX-06, MX-12)
+- [ ] Invitation sheet: email keyboard, role as two described 56 px options, the fallback link copyable with a 44 px button (MX-07, MX-13)
+- [ ] Activity log: entries as stacked rows (staff, role, action, subject, device, relative time); search and the action filter in a sheet (MX-08, MX-14)
+- [ ] Trash: rows with image, name, category and age; Restore and "Delete permanently" at 44 px and apart; "Empty trash" at the end of the page; each confirmed (MX-09, MX-15)
+
+**Admin — analytics and exports (MA-01 to MA-14)**
+- [ ] Period selector as three chips; a note states which figures follow the period and which are all-time (MA-01, MA-10, BUG-29)
+- [ ] Indicators two per row in tabular figures (MA-02)
+- [ ] Revenue bars, status donut and traffic chart at full width, with values readable at 360 px without hover and a text summary for each (MA-03, MA-04)
+- [ ] Top pages, top products, devices, brands, browsers, countries and Nigerian states as ranked lists with the share beside each, not tables wider than the screen (MA-04 to MA-06, MA-11)
+- [ ] Configuration status cards stack (MA-07)
+- [ ] Export sheet with the ten entries as 48 px rows and the "no data" message; CSV and PDF complete on a phone, PDF generation loaded on demand (MA-08, MA-09, MA-12 to MA-14)
+- [ ] Printing an admin view hides the navigation, bars and toasts (M-30)
+
+**Installed app and offline (Q-01 to Q-09)**
+- [ ] Installs from the menu and after an order; opens at `/` in standalone mode with correct status-bar colour in both themes
+- [ ] Offline: a styled page with the bag from the device; checkout and account are never served stale
+- [ ] An update activates and reloads once, without losing a filled checkout form
+- [ ] The admin installs separately and opens at `/admin`; during the retirement release `/admin-sw.js` unregisters itself and an installed admin keeps working (Q-04, Q-08, Q-09, section 3.5)
+
+---
+
+## 13. Quality gates (must all pass before the PR)
+
+Nothing in this rebuild is called done until every gate below passes, and the pull request is not opened until gates (a) to (h) have passed on the same commit. A gate that fails is fixed at its cause; it is never passed by weakening the check. The repository has no toolchain today (section 4), so the commands below are the ones the rebuild adds in Phase 0 and runs in CI on every push.
+
+**(a) Type check and lint clean, with no workarounds.**
+- `npx tsc --noEmit` — 0 errors, with `strict`, `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` on (3.3).
+- `npx eslint . --max-warnings 0` — 0 errors, 0 warnings. `npx prettier --check .` — no differences.
+- A CI step searches the tree for `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, `eslint-disable`, `as any`, `as unknown as` and fails if any is found. `tsconfig.json` and `eslint.config.mjs` are compared with their Phase 0 versions in the review; a loosened option fails the gate.
+
+**(b) A test for every rule, fix and key flow, and the suite passing.**
+- Unit (`npx vitest run`): pricing and totals, promo validation, delivery fee by state, stock caps per variant, the cart and wishlist merge rules, every zod schema (including the phone and order-number formats), money and date formatting, the bra-size calculation. Every defect in section 5 that is fixed in code has a test named after its number (for example `BUG-04 promo discount reaches the order`).
+- Database: policy tests run against a local Supabase (`supabase start`, `supabase test db`) as `anon`, customer, editor, super admin and owner, one for each `SEC-` and `SC-` item.
+- End-to-end (`npx playwright test`), run in two projects on every push — **`phone`** (390 × 844, touch, mobile user agent) and **`desktop`** (1280 × 800) — with the phone project also repeating the layout assertions at 360 and 430 px. The flows:
+  1. Browse the shop, filter and sort, open a product, choose size and colour, add to bag, change the quantity, check out through contact, delivery and bank transfer with a receipt upload, reach the confirmation, and track the order.
+  2. A failed order keeps the bag and shows the error (BUG-01); a double tap on "Place order" creates one order.
+  3. A promo code applied in the cart reduces the order total and its use is counted (BUG-04).
+  4. Stock is reduced by an order and an out-of-stock size cannot be added (BUG-05).
+  5. Sign-up, email verification landing, sign-in, Google sign-in entry, forgot password and set new password; a suspended account is refused by the server.
+  6. Wishlist add and remove, and synchronisation of bag and wishlist between two signed-in sessions.
+  7. Search from the bottom navigation to a product; the no-match fallback.
+  8. Size guide opened from a product and closed with the selection intact; the calculator.
+  9. Account: order detail, cancel within 30 minutes, return request hand-off, add and delete an address, edit the profile, change theme and text size, download data, delete account.
+  10. Contact form submission and its failure path; FAQ search.
+  11. Consent: analytics and marketing scripts absent until accepted, and the choice honoured on the next page load.
+  12. Admin: staff sign-in; an editor cannot reach restricted views or data; confirm a payment from the receipt and advance an order to delivered; edit a product's variant stock and images; reply to a message; approve a review and see it on the storefront; invite a member of staff and accept the invitation; export orders.
+  13. Guest order tracking with the order number and email; a wrong pair reveals nothing.
+  14. Legacy URLs redirect as in the map of 3.5.
+  15. Offline: the offline page appears, and checkout is not served from the cache.
+- Pass: every test green in both projects, no test skipped or marked as expected to fail, and each of the 354 parity items mapped to a test or a recorded manual check.
+
+**(c) The production build passes.** `npm ci && npm run build` exits 0 with no warnings on the Node version in `.nvmrc`, and the Vercel preview deployment of the same commit succeeds. The bundle-size check against the budgets of 12.6 is part of this gate.
+
+**(d) Data and secret safety.**
+- No secrets on the client: a script searches `.next/static` and the rendered HTML for the names and values of every server-only variable in 9.2 (`SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `RECAPTCHA_SECRET_KEY`, the Monnify secret if present) and for a JWT whose role is `service_role`; any hit fails. Only `NEXT_PUBLIC_` variables may appear. `.env*` files other than `.env.example` (names only) are ignored by git, and the history of the branch is searched for the same values.
+- Server-side validation and authorisation: every server action and route handler parses its input with zod and checks the session and role before acting (tested in (b)); `/admin` returns a redirect, not markup, to a visitor who is not staff; the policy tests pass.
+- Safe headers on the preview: `curl -sI` on `/`, `/checkout` and `/admin` shows HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`, and a content security policy with nonces and without `'unsafe-inline'` for scripts.
+- Receipts are private: an unauthenticated request for a receipt object is refused; a signed URL expires.
+- `npm audit --audit-level=high` reports nothing.
+
+**(e) Seen on screen.** A Playwright run captures every route — the thirteen storefront routes, the product page, the 404 page, the staff sign-in screens and each of the twelve admin views, plus the open states of the bag, filter, size-guide, quick-view and sign-in sheets — at 360, 390, 768, 1024, 1280 and 1536 px (and at 430 px for the phone layouts), in light and in dark. Each capture is compared by eye against the design direction in section 7 and the checklist in 12.9, phone widths first. The "before" captures taken in Phase 0 and the "after" captures are attached to the pull request side by side, phone first. Pass: no horizontal scroll, overlap, clipped text, content under a fixed bar or wrong-theme colour in any capture.
+
+**(f) Independent review of the finished diff.** A reviewer who did not write the code reads the complete diff looking for real defects only: security (authorisation, injection, exposure of receipts or customer data), privacy (consent, IP storage, what is logged), data loss (orders, stock, bag and wishlist merges, migrations) and broken flows. Every finding is fixed at its cause with a test, and the reviewer re-checks each fix; the review is repeated on the changed code until it returns nothing. The findings and their resolutions are listed in the pull request.
+
+**(g) The professional finish.** Checked page by page against section 11: no gradients, gradient text, glows, glass effects or blurred shapes; one icon set and no emoji as icons; not the stock template; the banned phrases absent (a scripted search of the source and of the rendered text); no placeholder images, lorem ipsum, `console.log`, commented-out code or TODO; unsupported claims removed (DES-05); copy in plain British English, read through once by a person for spelling (colour, organise, centre) and for anything that reads as filler.
+
+**(h) Lighthouse mobile 90 or more in all four categories.** `npx lighthouse <preview URL> --form-factor=mobile` (default mobile throttling), three runs per page, median reported, on `/`, `/shop`, a product page, `/cart`, `/checkout`, `/track`, `/size` and `/contact`. Pass: Performance, Accessibility, Best Practices and SEO each 90 or more, LCP under 2.5 s, CLS under 0.1, and the INP check of 12.6 under 200 ms. The scores are pasted into the pull request as a table with the Lighthouse version. One point is declared in advance rather than discovered later: `/cart`, `/checkout` and `/track` are deliberately `noindex` (O-02), and Lighthouse counts a `noindex` page against its SEO category (the present pages score 66 for that reason, 4.1). For those three pages the gate is 90 or more in the other three categories, every other SEO audit passing, and `noindex` confirmed as intended; the owner is asked to accept this, or to decide otherwise, as decision 12 in 9.6. `/admin` is checked in the same way after signing in.
+
+**(i) The owner's approval.** The owner reviews the preview deployment on their own phone and the pull request (screenshots, scores, review findings, the ticked parity and mobile checklists) and approves in writing on the pull request. Nothing is merged, no migration is applied to the live database and nothing is deployed to production before that approval.
+
+---
+
+## 14. What will make it stand out
+
+The comparison is with the kinds of shop a customer of this brand is likely to use instead; the descriptions are of what such shops typically do, not claims about any named business.
+
+- **Vendors who sell through Instagram and WhatsApp alone.** Typically: prices and sizes confirmed in direct messages, account details sent in chat, payment confirmed by a screenshot, and no way to see stock or follow an order without asking.
+- **Large marketplaces.** Typically: very wide catalogues with card and other payment options and their own delivery, but generic product pages, sizing information that varies by seller, and little sense of a brand.
+- **Small brands on hosted shop builders and templates.** Typically: a standard theme with a card gateway, product pages that look alike from shop to shop, and a size chart as an image or a separate page.
+- **International lingerie retailers.** Typically: thorough fit guidance, but foreign-currency prices, longer delivery and returns that are impractical from Nigeria.
+
+Against that, the rebuild can deliver and verify the following.
+
+1. **A shop that is built for the phone in one hand.** Swipe galleries with pinch-zoom, size and colour buttons a thumb can hit, a bag and checkout whose main button is always at the bottom of the screen, and search, wishlist, bag and account one tap away. Verified by the checklist in 12.9, the phone Playwright project and Lighthouse mobile 90 or more (gates (b), (e), (h)). The present site hides search on phones, has no swipe and disables zoom (12.1), so the difference is concrete.
+
+2. **Bank transfer done properly.** The shop's customers pay by transfer, and that is kept (section 1). What changes is that the transfer step is designed for the round trip to a banking app: one tap copies the account number and the exact amount, the receipt is attached from the photo library, the order is created on the server with the right total and stock, and the customer is told truthfully that a person will confirm the payment. Staff confirm from a phone with the receipt on screen, and the customer sees real timestamps when tracking. This sits between the informality of ordering by chat and the card-only checkout of template shops. Verified by flows 1, 2 and 12 in gate (b) and the staging walk-through in 8.2.
+
+3. **Fit information where the decision is made.** The size guide opens over the product without losing the selection, the charts are readable at 360 px, the bra calculator is one tap away, and each size shows whether it is in stock. For a product bought by measurement and rarely returned casually, this removes the commonest reason to leave the page and ask. Verified by flow 8 and the size-guide entries in 12.9.
+
+4. **WhatsApp as part of the shop rather than a substitute for it.** The store already answers customers on WhatsApp (G-10, D-07, P-03). The rebuild carries context into each hand-off — the product, the order number, the reason — from the product page, the confirmation, tracking and returns, so the conversation starts with the facts and the order itself stays in the system with its status and history. Verified by the pre-filled links in the e2e flows.
+
+5. **Plain facts, fast, on mobile data.** Naira prices, the delivery fee for each of the seven states shown before checkout with Lagos free (`assets/js/config.js:32-41`), real stock per size, real order times, and no invented figures such as the present "500+" counter (DES-05); pages that meet the budgets of 12.6 on a mid-range phone. Verified by gates (g) and (h).
+
+These are the differentiators the plan commits to. None depends on a feature the shop does not have today, and each is tied to a gate, so it either passes or it is not claimed.
+
+---
+
+No rebuild work will start until the owner approves this plan, and no pull request will be opened until every gate in section 13 passes.
