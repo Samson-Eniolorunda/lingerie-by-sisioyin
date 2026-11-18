@@ -11,6 +11,7 @@ export default defineConfig({
   use: {
     baseURL: `http://localhost:${port}`,
     trace: "off",
+    serviceWorkers: "block",
     ...(process.env.CHROMIUM_PATH
       ? { launchOptions: { executablePath: process.env.CHROMIUM_PATH } }
       : {}),

@@ -6,6 +6,14 @@ import { test as base, expect } from "@playwright/test";
  */
 export const test = base.extend({
   page: async ({ page }, provide) => {
+    // Most tests are not about cookies: answer the consent card up front. The consent spec opts out.
+    await page.addInitScript(() => {
+      if (!window.sessionStorage.getItem("LBS_TEST_NO_CONSENT_PRESET"))
+        window.localStorage.setItem(
+          "LBS_CONSENT_V1",
+          JSON.stringify({ choice: "essential", version: 1, at: "2026-01-01T00:00:00.000Z" }),
+        );
+    });
     const goto = page.goto.bind(page);
     page.goto = async (url, options) => {
       const response = await goto(url, options);

@@ -1,3 +1,4 @@
+import "@/lib/zod-config";
 import { z } from "zod";
 import { ORDER_NUMBER_PATTERN } from "@/lib/order-number";
 import { normaliseNigerianPhone } from "@/lib/phone";

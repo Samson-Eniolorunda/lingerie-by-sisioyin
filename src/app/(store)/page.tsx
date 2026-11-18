@@ -1,11 +1,29 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
-import { CONTACT, whatsappLink } from "@/config/site";
+import { BRAND, CONTACT, whatsappLink } from "@/config/site";
 import { ProductCard } from "@/features/catalogue/ProductCard";
 import { DELIVERY_STATES } from "@/lib/delivery";
 import { formatNaira } from "@/lib/money";
 import { newArrivals } from "@/server/queries/catalogue";
+
+export const metadata: Metadata = {
+  title: { absolute: `${BRAND.name} | Lingerie, loungewear and underwear` },
+  description: BRAND.tagline,
+  alternates: { canonical: "/" },
+};
+
+const ORGANISATION = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: BRAND.name,
+  url: BRAND.siteUrl,
+  logo: `${BRAND.siteUrl}/icons/icon-512.png`,
+  email: CONTACT.email,
+  telephone: "+2349033344860",
+  sameAs: [CONTACT.instagram, CONTACT.tiktok],
+};
 
 const HERO = {
   src: "/placeholders/portrait-3x4.svg",
@@ -127,6 +145,10 @@ export default async function HomePage() {
           .
         </p>
       </section>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANISATION) }}
+      />
     </>
   );
 }

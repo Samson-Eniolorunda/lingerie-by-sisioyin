@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CookieSettingsButton } from "@/features/consent/ConsentBanner";
 import { BRAND, CATEGORY_LINKS, CONTACT, SUPPORT_LINKS, whatsappLink } from "@/config/site";
 
 const link =
@@ -103,6 +104,7 @@ export function Footer() {
           >
             Privacy
           </Link>
+          <CookieSettingsButton className="flex min-h-11 items-center text-on-footer/80 underline-offset-4 hover:text-on-footer hover:underline" />
         </p>
       </div>
     </footer>

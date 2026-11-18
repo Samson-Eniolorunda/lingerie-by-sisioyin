@@ -1,3 +1,4 @@
+import "@/lib/zod-config";
 import { z } from "zod";
 import type { CatalogueQuery, SortKey } from "@/server/queries/catalogue";
 

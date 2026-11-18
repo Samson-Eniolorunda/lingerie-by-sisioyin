@@ -59,13 +59,13 @@ There are three audiences:
 - [ ] G-01 Header with logo, primary navigation (Home, Shop, Women, Men, Kids) and active-link state
 - [ ] G-02 Account button: opens the sign-in modal when signed out; shows initials and links to `/dashboard` when signed in
 - [x] G-03 Cart button with live item-count badge
-- [ ] G-04 Mobile navigation drawer: account block, Home, Shop, New Arrivals, Cart, Wishlist; category shortcuts (Women, Men, Kids, Lingerie, Loungewear, Underwear); support links (FAQs, Size Guide, Contact, Terms, Privacy)
+- [x] G-04 Mobile navigation drawer: account block, Home, Shop, New Arrivals, Cart, Wishlist; category shortcuts (Women, Men, Kids, Lingerie, Loungewear, Underwear); support links (FAQs, Size Guide, Contact, Terms, Privacy)
 - [ ] G-05 Theme: light, dark and system, persisted, applied before first paint, switchable from the floating control, the mobile drawer and the dashboard
 - [x] G-06 Search overlay: opens from the header or Ctrl/Cmd+K, closes on Escape or backdrop; debounced product search over name, category and description (8 results)
 - [x] G-07 Search fallback: six latest products under "You might like" when nothing matches, plus a "View all results" link to `/shop?search=`
 - [x] G-08 Cart drawer: line items with image, size, colour; quantity up/down; remove; subtotal; checkout link; continue shopping; empty state
 - [x] G-09 Footer: shop links, help links (My Account, Track Order, FAQs, Size Guide, Contact), legal links, social links (Instagram, TikTok, WhatsApp from `config.js:25-29`), current year
-- [ ] G-10 Floating WhatsApp button with a small pop-up card and a pre-filled enquiry message
+- [x] G-10 Floating WhatsApp button with a small pop-up card and a pre-filled enquiry message
 - [ ] G-11 Cookie and consent dialog: Essential (locked), Analytics, Marketing, Functional; "Accept All", "Save Preferences", "Essential Only"; choice stored *(defect today: not enforced on later page loads)*
 - [x] G-12 Toast notifications (success, error, info, warning)
 - [x] G-13 Skip-to-content link
@@ -116,7 +116,7 @@ There are three audiences:
 - [x] S-01 Catalogue grid of all active, non-deleted products with skeleton loading
 - [x] S-02 Filter by category (Lingerie, Loungewear, Underwear, Accessories)
 - [x] S-03 Filter by gender (Women, Men, Kids, Unisex)
-- [ ] S-04 Price range filter with dual sliders and numeric inputs (0–500,000)
+- [x] S-04 Price range filter with dual sliders and numeric inputs (0–500,000)
 - [x] S-05 Filter by delivery type (express, standard)
 - [x] S-06 "In stock only" and "New arrivals only" toggles
 - [x] S-07 In-page text search over name, category and description
@@ -125,19 +125,19 @@ There are three audiences:
 - [x] S-10 "No products found" state with a clear-filters action
 - [x] S-11 Filters and search pre-applied from URL parameters
 - [x] S-12 Product quick view: gallery with thumbnails, previous/next and a full-screen image viewer opened by double-click or double-tap (`assets/js/shop.js:995-1015`, `:1940-1962`). The storefront gallery has no swipe today; swipe exists only in the admin viewer (MI-02). The rebuild adds it (section 12.7)
-- [ ] S-13 Product quick view: name, category, price, description, pack type, delivery-type tag, stock indicator
+- [x] S-13 Product quick view: name, category, price, description, pack type, delivery-type tag, stock indicator
 - [x] S-14 Size selection with per-size availability
 - [ ] S-15 Colour selection with swatches (when the product allows it), per-colour availability, "Assorted" handling
 - [x] S-16 Quantity stepper capped by variant, colour, size or product stock (`shop.js:1018-1065`)
 - [x] S-17 Add to cart from quick view; opens the cart drawer
-- [ ] S-18 Edit a cart line from the cart or checkout: reopens quick view pre-filled and replaces the line
+- [x] S-18 Edit a cart line from the cart or checkout: reopens quick view pre-filled and replaces the line
 - [ ] S-19 Quick add from a card for products without size or colour choices
 - [x] S-20 Wishlist toggle on cards and in quick view
 - [ ] S-21 Share: Facebook, X, Instagram, TikTok, WhatsApp, copy link
 - [x] S-22 Size-guide link from quick view
 - [ ] S-23 Reviews in quick view: average, count, list of up to 20 approved reviews
 - [ ] S-24 "Write a review" available only to signed-in customers with a delivered order containing the product; form with name, email, title, star rating, comment; held for approval
-- [ ] S-25 `/shop?product=<id>` opens that product directly
+- [x] S-25 `/shop?product=<id>` opens that product directly
 - [ ] S-26 Analytics events: view item, add to cart, add to wishlist, search
 
 ### 2.6 Wishlist (W)
@@ -152,7 +152,7 @@ There are three audiences:
 
 - [ ] C-01 Cart stored on the device (`LBS_CART_V1`) and synchronised to the account
 - [x] C-02 Cart page: line items with image, name, size, colour, unit price and line total
-- [ ] C-03 Quantity up/down, remove, edit (S-18)
+- [x] C-03 Quantity up/down, remove, edit (S-18)
 - [x] C-04 Clear cart with confirmation
 - [x] C-05 Promo code entry: validated against `promo_codes` (active, not expired, under usage limit); percentage discount shown; removable *(defect today: discount never reaches the order)*
 - [x] C-06 Delivery estimator: state selector populated from the configured fee table, "Free" for zero
@@ -245,7 +245,7 @@ There are three audiences:
 
 ### 2.13 Admin — access and shell (M)
 
-- [ ] M-01 Staff sign-in; access granted only when `is_admin()` returns true, otherwise signed out with "Access denied"
+- [x] M-01 Staff sign-in; access granted only when `is_admin()` returns true, otherwise signed out with "Access denied"
 - [ ] M-02 Staff sign-up from an invitation link: token validated, email pre-filled and locked, role carried from the invitation
 - [ ] M-03 Email confirmation screen, verified screen and expired-link screen for staff
 - [ ] M-04 Password reset and set-new-password flows for staff, with the password rules
@@ -254,13 +254,13 @@ There are three audiences:
 - [ ] M-07 Complete-profile prompt when first or last name is missing
 - [ ] M-08 Welcome overlay on sign-in and a sign-out overlay
 - [ ] M-09 Sidebar navigation across twelve views, collapsible on mobile; last view remembered for the session
-- [ ] M-10 Role-based interface: Activity Logs, Manage Admins, Trash and Invite are shown only to owner, super admin and developer *(defect today: interface only)*
-- [ ] M-11 Role label beside the status text; name and role in the sidebar
+- [x] M-10 Role-based interface: Activity Logs, Manage Admins, Trash and Invite are shown only to owner, super admin and developer *(defect today: interface only)*
+- [x] M-11 Role label beside the status text; name and role in the sidebar
 - [ ] M-12 Idle timeout after 30 minutes with a 60-second warning and "stay signed in"
 - [ ] M-13 Change password from the sidebar; "View Store" link
-- [ ] M-14 Theme switch (light, system, dark) in the top bar, and a light/dark switch in the sidebar footer for narrow screens (`admin.html:968-993`, `:824-832`; `assets/js/admin.js:196-212`)
-- [ ] M-15 Confirm dialog (danger, warning and information variants), three-second toast, and five-second undo toast with a countdown bar for destructive actions (`assets/js/admin.js:229-272`, `:1168-1176`, `:300-331`) *(defect today: the undo toast is never displayed, BUG-19)*
-- [ ] M-16 Keyboard shortcuts: Ctrl/Cmd+S saves the product form while the editor is open, Escape closes dialogs, the image viewer and the mobile menu (`assets/js/admin.js:623-641`, `:1966-1973`)
+- [x] M-14 Theme switch (light, system, dark) in the top bar, and a light/dark switch in the sidebar footer for narrow screens (`admin.html:968-993`, `:824-832`; `assets/js/admin.js:196-212`)
+- [x] M-15 Confirm dialog (danger, warning and information variants), three-second toast, and five-second undo toast with a countdown bar for destructive actions (`assets/js/admin.js:229-272`, `:1168-1176`, `:300-331`) *(defect today: the undo toast is never displayed, BUG-19)*
+- [x] M-16 Keyboard shortcuts: Ctrl/Cmd+S saves the product form while the editor is open, Escape closes dialogs, the image viewer and the mobile menu (`assets/js/admin.js:623-641`, `:1966-1973`)
 - [ ] M-17 Activity logging of staff actions with device information (device type, browser, operating system); staff name and role added by a database trigger
 - [ ] M-18 Staff form validation messages: empty sign-in ("Kindly input your login details."), per-field "required" messages, the five password rules and "Passwords do not match." on sign-up and set-password (`assets/js/admin.js:6012-6021`, `:6023-6047`, `:6057-6072`)
 - [ ] M-19 The sign-up tab is hidden once any member of staff exists, unless the visitor arrives by invitation (`assets/js/admin.js:8434-8449`)
@@ -273,57 +273,57 @@ There are three audiences:
 - [ ] M-26 Each view loads its data when opened; Orders, Activity, Analytics and Messages have their own refresh buttons; the admin holds no Realtime subscription (`assets/js/admin.js:2052-2100`, `:3345-3346`, `:6897`, `:9215`)
 - [ ] M-27 Loading skeletons for the product grid, lists, dashboard widgets, reviews, messages and tables (`assets/js/admin.js:358-419`, `:3002-3003`)
 - [ ] M-28 Events written to the activity log: sign-in, profile completed, product create and update, delete, bulk delete, restore, permanent delete and empty trash, order status change, staff promote, demote and remove, invitation, site images saved, customer suspend, ban and reactivate, return-privilege change and customer delete (`assets/js/admin.js:5823`, `:1868`, `:6493`, `:6339`, `:3583`, `:2900`, `:2921`, `:2955`, `:3321`, `:2454`, `:2483`, `:2525`, `:5516`, `:2667`, `:7621`, `:7547`, `:7465`). Review moderation and message actions are not logged today
-- [ ] M-29 On narrow screens data tables collapse into cards with a label before each value (`assets/css/admin.css:4407-4408`; `assets/js/admin.js:3083-3093`)
-- [ ] M-30 Admin print stylesheet: sidebar, top bar, dialogs, toasts and the bulk bar are hidden and the content offset is removed (`assets/css/admin.css:5247-5265`)
+- [x] M-29 On narrow screens data tables collapse into cards with a label before each value (`assets/css/admin.css:4407-4408`; `assets/js/admin.js:3083-3093`)
+- [x] M-30 Admin print stylesheet: sidebar, top bar, dialogs, toasts and the bulk bar are hidden and the content offset is removed (`assets/css/admin.css:5247-5265`)
 - [ ] M-31 Browser storage keys in use: local `lbs-admin-auth`, `theme_pref`, `LBS_WELCOME_SENT_<user id>`, `lbs_site_images_updated`; session `LBS_ADMIN_VIEW`, `LBS_ADMIN_STAFF_MODE`, `LBS_ADMIN_RECOVERY_MODE` (`assets/js/supabase.js:14`; `assets/js/admin.js:126`, `:1551`, `:2675`, `:2023`, `:66-68`)
 
 ### 2.14 Admin — dashboard view (MD)
 
-- [ ] MD-01 Totals: products, orders, revenue, pending orders
-- [ ] MD-02 Recent orders widget: the five latest orders with short id, date, customer and status badge; empty and error states (`assets/js/admin.js:5620-5669`)
-- [ ] MD-03 Low-stock widget: up to five products with a quantity below 10, lowest first; "All products in stock" when none (`assets/js/admin.js:5680-5703`) *(defect today: BUG-23)*
-- [ ] MD-04 Pending-orders and unread-messages badges in the sidebar
-- [ ] MD-05 The revenue total counts delivered orders only (`assets/js/admin.js:5572-5574`)
-- [ ] MD-06 "View All" links from the two widgets to Orders and Inventory (`admin.html:1047`, `:1057`) *(defect today: no handler is bound, BUG-28)*
+- [x] MD-01 Totals: products, orders, revenue, pending orders
+- [x] MD-02 Recent orders widget: the five latest orders with short id, date, customer and status badge; empty and error states (`assets/js/admin.js:5620-5669`)
+- [x] MD-03 Low-stock widget: up to five products with a quantity below 10, lowest first; "All products in stock" when none (`assets/js/admin.js:5680-5703`) *(defect today: BUG-23)*
+- [x] MD-04 Pending-orders and unread-messages badges in the sidebar
+- [x] MD-05 The revenue total counts delivered orders only (`assets/js/admin.js:5572-5574`)
+- [x] MD-06 "View All" links from the two widgets to Orders and Inventory (`admin.html:1047`, `:1057`) *(defect today: no handler is bound, BUG-28)*
 
 ### 2.15 Admin — inventory and product editor (MI)
 
-- [ ] MI-01 Inventory list, newest first, with search, category filter (Accessories, Lingerie, Loungewear, Underwear), stock filter (in stock, out of stock) and pagination (12 per page) *(defect today: the two filters do nothing, BUG-20)*
+- [x] MI-01 Inventory list, newest first, with search, category filter (Accessories, Lingerie, Loungewear, Underwear), stock filter (in stock, out of stock) and pagination (12 per page) *(defect today: the two filters do nothing, BUG-20)*
 - [ ] MI-02 Product cards with image viewer (swipe, previous and next, dots, count)
-- [ ] MI-03 Bulk select and bulk move to trash, with a confirm dialog and undo *(defect today: the bulk bar is never displayed, BUG-19)*
-- [ ] MI-04 Product editor ("Add Product"): name, price, description, category, gender (Women, Men, Unisex, Kids), quantity, delivery type (standard, same-day)
-- [ ] MI-05 Sizes and colours are entered as variants (MI-13), with colour suggestions; colour type switch (Open Selection, Assorted Pack); pack type
-- [ ] MI-06 Variant stock list (size × colour × quantity) with add, remove, quantity steppers and low/out-of-stock markers (low at five or fewer). The grid-style matrix in the script has no markup and is dead code
+- [x] MI-03 Bulk select and bulk move to trash, with a confirm dialog and undo *(defect today: the bulk bar is never displayed, BUG-19)*
+- [x] MI-04 Product editor ("Add Product"): name, price, description, category, gender (Women, Men, Unisex, Kids), quantity, delivery type (standard, same-day)
+- [x] MI-05 Sizes and colours are entered as variants (MI-13), with colour suggestions; colour type switch (Open Selection, Assorted Pack); pack type
+- [x] MI-06 Variant stock list (size × colour × quantity) with add, remove, quantity steppers and low/out-of-stock markers (low at five or fewer). The grid-style matrix in the script has no markup and is dead code
 - [ ] MI-07 Image upload with client-side compression to the `product-images` bucket, slider preview (swipe, dots) and remove. Images cannot be reordered today: new uploads are appended after the existing ones (`assets/js/admin.js:6451`)
-- [ ] MI-08 Active ("Live") and "New Arrival" switches
-- [ ] MI-09 Edit an existing product; delete (soft delete to trash) from the card or the editor, with a confirm dialog and undo *(defect today: the undo toast is never displayed, BUG-19)*
+- [x] MI-08 Active ("Live") and "New Arrival" switches
+- [x] MI-09 Edit an existing product; delete (soft delete to trash) from the card or the editor, with a confirm dialog and undo *(defect today: the undo toast is never displayed, BUG-19)*
 - [ ] MI-10 Audit fields (`created_by`, `updated_by`, `updated_at`) set by triggers
 - [ ] MI-11 Inventory search over name, category and description with a clear button, a live product count in the top bar and a "No products match your search" state (`assets/js/admin.js:3425-3432`, `:3447`, `:3653-3664`; `admin.html:1149-1152`)
-- [ ] MI-12 Product card: first image, name, price, "N in stock" or "Out of Stock", Edit and Remove, and a selection tick (`assets/js/admin.js:3744-3782`)
-- [ ] MI-13 Variant entry row: size (XS, S, M, L, XL, XXL, XXXL, One Size), free-text colour with fifteen suggestions, quantity; quick-size buttons S, M, L, XL; Enter adds; an existing size-and-colour pair has its quantity replaced; negative quantities are refused (`admin.html:1419-1500`; `assets/js/admin.js:4713-4771`, `:4944-4965`)
-- [ ] MI-14 Variant list grouped by size in a fixed order, each line with a colour dot (31 named colours), a per-size colour count, and a footer with variant and unit totals; the heading counter shows total units (`assets/js/admin.js:4842-4924`, `:4572-4604`, `:4483-4491`)
-- [ ] MI-15 The product's `sizes` and `colors` are derived from the variants with summed quantities; older products stored as plain string lists are still read on edit (`assets/js/admin.js:4798-4840`, `:5320-5368`)
-- [ ] MI-16 "Assorted Pack" shows the pack type (2-in-1, 3-in-1, 4-in-1) and saves the product with no colours and no variant stock; "Open Selection" saves both (`admin.html:1389-1403`; `assets/js/admin.js:4141-4152`, `:6468-6474`)
+- [x] MI-12 Product card: first image, name, price, "N in stock" or "Out of Stock", Edit and Remove, and a selection tick (`assets/js/admin.js:3744-3782`)
+- [x] MI-13 Variant entry row: size (XS, S, M, L, XL, XXL, XXXL, One Size), free-text colour with fifteen suggestions, quantity; quick-size buttons S, M, L, XL; Enter adds; an existing size-and-colour pair has its quantity replaced; negative quantities are refused (`admin.html:1419-1500`; `assets/js/admin.js:4713-4771`, `:4944-4965`)
+- [x] MI-14 Variant list grouped by size in a fixed order, each line with a colour dot (31 named colours), a per-size colour count, and a footer with variant and unit totals; the heading counter shows total units (`assets/js/admin.js:4842-4924`, `:4572-4604`, `:4483-4491`)
+- [x] MI-15 The product's `sizes` and `colors` are derived from the variants with summed quantities; older products stored as plain string lists are still read on edit (`assets/js/admin.js:4798-4840`, `:5320-5368`)
+- [x] MI-16 "Assorted Pack" shows the pack type (2-in-1, 3-in-1, 4-in-1) and saves the product with no colours and no variant stock; "Open Selection" saves both (`admin.html:1389-1403`; `assets/js/admin.js:4141-4152`, `:6468-6474`)
 - [ ] MI-17 Image handling: several files at once; each resized to fit 800 × 1000 px and re-encoded as JPEG at quality 0.82 (files under 50 KB, and files that are not images, are left alone); stored at `products/<product id>/<timestamp>_<name>`; double-click opens a full-screen preview (`assets/js/admin.js:424-477`, `:6259-6276`, `:5194-5198`; `admin.html:1520-1531`)
 - [ ] MI-18 Editor modes: "Add New Product" with "Clear Form"; "Editing <name>" with a Delete button; after saving or deleting, the editor resets and returns to the inventory (`assets/js/admin.js:5232-5281`, `:5300-5302`, `:5219-5227`, `:6500-6503`)
-- [ ] MI-19 Required fields: name, price, category and stock quantity; price and quantities not below zero (`admin.html:1295`, `:1305-1306`, `:1329`, `:1356-1357`) *(defect today: BUG-25)*
+- [x] MI-19 Required fields: name, price, category and stock quantity; price and quantities not below zero (`admin.html:1295`, `:1305-1306`, `:1329`, `:1356-1357`) *(defect today: BUG-25)*
 
 ### 2.16 Admin — orders (MO)
 
-- [ ] MO-01 Counters for pending, processing, shipped, delivered
-- [ ] MO-02 Orders table with status filter, refresh and pagination
-- [ ] MO-03 Order detail: customer, contact, delivery address, items, totals, discount and promo code, notes, payment method, link to the uploaded receipt
-- [ ] MO-04 Status progression (pending → processing → shipped → delivered) with one action per step ("Process Order", "Ship Order", "Mark Delivered"), and cancel where allowed (`assets/js/admin.js:3124-3155`) *(defect today: no staff action sets `confirmed`, BUG-22)*
-- [ ] MO-05 Order timeline in the detail view: Pending, Processing, Shipped, Delivered, or a single Cancelled marker (`assets/js/admin.js:3157-3183`)
-- [ ] MO-06 Table columns: short order id (first eight characters), date, customer, item count, total, status, View; newest first; ten per page (`assets/js/admin.js:3083-3098`, `:3008`, `:2990`)
-- [ ] MO-07 Status filter values: all, pending, processing, shipped, delivered, cancelled (`admin.html:1215-1220`)
-- [ ] MO-08 Cancel is offered while an order is pending or processing and asks for confirmation; delivered and cancelled orders show a final-status label and no action (`assets/js/admin.js:3124-3155`, `:3194-3199`, `:3288-3292`)
-- [ ] MO-09 A status change sets `updated_at`, is written to the activity log, closes the dialog and reloads the table (`assets/js/admin.js:3307-3310`, `:3321-3324`)
+- [x] MO-01 Counters for pending, processing, shipped, delivered
+- [x] MO-02 Orders table with status filter, refresh and pagination
+- [x] MO-03 Order detail: customer, contact, delivery address, items, totals, discount and promo code, notes, payment method, link to the uploaded receipt
+- [x] MO-04 Status progression (pending → processing → shipped → delivered) with one action per step ("Process Order", "Ship Order", "Mark Delivered"), and cancel where allowed (`assets/js/admin.js:3124-3155`) *(defect today: no staff action sets `confirmed`, BUG-22)*
+- [x] MO-05 Order timeline in the detail view: Pending, Processing, Shipped, Delivered, or a single Cancelled marker (`assets/js/admin.js:3157-3183`)
+- [x] MO-06 Table columns: short order id (first eight characters), date, customer, item count, total, status, View; newest first; ten per page (`assets/js/admin.js:3083-3098`, `:3008`, `:2990`)
+- [x] MO-07 Status filter values: all, pending, processing, shipped, delivered, cancelled (`admin.html:1215-1220`)
+- [x] MO-08 Cancel is offered while an order is pending or processing and asks for confirmation; delivered and cancelled orders show a final-status label and no action (`assets/js/admin.js:3124-3155`, `:3194-3199`, `:3288-3292`)
+- [x] MO-09 A status change sets `updated_at`, is written to the activity log, closes the dialog and reloads the table (`assets/js/admin.js:3307-3310`, `:3321-3324`)
 - [ ] MO-10 The detail header shows the order number (falling back to the short id) and the date and time; the payment panel shows the payment reference (`assets/js/admin.js:3216`, `:3227-3231`, `:3247`)
 
 ### 2.17 Admin — customers (MC)
 
-- [ ] MC-01 Customer table with search, totals (all, new, with orders), order count and spend per customer
+- [x] MC-01 Customer table with search, totals (all, new, with orders), order count and spend per customer
 - [ ] MC-02 Customer detail modal: profile (name, email, phone, WhatsApp number, date of birth, joined, order count, total spent, status) and the visit data in MC-11 (`assets/js/admin.js:7701-7709`). It does not list the customer's orders
 - [ ] MC-03 Suspend, ban and reactivate, each with an email to the customer
 - [ ] MC-04 Revoke and restore return privilege, with an email
@@ -331,22 +331,22 @@ There are three audiences:
 - [ ] MC-06 Message a customer from the row (opens compose)
 - [ ] MC-07 Customer export as CSV, JSON, TXT and PDF from the Customers view, with the columns name, email, phone, WhatsApp, orders, total spent, joined (`assets/js/admin.js:7334-7344`, `:1072-1080`)
 - [ ] MC-08 Table columns: number, name, email, phone, WhatsApp number, date of birth, orders, total spent, joined, status, actions; oldest account first; no pagination (`admin.html:2241-2251`; `assets/js/admin.js:7158`, `:7250-7260`)
-- [ ] MC-09 Figures: orders are matched to customers by email; "total spent" counts delivered orders only; "New (30d)" counts accounts created in the last 30 days (`assets/js/admin.js:7167-7174`, `:7191-7196`)
-- [ ] MC-10 Search over name, email, phone and WhatsApp number (`assets/js/admin.js:7289-7301`) *(defect today: BUG-21)*
+- [x] MC-09 Figures: orders are matched to customers by email; "total spent" counts delivered orders only; "New (30d)" counts accounts created in the last 30 days (`assets/js/admin.js:7167-7174`, `:7191-7196`)
+- [x] MC-10 Search over name, email, phone and WhatsApp number (`assets/js/admin.js:7289-7301`) *(defect today: BUG-21)*
 - [ ] MC-11 Customer detail "Location & Device" from recorded visits: last IP address, country, region, city, device, browser, operating system, device brand, screen size, known IP addresses and cities; table of the 20 most recent visits (date, page, IP address, location, device, time spent) (`assets/js/admin.js:7677-7682`, `:7717-7727`, `:7743-7762`)
 - [ ] MC-12 Deleting a customer removes wishlist items, cart items, reviews, visits and messages, de-links orders (which are kept) and deletes the profile; every customer action is written to the activity log (`assets/js/admin.js:7412-7434`, `:7465`, `:7547`, `:7621`)
 
 ### 2.18 Admin — messages (MM)
 
 - [ ] MM-01 Inbox list with counters (total, unread, replied), search, subject filter, pagination
-- [ ] MM-02 Message detail: sender, phone, order ID, body, reply thread
+- [x] MM-02 Message detail: sender, phone, order ID, body, reply thread
 - [ ] MM-03 Reply by email from a chosen sender address (`send-admin-reply`); reply stored in `message_replies`; status set to replied
-- [ ] MM-04 Mark as unread; delete message with its replies
+- [x] MM-04 Mark as unread; delete message with its replies
 - [ ] MM-05 Compose a new message to a customer chosen by search
 - [ ] MM-06 Two-pane layout on desktop, list/detail with back button at 900 px and below (`assets/js/admin.js:8711-8714`)
 - [ ] MM-07 Filters: status chips (All, Unread, Replied, Read); category list (General Inquiry, Order Issue, Returns & Exchanges, Sizing Help, Wholesale, Other, Order Notifications); search over name, email, message and order ID with a 250 ms delay; 20 per page (`admin.html:2465-2520`; `assets/js/admin.js:8554-8577`, `:8460`, `:9237-9243`)
-- [ ] MM-08 List card: initials, name, category, status badge (New, Read, Replied) and a 90-character preview of the latest reply (prefixed "You:" for staff) or of the original message, with a relative time (`assets/js/admin.js:8609-8654`, `:8684-8699`)
-- [ ] MM-09 Opening a message marks it read and updates the counters and the sidebar badge; the thread shows the original message and all replies, customer and staff, in time order, scrolled to the latest (`assets/js/admin.js:8716-8725`, `:8811-8853`, `:8805-8807`)
+- [x] MM-08 List card: initials, name, category, status badge (New, Read, Replied) and a 90-character preview of the latest reply (prefixed "You:" for staff) or of the original message, with a relative time (`assets/js/admin.js:8609-8654`, `:8684-8699`)
+- [x] MM-09 Opening a message marks it read and updates the counters and the sidebar badge; the thread shows the original message and all replies, customer and staff, in time order, scrolled to the latest (`assets/js/admin.js:8716-8725`, `:8811-8853`, `:8805-8807`)
 - [ ] MM-10 Sender addresses offered for replies and new messages: support@, info@, orders@ and contact@ on the store domain (`admin.html:2688-2697`, `:2395-2408`)
 - [ ] MM-11 Compose in detail: recipient search from two characters (eight matches by name or email), the chosen recipient shown as a removable tag, optional subject with a default, message required; the message is stored as a `contact_messages` row with status "replied" and emailed (`assets/js/admin.js:9065-9081`, `:9110-9138`, `:9151-9154`, `:9167-9173`, `:9180-9194`) *(defect today: BUG-26)*
 
@@ -356,22 +356,22 @@ There are three audiences:
 - [ ] MX-02 Approve, reject and delete a review *(defect today)*
 - [ ] MX-03 Site images: hero and three category images, each by URL or by upload to the `site-images` bucket, with preview and save
 - [ ] MX-04 Storefront picks up new site images without a redeploy
-- [ ] MX-05 Manage admins: list with role badges
-- [ ] MX-06 Promote to super admin, demote to editor, remove a member of staff
+- [x] MX-05 Manage admins: list with role badges
+- [x] MX-06 Promote to super admin, demote to editor, remove a member of staff
 - [ ] MX-07 Invite a member of staff by email with a role (editor or super admin); seven-day expiry; invitation email (`send-admin-invite`); fallback link shown if the email fails
 - [ ] MX-08 Activity log with search, action filter and refresh
-- [ ] MX-09 Trash: list soft-deleted products, restore, delete permanently, empty trash
+- [x] MX-09 Trash: list soft-deleted products, restore, delete permanently, empty trash
 - [ ] MX-10 Review card: reviewer name (or email), date, star rating, product name, comment and status, with Approve, Reject and Delete (delete asks for confirmation); counters for total, approved, pending, rejected and average rating (`assets/js/admin.js:7848-7870`, `:7911-7928`, `:7950`)
 - [ ] MX-11 Site images in detail: recommended dimensions shown beside each field; typing a URL updates the preview; uploads are compressed, named with a timestamp and given a public URL; each setting stored as `{url, alt}`; saving signals other open storefront tabs to refresh (`admin.html:1689-1693`, `:1740-1743`; `assets/js/admin.js:2624-2658`, `:2675`, `:2691-2694`, `:2735-2744`)
-- [ ] MX-12 Staff list ordered by role priority then date; the signed-in user is marked "You"; owner and developer accounts are marked "Protected" and offer no actions; promote, demote and remove are logged and removal asks for confirmation (`assets/js/admin.js:2406-2413`, `:2365-2391`, `:2505-2510`)
+- [x] MX-12 Staff list ordered by role priority then date; the signed-in user is marked "You"; owner and developer accounts are marked "Protected" and offer no actions; promote, demote and remove are logged and removal asks for confirmation (`assets/js/admin.js:2406-2413`, `:2365-2391`, `:2505-2510`)
 - [ ] MX-13 Invitation in detail: email format checked; inviting the same email again replaces its token, role and expiry; role choices described as "Editor - Can add and edit products" and "Super Admin - Full access"; the invitation is logged (`assets/js/admin.js:5444-5446`, `:5456-5466`, `:5516`; `admin.html:226-227`)
 - [ ] MX-14 Activity log in detail: the latest 100 entries; each shows staff name, role badge, action, entity, subject, device, browser and operating system, and a relative time; search over staff name, subject, email, entity and action with a 250 ms delay; action filter values login, create, update, delete, restore, invite (`assets/js/admin.js:2263-2267`, `:2238-2252`, `:2298-2309`, `:3354-3360`; `admin.html:1623-1629`)
 - [ ] MX-15 Trash in detail: each entry shows image, name, category and how long ago it was deleted; restoring returns the product to the inventory; permanent delete and "Empty Trash" each ask for confirmation; all three are logged (`assets/js/admin.js:2817-2846`, `:2884-2906`, `:2936-2941`, `:2975-2977`)
 
 ### 2.20 Admin — analytics and exports (MA)
 
-- [ ] MA-01 Period selector (7, 30, 90 days) and refresh
-- [ ] MA-02 Indicators: page views, customers, orders, revenue, conversion rate
+- [x] MA-01 Period selector (7, 30, 90 days) and refresh
+- [x] MA-02 Indicators: page views, customers, orders, revenue, conversion rate
 - [ ] MA-03 Revenue bar chart and order-status donut
 - [ ] MA-04 Traffic chart, top pages, top products
 - [ ] MA-05 Device type, device brand/model and browser tables
@@ -396,12 +396,12 @@ There are three audiences:
 
 ### 2.22 Progressive web app (Q)
 
-- [ ] Q-01 Storefront web manifest (name, icons, standalone, start URL `/home`)
-- [ ] Q-02 Separate admin manifest ("LBS Admin", start URL `/admin`)
+- [x] Q-01 Storefront web manifest (name, icons, standalone, start URL `/home`)
+- [x] Q-02 Separate admin manifest ("LBS Admin", start URL `/admin`)
 - [ ] Q-03 Storefront service worker: network-first pages with cached fallback, cached icons, offline image placeholder
 - [ ] Q-04 Admin service worker scoped to `/admin`
 - [ ] Q-05 Install banner on Android and install instructions on iOS, with dismissal remembered
-- [ ] Q-06 Update flow: new worker activates and the page reloads once
+- [x] Q-06 Update flow: new worker activates and the page reloads once
 - [ ] Q-07 Push notification and notification-click handlers in the storefront worker (the admin worker has none)
 - [ ] Q-08 Admin worker caching: the admin shell, icons and manifest are pre-cached; navigation is network-first, falling back to the cached page and then to `/admin`; scripts and styles are always fetched fresh; other same-origin files are served from cache and refreshed in the background; old admin caches are deleted on activation; Supabase and other third-party requests are left alone (`admin-sw.js:12-21`, `:39-56`, `:66-76`, `:81-93`, `:96-98`, `:100-128`)
 - [ ] Q-09 Admin worker messages `SKIP_WAITING`, `GET_VERSION` and `FORCE_UNREGISTER`; each area registers its own worker and removes the other's registration where the scopes overlap (`admin-sw.js:132-146`; `assets/js/app.js:2330-2353`)
@@ -459,7 +459,7 @@ There are three audiences:
 - [ ] O-01 Title and meta description on every page
 - [ ] O-02 Canonical links on public pages; `noindex` on cart, checkout, track and admin
 - [ ] O-03 Open Graph tags and Twitter card on public pages
-- [ ] O-04 `robots.txt` and `sitemap.xml`
+- [x] O-04 `robots.txt` and `sitemap.xml`
 - [ ] O-05 Favicon set (SVG, PNG, Apple touch icon) and theme colour
 - [ ] O-06 Security headers: HSTS, `nosniff`, frame options, referrer policy, permissions policy, content security policy (`vercel.json:11-50`)
 

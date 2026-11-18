@@ -2,6 +2,9 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ToastProvider } from "@/components/ui/Toast";
+import { AnalyticsLoader } from "@/features/consent/AnalyticsLoader";
+import { ConsentBanner } from "@/features/consent/ConsentBanner";
+import { ServiceWorkerRegistrar } from "@/features/pwa/ServiceWorkerRegistrar";
 import { BagSheet } from "@/features/cart/BagSheet";
 import { KeyboardWatcher } from "@/features/shell/KeyboardWatcher";
 import { MenuSheet } from "@/features/shell/MenuSheet";
@@ -27,6 +30,9 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
         <SearchSheet />
         <BagSheet />
         <WhatsAppButton />
+        <ConsentBanner />
+        <AnalyticsLoader />
+        <ServiceWorkerRegistrar script="/sw.js" scope="/" />
         <KeyboardWatcher />
       </ShellProvider>
     </ToastProvider>

@@ -48,6 +48,10 @@ export function CheckoutView() {
     return (
       <div className="mx-auto min-h-[60dvh] max-w-[560px] px-4 pt-4 sm:pt-10" aria-busy="true">
         <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
+        <p className="mt-2 max-w-[34rem] text-lg text-muted">
+          Pay by bank transfer, then upload your receipt. Your details are kept on this phone until
+          the order is placed.
+        </p>
       </div>
     );
   }
@@ -199,12 +203,17 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
 
   if (lines.length === 0 && !pending) {
     return (
-      <div className="mx-auto max-w-xl px-4 py-20 text-center">
-        <h1 className="font-display text-4xl">Your bag is empty</h1>
+      <div className="mx-auto max-w-[560px] px-4 pt-4 sm:pt-10">
+        <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
+        <p className="mt-2 max-w-[34rem] text-lg text-muted">
+          Pay by bank transfer, then upload your receipt. Your details are kept on this phone until
+          the order is placed.
+        </p>
+        <h2 className="mt-12 font-display text-3xl">Your bag is empty</h2>
         <p className="mt-3 text-base text-muted">Add something to your bag before checking out.</p>
-        <ButtonLink href="/shop" className="mt-8">
-          Browse the shop
-        </ButtonLink>
+        <div className="mt-8 flex justify-end">
+          <ButtonLink href="/shop">Browse the shop</ButtonLink>
+        </div>
       </div>
     );
   }
@@ -240,6 +249,10 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
   return (
     <div className="mx-auto max-w-[560px] px-4 pt-4 pb-[calc(var(--bar-h)+var(--safe-bottom)+1rem)] sm:pt-10 sm:pb-16">
       <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
+      <p className="mt-2 max-w-[34rem] text-lg text-muted">
+        Pay by bank transfer, then upload your receipt. Your details are kept on this phone until
+        the order is placed.
+      </p>
 
       <details className="mt-4 border border-line bg-surface">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-base [&::-webkit-details-marker]:hidden">

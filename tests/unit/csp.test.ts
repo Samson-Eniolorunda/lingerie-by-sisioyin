@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCsp } from "@/lib/csp";
+import { buildCsp, SECURITY_HEADERS } from "@/lib/csp";
 
 describe("content security policy", () => {
   const csp = buildCsp({ nonce: "abc", supabaseUrl: "https://example.supabase.co", isDev: false });
@@ -21,5 +21,13 @@ describe("content security policy", () => {
       .split("; ")
       .find((d) => d.startsWith("connect-src"));
     expect(bare).not.toContain("supabase");
+  });
+  it("allows Cloudinary images and sets framing and opener headers", () => {
+    expect(csp.split("; ").find((d) => d.startsWith("img-src"))).toContain(
+      "https://res.cloudinary.com",
+    );
+    expect(SECURITY_HEADERS["X-Frame-Options"]).toBe("DENY");
+    expect(SECURITY_HEADERS["Cross-Origin-Opener-Policy"]).toBe("same-origin-allow-popups");
+    expect(SECURITY_HEADERS["X-Content-Type-Options"]).toBe("nosniff");
   });
 });

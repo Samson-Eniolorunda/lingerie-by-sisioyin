@@ -96,7 +96,7 @@ test("K-01 to K-14 full checkout reaches the confirmation, then the order can be
   await page.getByRole("link", { name: "Track this order" }).click();
   await page.getByLabel("Email used for the order").fill("ada@example.com");
   await page.getByRole("button", { name: "Track order" }).click();
-  await expect(page.getByText("Awaiting payment check")).toBeVisible();
+  await expect(page.getByText("Pending", { exact: true })).toBeVisible();
 
   await page.getByLabel("Email used for the order").fill("someone@else.com");
   await page.getByRole("button", { name: "Track order" }).click();

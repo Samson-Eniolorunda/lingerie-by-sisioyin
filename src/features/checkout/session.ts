@@ -1,5 +1,6 @@
 "use client";
 
+import "@/lib/zod-config";
 import { useSyncExternalStore } from "react";
 import { z } from "zod";
 import { createLocalStore } from "@/lib/local-store";

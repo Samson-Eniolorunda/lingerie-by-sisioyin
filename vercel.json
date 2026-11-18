@@ -4,8 +4,14 @@
   "trailingSlash": false,
   "redirects": [],
   "rewrites": [
-    { "source": "/", "destination": "/home" },
-    { "source": "/admin", "destination": "/admin.html" }
+    {
+      "source": "/",
+      "destination": "/home"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    }
   ],
   "headers": [
     {
@@ -165,6 +171,12 @@
           "value": "application/manifest+json"
         }
       ]
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/keep-alive",
+      "schedule": "17 5 * * *"
     }
   ]
 }
