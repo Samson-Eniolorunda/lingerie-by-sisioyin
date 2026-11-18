@@ -142,7 +142,7 @@ test.describe("products (MI)", () => {
     await expect(page.getByText("7 units in 1 line")).toBeVisible();
     await page.getByRole("button", { name: "Add product" }).click();
     await expect(page).toHaveURL(/\/admin\/products$/);
-    await expect(page.getByText("Satin sleep set", { exact: true })).toBeVisible();
+    await expect(page.getByText("Satin sleep set", { exact: true }).first()).toBeVisible();
     await page.goto("/shop");
     await expect(page.getByText("Satin sleep set").first()).toBeVisible();
   });

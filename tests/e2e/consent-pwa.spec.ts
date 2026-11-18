@@ -2,6 +2,7 @@ import { expect, test } from "./fixtures";
 
 test.describe("cookie consent (N-01, N-02)", () => {
   test.beforeEach(async ({ page }) => {
+    await page.context().clearCookies();
     await page.addInitScript(() => {
       window.sessionStorage.setItem("LBS_TEST_NO_CONSENT_PRESET", "1");
       if (!window.sessionStorage.getItem("seeded")) {

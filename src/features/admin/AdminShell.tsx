@@ -223,7 +223,7 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
       <main
         id="main"
         data-admin-main
-        className="mx-auto w-full max-w-[1100px] px-4 pt-5 pb-[calc(var(--bottom-nav-h)+var(--safe-bottom)+2rem)] lg:ml-64 lg:max-w-none lg:px-10 lg:pt-8 lg:pb-16"
+        className="mx-auto w-full max-w-[1100px] px-4 pt-5 pb-[calc(var(--bottom-nav-h)+var(--safe-bottom)+2rem)] lg:ml-64 lg:w-auto lg:max-w-none lg:px-10 lg:pt-8 lg:pb-16"
       >
         <div className="lg:mx-auto lg:max-w-[1100px]">{children}</div>
       </main>

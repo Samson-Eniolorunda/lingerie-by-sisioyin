@@ -30,3 +30,11 @@ export function makeConsent(choice: ConsentChoice, now: Date = new Date()): Cons
 export function analyticsAllowed(record: ConsentRecord | null): boolean {
   return record?.choice === "all";
 }
+
+/** The answer is also kept in a first-party cookie so the server knows whether to show the card in the first HTML. */
+export const CONSENT_COOKIE = "lbs_consent";
+export const CONSENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
+
+export function consentCookie(choice: ConsentChoice, secure: boolean): string {
+  return `${CONSENT_COOKIE}=${choice}; Path=/; Max-Age=${CONSENT_COOKIE_MAX_AGE}; SameSite=Lax${secure ? "; Secure" : ""}`;
+}

@@ -1,3 +1,5 @@
+import { cookies } from "next/headers";
+import { CONSENT_COOKIE } from "@/lib/consent";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
@@ -12,7 +14,8 @@ import { SearchSheet } from "@/features/shell/SearchSheet";
 import { ShellProvider } from "@/features/shell/ShellContext";
 import { WhatsAppButton } from "@/features/shell/WhatsAppButton";
 
-export function StoreShell({ children }: { children: React.ReactNode }) {
+export async function StoreShell({ children }: { children: React.ReactNode }) {
+  const answered = (await cookies()).has(CONSENT_COOKIE);
   return (
     <ToastProvider>
       <ShellProvider>
@@ -30,7 +33,7 @@ export function StoreShell({ children }: { children: React.ReactNode }) {
         <SearchSheet />
         <BagSheet />
         <WhatsAppButton />
-        <ConsentBanner />
+        <ConsentBanner answered={answered} />
         <AnalyticsLoader />
         <ServiceWorkerRegistrar script="/sw.js" scope="/" />
         <KeyboardWatcher />

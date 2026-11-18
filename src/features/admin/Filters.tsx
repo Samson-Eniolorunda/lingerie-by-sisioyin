@@ -36,23 +36,25 @@ export function FilterBar({
           className="min-h-12 w-full rounded-sm border border-control bg-surface px-3 text-base font-normal"
         />
       </label>
-      {select ? (
-        <label className="flex flex-col gap-1.5 text-sm font-medium sm:w-56">
-          {select.label}
-          <select
-            name={select.name}
-            defaultValue={select.value}
-            className="min-h-12 w-full rounded-sm border border-control bg-surface px-3 text-base font-normal"
-          >
-            {select.options.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-      ) : null}
-      {extra}
+      <div className="grid grid-cols-2 gap-3 sm:contents">
+        {select ? (
+          <label className="flex flex-col gap-1.5 text-sm font-medium sm:w-56">
+            {select.label}
+            <select
+              name={select.name}
+              defaultValue={select.value}
+              className="min-h-12 w-full rounded-sm border border-control bg-surface px-3 text-base font-normal"
+            >
+              {select.options.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : null}
+        {extra}
+      </div>
       <Button type="submit" variant="secondary">
         Apply
       </Button>

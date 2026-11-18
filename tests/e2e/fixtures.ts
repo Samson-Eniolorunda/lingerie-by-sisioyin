@@ -20,6 +20,8 @@ export const test = base.extend({
       await page.locator("html[data-hydrated]").waitFor({ state: "attached" });
       return response;
     };
+    const baseURL = process.env.BASE_URL ?? "http://localhost:3100";
+    await page.context().addCookies([{ name: "lbs_consent", value: "essential", url: baseURL }]);
     await provide(page);
   },
 });

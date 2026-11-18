@@ -61,18 +61,20 @@ export function OrderActions({
           secondary={
             <Button
               variant="secondary"
+              aria-label="Reject receipt"
               disabled={pending || paymentStatus === "rejected"}
               onClick={() => run(() => paymentDecisionAction(orderNumber, "rejected"))}
             >
-              Reject receipt
+              Reject
             </Button>
           }
           primary={
             <Button
+              aria-label="Confirm payment"
               disabled={pending}
               onClick={() => run(() => paymentDecisionAction(orderNumber, "confirmed"))}
             >
-              Confirm payment
+              Confirm
             </Button>
           }
         />

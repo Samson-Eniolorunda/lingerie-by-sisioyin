@@ -24,7 +24,7 @@ export default async function AnalyticsPage({
     ["Customers", String(report.customers)],
     ["Orders", String(report.orders)],
     ["Revenue", formatNaira(report.revenueNgn)],
-    ["Orders per customer", `${report.conversionPercent}%`],
+    ["Orders per customer", (report.conversionPercent / 100).toFixed(1)],
   ] as const;
   return (
     <>
@@ -55,7 +55,7 @@ export default async function AnalyticsPage({
         {figures.map(([label, value]) => (
           <div key={label} className="min-w-0 border border-line bg-surface p-4">
             <dt className="text-sm text-muted">{label}</dt>
-            <dd className="mt-1 font-display text-[1.625rem] leading-none [overflow-wrap:anywhere] tabular-nums">
+            <dd className="mt-1 font-display text-[1.625rem] leading-none [overflow-wrap:anywhere] lining-nums tabular-nums">
               {value}
             </dd>
           </div>

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { Button, ButtonRow } from "@/components/ui/Button";
 import { createLocalStore } from "@/lib/local-store";
 import {
+  consentCookie,
   CONSENT_KEY,
   makeConsent,
   parseConsent,
@@ -21,6 +22,7 @@ export function useConsent(): ConsentRecord | null {
 
 export function chooseConsent(choice: ConsentChoice): void {
   consentStore.set(makeConsent(choice));
+  document.cookie = consentCookie(choice, window.location.protocol === "https:");
 }
 
 /** A footer link that brings the card back so the choice can be changed at any time. */
@@ -40,14 +42,9 @@ export function CookieSettingsButton({ className }: { readonly className?: strin
  * Asked once, in plain words, with both answers equally easy: "Essential only" on the left and
  * "Accept analytics" on the right. It does not cover the page or block it.
  */
-export function ConsentBanner() {
+export function ConsentBanner({ answered }: { readonly answered: boolean }) {
   const record = useConsent();
   const [reopened, setReopened] = useState(false);
-  const hydrated = useSyncExternalStore(
-    () => () => undefined,
-    () => true,
-    () => false,
-  );
 
   useEffect(() => {
     const open = () => setReopened(true);
@@ -60,7 +57,9 @@ export function ConsentBanner() {
     setReopened(false);
   }, []);
 
-  if (!hydrated || (record !== null && !reopened)) return null;
+  // The server renders the card when there is no cookie, so it is in the first paint and never pops in late.
+  // A choice kept only in local storage (before the cookie existed) hides it once the page is on the device.
+  if (!reopened && (answered || record !== null)) return null;
   return (
     <section
       aria-labelledby="consent-title"
@@ -68,11 +67,11 @@ export function ConsentBanner() {
       className="fixed inset-x-0 z-[calc(var(--z-toast)+1)] mx-auto w-[min(32rem,calc(100vw-1.5rem))] border border-line bg-surface p-4 shadow-lg"
       style={{ bottom: "calc(var(--bottom-nav-h) + var(--safe-bottom) + 0.75rem)" }}
     >
-      <h2 id="consent-title" className="font-sans text-base font-semibold">
+      <h2 id="consent-title" className="font-sans text-sm font-semibold">
         Cookies and measuring visits
       </h2>
-      <p className="mt-1 text-sm text-muted">
-        Essential storage keeps your bag and sign-in. With your permission we also measure visits.{" "}
+      <p className="mt-0.5 text-sm text-muted">
+        We measure visits only with your permission.{" "}
         <Link href="/privacy#cookies" className="text-primary underline underline-offset-4">
           Privacy policy
         </Link>

@@ -15,7 +15,7 @@ function Figure({ label, value, href }: { label: string; value: string; href?: s
   const body = (
     <>
       <p className="text-sm text-muted">{label}</p>
-      <p className="mt-1 font-display text-[1.75rem] leading-none [overflow-wrap:anywhere] tabular-nums">
+      <p className="mt-1 font-display text-[1.75rem] leading-none [overflow-wrap:anywhere] lining-nums tabular-nums">
         {value}
       </p>
     </>

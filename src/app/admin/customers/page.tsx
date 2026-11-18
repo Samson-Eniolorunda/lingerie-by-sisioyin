@@ -47,7 +47,9 @@ export default async function CustomersPage({
         {stats.map(([label, value]) => (
           <div key={label} className="border border-line bg-surface p-3">
             <dt className="text-sm text-muted">{label}</dt>
-            <dd className="font-display text-[1.5rem] leading-none tabular-nums">{value}</dd>
+            <dd className="font-display text-[1.5rem] leading-none lining-nums tabular-nums">
+              {value}
+            </dd>
           </div>
         ))}
       </dl>
