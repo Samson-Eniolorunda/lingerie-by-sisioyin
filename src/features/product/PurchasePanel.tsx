@@ -6,21 +6,32 @@ import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
 import { StickyActionBar } from "@/components/ui/StickyActionBar";
 import { useToast } from "@/components/ui/Toast";
-import { cartCount, addToCart, useCart } from "@/features/cart/store";
+import { cartCount, addToCart, removeLine, replaceLine, useCart } from "@/features/cart/store";
 import { useShell } from "@/features/shell/ShellContext";
 import { SizeGuideContent } from "@/features/size/SizeGuideContent";
 import { WishlistHeart } from "@/features/catalogue/WishlistHeart";
 import { chartForCategory } from "@/data/size-charts";
+import { track } from "@/lib/analytics";
 import { cn } from "@/lib/cn";
 import { swatchFor } from "@/lib/colours";
 import { variantIdFor } from "@/lib/cart-merge";
 import { formatNaira } from "@/lib/money";
 import { maxQuantity, sizeAvailable, stockNote } from "@/lib/stock";
-import type { Product } from "@/types/domain";
+import type { CartLine, Product } from "@/types/domain";
 
 const ONE_SIZE = "One Size";
 
-export function PurchasePanel({ product }: { readonly product: Product }) {
+interface PurchasePanelProps {
+  readonly product: Product;
+  /** Inside a sheet: no sticky bar, no heart, one inline button. */
+  readonly compact?: boolean;
+  /** Editing a bag line (S-18): the options start as the line has them and Save replaces it. */
+  readonly edit?: { readonly line: CartLine; readonly onDone: () => void };
+  /** Called after a line is added, so a sheet can close. */
+  readonly onAdded?: () => void;
+}
+
+export function PurchasePanel({ product, compact = false, edit, onAdded }: PurchasePanelProps) {
   const toast = useToast();
   const shell = useShell();
   const bag = useCart();
@@ -30,17 +41,24 @@ export function PurchasePanel({ product }: { readonly product: Product }) {
   const needsColour = product.allowColourSelection && product.colours.length > 0;
 
   const [size, setSize] = useState<string | undefined>(
-    sizeNames.length === 1 ? sizeNames[0] : undefined,
+    edit ? edit.line.selectedSize : sizeNames.length === 1 ? sizeNames[0] : undefined,
   );
-  const [colour, setColour] = useState<string | undefined>(undefined);
-  const [qty, setQty] = useState(1);
+  const [colour, setColour] = useState<string | undefined>(
+    edit && edit.line.selectedColor !== "" ? edit.line.selectedColor : undefined,
+  );
+  const [qty, setQty] = useState(edit ? edit.line.qty : 1);
   const [guide, setGuide] = useState(false);
   const [added, setAdded] = useState(false);
   const sizeGroup = useRef<HTMLFieldSetElement>(null);
   const colourGroup = useRef<HTMLFieldSetElement>(null);
 
   const max = useMemo(() => maxQuantity(product, { size, colour }), [product, size, colour]);
-  const inBag = bag.find((l) => l.variantId === variantIdFor(product.id, size, colour))?.qty ?? 0;
+  const inBag =
+    bag.find(
+      (l) =>
+        l.variantId === variantIdFor(product.id, size, colour) &&
+        l.variantId !== edit?.line.variantId,
+    )?.qty ?? 0;
   const room = Math.max(0, max - inBag);
   const outOfStock = product.qty <= 0;
   const effectiveQty = Math.min(qty, Math.max(1, room));
@@ -63,7 +81,7 @@ export function PurchasePanel({ product }: { readonly product: Product }) {
     "pick-colour": "Select a colour",
     out: "Out of stock",
     full: "All available are in your bag",
-    ready: added ? "Added" : "Add to bag",
+    ready: edit ? "Save changes" : added ? "Added" : "Add to bag",
   }[status];
 
   function onAdd() {
@@ -77,19 +95,36 @@ export function PurchasePanel({ product }: { readonly product: Product }) {
       return;
     }
     if (status !== "ready") return;
-    addToCart(
-      {
-        variantId: variantIdFor(product.id, size, colour),
-        id: product.id,
-        name: product.name,
-        price_ngn: product.priceNgn,
-        selectedSize: size ?? ONE_SIZE,
-        selectedColor: colour ?? "",
-        image: product.images[0]?.src ?? "",
-        qty: effectiveQty,
-      },
-      max,
-    );
+    const next: CartLine = {
+      variantId: variantIdFor(product.id, size, colour),
+      id: product.id,
+      name: product.name,
+      price_ngn: product.priceNgn,
+      selectedSize: size ?? ONE_SIZE,
+      selectedColor: colour ?? "",
+      image: product.images[0]?.src ?? "",
+      qty: effectiveQty,
+    };
+    if (edit) {
+      // Changing to an option already in the bag merges the two lines; otherwise the line is replaced in place.
+      if (
+        next.variantId !== edit.line.variantId &&
+        bag.some((l) => l.variantId === next.variantId)
+      ) {
+        removeLine(edit.line.variantId);
+        addToCart(next, max);
+      } else replaceLine(edit.line.variantId, { ...next, qty: Math.min(max, next.qty) });
+      toast.show("Your bag has been updated.", { tone: "success" });
+      edit.onDone();
+      return;
+    }
+    addToCart(next, max);
+    track("add_to_cart", {
+      currency: "NGN",
+      value: next.price_ngn * next.qty,
+      items: [{ item_id: next.id, item_name: next.name, quantity: next.qty }],
+    });
+    onAdded?.();
     setAdded(true);
     window.setTimeout(() => setAdded(false), 2000);
     toast.show(`${product.name} added to your bag`, {
@@ -239,33 +274,39 @@ export function PurchasePanel({ product }: { readonly product: Product }) {
         </p>
       </div>
 
-      <div className="hidden items-center gap-3 sm:flex">
+      <div className={cn("items-center gap-3", compact ? "flex" : "hidden sm:flex")}>
         <Button block variant="primary" onClick={onAdd} disabled={disabled} aria-live="polite">
           {label}
         </Button>
-        <WishlistHeart
-          productId={product.id}
-          name={product.name}
-          className="border border-control"
-        />
+        {compact ? null : (
+          <WishlistHeart
+            productId={product.id}
+            name={product.name}
+            className="border border-control"
+          />
+        )}
       </div>
-      <div className="sm:hidden">
-        <WishlistHeart productId={product.id} name={product.name} className="-ml-3" />
-      </div>
-
-      <StickyActionBar>
-        <div className="flex items-center gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="tabular text-lg font-semibold">
-              {formatNaira(product.priceNgn * effectiveQty)}
-            </p>
-            <p className="truncate text-sm text-muted">{summary}</p>
-          </div>
-          <Button onClick={onAdd} disabled={disabled} className="shrink-0">
-            {label}
-          </Button>
+      {compact ? null : (
+        <div className="sm:hidden">
+          <WishlistHeart productId={product.id} name={product.name} className="-ml-3" />
         </div>
-      </StickyActionBar>
+      )}
+
+      {compact ? null : (
+        <StickyActionBar>
+          <div className="flex items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="tabular text-lg font-semibold">
+                {formatNaira(product.priceNgn * effectiveQty)}
+              </p>
+              <p className="truncate text-sm text-muted">{summary}</p>
+            </div>
+            <Button onClick={onAdd} disabled={disabled} className="shrink-0">
+              {label}
+            </Button>
+          </div>
+        </StickyActionBar>
+      )}
 
       <Sheet
         open={guide}

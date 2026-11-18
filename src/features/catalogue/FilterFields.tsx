@@ -1,3 +1,4 @@
+import { PriceRange } from "./PriceRange";
 import { CATEGORIES, GENDERS, PRICE_CEILING } from "@/schemas/catalogue";
 import type { CatalogueQuery } from "@/server/queries/catalogue";
 
@@ -5,7 +6,6 @@ const group = "border-b border-line py-4";
 const legend = "mb-1 text-sm font-medium uppercase tracking-wider text-subtle";
 const row = "flex min-h-12 cursor-pointer items-center gap-3 text-base";
 const radio = "size-5 shrink-0 accent-[var(--c-primary)]";
-const number = "min-h-12 w-full rounded-sm border border-control bg-surface px-3 text-base";
 
 /** Plain controls inside a GET form, so filters work with or without scripting and live in the URL. */
 export function FilterFields({
@@ -71,40 +71,12 @@ export function FilterFields({
 
       <fieldset className={group}>
         <legend className={legend}>Price (₦)</legend>
-        <div className="flex items-end gap-3">
-          <div className="flex-1">
-            <label htmlFor={`${idPrefix}-min`} className="text-sm text-muted">
-              From
-            </label>
-            <input
-              id={`${idPrefix}-min`}
-              name="min"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete="off"
-              placeholder="0"
-              defaultValue={query.minPrice ?? ""}
-              className={number}
-            />
-          </div>
-          <div className="flex-1">
-            <label htmlFor={`${idPrefix}-max`} className="text-sm text-muted">
-              To
-            </label>
-            <input
-              id={`${idPrefix}-max`}
-              name="max"
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete="off"
-              placeholder={String(PRICE_CEILING)}
-              defaultValue={query.maxPrice ?? ""}
-              className={number}
-            />
-          </div>
-        </div>
+        <PriceRange
+          idPrefix={idPrefix}
+          ceiling={PRICE_CEILING}
+          initialMin={query.minPrice}
+          initialMax={query.maxPrice}
+        />
       </fieldset>
 
       <fieldset className={group}>

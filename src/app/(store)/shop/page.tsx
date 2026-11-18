@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { FilterFields } from "@/features/catalogue/FilterFields";
 import { ProductCard } from "@/features/catalogue/ProductCard";
@@ -7,7 +8,12 @@ import { RemoveChip } from "@/features/catalogue/RemoveChip";
 import { ShopToolbar } from "@/features/catalogue/ShopToolbar";
 import { formatNaira } from "@/lib/money";
 import { PAGE_SIZE, parseCatalogueParams, toSearchParams } from "@/schemas/catalogue";
-import { listProducts, type CatalogueQuery } from "@/server/queries/catalogue";
+import {
+  getProductBySlug,
+  getProductsByIds,
+  listProducts,
+  type CatalogueQuery,
+} from "@/server/queries/catalogue";
 
 export const metadata: Metadata = {
   title: "Shop",
@@ -53,7 +59,14 @@ export default async function ShopPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { query, page } = parseCatalogueParams(await searchParams);
+  const params = await searchParams;
+  // Legacy deep link: /shop?product=<id> opened a modal; products now have their own page (R-18, S-25).
+  const legacy = typeof params.product === "string" ? params.product.slice(0, 80) : undefined;
+  if (legacy) {
+    const target = (await getProductsByIds([legacy]))[0] ?? (await getProductBySlug(legacy));
+    if (target) permanentRedirect(`/products/${target.slug}`);
+  }
+  const { query, page } = parseCatalogueParams(params);
   const all = await listProducts(query);
   const shown = all.slice(0, page * PAGE_SIZE);
   const chips = chipsFor(query);

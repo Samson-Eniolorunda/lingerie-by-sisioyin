@@ -15,6 +15,7 @@ import { DELIVERY_STATES } from "@/lib/delivery";
 import { formatNaira } from "@/lib/money";
 import { computeTotals, lineTotal } from "@/lib/pricing";
 import { applyPromo } from "@/server/actions/orders";
+import { EditLineButton } from "@/features/product/QuickView";
 import { clearCart, removeLine, restoreLine, setLineQuantity, useCart } from "./store";
 
 const step =
@@ -117,19 +118,22 @@ export function CartView() {
                     {formatNaira(lineTotal(line))}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  className="min-h-11 self-start pr-2 text-sm text-muted underline underline-offset-4"
-                  onClick={() => {
-                    const removed = removeLine(line.variantId);
-                    if (removed)
-                      toast.show(`${removed.name} removed`, {
-                        action: { label: "Undo", run: () => restoreLine(removed) },
-                      });
-                  }}
-                >
-                  Remove
-                </button>
+                <div className="flex items-center gap-3">
+                  <EditLineButton line={line} />
+                  <button
+                    type="button"
+                    className="min-h-11 self-start pr-2 text-sm text-muted underline underline-offset-4"
+                    onClick={() => {
+                      const removed = removeLine(line.variantId);
+                      if (removed)
+                        toast.show(`${removed.name} removed`, {
+                          action: { label: "Undo", run: () => restoreLine(removed) },
+                        });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
               </div>
             </li>
           ))}

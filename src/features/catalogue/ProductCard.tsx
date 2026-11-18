@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { formatNaira } from "@/lib/money";
 import type { Product } from "@/types/domain";
+import { QuickViewButton } from "@/features/product/QuickView";
 import { WishlistHeart } from "./WishlistHeart";
 
 export const TILE_SIZES = "(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw";
@@ -41,6 +42,9 @@ export function ProductCard({
         name={product.name}
         className="absolute top-0 right-0"
       />
+      {soldOut ? null : (
+        <QuickViewButton productId={product.id} name={product.name} className="-ml-2" />
+      )}
     </article>
   );
 }
