@@ -41,15 +41,13 @@ GOOGLE_LOGIN_SETUP.md
 DEPLOYMENT.md
 ROLE_PERMISSIONS.md
 
-# Database schema / SQL dumps
-*.sql
-supabase_complete.sql
+# Database schema / SQL dumps (migrations are tracked; ad hoc dumps are not)
+dumps/
 
-# Environment examples
-.env.example
 
-# Supabase (edge functions, config, SQL, temp files)
-supabase/
+# Supabase local state
+supabase/.temp/
+supabase/.branches/
 nul
 
 # Cloudflare email worker (contains internal routing config)
@@ -70,3 +68,12 @@ DocuMorph/
 # Audit/dev scripts
 audit_css*.py
 css_audit_report.md
+
+# Next.js and tooling
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+playwright-report/
+test-results/
+screenshots/

@@ -1,0 +1,74 @@
+export interface CspOptions {
+  readonly nonce: string;
+  readonly supabaseUrl?: string | undefined;
+  readonly isDev: boolean;
+  /** Only when the page itself is served over HTTPS, so a local production build still loads. */
+  readonly upgradeInsecure?: boolean;
+}
+
+/**
+ * Content security policy with a per-request nonce and no `'unsafe-inline'` for scripts.
+ * Analytics, reCAPTCHA and Supabase hosts are listed explicitly; they load only after consent
+ * or when a sheet that needs them opens.
+ */
+export function buildCsp({
+  nonce,
+  supabaseUrl,
+  isDev,
+  upgradeInsecure = false,
+}: CspOptions): string {
+  const supabase = supabaseUrl ? [new URL(supabaseUrl).origin, wsOrigin(supabaseUrl)] : [];
+  const directives: Record<string, readonly string[]> = {
+    "default-src": ["'self'"],
+    "script-src": [
+      "'self'",
+      `'nonce-${nonce}'`,
+      "'strict-dynamic'",
+      "https://www.googletagmanager.com",
+      "https://connect.facebook.net",
+      "https://www.google.com/recaptcha/",
+      "https://www.gstatic.com/recaptcha/",
+      ...(isDev ? ["'unsafe-eval'"] : []),
+    ],
+    "style-src": ["'self'", "'unsafe-inline'"],
+    "img-src": [
+      "'self'",
+      "data:",
+      "blob:",
+      "https://*.supabase.co",
+      "https://www.google-analytics.com",
+      "https://www.facebook.com",
+    ],
+    "font-src": ["'self'"],
+    "connect-src": [
+      "'self'",
+      ...supabase,
+      "https://www.google-analytics.com",
+      "https://*.google-analytics.com",
+      "https://www.facebook.com",
+    ],
+    "frame-src": ["https://www.google.com/recaptcha/", "https://recaptcha.google.com"],
+    "frame-ancestors": ["'none'"],
+    "object-src": ["'none'"],
+    "base-uri": ["'self'"],
+    "form-action": ["'self'"],
+    "manifest-src": ["'self'"],
+    "worker-src": ["'self'"],
+  };
+  return Object.entries(directives)
+    .map(([name, values]) => `${name} ${values.join(" ")}`)
+    .concat(upgradeInsecure ? ["upgrade-insecure-requests"] : [])
+    .join("; ");
+}
+
+function wsOrigin(url: string): string {
+  const origin = new URL(url);
+  return `wss://${origin.host}`;
+}
+
+export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
+  "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()",
+};
