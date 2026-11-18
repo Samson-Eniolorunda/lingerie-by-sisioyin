@@ -82,3 +82,14 @@ export async function staffSignOutAction(): Promise<void> {
   await clearSession("staff");
   redirect("/admin/sign-in");
 }
+
+export async function staffForgotAction(input: unknown): Promise<AuthState> {
+  const parsed = forgotSchema.safeParse(input);
+  if (!parsed.success) return invalid("Enter a valid email address.", fieldErrors(parsed.error));
+  const { devToken } = await data.auth.requestPasswordReset(parsed.data.email, "staff");
+  return {
+    ok: true,
+    message: "If that address has a staff account, a reset link is on its way.",
+    ...(DATA_MODE === "mock" && devToken ? { devLink: `/reset-password?token=${devToken}` } : {}),
+  };
+}

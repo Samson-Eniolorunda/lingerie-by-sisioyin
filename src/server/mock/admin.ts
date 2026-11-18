@@ -242,6 +242,25 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
+  async deleteProductForever(id, actor) {
+    const db = getDb();
+    const current = db.products.find((p) => p.id === id);
+    if (!current) return { ok: false, message: "That product no longer exists." };
+    if (current.deletedAt === null)
+      return { ok: false, message: "Move the product to the trash before deleting it for good." };
+    db.products = db.products.filter((p) => p.id !== id);
+    log(db, actor, "permanent delete", current.name);
+    return { ok: true };
+  },
+
+  async emptyTrash(actor) {
+    const db = getDb();
+    const removed = db.products.filter((p) => p.deletedAt !== null).length;
+    db.products = db.products.filter((p) => p.deletedAt === null);
+    log(db, actor, "empty trash", `${removed} products`);
+    return { ok: true, value: { removed } };
+  },
+
   async orders(query = {}) {
     const needle = query.search?.trim().toLowerCase() ?? "";
     return [...getDb().orders.values()]
@@ -336,6 +355,17 @@ export const mockAdmin: AdminRepository = {
       allowed ? "return privilege restored" : "return privilege revoked",
       user.profile.email,
     );
+    return { ok: true };
+  },
+
+  async deleteCustomer(id, actor) {
+    const db = getDb();
+    const user = db.users.get(id);
+    if (!user || user.role !== null) return { ok: false, message: "That customer was not found." };
+    // Orders are kept and de-linked; the profile, addresses and sessions go (MC-12).
+    for (const [token, record] of db.sessions) if (record.userId === id) db.sessions.delete(token);
+    db.users.delete(id);
+    log(db, actor, "customer deleted", user.profile.email);
     return { ok: true };
   },
 

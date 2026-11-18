@@ -203,6 +203,8 @@ function seedOrders(db: Db): void {
     "pending",
     "cancelled",
   ];
+  // A handful of fresh orders awaiting a payment check, so the admin always has work to show.
+  customers.slice(0, 8).forEach((customer, i) => make(customer, 2 + i * 5, "pending"));
   for (let i = 0; i < 44; i += 1) {
     const customer = customers[Math.floor(rand() * customers.length)];
     if (!customer) continue;

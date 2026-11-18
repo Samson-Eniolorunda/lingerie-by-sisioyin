@@ -136,6 +136,8 @@ export interface AdminRepository {
   updateProduct(id: string, draft: ProductDraft, actor: SessionUser): Promise<Result<AdminProduct>>;
   trashProduct(id: string, actor: SessionUser): Promise<Result>;
   restoreProduct(id: string, actor: SessionUser): Promise<Result>;
+  deleteProductForever(id: string, actor: SessionUser): Promise<Result>;
+  emptyTrash(actor: SessionUser): Promise<Result<{ removed: number }>>;
   orders(query?: OrderQuery): Promise<readonly StoredOrder[]>;
   order(orderNumber: string): Promise<StoredOrder | null>;
   setOrderStatus(orderNumber: string, status: OrderStatus, actor: SessionUser): Promise<Result>;
@@ -151,6 +153,7 @@ export interface AdminRepository {
     actor: SessionUser,
   ): Promise<Result>;
   setReturnPrivilege(id: string, allowed: boolean, actor: SessionUser): Promise<Result>;
+  deleteCustomer(id: string, actor: SessionUser): Promise<Result>;
   promos(): Promise<readonly PromoRecord[]>;
   savePromo(
     input: { code: string; percent: number; expiresAt: string | null; usageLimit: number | null },

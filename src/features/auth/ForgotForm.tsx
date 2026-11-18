@@ -7,7 +7,13 @@ import { TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { forgotAction } from "@/server/actions/auth";
 
-export function ForgotForm({ initialEmail }: { readonly initialEmail: string }) {
+export function ForgotForm({
+  initialEmail,
+  action = forgotAction,
+}: {
+  readonly initialEmail: string;
+  readonly action?: typeof forgotAction;
+}) {
   const [email, setEmail] = useState(initialEmail);
   const [error, setError] = useState<string | undefined>();
   const [done, setDone] = useState<{ sentTo: string; devLink?: string } | null>(null);
@@ -43,7 +49,7 @@ export function ForgotForm({ initialEmail }: { readonly initialEmail: string }) 
       onSubmit={(event) => {
         event.preventDefault();
         start(async () => {
-          const result = await forgotAction({ email });
+          const result = await action({ email });
           if (result.ok)
             setDone({
               sentTo: email.trim(),

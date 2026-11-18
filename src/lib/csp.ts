@@ -27,6 +27,7 @@ export function buildCsp({
       "data:",
       "blob:",
       "https://*.supabase.co",
+      "https://res.cloudinary.com",
       "https://www.google-analytics.com",
       "https://www.facebook.com",
     ],
@@ -61,5 +62,7 @@ export const SECURITY_HEADERS: Readonly<Record<string, string>> = {
   "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
+  "X-Frame-Options": "DENY",
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), interest-cohort=()",
 };
