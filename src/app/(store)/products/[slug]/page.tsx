@@ -1,3 +1,4 @@
+import { countOf } from "@/lib/plural";
 import { jsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -90,7 +91,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           {product.reviewCount > 0 ? (
             <p className="mt-1 text-sm text-muted">
               <span className="text-accent">★</span> {product.avgRating.toFixed(1)} from{" "}
-              {product.reviewCount} reviews
+              {countOf(product.reviewCount, "review")}
             </p>
           ) : null}
           <div className="mt-6">

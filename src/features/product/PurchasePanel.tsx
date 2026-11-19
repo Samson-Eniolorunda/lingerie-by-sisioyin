@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@/lib/plural";
 import { Minus, Plus, Ruler } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
@@ -317,7 +318,7 @@ export function PurchasePanel({ product, compact = false, edit, onAdded }: Purch
         <SizeGuideContent initial={chartForCategory(product.category, product.name)} showPageLink />
       </Sheet>
       <span className="sr-only" aria-live="polite">
-        {cartCount(bag)} items in bag
+        {countOf(cartCount(bag), "item")} in bag
       </span>
     </div>
   );

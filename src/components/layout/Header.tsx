@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@/lib/plural";
 import Link from "next/link";
 import { Menu, Search, ShoppingBag, User } from "lucide-react";
 import { NAV } from "@/config/site";
@@ -42,7 +43,7 @@ export function Header() {
             <User size={20} strokeWidth={1.5} />
           </Link>
           <IconButton
-            label={count > 0 ? `Bag, ${count} items` : "Bag"}
+            label={count > 0 ? `Bag, ${countOf(count, "item")}` : "Bag"}
             onClick={() => shell.open("bag")}
             className="max-md:hidden"
           >

@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@/lib/plural";
 import Image from "next/image";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
@@ -130,7 +131,7 @@ export function SearchSheet() {
               onClick={shell.close}
               className="mt-2 flex min-h-12 items-center text-base font-medium"
             >
-              View all {visible.total} results
+              View all {countOf(visible.total, "result")}
             </Link>
           </>
         ) : null}

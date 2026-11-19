@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@/lib/plural";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Heart, Search, ShoppingBag, Store, User } from "lucide-react";
@@ -73,7 +74,7 @@ export function BottomNav() {
           ) : null}
         </span>
         Bag
-        {bag > 0 ? <span className="sr-only">, {bag} items</span> : null}
+        {bag > 0 ? <span className="sr-only">, {countOf(bag, "item")}</span> : null}
       </button>
       <Link
         href="/dashboard"

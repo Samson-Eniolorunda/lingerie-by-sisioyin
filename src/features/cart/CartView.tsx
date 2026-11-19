@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@/lib/plural";
 import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, Tag, X } from "lucide-react";
@@ -287,7 +288,7 @@ export function CartView() {
         }
       >
         <p className="text-base text-muted">
-          All {lines.length} {lines.length === 1 ? "item" : "items"} will be removed from your bag.
+          All {countOf(lines.length, "item")} will be removed from your bag.
         </p>
       </Sheet>
     </div>

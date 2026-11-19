@@ -1,3 +1,4 @@
+import { countOf } from "@/lib/plural";
 import Link from "next/link";
 import { StatusBadge } from "@/features/orders/StatusBadge";
 import { formatDate } from "@/lib/dates";
@@ -22,7 +23,7 @@ export function OrderRow({
         <span className="min-w-0">
           <span className="tabular block text-base font-medium">{order.orderNumber}</span>
           <span className="block text-sm text-subtle">
-            {formatDate(order.createdAt)} · {items} item{items === 1 ? "" : "s"}
+            {formatDate(order.createdAt)} · {countOf(items, "item")}
           </span>
         </span>
         <span className="flex shrink-0 flex-col items-end gap-1">
