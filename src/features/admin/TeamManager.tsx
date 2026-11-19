@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonRow } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { SelectField, TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { Sheet } from "@/components/ui/Sheet";
-import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/dates";
 import { isProtectedRole, ROLE_LABELS } from "@/lib/permissions";
 import { inviteStaffAction, removeStaffAction, setStaffRoleAction } from "@/server/actions/admin";
@@ -31,7 +30,9 @@ export function TeamManager({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [link, setLink] = useState<string | null>(null);
   const { run, pending } = useAdminAction();
-  const toast = useToast();
+  const [copy, setCopy] = useState<"idle" | "copied" | "failed">("idle");
+  const copyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  useEffect(() => () => clearTimeout(copyTimer.current), []);
   const canShare = useSyncExternalStore(
     () => () => undefined,
     () => typeof navigator.share === "function",
@@ -44,10 +45,13 @@ export function TeamManager({
     if (!fullLink) return;
     try {
       await navigator.clipboard.writeText(fullLink);
-      toast.show("Link copied.", { tone: "success" });
+      setCopy("copied");
     } catch {
-      toast.show("Could not copy. Select the link and copy it.", { tone: "error" });
+      setCopy("failed");
     }
+    // Shown on the button itself: a toast would cover the link and the buttons on a phone.
+    clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopy("idle"), 2000);
   }
 
   return (
@@ -152,23 +156,33 @@ export function TeamManager({
             >
               {fullLink}
             </p>
-            <div className="flex flex-wrap justify-end gap-2">
-              <Button variant="secondary" onClick={() => void copyLink()}>
-                Copy link
-              </Button>
-              {canShare ? (
-                <Button
-                  variant="secondary"
-                  onClick={() =>
-                    void navigator
-                      .share({ title: "Staff invitation", url: fullLink ?? "" })
-                      .catch(() => undefined)
-                  }
-                >
-                  Share
+            {copy === "failed" ? (
+              <p className="text-sm font-medium text-error">
+                Could not copy. Select the link and copy it.
+              </p>
+            ) : null}
+            {/* Copy and Share (secondary) on the left, Done (primary) on the right; on a phone Copy and Share share one row and Done sits full width below. */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex gap-3 [&>*]:flex-1 sm:[&>*]:flex-none">
+                <Button variant="secondary" onClick={() => void copyLink()}>
+                  {copy === "copied" ? "Copied" : "Copy link"}
                 </Button>
-              ) : null}
-              <Button onClick={() => setOpen(false)}>Done</Button>
+                {canShare ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() =>
+                      void navigator
+                        .share({ title: "Staff invitation", url: fullLink ?? "" })
+                        .catch(() => undefined)
+                    }
+                  >
+                    Share
+                  </Button>
+                ) : null}
+              </div>
+              <Button className="w-full sm:w-auto" onClick={() => setOpen(false)}>
+                Done
+              </Button>
             </div>
           </div>
         ) : (
