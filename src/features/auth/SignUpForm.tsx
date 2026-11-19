@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { Turnstile, useTurnstile } from "@/components/ui/Turnstile";
 import { CheckboxRow, TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { signUpAction } from "@/server/actions/auth";
@@ -20,6 +21,7 @@ export function SignUpForm({ next }: { readonly next: string | null }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | undefined>();
   const [pending, start] = useTransition();
+  const captcha = useTurnstile();
 
   const set = (key: keyof typeof values) => (value: string) =>
     setValues((v) => ({ ...v, [key]: value }));
@@ -28,7 +30,11 @@ export function SignUpForm({ next }: { readonly next: string | null }) {
     event.preventDefault();
     setMessage(undefined);
     start(async () => {
-      const result = await signUpAction({ ...values, acceptTerms: accepted }, next);
+      const result = await signUpAction(
+        { ...values, acceptTerms: accepted, turnstileToken: captcha.token ?? undefined },
+        next,
+      );
+      captcha.reset();
       if (result && !result.ok) {
         setErrors(result.fieldErrors);
         setMessage(result.message);
@@ -119,7 +125,8 @@ export function SignUpForm({ next }: { readonly next: string | null }) {
           <p className="text-sm font-medium text-error">{errors.acceptTerms}</p>
         ) : null}
       </div>
-      <Button type="submit" block disabled={pending}>
+      <Turnstile onToken={captcha.setToken} resetSignal={captcha.resetSignal} />
+      <Button type="submit" block disabled={pending || !captcha.ready}>
         {pending ? "Creating your account" : "Create account"}
       </Button>
     </Form>

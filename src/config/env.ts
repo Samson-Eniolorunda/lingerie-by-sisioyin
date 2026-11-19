@@ -7,7 +7,7 @@ const publicSchema = z.object({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_GA_MEASUREMENT_ID: z.string().min(1).optional(),
   NEXT_PUBLIC_FB_PIXEL_ID: z.string().min(1).optional(),
-  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: z.string().min(1).optional(),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().min(1).optional(),
   NEXT_PUBLIC_WHATSAPP_NUMBER: z
     .string()
@@ -20,7 +20,8 @@ const serverSchema = z.object({
   RESEND_API_KEY: z.string().min(1),
   EMAIL_FROM_ADDRESS: z.email(),
   EMAIL_SUPPORT_ADDRESS: z.email(),
-  RECAPTCHA_SECRET_KEY: z.string().min(1),
+  /** Required on the live site only; see `src/server/turnstile.ts` for how each environment behaves. */
+  TURNSTILE_SECRET_KEY: z.string().min(1).optional(),
 });
 
 function emptyToUndefined(value: string | undefined): string | undefined {
@@ -34,7 +35,7 @@ export const publicEnv = publicSchema.parse({
   NEXT_PUBLIC_SUPABASE_ANON_KEY: emptyToUndefined(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
   NEXT_PUBLIC_GA_MEASUREMENT_ID: emptyToUndefined(process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID),
   NEXT_PUBLIC_FB_PIXEL_ID: emptyToUndefined(process.env.NEXT_PUBLIC_FB_PIXEL_ID),
-  NEXT_PUBLIC_RECAPTCHA_SITE_KEY: emptyToUndefined(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: emptyToUndefined(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY),
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: emptyToUndefined(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY),
   NEXT_PUBLIC_WHATSAPP_NUMBER: emptyToUndefined(process.env.NEXT_PUBLIC_WHATSAPP_NUMBER),
 });

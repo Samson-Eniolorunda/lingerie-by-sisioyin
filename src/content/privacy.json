@@ -247,7 +247,7 @@
                   "t": "strong",
                   "c": ["Google Services:"]
                 },
-                " We use Google Fonts for typography (which may transmit your IP to Google), Google Maps Places API for address autocomplete, and Google reCAPTCHA for security."
+                " We use Google Fonts for typography (which may transmit your IP to Google), Google Maps Places API for address autocomplete, and Cloudflare Turnstile for security."
               ]
             },
             {
@@ -320,9 +320,9 @@
               "c": [
                 {
                   "t": "strong",
-                  "c": ["Google reCAPTCHA:"]
+                  "c": ["Cloudflare Turnstile:"]
                 },
-                " We use reCAPTCHA on login and registration forms to prevent automated abuse."
+                " We use Cloudflare Turnstile on the sign-in, sign-up, password-reset and contact forms, and on the staff sign-in, to prevent automated abuse. It runs a short check in your browser and sends the result, together with your IP address and browser details, to Cloudflare so that it can tell a person from an automated program. We do not use it for advertising."
               ]
             }
           ]

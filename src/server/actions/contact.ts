@@ -2,6 +2,7 @@
 
 import { contactMessageSchema } from "@/schemas/contact";
 import { clientIp } from "@/server/auth/request";
+import { humanCheck } from "@/server/auth/human";
 import { data } from "@/server/data";
 import { allowRequest } from "@/server/rate-limit";
 
@@ -17,6 +18,8 @@ export async function sendContact(input: unknown): Promise<ContactState> {
     for (const issue of parsed.error.issues) fieldErrors[String(issue.path[0])] ??= issue.message;
     return { ok: false, message: "Please check the highlighted details.", fieldErrors };
   }
+  const human = await humanCheck(input);
+  if (!human.ok) return { ok: false, message: human.message, fieldErrors: {} };
   if (
     !(await allowRequest("contact", await clientIp(), [parsed.data.email], {
       ip: 10,

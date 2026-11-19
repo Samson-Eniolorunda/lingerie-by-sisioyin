@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { Turnstile, useTurnstile } from "@/components/ui/Turnstile";
 import { TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { forgotAction } from "@/server/actions/auth";
@@ -17,6 +18,7 @@ export function ForgotForm({
   const [error, setError] = useState<string | undefined>();
   const [done, setDone] = useState<{ sentTo: string; devLink?: string } | null>(null);
   const [pending, start] = useTransition();
+  const captcha = useTurnstile();
 
   if (done) {
     return (
@@ -48,7 +50,8 @@ export function ForgotForm({
       onSubmit={(event) => {
         event.preventDefault();
         start(async () => {
-          const result = await action({ email });
+          const result = await action({ email, turnstileToken: captcha.token ?? undefined });
+          captcha.reset();
           if (result.ok)
             setDone({
               sentTo: email.trim(),
@@ -71,7 +74,8 @@ export function ForgotForm({
         onChange={(e) => setEmail(e.target.value)}
         error={error}
       />
-      <Button type="submit" block disabled={pending}>
+      <Turnstile onToken={captcha.setToken} resetSignal={captcha.resetSignal} />
+      <Button type="submit" block disabled={pending || !captcha.ready}>
         {pending ? "Sending" : "Send reset link"}
       </Button>
     </Form>

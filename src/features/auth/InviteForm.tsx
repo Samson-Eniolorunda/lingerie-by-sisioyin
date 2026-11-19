@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { Turnstile, useTurnstile } from "@/components/ui/Turnstile";
 import { TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { acceptInvitationAction } from "@/server/actions/auth";
@@ -27,6 +28,7 @@ export function InviteForm({
   const [message, setMessage] = useState<string | undefined>();
   const [done, setDone] = useState<string | undefined>();
   const [pending, start] = useTransition();
+  const captcha = useTurnstile();
   const set = (key: keyof typeof values) => (value: string) =>
     setValues((v) => ({ ...v, [key]: value }));
 
@@ -34,7 +36,12 @@ export function InviteForm({
     event.preventDefault();
     setMessage(undefined);
     start(async () => {
-      const result = await acceptInvitationAction({ token, ...values });
+      const result = await acceptInvitationAction({
+        token,
+        ...values,
+        turnstileToken: captcha.token ?? undefined,
+      });
+      captcha.reset();
       if (!result) return;
       if (!result.ok) {
         setErrors(result.fieldErrors);
@@ -99,7 +106,8 @@ export function InviteForm({
         onChange={set("confirmPassword")}
         error={errors.confirmPassword}
       />
-      <Button type="submit" block disabled={pending}>
+      <Turnstile onToken={captcha.setToken} resetSignal={captcha.resetSignal} />
+      <Button type="submit" block disabled={pending || !captcha.ready}>
         {pending ? "Creating your account" : "Create my account"}
       </Button>
     </Form>

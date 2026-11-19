@@ -13,6 +13,7 @@ import {
 import { safeNext } from "@/lib/safe-next";
 import { cookies } from "next/headers";
 import { RESET_AUDIENCE_COOKIE, callbackUrl, clientIp } from "@/server/auth/request";
+import { humanCheck } from "@/server/auth/human";
 import { clearSession, currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
 import { allowRequest } from "@/server/rate-limit";
@@ -36,6 +37,8 @@ export async function signInAction(input: unknown, next: string | null): Promise
   const parsed = signInSchema.safeParse(input);
   if (!parsed.success)
     return invalid("Please check the highlighted details.", fieldErrors(parsed.error));
+  const human = await humanCheck(input);
+  if (!human.ok) return invalid(human.message);
   const result = await data.auth.signIn(parsed.data.email, parsed.data.password, "customer", {
     ip: await clientIp(),
   });
@@ -47,6 +50,8 @@ export async function signUpAction(input: unknown, next: string | null): Promise
   const parsed = signUpSchema.safeParse(input);
   if (!parsed.success)
     return invalid("Please check the highlighted details.", fieldErrors(parsed.error));
+  const human = await humanCheck(input);
+  if (!human.ok) return invalid(human.message);
   const { firstName, lastName, email, password } = parsed.data;
   const result = await data.auth.signUp({ firstName, lastName, email, password });
   if (!result.ok) return invalid(result.message, { email: result.message });
@@ -67,6 +72,8 @@ export async function googleAction(): Promise<AuthState> {
 export async function forgotAction(input: unknown): Promise<AuthState> {
   const parsed = forgotSchema.safeParse(input);
   if (!parsed.success) return invalid("Enter a valid email address.", fieldErrors(parsed.error));
+  const human = await humanCheck(input);
+  if (!human.ok) return invalid(human.message);
   const { devLink } = await data.auth.requestPasswordReset(
     parsed.data.email,
     "customer",
@@ -107,6 +114,8 @@ export async function staffSignInAction(input: unknown, next: string | null): Pr
   const parsed = signInSchema.safeParse(input);
   if (!parsed.success)
     return invalid("Kindly enter your login details.", fieldErrors(parsed.error));
+  const human = await humanCheck(input);
+  if (!human.ok) return invalid(human.message);
   const result = await data.auth.signIn(parsed.data.email, parsed.data.password, "staff", {
     ip: await clientIp(),
   });
@@ -119,6 +128,8 @@ export async function acceptInvitationAction(input: unknown): Promise<AuthState>
   const parsed = inviteSignUpSchema.safeParse(input);
   if (!parsed.success)
     return invalid("Please check the highlighted details.", fieldErrors(parsed.error));
+  const human = await humanCheck(input);
+  if (!human.ok) return invalid(human.message);
   if (
     !(await allowRequest("invite", await clientIp(), [parsed.data.token.slice(0, 16)], {
       ip: 10,
@@ -146,6 +157,8 @@ export async function staffSignOutAction(): Promise<void> {
 export async function staffForgotAction(input: unknown): Promise<AuthState> {
   const parsed = forgotSchema.safeParse(input);
   if (!parsed.success) return invalid("Enter a valid email address.", fieldErrors(parsed.error));
+  const human = await humanCheck(input);
+  if (!human.ok) return invalid(human.message);
   const { devLink } = await data.auth.requestPasswordReset(
     parsed.data.email,
     "staff",

@@ -215,7 +215,7 @@ Lighthouse 13.6.0, local production build, default mobile throttling, one run pe
 2. **Cloudinary free account**: cloud name, API key and secret as `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` in Vercel.
 3. **`CRON_SECRET`** in Vercel, so the daily keep-alive can run.
 4. **The email functions** you said you are supplying (contact, admin reply, welcome, order email, invitation), and Resend: verified sending domain, sender addresses, `RESEND_API_KEY`.
-5. **Auth settings** once the project exists: redirect allow-list for `/auth/callback`, Google OAuth client, reCAPTCHA keys (`NEXT_PUBLIC_RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY`), the Maps key to restrict or rotate.
+5. **Auth settings** once the project exists: redirect allow-list for `/auth/callback`, Google OAuth client, Cloudflare Turnstile keys (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`), the Maps key to restrict or rotate.
 6. **Google Analytics and Meta Pixel ids** (`NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_FB_PIXEL_ID`), if you want them on; and a decision on whether the consent card needs the four categories of G-11 or the two answers it has.
 7. **The canonical host**: `www.lingeriebysisioyin.store` or the apex.
 8. **The logo as vector artwork** (or approval to redraw it) to replace the placeholder icons, the sharing image and the typeset wordmark.

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { Turnstile, useTurnstile } from "@/components/ui/Turnstile";
 import { SelectField, TextField, TextareaField } from "@/components/ui/Field";
 import { whatsappLink } from "@/config/site";
 import { isSubject, SUBJECTS } from "@/schemas/contact";
@@ -20,6 +21,7 @@ export function ContactForm({ initialSubject }: { readonly initialSubject: strin
   const [failure, setFailure] = useState<string | undefined>();
   const [sent, setSent] = useState(false);
   const [pending, startTransition] = useTransition();
+  const captcha = useTurnstile();
   const set = (key: keyof typeof values) => (e: { target: { value: string } }) =>
     setValues((v) => ({ ...v, [key]: e.target.value }));
 
@@ -57,7 +59,9 @@ export function ContactForm({ initialSubject }: { readonly initialSubject: strin
               ...values,
               phone: values.phone || undefined,
               orderNumber: values.orderNumber || undefined,
+              turnstileToken: captcha.token ?? undefined,
             });
+            captcha.reset();
             if (result.ok) {
               setErrors({});
               setSent(true);
@@ -68,6 +72,7 @@ export function ContactForm({ initialSubject }: { readonly initialSubject: strin
               if (first) document.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
             }
           } catch {
+            captcha.reset();
             setFailure(
               "We could not send your message. Check your connection and try again, or message us on WhatsApp.",
             );
@@ -161,7 +166,8 @@ export function ContactForm({ initialSubject }: { readonly initialSubject: strin
           </a>
         </p>
       ) : null}
-      <Button type="submit" block disabled={pending}>
+      <Turnstile onToken={captcha.setToken} resetSignal={captcha.resetSignal} />
+      <Button type="submit" block disabled={pending || !captcha.ready}>
         {pending ? "Sending…" : "Send message"}
       </Button>
     </form>

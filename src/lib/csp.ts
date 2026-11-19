@@ -1,3 +1,6 @@
+/** The Turnstile widget script and its frame; loaded only on pages that have a form with the check. */
+const TURNSTILE = "https://challenges.cloudflare.com";
+
 export interface CspOptions {
   readonly nonce: string;
   readonly supabaseUrl?: string | undefined;
@@ -8,7 +11,7 @@ export interface CspOptions {
 
 /**
  * Content security policy with a per-request nonce and no `'unsafe-inline'` for scripts.
- * Analytics, reCAPTCHA and Supabase hosts are listed explicitly; they load only after consent
+ * Analytics, Cloudflare Turnstile and Supabase hosts are listed explicitly; they load only after consent
  * or when a sheet that needs them opens.
  */
 export function buildCsp({
@@ -20,7 +23,12 @@ export function buildCsp({
   const supabase = supabaseUrl ? [new URL(supabaseUrl).origin, wsOrigin(supabaseUrl)] : [];
   const directives: Record<string, readonly string[]> = {
     "default-src": ["'self'"],
-    "script-src": [`'nonce-${nonce}'`, "'strict-dynamic'", ...(isDev ? ["'unsafe-eval'"] : [])],
+    "script-src": [
+      `'nonce-${nonce}'`,
+      "'strict-dynamic'",
+      TURNSTILE,
+      ...(isDev ? ["'unsafe-eval'"] : []),
+    ],
     "style-src": ["'self'", "'unsafe-inline'"],
     "img-src": [
       "'self'",
@@ -39,7 +47,7 @@ export function buildCsp({
       "https://*.google-analytics.com",
       "https://www.facebook.com",
     ],
-    "frame-src": ["https://www.google.com/recaptcha/", "https://recaptcha.google.com"],
+    "frame-src": [TURNSTILE],
     "frame-ancestors": ["'none'"],
     "object-src": ["'none'"],
     "base-uri": ["'self'"],

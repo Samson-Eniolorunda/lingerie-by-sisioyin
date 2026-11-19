@@ -189,7 +189,18 @@ is needed for Production only; do not set it for Preview, where it is ignored.
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID`                                        | Google Analytics id                                                                                                                                   | optional (loads only after consent)        |
 | `NEXT_PUBLIC_FB_PIXEL_ID`                                              | Meta Pixel id                                                                                                                                         | optional (loads only after consent)        |
 | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                      | Maps key                                                                                                                                              | optional                                   |
-| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`                                       | reCAPTCHA site key                                                                                                                                    | optional                                   |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`                                       | Cloudflare Turnstile site key for the live domains (Production and Preview; already added)                                                            | yes, for Production                        |
+| `TURNSTILE_SECRET_KEY`                                                 | Cloudflare Turnstile secret key (Production and Preview; already added)                                                                               | yes, for Production, server only           |
+
+**Turnstile (the security check on the forms).** The sign-up, sign-in, forgotten-password, contact and staff
+sign-in forms show a Cloudflare Turnstile check, and the server verifies it before anything is sent to
+Supabase or stored. On the live site both keys are required: with the secret key missing, the forms
+refuse to send (and say so in the log) rather than skip the check. On Vercel previews the keys above are
+ignored and Cloudflare's published always-pass test keys are used, because preview addresses are not on
+the widget's list of domains. On a developer's machine, and in the automated tests, with no keys set the
+check is skipped. In the Cloudflare dashboard, **Turnstile**, the widget's hostname list must
+include `www.lingeriebysisioyin.store` and `admin.lingeriebysisioyin.store`, mode **Managed**. Supabase's own
+CAPTCHA setting stays off.
 
 Never set `LBS_ALLOW_DEMO` on the live site: it switches on demonstration sign-ins. (As a safeguard
 it has no effect at all when Vercel's `VERCEL_ENV` is `production`, but do not rely on that.) Vercel

@@ -85,7 +85,7 @@ There are three audiences:
 - [ ] A-01 Sign-in with email and password
 - [ ] A-02 Sign-up with first name, last name, email, password and confirmation
 - [ ] A-03 Password rules shown live with a strength meter: 8+ characters, upper case, lower case, number, special character
-- [ ] A-04 reCAPTCHA v2 checkbox on sign-in and sign-up *(defect today: never verified by a server)*
+- [ ] A-04 Cloudflare Turnstile on sign-in and sign-up *(defect today: never verified by a server)*
 - [ ] A-05 Sign-in with Google (OAuth)
 - [ ] A-06 Forgot password: modal, reset email, success state showing the address
 - [ ] A-07 Recovery link lands on `/dashboard?setpw=1` and opens a "Set New Password" modal with the same rules
@@ -449,7 +449,7 @@ There are three audiences:
 - [ ] E-07 Resend as the mail provider, sending from the store's domain
 - [ ] E-08 Supabase image transformation for resized product images (`assets/js/utils.js:438-457`)
 - [ ] E-09 Google OAuth provider
-- [ ] E-10 Google reCAPTCHA v2
+- [ ] E-10 Cloudflare Turnstile
 - [ ] E-11 Google Maps Places (optional, key currently blank)
 - [ ] E-12 Geo-IP look-ups (`ipapi.co`, `ipwho.is`)
 - [ ] E-13 `send-admin-reply` request contract, to be re-specified because the source is not tracked: replies and account notices send `recipientEmail`, `recipientName`, `originalSubject`, `replyText` and `fromEmail` (replies also `messageId` and `originalMessage`); compose sends `to`, `customerName`, `subject`, `message` and `fromEmail` (`assets/js/admin.js:8894-8904`, `:7450-7458`, `:9188-9194`)
@@ -1169,7 +1169,7 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 
 ### 9.2 Environment variable names (values to be set in Vercel, never committed)
 
-`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_SUPPORT_ADDRESS`, `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_FB_PIXEL_ID`, `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (optional), `NEXT_PUBLIC_WHATSAPP_NUMBER`. Only if card payments are approved: `MONNIFY_API_KEY`, `MONNIFY_SECRET_KEY`, `MONNIFY_CONTRACT_CODE`, `MONNIFY_BASE_URL`.
+`NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `EMAIL_FROM_ADDRESS`, `EMAIL_SUPPORT_ADDRESS`, `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `NEXT_PUBLIC_FB_PIXEL_ID`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`, `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` (optional), `NEXT_PUBLIC_WHATSAPP_NUMBER`. Only if card payments are approved: `MONNIFY_API_KEY`, `MONNIFY_SECRET_KEY`, `MONNIFY_CONTRACT_CODE`, `MONNIFY_BASE_URL`.
 
 ### 9.3 Domain and service settings
 
@@ -1435,7 +1435,7 @@ None of these figures has been measured for the rebuild; they are targets. The p
 | Product gallery image | 140 KB at phone widths (`sizes="100vw"` below 768 px); the first is eager, the rest lazy |
 | Total transfer before scrolling, home and shop | 900 KB |
 | Total transfer before scrolling, other pages | 700 KB |
-| Third-party scripts before interaction | None. reCAPTCHA loads when the sign-in sheet opens; GA4 and Meta Pixel load only after consent (SEC-21); no geo-IP request from the browser (PERF-05) |
+| Third-party scripts before interaction | None. Cloudflare Turnstile loads only on pages with a protected form; GA4 and Meta Pixel load only after consent (SEC-21); no geo-IP request from the browser (PERF-05) |
 | Requests to render the first screen | 25 or fewer |
 
 **How the budgets are met.** Server-rendered pages with the product data in the HTML; `next/image` with explicit `width` and `height` (or a fixed aspect-ratio frame) on every image so nothing shifts; the catalogue paginated on the server instead of fetched whole (PERF-02); below-the-fold images lazy; sheets and the admin exports loaded on demand; no `backdrop-filter` layers (PERF-06); hashed static assets cached for a year instead of the present `no-store` and `no-cache` headers (STR-07). The budgets are enforced in CI by the Lighthouse budget file added in commit 6 and by a bundle-size check on the build output.
@@ -1728,7 +1728,7 @@ Nothing in this rebuild is called done until every gate below passes, and the pu
 **(c) The production build passes.** `npm ci && npm run build` exits 0 with no warnings on the Node version in `.nvmrc`, and the Vercel preview deployment of the same commit succeeds. The bundle-size check against the budgets of 12.6 is part of this gate.
 
 **(d) Data and secret safety.**
-- No secrets on the client: a script searches `.next/static` and the rendered HTML for the names and values of every server-only variable in 9.2 (`SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `RECAPTCHA_SECRET_KEY`, the Monnify secret if present) and for a JWT whose role is `service_role`; any hit fails. Only `NEXT_PUBLIC_` variables may appear. `.env*` files other than `.env.example` (names only) are ignored by git, and the history of the branch is searched for the same values.
+- No secrets on the client: a script searches `.next/static` and the rendered HTML for the names and values of every server-only variable in 9.2 (`SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `TURNSTILE_SECRET_KEY`, the Monnify secret if present) and for a JWT whose role is `service_role`; any hit fails. Only `NEXT_PUBLIC_` variables may appear. `.env*` files other than `.env.example` (names only) are ignored by git, and the history of the branch is searched for the same values.
 - Server-side validation and authorisation: every server action and route handler parses its input with zod and checks the session and role before acting (tested in (b)); `/admin` returns a redirect, not markup, to a visitor who is not staff; the policy tests pass.
 - Safe headers on the preview: `curl -sI` on `/`, `/checkout` and `/admin` shows HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, `frame-ancestors`, and a content security policy with nonces and without `'unsafe-inline'` for scripts.
 - Receipts are private: an unauthenticated request for a receipt object is refused; a signed URL expires.

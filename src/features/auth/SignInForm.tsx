@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
+import { Turnstile, useTurnstile } from "@/components/ui/Turnstile";
 import { TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { AuthLink } from "./AuthCard";
@@ -28,12 +29,17 @@ export function SignInForm({ next, action, forgotHref, emailLabel = "Email addre
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<string | undefined>();
   const [pending, start] = useTransition();
+  const captcha = useTurnstile();
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
     setMessage(undefined);
     start(async () => {
-      const result = await action({ email, password }, next);
+      const result = await action(
+        { email, password, turnstileToken: captcha.token ?? undefined },
+        next,
+      );
+      captcha.reset();
       if (result && !result.ok) {
         setErrors(result.fieldErrors);
         setMessage(Object.keys(result.fieldErrors).length === 0 ? result.message : undefined);
@@ -73,7 +79,9 @@ export function SignInForm({ next, action, forgotHref, emailLabel = "Email addre
       <div className="-mt-2">
         <AuthLink href={forgotLinkFor(forgotHref, email)}>Forgotten your password?</AuthLink>
       </div>
-      <Button type="submit" block disabled={pending}>
+
+      <Turnstile onToken={captcha.setToken} resetSignal={captcha.resetSignal} />
+      <Button type="submit" block disabled={pending || !captcha.ready}>
         {pending ? "Signing in" : "Sign in"}
       </Button>
     </Form>

@@ -129,7 +129,7 @@
               "t": "strong",
               "c": ["Security:"]
             },
-            " Login and registration forms are protected by Google reCAPTCHA. You may also sign in using your Google account. By using these features, you agree to Google's ",
+            " Our sign-in, sign-up, password-reset and contact forms are protected by Cloudflare Turnstile. You may also sign in using your Google account; if you do, you agree to Google's ",
             {
               "t": "a",
               "c": ["Terms of Service"],
