@@ -61,7 +61,19 @@ export type UploadState =
 const UPLOAD_LIMIT = 20;
 const HOUR = 3_600_000;
 
-async function issueUpload(scope: string, type: string, size: number): Promise<UploadState> {
+interface UploadWho {
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly quotedTotal: number | null;
+}
+
+async function issueUpload(
+  scope: string,
+  type: string,
+  size: number,
+  who?: UploadWho,
+): Promise<UploadState> {
   const problem = receiptProblem({ type, size });
   if (problem || !isReceiptType(type))
     return { ok: false, message: problem ?? "Attach a photograph or a PDF of your receipt." };
@@ -70,7 +82,19 @@ async function issueUpload(scope: string, type: string, size: number): Promise<U
       ok: false,
       message: "Too many uploads from this connection. Please wait a little and try again.",
     };
-  return { ok: true, ...(await receipts.createUpload(newReceiptPath(scope, type), type)) };
+  const upload = await receipts.createUpload(newReceiptPath(scope, type), type);
+  // Remember who this address was issued to, so a receipt that never reaches an order can still be
+  // traced to a person (staff see their contact details on /admin/receipts).
+  if (who)
+    await data.orders.recordUpload({
+      idempotencyKey: scope,
+      path: upload.path,
+      name: who.name,
+      email: who.email,
+      phone: who.phone,
+      quotedTotal: who.quotedTotal,
+    });
+  return { ok: true, ...upload };
 }
 
 /** A signed address for the browser to upload the receipt to directly; no file passes through this action. */
@@ -78,7 +102,13 @@ export async function createReceiptUpload(input: unknown): Promise<UploadState> 
   const parsed = receiptUploadSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false, message: "Something went wrong with the form. Please try again." };
-  return issueUpload(parsed.data.idempotencyKey, parsed.data.type, parsed.data.size);
+  const { contact, quotedTotal } = parsed.data;
+  return issueUpload(
+    parsed.data.idempotencyKey,
+    parsed.data.type,
+    parsed.data.size,
+    contact ? { ...contact, quotedTotal: quotedTotal ?? null } : undefined,
+  );
 }
 
 export type PlaceOrderState =
@@ -104,11 +134,13 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderState> {
   }
 
   // Nobody can be asked to pay into details that are not there.
-  if (!(await data.payments.bankDetails()))
+  if (!(await data.payments.bankDetails())) {
+    await data.orders.recordFailure(parsed.data, "Bank details were not available");
     return {
       ok: false,
       message: `${PAYMENT_DETAILS_UPDATING}. Please try again a little later, or message us on WhatsApp.`,
     };
+  }
 
   // Shared limit by address and by e-mail: a script cannot hold stock or burn promo codes by
   // placing orders in a loop (each attempt counts, successful or not).
@@ -118,11 +150,14 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderState> {
       subject: 5,
       windowMs: HOUR,
     }))
-  )
+  ) {
+    // The receipt is already uploaded and the customer may have paid: staff must still see it.
+    await data.orders.recordFailure(parsed.data, "Too many orders from this connection");
     return {
       ok: false,
-      message: "Too many orders from this connection. Please wait a little and try again.",
+      message: `Too many orders from this connection. Please wait a little and try again. ${RECEIPT_SAFE}`,
     };
+  }
 
   const user = await currentUser("customer");
   const result = await data.orders.place(parsed.data, { userId: user?.id ?? null });

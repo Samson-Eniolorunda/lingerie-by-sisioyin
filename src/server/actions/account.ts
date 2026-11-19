@@ -95,7 +95,7 @@ export async function changePasswordLinkAction(): Promise<{ readonly devLink: st
   const { devLink } = await data.auth.requestPasswordReset(
     user.email,
     "customer",
-    callbackUrl("/reset-password"),
+    await callbackUrl("/reset-password"),
   );
   return { devLink };
 }

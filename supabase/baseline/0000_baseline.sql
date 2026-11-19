@@ -1447,8 +1447,8 @@ END;
 $$;
 
 -- Staff checked the bank account for a cancelled order with an unaccepted receipt. An amount above
--- zero turns it into a refund owed for that amount (never more than the order total); zero means
--- no money arrived and nothing is owed.
+-- zero turns it into a refund owed for that amount (an overpayment is owed in full, not capped at
+-- the order total); zero means no money arrived and nothing is owed.
 CREATE OR REPLACE FUNCTION public.resolve_refund_check(p_order_number TEXT, p_received NUMERIC)
 RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
@@ -1463,7 +1463,7 @@ BEGIN
   END IF;
   UPDATE public.orders SET
       payment_status = CASE WHEN p_received > 0 THEN 'refund_owed' ELSE 'rejected' END,
-      refund_amount = CASE WHEN p_received > 0 THEN LEAST(p_received, total) ELSE NULL END
+      refund_amount = CASE WHEN p_received > 0 THEN p_received ELSE NULL END
    WHERE order_number = upper(trim(COALESCE(p_order_number, ''))) AND payment_status = 'refund_check';
   IF NOT FOUND THEN
     RETURN jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'No refund check is open on that order.');

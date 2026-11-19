@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { allowRequest, allowShared, resetRateLimits } from "@/server/rate-limit";
-import { callbackUrl, siteOrigin } from "@/server/auth/request";
+import { callbackUrl, hostAllowed, siteOrigin } from "@/server/auth/request";
 import { trackedOrder, type StoredOrder } from "@/types/orders";
 
 afterEach(() => {
@@ -73,20 +73,42 @@ describe("review fix 8: rate limits", () => {
 });
 
 describe("review fix 6: links in e-mails return to the deployment that sent them", () => {
-  it("uses the preview's own address on a Vercel preview", () => {
+  it("uses the preview's own address on a Vercel preview", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     vi.stubEnv("VERCEL_URL", "lbs-git-branch-team.vercel.app");
     expect(siteOrigin()).toBe("https://lbs-git-branch-team.vercel.app");
-    expect(callbackUrl("/reset-password")).toBe(
+    expect(await callbackUrl("/reset-password")).toBe(
       "https://lbs-git-branch-team.vercel.app/auth/callback?next=%2Freset-password&aud=customer",
     );
   });
 
-  it("uses NEXT_PUBLIC_SITE_URL elsewhere, and marks a sign-up confirmation link", () => {
+  it("uses NEXT_PUBLIC_SITE_URL elsewhere, and marks a sign-up confirmation link", async () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("VERCEL_URL", "ignored.vercel.app");
     expect(siteOrigin()).not.toContain("ignored");
-    expect(callbackUrl("/dashboard", "customer", "confirm")).toContain("&type=confirm");
+    expect(await callbackUrl("/dashboard", "customer", "confirm")).toContain("&type=confirm");
+  });
+});
+
+describe("auth links on a preview follow the request's own host, checked against an allow-list", () => {
+  it("accepts the production domain, this project's vercel.app addresses and localhost only", () => {
+    vi.stubEnv("VERCEL_URL", "lbs-abc123-team.vercel.app");
+    vi.stubEnv("VERCEL_GIT_REPO_SLUG", "lingerie-by-sisioyin");
+    for (const ok of [
+      "www.lingeriebysisioyin.store",
+      "lbs-abc123-team.vercel.app",
+      "lingerie-by-sisioyin-git-rebuild-production-team.vercel.app",
+      "localhost:3000",
+    ])
+      expect(hostAllowed(ok), ok).toBe(true);
+    for (const bad of [
+      "evil.example",
+      "someone-elses-project.vercel.app",
+      "www.lingeriebysisioyin.store.evil.example",
+      "lingerie-by-sisioyin.evil.example",
+      "",
+    ])
+      expect(hostAllowed(bad), bad).toBe(false);
   });
 });
 

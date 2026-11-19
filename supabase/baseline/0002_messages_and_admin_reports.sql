@@ -334,6 +334,66 @@ BEGIN
 END;
 $$;
 
+-- Every receipt upload address issued at checkout, with the contact details the customer had typed,
+-- so a receipt that never reaches an order can still be traced to a person. `viewed_at` is set when a
+-- staff member first opens the file; a receipt nobody has opened can never be deleted.
+CREATE TABLE IF NOT EXISTS public.receipt_uploads (
+  receipt_path    TEXT        PRIMARY KEY CHECK (char_length(receipt_path) <= 300),
+  idempotency_key TEXT        NOT NULL CHECK (char_length(idempotency_key) BETWEEN 16 AND 100),
+  customer_name   TEXT        NOT NULL DEFAULT '' CHECK (char_length(customer_name) <= 120),
+  customer_email  TEXT        NOT NULL DEFAULT '' CHECK (char_length(customer_email) <= 200),
+  customer_phone  TEXT        NOT NULL DEFAULT '' CHECK (char_length(customer_phone) <= 30),
+  quoted_total    NUMERIC     CHECK (quoted_total IS NULL OR quoted_total >= 0),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  viewed_at       TIMESTAMPTZ,
+  viewed_by       UUID        REFERENCES auth.users(id) ON DELETE SET NULL
+);
+ALTER TABLE public.receipt_uploads ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "receipt_uploads: staff read" ON public.receipt_uploads;
+CREATE POLICY "receipt_uploads: staff read"
+  ON public.receipt_uploads FOR SELECT TO authenticated
+  USING (public.has_permission('orders.view'));
+
+-- Server only: remembers who an issued upload address was for.
+CREATE OR REPLACE FUNCTION public.record_receipt_upload(
+  p_key TEXT, p_receipt_path TEXT, p_name TEXT, p_email TEXT, p_phone TEXT, p_total NUMERIC)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_service() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_key IS NULL OR p_receipt_path IS NULL OR p_receipt_path NOT LIKE p_key || '/%' THEN
+    RETURN;
+  END IF;
+  INSERT INTO public.receipt_uploads (receipt_path, idempotency_key, customer_name, customer_email,
+                                      customer_phone, quoted_total)
+  VALUES (p_receipt_path, p_key, left(COALESCE(p_name, ''), 120), left(lower(COALESCE(p_email, '')), 200),
+          left(COALESCE(p_phone, ''), 30), p_total)
+  ON CONFLICT (receipt_path) DO NOTHING;
+END;
+$$;
+
+-- Staff record that they have opened a receipt (the first opening is kept).
+CREATE OR REPLACE FUNCTION public.mark_receipt_viewed(p_receipt_path TEXT)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.view')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  INSERT INTO public.receipt_uploads (receipt_path, idempotency_key, viewed_at, viewed_by)
+  VALUES (p_receipt_path, split_part(p_receipt_path, '/', 1), now(), auth.uid())
+  ON CONFLICT (receipt_path) DO UPDATE
+     SET viewed_at = COALESCE(public.receipt_uploads.viewed_at, now()),
+         viewed_by = COALESCE(public.receipt_uploads.viewed_by, auth.uid());
+END;
+$$;
+
 -- A customer paid and uploaded a receipt, but the order could not be placed (stock gone, promo
 -- used up, total changed). The receipt is kept so staff can contact the customer and refund.
 CREATE TABLE IF NOT EXISTS public.checkout_failures (
@@ -404,7 +464,7 @@ $$;
 -- is younger than that).
 CREATE OR REPLACE FUNCTION public.admin_orphan_receipts()
 RETURNS TABLE (path TEXT, uploaded_at TIMESTAMPTZ, failure_id UUID, customer_name TEXT, customer_email TEXT,
-               customer_phone TEXT, quoted_total NUMERIC, reason TEXT, resolved BOOLEAN)
+               customer_phone TEXT, quoted_total NUMERIC, reason TEXT, resolved BOOLEAN, viewed BOOLEAN)
 LANGUAGE plpgsql STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
@@ -413,10 +473,15 @@ BEGIN
     RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
   END IF;
   RETURN QUERY
-    SELECT o.name::TEXT, o.created_at, f.id, f.customer_name, f.customer_email, f.customer_phone,
-           f.quoted_total, f.reason, (f.resolved_at IS NOT NULL)
+    SELECT o.name::TEXT, o.created_at, f.id,
+           COALESCE(NULLIF(f.customer_name, ''), u.customer_name, '')::TEXT,
+           COALESCE(NULLIF(f.customer_email, ''), u.customer_email, '')::TEXT,
+           COALESCE(NULLIF(f.customer_phone, ''), u.customer_phone, '')::TEXT,
+           COALESCE(f.quoted_total, u.quoted_total), COALESCE(f.reason, '')::TEXT,
+           (f.resolved_at IS NOT NULL), (u.viewed_at IS NOT NULL)
       FROM storage.objects o
       LEFT JOIN public.checkout_failures f ON f.receipt_path = o.name
+      LEFT JOIN public.receipt_uploads u ON u.receipt_path = o.name
      WHERE o.bucket_id = 'payment-receipts'
        AND NOT EXISTS (SELECT 1 FROM public.orders x WHERE x.receipt_path = o.name)
      ORDER BY (f.id IS NOT NULL AND f.resolved_at IS NULL) DESC, o.created_at DESC
@@ -451,6 +516,11 @@ REVOKE ALL ON FUNCTION public.rate_limit_hit(TEXT, INTEGER, INTEGER) FROM PUBLIC
 REVOKE ALL ON FUNCTION public.record_checkout_failure(TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC, TEXT) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.resolve_checkout_failure(UUID, TEXT) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_orphan_receipts() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.record_receipt_upload(TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.mark_receipt_viewed(TEXT) FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.receipt_uploads TO authenticated;
+GRANT ALL ON public.receipt_uploads TO service_role;
+GRANT EXECUTE ON FUNCTION public.mark_receipt_viewed(TEXT) TO authenticated;
 GRANT SELECT ON public.checkout_failures TO authenticated;
 GRANT ALL ON public.rate_limits, public.checkout_failures TO service_role;
 GRANT EXECUTE ON FUNCTION public.resolve_checkout_failure(UUID, TEXT) TO authenticated;

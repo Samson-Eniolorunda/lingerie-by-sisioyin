@@ -134,8 +134,32 @@ describe("review fix 2: money in flight is never lost", () => {
     expect(
       (await supabaseAdmin.resolveCheckoutFailure(found?.failureId ?? "", "Refunded", owner)).ok,
     ).toBe(true);
+    // A receipt nobody has opened can never be deleted.
+    expect((await supabaseAdmin.deleteOrphanReceipt(input.receiptPath, owner)).ok).toBe(false);
+    expect((await supabaseAdmin.markReceiptViewed(input.receiptPath, owner)).ok).toBe(true);
     expect((await supabaseAdmin.deleteOrphanReceipt(input.receiptPath, owner)).ok).toBe(true);
     expect(await receipts.exists(input.receiptPath)).toBe(false);
+  });
+
+  it("traces an upload that never became an order to the customer who made it", async () => {
+    const input = await orderInput();
+    await supabaseOrders.recordUpload({
+      idempotencyKey: input.idempotencyKey,
+      path: input.receiptPath,
+      name: "Bisi Ade",
+      email: "Bisi@Example.com",
+      phone: "08020000000",
+      quotedTotal: 7000,
+    });
+    await asOwner();
+    const found = (await supabaseAdmin.orphanReceipts()).find((o) => o.path === input.receiptPath);
+    expect(found).toMatchObject({
+      customerName: "Bisi Ade",
+      email: "bisi@example.com",
+      phone: "08020000000",
+      failureId: null,
+      viewed: false,
+    });
   });
 });
 

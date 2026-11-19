@@ -237,7 +237,9 @@ REVOKE ALL ON FUNCTION public.record_gateway_event(TEXT, TEXT, JSONB) FROM PUBLI
 REVOKE ALL ON FUNCTION public.confirm_gateway_payment(TEXT, TEXT, TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.fail_gateway_payment(TEXT, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
 
-GRANT SELECT ON public.payment_bank_details, public.payment_methods TO anon, authenticated;
+-- Public readers see exactly what the checkout shows; `updated_by` (a staff member's id) stays private.
+GRANT SELECT (id, bank_name, account_number, account_name, note, updated_at) ON public.payment_bank_details TO anon, authenticated;
+GRANT SELECT ON public.payment_methods TO anon, authenticated;
 GRANT SELECT ON public.payment_settings_log TO authenticated;
 GRANT INSERT (bank_name, account_number, account_name, note), UPDATE (bank_name, account_number, account_name, note)
   ON public.payment_bank_details TO authenticated;

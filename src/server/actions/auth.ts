@@ -59,7 +59,7 @@ export async function signUpAction(input: unknown, next: string | null): Promise
 }
 
 export async function googleAction(): Promise<AuthState> {
-  const result = await data.auth.signInWithGoogle(callbackUrl("/dashboard"));
+  const result = await data.auth.signInWithGoogle(await callbackUrl("/dashboard"));
   return result.ok ? { ok: true, url: result.value.url } : invalid(result.message);
 }
 
@@ -69,7 +69,7 @@ export async function forgotAction(input: unknown): Promise<AuthState> {
   const { devLink } = await data.auth.requestPasswordReset(
     parsed.data.email,
     "customer",
-    callbackUrl("/reset-password"),
+    await callbackUrl("/reset-password"),
   );
   // The reply is the same whether or not the address has an account (M-23).
   return {
@@ -148,7 +148,7 @@ export async function staffForgotAction(input: unknown): Promise<AuthState> {
   const { devLink } = await data.auth.requestPasswordReset(
     parsed.data.email,
     "staff",
-    callbackUrl("/reset-password", "staff"),
+    await callbackUrl("/reset-password", "staff"),
   );
   return {
     ok: true,

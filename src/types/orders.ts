@@ -94,6 +94,8 @@ export interface OrphanReceipt {
   readonly quotedTotal: number | null;
   readonly reason: string;
   readonly resolved: boolean;
+  /** Whether a member of staff has opened the receipt (one that nobody has opened cannot be deleted). */
+  readonly viewed: boolean;
 }
 
 export interface Quote {

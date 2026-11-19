@@ -13,7 +13,12 @@ export type DataMode = "mock" | "supabase" | "unconfigured";
 const configured = Boolean(
   process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
 );
-const mockAllowed = process.env.NODE_ENV !== "production" || process.env.LBS_ALLOW_DEMO === "true";
+/**
+ * `LBS_ALLOW_DEMO` has no effect on the live site: when Vercel says this is the Production
+ * environment, the switch is ignored whatever it is set to.
+ */
+const demoSwitch = process.env.LBS_ALLOW_DEMO === "true" && process.env.VERCEL_ENV !== "production";
+const mockAllowed = process.env.NODE_ENV !== "production" || demoSwitch;
 
 export const DATA_MODE: DataMode = configured ? "supabase" : mockAllowed ? "mock" : "unconfigured";
 
@@ -23,5 +28,4 @@ export const DATA_MODE: DataMode = configured ? "supabase" : mockAllowed ? "mock
  * site never prints them, even if it is running on the development store.
  */
 export const SHOW_DEMO_HINTS: boolean =
-  DATA_MODE === "mock" &&
-  (process.env.NODE_ENV === "development" || process.env.LBS_ALLOW_DEMO === "true");
+  DATA_MODE === "mock" && (process.env.NODE_ENV === "development" || demoSwitch);

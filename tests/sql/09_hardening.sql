@@ -89,6 +89,15 @@ BEGIN
   PERFORM t.ok((public.resolve_refund_check(n, 0)->>'ok')::boolean, 'zero received closes the check');
   PERFORM t.reset();
   PERFORM t.ok((SELECT payment_status = 'rejected' AND refund_amount IS NULL FROM public.orders WHERE order_number = n), 'nothing is owed when nothing arrived');
+
+  -- An overpayment is owed in full, not capped at the order total.
+  r := t.place(t.line(prod, 'M', 'Black', 1), 10000);
+  n := r->>'order_number';
+  PERFORM t.as_service();
+  PERFORM public.set_order_status(n, 'cancelled');
+  PERFORM public.resolve_refund_check(n, 999999);
+  PERFORM t.reset();
+  PERFORM t.ok((SELECT payment_status = 'refund_owed' AND refund_amount = 999999 FROM public.orders WHERE order_number = n), 'an overpayment is recorded as owed in full');
   DELETE FROM storage.objects WHERE bucket_id = 'payment-receipts' AND name NOT IN (SELECT receipt_path FROM public.orders WHERE receipt_path IS NOT NULL);
 
   -- Failed checkouts and receipts with no order.
@@ -117,6 +126,31 @@ BEGIN
   PERFORM t.as_user(cust);
   PERFORM t.ok(t.try('SELECT public.admin_orphan_receipts()') = 'error: 42501', 'a customer cannot list receipts with no order');
   PERFORM t.ok(t.try('SELECT 1 FROM public.checkout_failures') = 'rows: 0', 'a customer reads no checkout failures');
+  PERFORM t.reset();
+
+  -- Receipt uploads: the contact details are kept from the moment the address is issued.
+  INSERT INTO storage.objects (bucket_id, name, created_at) VALUES
+    ('payment-receipts', 'never-ordered-key-0001/r.png', now() - interval '3 days');
+  PERFORM t.as_anon();
+  PERFORM t.ok(t.try($q$SELECT public.record_receipt_upload('never-ordered-key-0001', 'never-ordered-key-0001/r.png', 'Bisi', 'b@example.com', '0802', 7000)$q$) = 'error: 42501',
+               'a browser cannot record a receipt upload');
+  PERFORM t.ok(t.try('SELECT 1 FROM public.receipt_uploads') = 'error: 42501', 'a browser reads no receipt uploads');
+  PERFORM t.reset();
+  PERFORM t.as_service();
+  PERFORM public.record_receipt_upload('never-ordered-key-0001', 'never-ordered-key-0001/r.png', 'Bisi', 'B@Example.com', '0802', 7000);
+  PERFORM public.record_receipt_upload('never-ordered-key-0001', 'wrong-folder/r.png', 'x', 'x@example.com', '1', 1);
+  PERFORM t.reset();
+  PERFORM t.ok((SELECT count(*) FROM public.receipt_uploads) = 1, 'an upload is recorded once, and only under its own folder');
+  PERFORM t.as_user(ed);
+  PERFORM t.ok((SELECT customer_email = 'b@example.com' AND customer_phone = '0802' AND NOT viewed
+                  FROM public.admin_orphan_receipts() WHERE path = 'never-ordered-key-0001/r.png'),
+               'an upload with no order lists the contact details and is not yet viewed');
+  PERFORM public.mark_receipt_viewed('never-ordered-key-0001/r.png');
+  PERFORM t.ok((SELECT viewed FROM public.admin_orphan_receipts() WHERE path = 'never-ordered-key-0001/r.png'), 'opening a receipt is recorded');
+  PERFORM t.reset();
+  PERFORM t.ok((SELECT viewed_by = ed FROM public.receipt_uploads WHERE receipt_path = 'never-ordered-key-0001/r.png'), 'and names who opened it');
+  PERFORM t.as_user(cust);
+  PERFORM t.ok(t.try($q$SELECT public.mark_receipt_viewed('never-ordered-key-0001/r.png')$q$) = 'error: 42501', 'a customer cannot mark a receipt as viewed');
   PERFORM t.reset();
 
   -- 5) Stock changes bump stock_version.

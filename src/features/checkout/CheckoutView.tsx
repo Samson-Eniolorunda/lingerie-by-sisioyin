@@ -230,7 +230,14 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
       try {
         let path = uploaded.current?.file === file ? uploaded.current.path : null;
         if (!path) {
-          const sent = await uploadReceiptFor(idempotencyKey, file);
+          const sent = await uploadReceiptFor(idempotencyKey, file, undefined, {
+            contact: {
+              name: `${values.firstName} ${values.lastName}`.trim(),
+              email: values.email,
+              phone: values.phone,
+            },
+            quotedTotal,
+          });
           if (!sent.ok) {
             setServerError(sent.message);
             return;

@@ -131,7 +131,7 @@ export function orderConfirmation(
       ),
       pay.html,
       p(
-        `You can follow this order at any time on our <a href="${esc(ctx.siteUrl)}/track?order=${encodeURIComponent(order.orderNumber)}" style="color:${ACCENT};">tracking page</a> with your order number and this e-mail address. You may cancel it online within 30 minutes of placing it, while it is still awaiting payment confirmation.`,
+        `You can follow this order at any time on our <a href="${esc(ctx.siteUrl)}/track?order=${encodeURIComponent(order.orderNumber)}" style="color:${ACCENT};">tracking page</a> with your order number and this e-mail address. ${order.userId ? "You may cancel it online from your account within 30 minutes of placing it, while it is still awaiting payment confirmation." : "If you need to change or cancel it, please reply to this e-mail or message us on WhatsApp."}`,
       ),
     ].join("\n"),
     `Order ${order.orderNumber}: we have your order and your receipt.`,

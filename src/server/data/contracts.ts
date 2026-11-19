@@ -102,6 +102,15 @@ export interface AuthRepository {
   signOut(audience: Audience): Promise<void>;
 }
 
+export interface ReceiptUploadRecord {
+  readonly idempotencyKey: string;
+  readonly path: string;
+  readonly name: string;
+  readonly email: string;
+  readonly phone: string;
+  readonly quotedTotal: number | null;
+}
+
 export interface OrdersRepository {
   /** What the customer must transfer, worked out on the server from current prices. */
   quote(input: {
@@ -118,6 +127,10 @@ export interface OrdersRepository {
   lookup(orderNumber: string, email: string): Promise<StoredOrder | null>;
   /** Replaces a rejected receipt while the re-upload window is open. */
   attachReceipt(orderNumber: string, receiptPath: string, now?: Date): Promise<Result>;
+  /** Remembers who a receipt upload address was issued to (best effort, never throws). */
+  recordUpload(upload: ReceiptUploadRecord): Promise<void>;
+  /** The order could not be placed after the receipt was uploaded: staff must contact the customer (never throws). */
+  recordFailure(input: OrderInput, reason: string): Promise<void>;
   /** Only whether a code is valid and its percentage; never the list of codes. */
   validatePromo(code: string, now?: Date): Promise<Result<{ code: string; percent: number }>>;
   /** Cancels pending orders whose rejected receipt was not replaced in time; for the cron. */
@@ -273,7 +286,9 @@ export interface AdminRepository {
   /** Receipts with no order, open failures first. */
   orphanReceipts(): Promise<readonly OrphanReceipt[]>;
   resolveCheckoutFailure(id: string, resolution: string, actor: SessionUser): Promise<Result>;
-  /** Deletes an abandoned upload (no failure on record) or a failure that has been resolved. */
+  /** Records that a member of staff opened a receipt. */
+  markReceiptViewed(path: string, actor: SessionUser): Promise<Result>;
+  /** Deletes an abandoned upload or a settled failure, but only a receipt that staff have opened. */
   deleteOrphanReceipt(path: string, actor: SessionUser): Promise<Result>;
   /** Moderation (products.manage): nothing a visitor sends in is shown until a member of staff approves it. */
   reviews(status: "pending" | "approved", page: Page): Promise<Paged<AdminReview>>;

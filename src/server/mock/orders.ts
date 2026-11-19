@@ -170,7 +170,38 @@ export function sequenceNumber(db: Db, now: Date): string {
   return formatOrderNumber(now, db.sequence);
 }
 
+function recordMockFailure(db: Db, input: OrderInput, reason: string, now: Date): void {
+  if (db.checkoutFailures.some((f) => f.path === input.receiptPath)) return;
+  db.checkoutFailures.push({
+    path: input.receiptPath,
+    uploadedAt: now.toISOString(),
+    failureId: `fail-${db.checkoutFailures.length + 1}`,
+    customerName: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
+    email: input.contact.email.toLowerCase(),
+    phone: input.contact.phone,
+    quotedTotal: input.quotedTotal,
+    reason,
+    resolved: false,
+    viewed: db.viewedReceipts.has(input.receiptPath),
+  });
+}
+
 export const mockOrders: OrdersRepository = {
+  async recordUpload(upload) {
+    const db = getDb();
+    db.receiptUploads.set(upload.path, {
+      ...upload,
+      email: upload.email.toLowerCase(),
+      uploadedAt: new Date().toISOString(),
+    });
+  },
+
+  async recordFailure(input, reason) {
+    const db = getDb();
+    if ([...db.orders.values()].some((o) => o.receiptPath === input.receiptPath)) return;
+    recordMockFailure(db, input, reason, new Date());
+  },
+
   async quote(input) {
     const priced = price(getDb(), input, new Date());
     return "message" in priced
@@ -196,20 +227,7 @@ export const mockOrders: OrdersRepository = {
         message: "Your receipt did not finish uploading. Choose it again and place the order.",
       };
 
-    const failed = (reason: string) => {
-      if (!db.checkoutFailures.some((f) => f.path === input.receiptPath))
-        db.checkoutFailures.push({
-          path: input.receiptPath,
-          uploadedAt: now.toISOString(),
-          failureId: `fail-${db.checkoutFailures.length + 1}`,
-          customerName: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
-          email: input.contact.email.toLowerCase(),
-          phone: input.contact.phone,
-          quotedTotal: input.quotedTotal,
-          reason,
-          resolved: false,
-        });
-    };
+    const failed = (reason: string) => recordMockFailure(db, input, reason, now);
     const priced = price(db, { ...input, state: input.delivery.state }, now);
     if ("message" in priced) {
       failed(priced.message);

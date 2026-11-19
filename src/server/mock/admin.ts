@@ -405,7 +405,7 @@ export const mockAdmin: AdminRepository = {
     db.orders.set(orderNumber, {
       ...order,
       paymentStatus: receivedNgn > 0 ? "refund_owed" : "rejected",
-      refundAmount: receivedNgn > 0 ? Math.min(receivedNgn, order.total) : null,
+      refundAmount: receivedNgn > 0 ? receivedNgn : null,
       updatedAt: new Date().toISOString(),
     });
     log(db, actor, "refund check", `${orderNumber}: received ${receivedNgn}`);
@@ -432,21 +432,28 @@ export const mockAdmin: AdminRepository = {
     const known = new Map(db.checkoutFailures.map((f) => [f.path, f]));
     const rows = mockReceiptPaths()
       .filter((p) => !used.has(p))
-      .map(
-        (path) =>
-          known.get(path) ?? {
-            path,
-            uploadedAt: new Date(0).toISOString(),
-            failureId: null,
-            customerName: "",
-            email: "",
-            phone: "",
-            quotedTotal: null,
-            reason: "",
-            resolved: false,
-          },
-      );
+      .map((path) => {
+        const upload = db.receiptUploads.get(path);
+        const failure = known.get(path);
+        return {
+          path,
+          uploadedAt: upload?.uploadedAt ?? new Date(0).toISOString(),
+          failureId: failure?.failureId ?? null,
+          customerName: failure?.customerName || upload?.name || "",
+          email: failure?.email || upload?.email || "",
+          phone: failure?.phone || upload?.phone || "",
+          quotedTotal: failure?.quotedTotal ?? upload?.quotedTotal ?? null,
+          reason: failure?.reason ?? "",
+          resolved: failure?.resolved ?? false,
+          viewed: db.viewedReceipts.has(path),
+        };
+      });
     return rows.sort((a, b) => Number(b.failureId !== null) - Number(a.failureId !== null));
+  },
+
+  async markReceiptViewed(path) {
+    getDb().viewedReceipts.add(path);
+    return { ok: true };
   },
 
   async resolveCheckoutFailure(id, resolution, actor) {
@@ -466,6 +473,11 @@ export const mockAdmin: AdminRepository = {
       return { ok: false, message: "That receipt belongs to an order." };
     if (failure && !failure.resolved)
       return { ok: false, message: "Close the failed checkout before deleting its receipt." };
+    if (!db.viewedReceipts.has(path))
+      return {
+        ok: false,
+        message: "Open the receipt first: a receipt nobody has seen cannot be deleted.",
+      };
     await receipts.remove(path);
     log(db, actor, "receipt deleted", path);
     return { ok: true };

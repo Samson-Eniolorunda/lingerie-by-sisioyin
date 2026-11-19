@@ -40,6 +40,8 @@ BEGIN
   PERFORM t.reset();
   PERFORM t.as_anon();
   PERFORM t.ok(t.try('SELECT 1 FROM public.payment_bank_details') = 'rows: 1', 'the checkout can read what was saved');
+  PERFORM t.ok(t.try('SELECT updated_by FROM public.payment_bank_details') = 'error: 42501', 'the public cannot read which staff member saved the details');
+  PERFORM t.ok(t.try('SELECT bank_name, account_number, account_name, note FROM public.payment_bank_details') = 'rows: 1', 'the public reads the columns the checkout shows');
   PERFORM t.reset();
   PERFORM t.ok((SELECT updated_by = adm FROM public.payment_bank_details), 'the row records who saved it');
 

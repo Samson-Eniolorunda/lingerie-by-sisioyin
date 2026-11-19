@@ -18,7 +18,7 @@ import type {
   StaffRole,
   StoreSettings,
 } from "@/types/account";
-import type { AdminProduct } from "@/server/data/contracts";
+import type { AdminProduct, ReceiptUploadRecord } from "@/server/data/contracts";
 import type { OrphanReceipt, StoredOrder } from "@/types/orders";
 
 /**
@@ -54,6 +54,9 @@ export interface Db {
   activity: ActivityEntry[];
   /** Checkouts that failed after the receipt was uploaded. */
   checkoutFailures: OrphanReceipt[];
+  /** Who each issued receipt upload address was for, and whether staff have opened the file. */
+  receiptUploads: Map<string, ReceiptUploadRecord & { uploadedAt: string }>;
+  viewedReceipts: Set<string>;
   reviews: AdminReview[];
   testimonials: AdminTestimonial[];
   /** Staff invitations by token (the development store keeps the token itself). */
@@ -349,9 +352,9 @@ export function buildDb(): Db {
     activity: [],
     // Demonstration details only (the development store). A live shop shows what its owner saved.
     bank: {
-      bankName: "Moniepoint Microfinance Bank",
-      accountNumber: "6327082294",
-      accountName: "Oyindamola Adelugba (LingeriesBySisioyin)",
+      bankName: "Demonstration Bank",
+      accountNumber: "0000000000",
+      accountName: "DEMONSTRATION ONLY",
       note: "",
     },
     paymentMethods: [
@@ -361,6 +364,8 @@ export function buildDb(): Db {
     ],
     paymentLog: [],
     checkoutFailures: [],
+    receiptUploads: new Map(),
+    viewedReceipts: new Set(),
     reviews: [
       {
         id: "rev-1",

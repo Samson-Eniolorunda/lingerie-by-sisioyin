@@ -35,15 +35,19 @@ async function orderByNumber(orderNumber: string) {
 
 /** The order could not be placed after the receipt was uploaded: staff see it and contact the customer. */
 async function recordFailure(input: OrderInput, reason: string): Promise<void> {
-  await serviceClient().rpc("record_checkout_failure", {
-    p_key: input.idempotencyKey,
-    p_receipt_path: input.receiptPath,
-    p_name: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
-    p_email: input.contact.email,
-    p_phone: input.contact.phone,
-    p_total: input.quotedTotal,
-    p_reason: reason,
-  });
+  try {
+    await serviceClient().rpc("record_checkout_failure", {
+      p_key: input.idempotencyKey,
+      p_receipt_path: input.receiptPath,
+      p_name: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
+      p_email: input.contact.email,
+      p_phone: input.contact.phone,
+      p_total: input.quotedTotal,
+      p_reason: reason,
+    });
+  } catch {
+    // The customer is already being told something went wrong; the upload record still names them.
+  }
 }
 
 export const supabaseOrders: OrdersRepository = {
@@ -79,27 +83,36 @@ export const supabaseOrders: OrdersRepository = {
 
     // Only the server may place an order (the browser has no EXECUTE on place_order). It names the
     // signed-in customer, if any; the database refuses a receipt that is not in the bucket.
-    const { data, error } = await serviceClient().rpc("place_order", {
-      p_idempotency_key: input.idempotencyKey,
-      p_contact: {
-        name: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
-        email: input.contact.email,
-        phone: input.contact.phone,
-      },
-      p_delivery: {
-        address: input.delivery.address,
-        city: input.delivery.city,
-        state: input.delivery.state,
-        landmark: input.delivery.landmark ?? "",
-        notes: input.delivery.notes ?? "",
-      },
-      p_lines: sqlLines(input.lines),
-      p_promo: input.promoCode ?? null,
-      p_quoted_total: input.quotedTotal,
-      p_receipt_path: input.receiptPath,
-      p_user: context.userId,
-    });
-    if (error) return { ok: false, message: TRY_AGAIN };
+    let data: unknown;
+    let error: unknown = null;
+    try {
+      ({ data, error } = await serviceClient().rpc("place_order", {
+        p_idempotency_key: input.idempotencyKey,
+        p_contact: {
+          name: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
+          email: input.contact.email,
+          phone: input.contact.phone,
+        },
+        p_delivery: {
+          address: input.delivery.address,
+          city: input.delivery.city,
+          state: input.delivery.state,
+          landmark: input.delivery.landmark ?? "",
+          notes: input.delivery.notes ?? "",
+        },
+        p_lines: sqlLines(input.lines),
+        p_promo: input.promoCode ?? null,
+        p_quoted_total: input.quotedTotal,
+        p_receipt_path: input.receiptPath,
+        p_user: context.userId,
+      }));
+    } catch (caught) {
+      error = caught;
+    }
+    if (error) {
+      await recordFailure(input, "The order service returned an error");
+      return { ok: false, message: TRY_AGAIN };
+    }
     const result = data as {
       ok: boolean;
       code?: string;
@@ -121,6 +134,23 @@ export const supabaseOrders: OrdersRepository = {
     }
     const order = await orderByNumber(result.order_number);
     return order ? { ok: true, order } : { ok: false, message: TRY_AGAIN };
+  },
+
+  recordFailure,
+
+  async recordUpload(upload) {
+    try {
+      await serviceClient().rpc("record_receipt_upload", {
+        p_key: upload.idempotencyKey,
+        p_receipt_path: upload.path,
+        p_name: upload.name,
+        p_email: upload.email,
+        p_phone: upload.phone,
+        p_total: upload.quotedTotal,
+      });
+    } catch {
+      // Never stop a customer from paying because the note about who they are could not be saved.
+    }
   },
 
   async byNumber(orderNumber) {

@@ -51,6 +51,14 @@ beforeEach(() => {
 });
 
 describe("e-mail templates", () => {
+  it("tells only signed-in customers that they can cancel online", () => {
+    const guest = t.orderConfirmation({ ...order, userId: null }, bank, ctx).html;
+    expect(guest).not.toMatch(/cancel it online/i);
+    expect(guest).toContain("reply to this e-mail");
+    const member = t.orderConfirmation({ ...order, userId: "user-1" }, bank, ctx).html;
+    expect(member).toContain("cancel it online from your account");
+  });
+
   it("confirm an order with its lines, total, delivery address and the stored bank details", () => {
     const m = t.orderConfirmation(order, bank, ctx);
     expect(m.subject).toBe("Your order LBS-01012026-0001 · Lingeries by Sisioyin");

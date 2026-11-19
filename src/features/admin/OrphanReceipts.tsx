@@ -12,7 +12,37 @@ import type { OrphanReceipt } from "@/types/orders";
 import { ConfirmButton } from "./ConfirmButton";
 import { useAdminAction } from "./useAdminAction";
 
-type Item = OrphanReceipt & { readonly url: string | null };
+type Item = OrphanReceipt;
+
+function ViewLink({ path, viewed }: { readonly path: string; readonly viewed: boolean }) {
+  return (
+    <p className="mt-3 text-base">
+      <a
+        href={`/admin/receipts/view?path=${encodeURIComponent(path)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View receipt
+      </a>{" "}
+      <span className="text-sm text-subtle">
+        ({viewed ? "opened by staff; " : "not yet opened; "}a private link that expires after five
+        minutes)
+      </span>
+    </p>
+  );
+}
+
+function ContactLine({ item }: { readonly item: Item }) {
+  return (
+    <p className="text-base break-all">
+      {item.customerName || "Name not given"}
+      {" · "}
+      {item.email ? <a href={`mailto:${item.email}`}>{item.email}</a> : "no e-mail"}
+      {" · "}
+      {item.phone ? <a href={`tel:${item.phone}`}>{item.phone}</a> : "no phone"}
+    </p>
+  );
+}
 
 function Failure({ item, canUpdate }: { readonly item: Item; readonly canUpdate: boolean }) {
   const { run, pending } = useAdminAction();
@@ -41,16 +71,7 @@ function Failure({ item, canUpdate }: { readonly item: Item; readonly canUpdate:
           {item.resolved ? "Closed" : "Open"}
         </Badge>
       </div>
-      {item.url ? (
-        <p className="mt-3 text-base">
-          <a href={item.url} target="_blank" rel="noopener noreferrer">
-            Open the receipt
-          </a>{" "}
-          <span className="text-sm text-subtle">
-            (a private link that expires after five minutes)
-          </span>
-        </p>
-      ) : null}
+      <ViewLink path={item.path} viewed={item.viewed} />
       {canUpdate && !item.resolved && item.failureId ? (
         <div className="mt-4 flex flex-col gap-3">
           <TextField
@@ -71,7 +92,7 @@ function Failure({ item, canUpdate }: { readonly item: Item; readonly canUpdate:
           </div>
         </div>
       ) : null}
-      {canUpdate && item.resolved ? (
+      {canUpdate && item.resolved && item.viewed ? (
         <div className="mt-4 flex justify-end">
           <ConfirmButton
             label="Delete the receipt"
@@ -124,10 +145,11 @@ export function OrphanReceipts({
             {abandoned.map((a) => (
               <li key={a.path} className="flex flex-wrap items-center justify-between gap-3 p-3">
                 <span className="min-w-0 text-sm break-all">
-                  {a.path}
+                  <ContactLine item={a} />
                   <span className="block text-subtle">{formatDateTime(a.uploadedAt)}</span>
+                  <ViewLink path={a.path} viewed={a.viewed} />
                 </span>
-                {canUpdate ? (
+                {canUpdate && a.viewed ? (
                   <ConfirmButton
                     label="Delete"
                     title="Delete this upload?"

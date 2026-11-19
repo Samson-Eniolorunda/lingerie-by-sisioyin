@@ -95,7 +95,7 @@ export const supabaseAuth: AuthRepository = {
           last_name: input.lastName,
           full_name: `${input.firstName} ${input.lastName}`.trim(),
         },
-        emailRedirectTo: callbackUrl("/dashboard", "customer", "confirm"),
+        emailRedirectTo: await callbackUrl("/dashboard", "customer", "confirm"),
       },
     });
     const exists = "An account with this email already exists. Sign in instead.";
@@ -146,7 +146,7 @@ export const supabaseAuth: AuthRepository = {
           full_name: `${input.firstName} ${input.lastName}`.trim(),
           invite_token: input.token,
         },
-        emailRedirectTo: callbackUrl("/admin", "staff", "confirm"),
+        emailRedirectTo: await callbackUrl("/admin", "staff", "confirm"),
       },
     });
     if (error) {

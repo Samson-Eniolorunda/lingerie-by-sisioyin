@@ -417,6 +417,7 @@ export const supabaseAdmin: AdminRepository = {
         r.quoted_total === null || r.quoted_total === undefined ? null : num(r.quoted_total),
       reason: str(r.reason),
       resolved: r.resolved === true,
+      viewed: r.viewed === true,
     }));
   },
 
@@ -431,6 +432,13 @@ export const supabaseAdmin: AdminRepository = {
     return okResult();
   },
 
+  async markReceiptViewed(path, actor) {
+    const { error } = await (await staff()).rpc("mark_receipt_viewed", { p_receipt_path: path });
+    if (error) return failResult(sqlMessage(error));
+    await log(actor, "order", "receipt opened", path);
+    return okResult();
+  },
+
   async deleteOrphanReceipt(path, actor) {
     // Re-read the list on the server: only a receipt that is still an orphan, and either abandoned
     // or settled, can be deleted, whatever the browser asked for.
@@ -439,6 +447,8 @@ export const supabaseAdmin: AdminRepository = {
     if (!row) return failResult("That receipt is no longer an orphan, or does not exist.");
     if (row.failureId && !row.resolved)
       return failResult("Close the failed checkout before deleting its receipt.");
+    if (!row.viewed)
+      return failResult("Open the receipt first: a receipt nobody has seen cannot be deleted.");
     if (!row.failureId && Date.now() - new Date(row.uploadedAt).getTime() < 24 * 3_600_000)
       return failResult("That upload is less than a day old; a checkout may still be using it.");
     await receipts.remove(path);
