@@ -64,7 +64,7 @@ export function ConsentBanner({ answered }: { readonly answered: boolean }) {
     <section
       aria-labelledby="consent-title"
       data-print="hide"
-      className="fixed inset-x-0 z-[calc(var(--z-toast)+1)] mx-auto w-[min(32rem,calc(100vw-1.5rem))] border border-line bg-surface p-4 shadow-lg"
+      className="fixed inset-x-0 z-[calc(var(--z-toast)+1)] mx-auto w-[min(32rem,calc(100vw-1.5rem))] border border-line bg-surface p-4 shadow-lg md:right-auto md:bottom-6! md:left-6 md:mx-0 md:w-[22rem]"
       style={{ bottom: "calc(var(--bottom-nav-h) + var(--safe-bottom) + 0.75rem)" }}
     >
       <h2 id="consent-title" className="font-sans text-sm font-semibold">
