@@ -1,61 +1,55 @@
--- Baseline for a FRESH Supabase project (the old project and its data are gone).
--- Built from supabase_complete.sql, which already folds in every file under supabase/migrations
--- (invite tokens, analytics columns, user_id on visits, role priority, the order-number sequence).
--- NOT run anywhere. Review it, then apply it to the new project with `supabase db push` or the SQL editor.
--- Tables: profiles, admin_invites, products, admin_activity_logs, reviews, testimonials,
--- newsletter_subscribers, promo_codes, orders, site_settings, site_visits.
--- Known gaps to close in 0002 once reviewed (plan section 10): a place_order() function so prices and
--- stock are re-read on the server instead of the open "Anyone can create orders" policy; an addresses
--- table; contact messages and replies; a private payment-receipts bucket (see 0001_receipts_bucket.sql).
 -- ============================================================================
--- LBS - COMPLETE DATABASE SCHEMA
--- Run this on a fresh Supabase project or after clearing existing tables
+-- Lingerie by Sisioyin: baseline schema for a FRESH Supabase project.
 --
--- Features:
---   - Profiles with role system (owner / super_admin / editor / developer)
---   - Cross-device sync (wishlist, cart, addresses, settings)
---   - Admin invites (allowlist)
---   - Products with soft delete, variant stock, review stats
---   - Activity logging with auto admin names
---   - Reviews & testimonials
---   - Newsletter subscribers
---   - Promo codes
---   - Orders with auto-generated order numbers
---   - Site settings (hero/category images)
---   - Storage buckets (product-images, site-images)
---   - Proper RLS policies throughout
+-- The anon key is public (it ships to every browser), so row level security and the grants in
+-- this file are the real security boundary. Principles:
+--   * Clients never write orders, roles, account status or visit rows directly. They call
+--     SECURITY DEFINER functions that enforce the rules.
+--   * Every SECURITY DEFINER function sets search_path; EXECUTE is revoked from everyone and
+--     granted back explicitly at the end of this file.
+--   * Staff permissions live in one function, has_permission(text), which mirrors
+--     src/lib/permissions.ts exactly. Change one, change the other.
+--   * The owner is created by hand with SQL (see supabase/baseline/README.md). No sign-up ever
+--     becomes owner or developer.
+--
+-- Apply with 0001_receipts_bucket.sql after it. Read the README first. Not run on any live project.
 -- ============================================================================
 
 BEGIN;
 
--- ============================================================================
--- EXTENSIONS
--- ============================================================================
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
+-- Tidy defaults: nothing is granted to API roles unless this file says so.
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON TABLES FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE ALL ON SEQUENCES FROM anon, authenticated;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC, anon, authenticated;
 
 -- ============================================================================
--- 1) PROFILES TABLE
+-- 1) PROFILES
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id                UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  email             TEXT,
-  first_name        TEXT,
-  last_name         TEXT,
-  full_name         TEXT,
-  phone             TEXT,
-  date_of_birth     DATE,
-  is_admin          BOOLEAN     NOT NULL DEFAULT false,
-  role              TEXT        NOT NULL DEFAULT 'customer',
-  whatsapp_number      TEXT,
-  whatsapp_opted_in    BOOLEAN     NOT NULL DEFAULT false,
-  account_status       TEXT        NOT NULL DEFAULT 'active',
-  return_privilege_revoked BOOLEAN NOT NULL DEFAULT false,
+  id                       UUID        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email                    TEXT,
+  first_name               TEXT,
+  last_name                TEXT,
+  full_name                TEXT,
+  phone                    TEXT,
+  date_of_birth            DATE,
+  role                     TEXT        NOT NULL DEFAULT 'customer',
+  -- Derived from role: nobody can set it, not even an UPDATE by an admin.
+  is_admin                 BOOLEAN     GENERATED ALWAYS AS
+                             (role IN ('owner', 'super_admin', 'developer', 'editor')) STORED,
+  role_priority            INTEGER     GENERATED ALWAYS AS (
+                             CASE role WHEN 'owner' THEN 1 WHEN 'developer' THEN 2
+                               WHEN 'super_admin' THEN 3 WHEN 'editor' THEN 4 ELSE 5 END) STORED,
+  whatsapp_number          TEXT,
+  whatsapp_opted_in        BOOLEAN     NOT NULL DEFAULT false,
+  account_status           TEXT        NOT NULL DEFAULT 'active',
+  return_privilege_revoked BOOLEAN     NOT NULL DEFAULT false,
   deletion_requested_at    TIMESTAMPTZ,
-  wishlist             JSONB       NOT NULL DEFAULT '[]',
-  cart                 JSONB       NOT NULL DEFAULT '[]',
-  saved_addresses      JSONB       NOT NULL DEFAULT '[]',
-  dashboard_settings   JSONB       NOT NULL DEFAULT '{}',
-  created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  wishlist                 JSONB       NOT NULL DEFAULT '[]',
+  cart                     JSONB       NOT NULL DEFAULT '[]',
+  saved_addresses          JSONB       NOT NULL DEFAULT '[]',
+  dashboard_settings       JSONB       NOT NULL DEFAULT '{}',
+  created_at               TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   CONSTRAINT profiles_role_check CHECK (role IN ('owner', 'super_admin', 'editor', 'developer', 'customer')),
   CONSTRAINT profiles_status_check CHECK (account_status IN ('active', 'suspended', 'banned', 'deleted'))
@@ -63,149 +57,396 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Persisted role_priority column for Supabase Dashboard sorting
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS role_priority INTEGER DEFAULT 5;
+-- True when the caller is the database owner or the service role (server side code or the SQL
+-- editor), never a browser session. PostgREST sets the `role` setting from the verified JWT.
+CREATE OR REPLACE FUNCTION public.is_service()
+RETURNS BOOLEAN
+LANGUAGE sql STABLE
+SET search_path = public
+AS $$
+  SELECT current_setting('role', true) = 'service_role'
+      OR (current_setting('role', true) IN ('none', '')
+          AND session_user IN ('postgres', 'supabase_admin'));
+$$;
 
--- Trigger function to auto-set role_priority on INSERT or UPDATE of role
-CREATE OR REPLACE FUNCTION public.set_role_priority()
+-- The caller has an active account (banned, suspended and deleted accounts get nothing).
+CREATE OR REPLACE FUNCTION public.is_active_account()
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND account_status = 'active'
+  );
+$$;
+
+-- Mirrors ROLE_PERMISSIONS in src/lib/permissions.ts.
+--   editor:                       products.manage, orders.view, orders.update, messages.manage
+--   owner, super_admin, developer: those four plus customers.view, customers.manage,
+--                                  promos.manage, analytics.view, settings.manage, roles.manage
+-- An inactive account has no permissions.
+CREATE OR REPLACE FUNCTION public.has_permission(p_permission TEXT)
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT CASE
+      WHEN role IN ('owner', 'super_admin', 'developer') THEN p_permission IN (
+        'products.manage', 'orders.view', 'orders.update', 'messages.manage',
+        'customers.view', 'customers.manage', 'promos.manage', 'analytics.view',
+        'settings.manage', 'roles.manage')
+      WHEN role = 'editor' THEN p_permission IN (
+        'products.manage', 'orders.view', 'orders.update', 'messages.manage')
+      ELSE false
+    END
+    FROM public.profiles
+    WHERE id = auth.uid() AND account_status = 'active'
+  ), false);
+$$;
+
+-- Any active member of staff. Kept for the storage policies and the activity log.
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT COALESCE((
+    SELECT is_admin FROM public.profiles WHERE id = auth.uid() AND account_status = 'active'
+  ), false);
+$$;
+
+-- Owner and developer rows cannot be created, changed or deleted through the application, by
+-- any role, including the service role. The only way is the documented manual statement, which
+-- sets a transaction-local flag first (see the README).
+CREATE OR REPLACE FUNCTION public.guard_protected_roles()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  override BOOLEAN := COALESCE(current_setting('lbs.allow_protected_roles', true), '') = 'on';
+BEGIN
+  IF override THEN
+    RETURN CASE TG_OP WHEN 'DELETE' THEN OLD ELSE NEW END;
+  END IF;
+  IF TG_OP = 'DELETE' THEN
+    IF OLD.role IN ('owner', 'developer') THEN
+      RAISE EXCEPTION 'The % account cannot be deleted.', OLD.role USING ERRCODE = '42501';
+    END IF;
+    RETURN OLD;
+  ELSIF TG_OP = 'INSERT' THEN
+    IF NEW.role IN ('owner', 'developer') THEN
+      RAISE EXCEPTION 'The % role cannot be assigned.', NEW.role USING ERRCODE = '42501';
+    END IF;
+    RETURN NEW;
+  ELSE
+    IF NEW.role IS DISTINCT FROM OLD.role
+       AND (OLD.role IN ('owner', 'developer') OR NEW.role IN ('owner', 'developer')) THEN
+      RAISE EXCEPTION 'The owner and developer roles cannot be changed here.' USING ERRCODE = '42501';
+    END IF;
+    RETURN NEW;
+  END IF;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_guard_protected_roles ON public.profiles;
+CREATE TRIGGER trg_guard_protected_roles
+  BEFORE INSERT OR UPDATE OR DELETE ON public.profiles
+  FOR EACH ROW EXECUTE FUNCTION public.guard_protected_roles();
+
+-- Policies. There is no INSERT policy (the sign-up trigger creates the row) and no DELETE policy.
+DROP POLICY IF EXISTS "profiles: user read own" ON public.profiles;
+CREATE POLICY "profiles: user read own"
+  ON public.profiles FOR SELECT TO authenticated
+  USING (auth.uid() = id AND account_status = 'active');
+
+DROP POLICY IF EXISTS "profiles: user update own" ON public.profiles;
+CREATE POLICY "profiles: user update own"
+  ON public.profiles FOR UPDATE TO authenticated
+  USING (auth.uid() = id AND account_status = 'active')
+  WITH CHECK (auth.uid() = id AND account_status = 'active');
+
+DROP POLICY IF EXISTS "profiles: staff read" ON public.profiles;
+CREATE POLICY "profiles: staff read"
+  ON public.profiles FOR SELECT TO authenticated
+  USING (public.has_permission('customers.view') OR public.has_permission('roles.manage'));
+
+-- Staff may edit the same safe columns as the user (column grants below); never role or status.
+DROP POLICY IF EXISTS "profiles: staff update" ON public.profiles;
+CREATE POLICY "profiles: staff update"
+  ON public.profiles FOR UPDATE TO authenticated
+  USING (public.has_permission('customers.manage'))
+  WITH CHECK (public.has_permission('customers.manage'));
+
+-- ----- Controlled changes to protected columns ------------------------------
+
+-- Role changes. Nobody may assign owner or developer; those rows cannot be changed; nobody
+-- changes their own role. 'customer' removes a member of staff.
+CREATE OR REPLACE FUNCTION public.set_staff_role(p_user UUID, p_role TEXT)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_target TEXT;
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('roles.manage')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_role NOT IN ('super_admin', 'editor', 'customer') THEN
+    RAISE EXCEPTION 'That role cannot be assigned.' USING ERRCODE = '42501';
+  END IF;
+  IF p_user = auth.uid() THEN
+    RAISE EXCEPTION 'You cannot change your own role.' USING ERRCODE = '42501';
+  END IF;
+  SELECT role INTO v_target FROM public.profiles WHERE id = p_user FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'No such account.' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_target IN ('owner', 'developer') THEN
+    RAISE EXCEPTION 'The % account is protected.', v_target USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.profiles SET role = p_role WHERE id = p_user;
+END;
+$$;
+
+-- Suspend, ban or reactivate a customer. Staff accounts are managed through roles instead.
+-- To end a banned person's sessions, also call auth.admin.updateUserById(id, { ban_duration })
+-- from the server (README).
+CREATE OR REPLACE FUNCTION public.set_account_status(p_user UUID, p_status TEXT)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_target TEXT;
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('customers.manage')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_status NOT IN ('active', 'suspended', 'banned') THEN
+    RAISE EXCEPTION 'Unknown status.' USING ERRCODE = '22023';
+  END IF;
+  IF p_user = auth.uid() THEN
+    RAISE EXCEPTION 'You cannot change your own status.' USING ERRCODE = '42501';
+  END IF;
+  SELECT role INTO v_target FROM public.profiles WHERE id = p_user FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'No such account.' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_target <> 'customer' THEN
+    RAISE EXCEPTION 'Staff accounts are managed through roles.' USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.profiles SET account_status = p_status WHERE id = p_user;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_return_privilege(p_user UUID, p_allowed BOOLEAN)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
-  NEW.role_priority := CASE NEW.role
-    WHEN 'owner'       THEN 1
-    WHEN 'developer'   THEN 2
-    WHEN 'super_admin' THEN 3
-    WHEN 'editor'      THEN 4
-    WHEN 'customer'    THEN 5
-    ELSE 6
-  END;
+  IF NOT (public.is_service() OR public.has_permission('customers.manage')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.profiles SET return_privilege_revoked = NOT p_allowed WHERE id = p_user;
+END;
+$$;
+
+-- A customer asks for deletion of their own account, or withdraws the request.
+CREATE OR REPLACE FUNCTION public.request_account_deletion(p_withdraw BOOLEAN DEFAULT false)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_active_account() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.profiles
+     SET deletion_requested_at = CASE WHEN p_withdraw THEN NULL ELSE now() END
+   WHERE id = auth.uid();
+END;
+$$;
+
+-- ============================================================================
+-- 2) ADMIN INVITES (hashed, single use, expiring)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.admin_invites (
+  id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  email        TEXT        NOT NULL,
+  token_hash   TEXT        NOT NULL UNIQUE,
+  invited_role TEXT        NOT NULL DEFAULT 'editor',
+  expires_at   TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '7 days'),
+  used_at      TIMESTAMPTZ,
+  created_by   UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT admin_invites_role_check CHECK (invited_role IN ('super_admin', 'editor'))
+);
+
+-- One open invitation per address.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_admin_invites_open_email
+  ON public.admin_invites (lower(email)) WHERE used_at IS NULL;
+
+ALTER TABLE public.admin_invites ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "admin_invites: staff read" ON public.admin_invites;
+CREATE POLICY "admin_invites: staff read"
+  ON public.admin_invites FOR SELECT TO authenticated
+  USING (public.has_permission('roles.manage'));
+
+DROP POLICY IF EXISTS "admin_invites: staff revoke" ON public.admin_invites;
+CREATE POLICY "admin_invites: staff revoke"
+  ON public.admin_invites FOR DELETE TO authenticated
+  USING (public.has_permission('roles.manage'));
+
+CREATE OR REPLACE FUNCTION public.hash_token(p_token TEXT)
+RETURNS TEXT
+LANGUAGE sql IMMUTABLE
+SET search_path = public
+AS $$
+  SELECT encode(sha256(convert_to(p_token, 'UTF8')), 'hex');
+$$;
+
+-- Creates an invitation and returns the plain token ONCE. Only its SHA-256 hash is stored.
+CREATE OR REPLACE FUNCTION public.create_admin_invite(p_email TEXT, p_role TEXT)
+RETURNS TEXT
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_token TEXT;
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('roles.manage')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_role NOT IN ('super_admin', 'editor') THEN
+    RAISE EXCEPTION 'That role cannot be invited.' USING ERRCODE = '42501';
+  END IF;
+  IF p_email IS NULL OR p_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' OR length(p_email) > 200 THEN
+    RAISE EXCEPTION 'Enter a valid email address.' USING ERRCODE = '22023';
+  END IF;
+  DELETE FROM public.admin_invites WHERE lower(email) = lower(p_email) AND used_at IS NULL;
+  v_token := replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', '');
+  INSERT INTO public.admin_invites (email, token_hash, invited_role, created_by)
+  VALUES (lower(p_email), public.hash_token(v_token), p_role, auth.uid());
+  RETURN v_token;
+END;
+$$;
+
+-- For the sign-up screen behind an invitation link: tells the holder of a valid token which
+-- address and role it carries. Reveals nothing without the secret token.
+CREATE OR REPLACE FUNCTION public.validate_invite_token(p_token TEXT)
+RETURNS TABLE (email TEXT, invited_role TEXT)
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT ai.email, ai.invited_role
+    FROM public.admin_invites ai
+   WHERE ai.token_hash = public.hash_token(p_token)
+     AND ai.used_at IS NULL
+     AND ai.expires_at > now();
+$$;
+
+-- ============================================================================
+-- 3) SIGN-UP TRIGGER: create the profile
+-- ============================================================================
+-- The role is 'customer' unless the sign-up carries a valid invitation token in
+-- raw_user_meta_data->>'invite_token' whose hash matches an unexpired, unused invitation for the
+-- SAME email address. The role comes only from admin_invites.invited_role, never from metadata.
+-- The invitation is consumed (single use). There is no "first sign-up becomes owner".
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_meta      JSONB := COALESCE(NEW.raw_user_meta_data, '{}'::jsonb);
+  v_full_name TEXT;
+  v_first     TEXT;
+  v_last      TEXT;
+  v_token     TEXT := NULLIF(v_meta->>'invite_token', '');
+  v_invite    public.admin_invites%ROWTYPE;
+  v_role      TEXT := 'customer';
+BEGIN
+  v_full_name := COALESCE(
+    NULLIF(v_meta->>'full_name', ''),
+    NULLIF(TRIM(CONCAT(COALESCE(v_meta->>'first_name', ''), ' ', COALESCE(v_meta->>'last_name', ''))), '')
+  );
+  v_first := COALESCE(NULLIF(v_meta->>'first_name', ''), NULLIF(SPLIT_PART(COALESCE(v_full_name, ''), ' ', 1), ''));
+  v_last := COALESCE(
+    NULLIF(v_meta->>'last_name', ''),
+    CASE WHEN POSITION(' ' IN COALESCE(v_full_name, '')) > 0
+         THEN NULLIF(SUBSTRING(v_full_name FROM POSITION(' ' IN v_full_name) + 1), '') END
+  );
+
+  IF v_token IS NOT NULL AND NEW.email IS NOT NULL THEN
+    UPDATE public.admin_invites
+       SET used_at = now()
+     WHERE token_hash = public.hash_token(v_token)
+       AND used_at IS NULL
+       AND expires_at > now()
+       AND lower(email) = lower(NEW.email)
+    RETURNING * INTO v_invite;
+    IF FOUND THEN
+      v_role := v_invite.invited_role;
+    END IF;
+  END IF;
+
+  INSERT INTO public.profiles (id, email, role, first_name, last_name, full_name, phone)
+  VALUES (NEW.id, NEW.email, v_role, v_first, v_last, v_full_name, NULLIF(v_meta->>'phone', ''))
+  ON CONFLICT (id) DO UPDATE SET
+    email      = COALESCE(EXCLUDED.email, public.profiles.email),
+    first_name = COALESCE(EXCLUDED.first_name, public.profiles.first_name),
+    last_name  = COALESCE(EXCLUDED.last_name, public.profiles.last_name),
+    full_name  = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
+    phone      = COALESCE(EXCLUDED.phone, public.profiles.phone);
+
   RETURN NEW;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_set_role_priority ON public.profiles;
-CREATE TRIGGER trg_set_role_priority
-  BEFORE INSERT OR UPDATE OF role ON public.profiles
-  FOR EACH ROW
-  EXECUTE FUNCTION public.set_role_priority();
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ============================================================================
--- 2) ADMIN CHECK FUNCTION (prevents policy recursion)
+-- 4) COMMON TRIGGERS
 -- ============================================================================
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS BOOLEAN
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER LANGUAGE plpgsql
 SET search_path = public
 AS $$
-  SELECT COALESCE(
-    (SELECT is_admin FROM public.profiles WHERE id = auth.uid()),
-    false
-  );
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
-GRANT EXECUTE ON FUNCTION public.is_admin() TO anon;
-
--- ============================================================================
--- 3) PROFILES POLICIES
--- ============================================================================
-DROP POLICY IF EXISTS "profiles: user read own" ON public.profiles;
-CREATE POLICY "profiles: user read own"
-  ON public.profiles FOR SELECT TO authenticated
-  USING (auth.uid() = id);
-
-DROP POLICY IF EXISTS "profiles: user insert own" ON public.profiles;
-CREATE POLICY "profiles: user insert own"
-  ON public.profiles FOR INSERT TO authenticated
-  WITH CHECK (auth.uid() = id);
-
--- User can update own profile (but cannot change role or is_admin)
-DROP POLICY IF EXISTS "profiles: user update own" ON public.profiles;
-CREATE POLICY "profiles: user update own"
-  ON public.profiles FOR UPDATE TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (
-    auth.uid() = id
-    -- Prevent users from changing their own admin status or role
-    AND (role = (SELECT role FROM public.profiles WHERE id = auth.uid()))
-    AND (is_admin = (SELECT is_admin FROM public.profiles WHERE id = auth.uid()))
-  );
-
-DROP POLICY IF EXISTS "profiles: admin read all" ON public.profiles;
-CREATE POLICY "profiles: admin read all"
-  ON public.profiles FOR SELECT TO authenticated
-  USING (public.is_admin());
-
-DROP POLICY IF EXISTS "profiles: admin update" ON public.profiles;
-CREATE POLICY "profiles: admin update"
-  ON public.profiles FOR UPDATE TO authenticated
-  USING  (public.is_admin())
-  WITH CHECK (public.is_admin());
-
-DROP POLICY IF EXISTS "profiles: owner manage roles" ON public.profiles;
-CREATE POLICY "profiles: owner manage roles"
-  ON public.profiles FOR UPDATE TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
-  ))
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
-  ));
-
-DROP POLICY IF EXISTS "profiles: owner delete" ON public.profiles;
-CREATE POLICY "profiles: owner delete"
-  ON public.profiles FOR DELETE TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
-  ));
-
--- ============================================================================
--- 4) ADMIN INVITES TABLE
--- ============================================================================
-CREATE TABLE IF NOT EXISTS public.admin_invites (
-  email        TEXT        PRIMARY KEY,
-  invite_token TEXT        UNIQUE,
-  invited_role TEXT        DEFAULT 'editor',
-  expires_at   TIMESTAMPTZ DEFAULT (now() + interval '7 days'),
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
--- Create index for token lookups
-CREATE INDEX IF NOT EXISTS idx_admin_invites_token ON public.admin_invites(invite_token);
-
-ALTER TABLE public.admin_invites ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "admin_invites: owner only" ON public.admin_invites;
-CREATE POLICY "admin_invites: owner only"
-  ON public.admin_invites FOR ALL TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
-  ))
-  WITH CHECK (EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
-  ));
-
--- Function to validate invite token
-CREATE OR REPLACE FUNCTION public.validate_invite_token(p_token TEXT)
-RETURNS TABLE(email TEXT, invited_role TEXT) AS $$
+CREATE OR REPLACE FUNCTION public.set_audit_fields()
+RETURNS TRIGGER LANGUAGE plpgsql
+SET search_path = public
+AS $$
 BEGIN
-  RETURN QUERY
-  SELECT ai.email, ai.invited_role
-  FROM public.admin_invites ai
-  WHERE ai.invite_token = p_token
-    AND ai.expires_at > now();
+  IF TG_OP = 'INSERT' THEN
+    NEW.created_by := auth.uid();
+    NEW.updated_by := auth.uid();
+  ELSE
+    NEW.updated_by := auth.uid();
+  END IF;
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- ============================================================================
--- 5) PRODUCTS TABLE
+-- 5) PRODUCTS
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.products (
   id                    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug                  TEXT        NOT NULL UNIQUE,
   name                  TEXT        NOT NULL,
   category              TEXT        NOT NULL,
   gender                TEXT        NOT NULL,
@@ -213,6 +454,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   qty                   INTEGER     NOT NULL DEFAULT 0,
   sizes                 JSONB       NOT NULL DEFAULT '[]',
   colors                JSONB       NOT NULL DEFAULT '[]',
+  -- [{ "size": "M", "color": "Black", "qty": 3 }]; colour is '' when the product has none.
   variant_stock         JSONB       NOT NULL DEFAULT '[]',
   description           TEXT        NOT NULL DEFAULT '',
   images                TEXT[]      NOT NULL DEFAULT '{}',
@@ -226,142 +468,122 @@ CREATE TABLE IF NOT EXISTS public.products (
   review_count          INTEGER     DEFAULT 0,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by            UUID        REFERENCES auth.users(id),
-  updated_by            UUID        REFERENCES auth.users(id),
+  created_by            UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  updated_by            UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
 
   CONSTRAINT products_price_nonneg CHECK (price_ngn >= 0),
-  CONSTRAINT products_qty_nonneg   CHECK (qty >= 0)
+  CONSTRAINT products_qty_nonneg   CHECK (qty >= 0),
+  CONSTRAINT products_variants_array CHECK (jsonb_typeof(variant_stock) = 'array')
 );
 
-CREATE INDEX IF NOT EXISTS idx_products_is_active   ON public.products (is_active);
-CREATE INDEX IF NOT EXISTS idx_products_is_deleted   ON public.products (is_deleted);
-CREATE INDEX IF NOT EXISTS idx_products_created_at   ON public.products (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_products_category     ON public.products (category);
+CREATE INDEX IF NOT EXISTS idx_products_is_active ON public.products (is_active);
+CREATE INDEX IF NOT EXISTS idx_products_is_deleted ON public.products (is_deleted);
+CREATE INDEX IF NOT EXISTS idx_products_created_at ON public.products (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_products_category ON public.products (category);
+
+CREATE OR REPLACE FUNCTION public.set_product_slug()
+RETURNS TRIGGER LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  IF NEW.slug IS NULL OR NEW.slug = '' THEN
+    NEW.slug := trim(both '-' from lower(regexp_replace(NEW.name, '[^a-zA-Z0-9]+', '-', 'g')))
+                || '-' || left(NEW.id::text, 8);
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_products_slug ON public.products;
+CREATE TRIGGER trg_products_slug BEFORE INSERT ON public.products
+  FOR EACH ROW EXECUTE FUNCTION public.set_product_slug();
+DROP TRIGGER IF EXISTS trg_products_updated_at ON public.products;
+CREATE TRIGGER trg_products_updated_at BEFORE UPDATE ON public.products
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+DROP TRIGGER IF EXISTS trg_products_audit ON public.products;
+CREATE TRIGGER trg_products_audit BEFORE INSERT OR UPDATE ON public.products
+  FOR EACH ROW EXECUTE FUNCTION public.set_audit_fields();
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
--- ============================================================================
--- 6) PRODUCTS POLICIES
--- ============================================================================
 DROP POLICY IF EXISTS "products: public read active" ON public.products;
 CREATE POLICY "products: public read active"
   ON public.products FOR SELECT TO anon, authenticated
   USING (is_active = true AND is_deleted = false);
 
-DROP POLICY IF EXISTS "products: admin read all" ON public.products;
-CREATE POLICY "products: admin read all"
+DROP POLICY IF EXISTS "products: staff read all" ON public.products;
+CREATE POLICY "products: staff read all"
   ON public.products FOR SELECT TO authenticated
-  USING (public.is_admin());
+  USING (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "products: admin insert" ON public.products;
-CREATE POLICY "products: admin insert"
+DROP POLICY IF EXISTS "products: staff insert" ON public.products;
+CREATE POLICY "products: staff insert"
   ON public.products FOR INSERT TO authenticated
-  WITH CHECK (public.is_admin());
+  WITH CHECK (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "products: admin update" ON public.products;
-CREATE POLICY "products: admin update"
+DROP POLICY IF EXISTS "products: staff update" ON public.products;
+CREATE POLICY "products: staff update"
   ON public.products FOR UPDATE TO authenticated
-  USING  (public.is_admin())
-  WITH CHECK (public.is_admin());
+  USING (public.has_permission('products.manage'))
+  WITH CHECK (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "products: owner delete" ON public.products;
-CREATE POLICY "products: owner delete"
+DROP POLICY IF EXISTS "products: staff delete" ON public.products;
+CREATE POLICY "products: staff delete"
   ON public.products FOR DELETE TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role IN ('owner', 'super_admin')
-  ));
+  USING (public.has_permission('products.manage'));
 
 -- ============================================================================
--- 7) PRODUCTS TRIGGERS
--- ============================================================================
-
--- Auto-update updated_at
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
-BEGIN
-  NEW.updated_at = now();
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_products_updated_at ON public.products;
-CREATE TRIGGER trg_products_updated_at
-  BEFORE UPDATE ON public.products
-  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
-
--- Auto-set audit fields (created_by, updated_by)
-CREATE OR REPLACE FUNCTION public.set_audit_fields()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    NEW.created_by := auth.uid();
-    NEW.updated_by := auth.uid();
-  ELSIF TG_OP = 'UPDATE' THEN
-    NEW.updated_by := auth.uid();
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS trg_products_audit ON public.products;
-CREATE TRIGGER trg_products_audit
-  BEFORE INSERT OR UPDATE ON public.products
-  FOR EACH ROW EXECUTE FUNCTION public.set_audit_fields();
-
--- ============================================================================
--- 8) ADMIN ACTIVITY LOGS
+-- 6) ACTIVITY LOG
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.admin_activity_logs (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   admin_id   UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
-  action     TEXT        NOT NULL,   -- create / update / delete / restore / login / invite
-  entity     TEXT        NOT NULL,   -- product / session / user
-  entity_id  UUID,
+  action     TEXT        NOT NULL,
+  entity     TEXT        NOT NULL,
+  entity_id  TEXT,
+  subject    TEXT,
   metadata   JSONB       NOT NULL DEFAULT '{}',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- Not capped: the whole log is kept.
 CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON public.admin_activity_logs (created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_activity_logs_admin_id   ON public.admin_activity_logs (admin_id);
+CREATE INDEX IF NOT EXISTS idx_activity_logs_admin_id ON public.admin_activity_logs (admin_id);
 
 ALTER TABLE public.admin_activity_logs ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "activity_logs: owner read" ON public.admin_activity_logs;
-CREATE POLICY "activity_logs: owner read"
+DROP POLICY IF EXISTS "activity_logs: staff read" ON public.admin_activity_logs;
+CREATE POLICY "activity_logs: staff read"
   ON public.admin_activity_logs FOR SELECT TO authenticated
-  USING (EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role IN ('owner', 'super_admin', 'developer')
-  ));
+  USING (public.has_permission('roles.manage'));
 
-DROP POLICY IF EXISTS "activity_logs: admin insert" ON public.admin_activity_logs;
-CREATE POLICY "activity_logs: admin insert"
+DROP POLICY IF EXISTS "activity_logs: staff insert" ON public.admin_activity_logs;
+CREATE POLICY "activity_logs: staff insert"
   ON public.admin_activity_logs FOR INSERT TO authenticated
   WITH CHECK (public.is_admin());
 
--- ============================================================================
--- 9) AUTO-ADD ADMIN NAME TO ACTIVITY LOGS
--- ============================================================================
+-- The actor is always the caller: a client-supplied admin_id is overwritten. Rows written by the
+-- service role (no auth.uid) keep the admin_id the server supplies.
 CREATE OR REPLACE FUNCTION public.log_activity_with_name()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
 DECLARE
   admin_name TEXT;
   admin_role TEXT;
 BEGIN
-  SELECT
-    CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, '')),
-    role
-  INTO admin_name, admin_role
-  FROM public.profiles
-  WHERE id = NEW.admin_id;
-
-  admin_name := TRIM(admin_name);
-  IF admin_name = '' THEN
-    admin_name := 'Admin';
+  IF auth.uid() IS NOT NULL THEN
+    NEW.admin_id := auth.uid();
+  ELSIF NOT public.is_service() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
   END IF;
 
-  NEW.metadata = NEW.metadata || jsonb_build_object(
-    'admin_name', admin_name,
+  SELECT NULLIF(TRIM(CONCAT(COALESCE(first_name, ''), ' ', COALESCE(last_name, ''))), ''), role
+    INTO admin_name, admin_role
+    FROM public.profiles WHERE id = NEW.admin_id;
+
+  NEW.metadata := COALESCE(NEW.metadata, '{}'::jsonb) || jsonb_build_object(
+    'admin_name', COALESCE(admin_name, 'Admin'),
     'admin_role', admin_role
   );
   RETURN NEW;
@@ -374,168 +596,66 @@ CREATE TRIGGER trg_activity_add_name
   FOR EACH ROW EXECUTE FUNCTION public.log_activity_with_name();
 
 -- ============================================================================
--- 10) AUTH -> PROFILE SYNC (new user signup)
--- ============================================================================
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-DECLARE
-  make_admin BOOLEAN;
-  user_role  TEXT;
-  v_full_name TEXT;
-  v_first TEXT;
-  v_last TEXT;
-  v_invited_role TEXT;
-BEGIN
-  -- Build full_name from metadata (signup sends full_name, Google sends first+last)
-  v_full_name := COALESCE(
-    NEW.raw_user_meta_data->>'full_name',
-    TRIM(CONCAT(
-      COALESCE(NEW.raw_user_meta_data->>'first_name', ''), ' ',
-      COALESCE(NEW.raw_user_meta_data->>'last_name', '')
-    ))
-  );
-  IF v_full_name = '' THEN v_full_name := NULL; END IF;
-
-  -- Parse first/last from full_name if individual fields missing
-  v_first := COALESCE(
-    NEW.raw_user_meta_data->>'first_name',
-    SPLIT_PART(COALESCE(v_full_name, ''), ' ', 1)
-  );
-  v_last := COALESCE(
-    NEW.raw_user_meta_data->>'last_name',
-    CASE
-      WHEN POSITION(' ' IN COALESCE(v_full_name, '')) > 0
-      THEN SUBSTRING(v_full_name FROM POSITION(' ' IN v_full_name) + 1)
-      ELSE NULL
-    END
-  );
-  IF v_first = '' THEN v_first := NULL; END IF;
-  IF v_last = '' THEN v_last := NULL; END IF;
-
-  -- Get invited_role from metadata if present
-  v_invited_role := NEW.raw_user_meta_data->>'invited_role';
-
-  -- First-ever user becomes owner
-  SELECT NOT EXISTS (
-    SELECT 1 FROM public.profiles WHERE is_admin = true
-  ) INTO make_admin;
-
-  -- Check if invited
-  IF NOT make_admin THEN
-    make_admin := EXISTS (
-      SELECT 1 FROM public.admin_invites
-      WHERE LOWER(email) = LOWER(NEW.email)
-    );
-  END IF;
-
-  -- Determine role:
-  -- 1. First admin becomes owner
-  -- 2. Invited admins get their invited_role or default to editor
-  -- 3. Non-admins become customer
-  IF make_admin AND NOT EXISTS (SELECT 1 FROM public.profiles WHERE is_admin = true) THEN
-    user_role := 'owner';
-  ELSIF make_admin THEN
-    user_role := COALESCE(v_invited_role, 'editor');
-  ELSE
-    user_role := 'customer';
-  END IF;
-
-  INSERT INTO public.profiles (id, email, is_admin, role, first_name, last_name, full_name, phone)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    make_admin,
-    user_role,
-    v_first,
-    v_last,
-    v_full_name,
-    NEW.raw_user_meta_data->>'phone'
-  )
-  ON CONFLICT (id) DO UPDATE SET
-    email      = COALESCE(EXCLUDED.email, public.profiles.email),
-    is_admin   = public.profiles.is_admin OR EXCLUDED.is_admin,
-    first_name = COALESCE(EXCLUDED.first_name, public.profiles.first_name),
-    last_name  = COALESCE(EXCLUDED.last_name, public.profiles.last_name),
-    full_name  = COALESCE(EXCLUDED.full_name, public.profiles.full_name),
-    phone      = COALESCE(EXCLUDED.phone, public.profiles.phone);
-
-  -- Clean up invite
-  DELETE FROM public.admin_invites WHERE LOWER(email) = LOWER(NEW.email);
-
-  RETURN NEW;
-END;
-$$;
-
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-
--- ============================================================================
--- 11) REVIEWS TABLE
+-- 7) REVIEWS and TESTIMONIALS
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.reviews (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   product_id      UUID        NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
-  customer_name   TEXT        NOT NULL,
-  customer_email  TEXT,
+  customer_name   TEXT        NOT NULL CHECK (char_length(customer_name) BETWEEN 1 AND 80),
+  customer_email  TEXT        CHECK (char_length(customer_email) <= 200),
   rating          INTEGER     NOT NULL CHECK (rating >= 1 AND rating <= 5),
-  title           TEXT,
-  comment         TEXT        NOT NULL,
+  title           TEXT        CHECK (char_length(title) <= 120),
+  comment         TEXT        NOT NULL CHECK (char_length(comment) BETWEEN 1 AND 2000),
   is_approved     BOOLEAN     NOT NULL DEFAULT false,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_reviews_product_id  ON public.reviews(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON public.reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_is_approved ON public.reviews(is_approved);
 
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Anyone can read approved reviews" ON public.reviews;
-CREATE POLICY "Anyone can read approved reviews"
-  ON public.reviews FOR SELECT
-  USING (is_approved = true);
+-- Visitors may submit, always unapproved. They never read the base table (it holds the email).
+DROP POLICY IF EXISTS "reviews: anyone submits unapproved" ON public.reviews;
+CREATE POLICY "reviews: anyone submits unapproved"
+  ON public.reviews FOR INSERT TO anon, authenticated
+  WITH CHECK (is_approved = false);
 
-DROP POLICY IF EXISTS "Anyone can create reviews" ON public.reviews;
-CREATE POLICY "Anyone can create reviews"
-  ON public.reviews FOR INSERT
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "reviews: staff read" ON public.reviews;
+CREATE POLICY "reviews: staff read"
+  ON public.reviews FOR SELECT TO authenticated
+  USING (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "Admins can read all reviews" ON public.reviews;
-CREATE POLICY "Admins can read all reviews"
-  ON public.reviews FOR SELECT
-  USING (public.is_admin());
+DROP POLICY IF EXISTS "reviews: staff update" ON public.reviews;
+CREATE POLICY "reviews: staff update"
+  ON public.reviews FOR UPDATE TO authenticated
+  USING (public.has_permission('products.manage'))
+  WITH CHECK (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "Admins can update reviews" ON public.reviews;
-CREATE POLICY "Admins can update reviews"
-  ON public.reviews FOR UPDATE
-  USING (public.is_admin());
+DROP POLICY IF EXISTS "reviews: staff delete" ON public.reviews;
+CREATE POLICY "reviews: staff delete"
+  ON public.reviews FOR DELETE TO authenticated
+  USING (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "Admins can delete reviews" ON public.reviews;
-CREATE POLICY "Admins can delete reviews"
-  ON public.reviews FOR DELETE
-  USING (public.is_admin());
+-- Public read goes through this view, which leaves out customer_email.
+CREATE OR REPLACE VIEW public.reviews_public AS
+  SELECT id, product_id, customer_name, rating, title, comment, created_at
+    FROM public.reviews WHERE is_approved = true;
 
--- ============================================================================
--- 12) AUTO-UPDATE PRODUCT RATING STATS
--- ============================================================================
 CREATE OR REPLACE FUNCTION public.update_product_rating_stats()
-RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
   UPDATE public.products SET
     avg_rating = (
-      SELECT COALESCE(AVG(rating)::DECIMAL(2,1), 0)
-      FROM public.reviews
-      WHERE product_id = COALESCE(NEW.product_id, OLD.product_id) AND is_approved = true
-    ),
+      SELECT COALESCE(AVG(rating)::DECIMAL(2,1), 0) FROM public.reviews
+      WHERE product_id = COALESCE(NEW.product_id, OLD.product_id) AND is_approved = true),
     review_count = (
-      SELECT COUNT(*)
-      FROM public.reviews
-      WHERE product_id = COALESCE(NEW.product_id, OLD.product_id) AND is_approved = true
-    )
+      SELECT COUNT(*) FROM public.reviews
+      WHERE product_id = COALESCE(NEW.product_id, OLD.product_id) AND is_approved = true)
   WHERE id = COALESCE(NEW.product_id, OLD.product_id);
-
   RETURN COALESCE(NEW, OLD);
 END;
 $$;
@@ -545,15 +665,12 @@ CREATE TRIGGER trigger_update_product_rating
   AFTER INSERT OR UPDATE OR DELETE ON public.reviews
   FOR EACH ROW EXECUTE FUNCTION public.update_product_rating_stats();
 
--- ============================================================================
--- 13) TESTIMONIALS TABLE
--- ============================================================================
 CREATE TABLE IF NOT EXISTS public.testimonials (
   id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  customer_name     TEXT        NOT NULL,
-  customer_location TEXT,
+  customer_name     TEXT        NOT NULL CHECK (char_length(customer_name) BETWEEN 1 AND 80),
+  customer_location TEXT        CHECK (char_length(customer_location) <= 80),
   rating            INTEGER     NOT NULL DEFAULT 5 CHECK (rating >= 1 AND rating <= 5),
-  comment           TEXT        NOT NULL,
+  comment           TEXT        NOT NULL CHECK (char_length(comment) BETWEEN 1 AND 2000),
   is_approved       BOOLEAN     NOT NULL DEFAULT false,
   is_featured       BOOLEAN     NOT NULL DEFAULT false,
   created_at        TIMESTAMPTZ NOT NULL DEFAULT now()
@@ -564,171 +681,237 @@ CREATE INDEX IF NOT EXISTS idx_testimonials_approved ON public.testimonials(is_a
 
 ALTER TABLE public.testimonials ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Anyone can read approved testimonials" ON public.testimonials;
-CREATE POLICY "Anyone can read approved testimonials"
-  ON public.testimonials FOR SELECT
-  USING (is_approved = true);
+DROP POLICY IF EXISTS "testimonials: anyone submits unapproved" ON public.testimonials;
+CREATE POLICY "testimonials: anyone submits unapproved"
+  ON public.testimonials FOR INSERT TO anon, authenticated
+  WITH CHECK (is_approved = false AND is_featured = false);
 
-DROP POLICY IF EXISTS "Anyone can submit testimonials" ON public.testimonials;
-CREATE POLICY "Anyone can submit testimonials"
-  ON public.testimonials FOR INSERT
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "testimonials: staff read" ON public.testimonials;
+CREATE POLICY "testimonials: staff read"
+  ON public.testimonials FOR SELECT TO authenticated
+  USING (public.has_permission('products.manage'));
 
-DROP POLICY IF EXISTS "Admins can manage testimonials" ON public.testimonials;
-CREATE POLICY "Admins can manage testimonials"
-  ON public.testimonials FOR ALL
-  USING (public.is_admin());
+DROP POLICY IF EXISTS "testimonials: staff update" ON public.testimonials;
+CREATE POLICY "testimonials: staff update"
+  ON public.testimonials FOR UPDATE TO authenticated
+  USING (public.has_permission('products.manage'))
+  WITH CHECK (public.has_permission('products.manage'));
+
+DROP POLICY IF EXISTS "testimonials: staff delete" ON public.testimonials;
+CREATE POLICY "testimonials: staff delete"
+  ON public.testimonials FOR DELETE TO authenticated
+  USING (public.has_permission('products.manage'));
+
+CREATE OR REPLACE VIEW public.testimonials_public AS
+  SELECT id, customer_name, customer_location, rating, comment, is_featured, created_at
+    FROM public.testimonials WHERE is_approved = true;
 
 -- ============================================================================
--- 14) NEWSLETTER SUBSCRIBERS TABLE
+-- 8) NEWSLETTER
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.newsletter_subscribers (
   id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  email           TEXT        NOT NULL UNIQUE,
+  email           TEXT        NOT NULL UNIQUE
+                    CHECK (char_length(email) <= 200 AND email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
   is_active       BOOLEAN     NOT NULL DEFAULT true,
   subscribed_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
   unsubscribed_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_newsletter_email ON public.newsletter_subscribers(email);
-
 ALTER TABLE public.newsletter_subscribers ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Anyone can subscribe" ON public.newsletter_subscribers;
-CREATE POLICY "Anyone can subscribe"
-  ON public.newsletter_subscribers FOR INSERT
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "newsletter: anyone subscribes" ON public.newsletter_subscribers;
+CREATE POLICY "newsletter: anyone subscribes"
+  ON public.newsletter_subscribers FOR INSERT TO anon, authenticated
+  WITH CHECK (is_active = true AND unsubscribed_at IS NULL);
 
-DROP POLICY IF EXISTS "Admins can read subscribers" ON public.newsletter_subscribers;
-CREATE POLICY "Admins can read subscribers"
-  ON public.newsletter_subscribers FOR SELECT
-  USING (public.is_admin());
+DROP POLICY IF EXISTS "newsletter: staff read" ON public.newsletter_subscribers;
+CREATE POLICY "newsletter: staff read"
+  ON public.newsletter_subscribers FOR SELECT TO authenticated
+  USING (public.has_permission('customers.view'));
 
-DROP POLICY IF EXISTS "Admins can update subscribers" ON public.newsletter_subscribers;
-CREATE POLICY "Admins can update subscribers"
-  ON public.newsletter_subscribers FOR UPDATE
-  USING (public.is_admin());
+DROP POLICY IF EXISTS "newsletter: staff update" ON public.newsletter_subscribers;
+CREATE POLICY "newsletter: staff update"
+  ON public.newsletter_subscribers FOR UPDATE TO authenticated
+  USING (public.has_permission('customers.manage'))
+  WITH CHECK (public.has_permission('customers.manage'));
 
 -- ============================================================================
--- 15) PROMO CODES TABLE
+-- 9) PROMO CODES (no public read; validate through validate_promo)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.promo_codes (
   id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   code             TEXT        NOT NULL UNIQUE,
   description      TEXT,
   discount_percent INTEGER     NOT NULL CHECK (discount_percent > 0 AND discount_percent <= 100),
-  min_order_amount DECIMAL(10,2) DEFAULT 0,
-  max_uses         INTEGER,
-  used_count       INTEGER     NOT NULL DEFAULT 0,
+  min_order_amount DECIMAL(10,2) NOT NULL DEFAULT 0,
+  max_uses         INTEGER     CHECK (max_uses IS NULL OR max_uses > 0),
+  used_count       INTEGER     NOT NULL DEFAULT 0 CHECK (used_count >= 0),
   is_active        BOOLEAN     NOT NULL DEFAULT true,
   starts_at        TIMESTAMPTZ DEFAULT now(),
   expires_at       TIMESTAMPTZ,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_promo_code   ON public.promo_codes(code);
-CREATE INDEX IF NOT EXISTS idx_promo_active ON public.promo_codes(is_active);
-
-ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Anyone can validate promo codes" ON public.promo_codes;
-CREATE POLICY "Anyone can validate promo codes"
-  ON public.promo_codes FOR SELECT
-  USING (is_active = true);
-
-DROP POLICY IF EXISTS "Admins can manage promo codes" ON public.promo_codes;
-CREATE POLICY "Admins can manage promo codes"
-  ON public.promo_codes FOR ALL
-  USING (public.is_admin());
-
--- ============================================================================
--- 16) ORDERS TABLE
--- ============================================================================
-CREATE TABLE IF NOT EXISTS public.orders (
-  id               UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_number     TEXT        NOT NULL UNIQUE,
-  customer_name    TEXT        NOT NULL,
-  customer_email   TEXT,
-  customer_phone   TEXT        NOT NULL,
-  delivery_address TEXT        NOT NULL,
-  delivery_city    TEXT        NOT NULL,
-  delivery_state   TEXT        NOT NULL,
-  items            JSONB       NOT NULL,
-  subtotal         DECIMAL(10,2) NOT NULL,
-  shipping_cost    DECIMAL(10,2) NOT NULL DEFAULT 0,
-  discount_amount  DECIMAL(10,2) NOT NULL DEFAULT 0,
-  promo_code       TEXT,
-  total            DECIMAL(10,2) NOT NULL,
-  status           TEXT        NOT NULL DEFAULT 'pending'
-                     CHECK (status IN ('pending','confirmed','processing','shipped','delivered','cancelled')),
-  payment_method   TEXT,
-  payment_status   TEXT        DEFAULT 'pending'
-                     CHECK (payment_status IN ('pending','paid','failed','refunded')),
-  notes            TEXT,
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at       TIMESTAMPTZ NOT NULL DEFAULT now()
-);
-
-CREATE INDEX IF NOT EXISTS idx_orders_number  ON public.orders(order_number);
-CREATE INDEX IF NOT EXISTS idx_orders_status  ON public.orders(status);
-CREATE INDEX IF NOT EXISTS idx_orders_created ON public.orders(created_at DESC);
-
-ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
-
-DROP POLICY IF EXISTS "Anyone can create orders" ON public.orders;
-CREATE POLICY "Anyone can create orders"
-  ON public.orders FOR INSERT
-  WITH CHECK (true);
-
-DROP POLICY IF EXISTS "Admins can read orders" ON public.orders;
-CREATE POLICY "Admins can read orders"
-  ON public.orders FOR SELECT
-  USING (public.is_admin());
-
-DROP POLICY IF EXISTS "Customers can read own orders" ON public.orders;
-CREATE POLICY "Customers can read own orders"
-  ON public.orders FOR SELECT
-  USING (customer_email = auth.jwt()->>'email');
-
-DROP POLICY IF EXISTS "Admins can update orders" ON public.orders;
-CREATE POLICY "Admins can update orders"
-  ON public.orders FOR UPDATE
-  USING (public.is_admin());
-
-
--- Customer can cancel own orders (within 30 minutes, pending only)
-DROP POLICY IF EXISTS "Customers can cancel own pending orders" ON public.orders;
-CREATE POLICY "Customers can cancel own pending orders"
-  ON public.orders FOR UPDATE TO authenticated
-  USING (
-    customer_email = auth.jwt()->>'email'
-    AND status = 'pending'
-    AND created_at > (NOW() - INTERVAL '30 minutes')
-  )
-  WITH CHECK (
-    customer_email = auth.jwt()->>'email'
-    AND status = 'cancelled'
-  );
-
--- Auto-generate order number (resettable sequence, format: LBS-DDMMYYYY-NNNN)
-CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START WITH 1 INCREMENT BY 1;
-
-CREATE OR REPLACE FUNCTION public.generate_order_number()
-RETURNS TEXT LANGUAGE plpgsql AS $$
-DECLARE
-  new_number TEXT;
-  counter    INTEGER;
+-- Codes are upper case. An expiry always ends at 23:59:59 Lagos time on the chosen day, whatever
+-- time of day the caller supplied.
+CREATE OR REPLACE FUNCTION public.normalise_promo()
+RETURNS TRIGGER LANGUAGE plpgsql
+SET search_path = public
+AS $$
 BEGIN
-  counter := nextval('public.order_number_seq');
-  new_number := 'LBS-' || TO_CHAR(NOW(), 'DDMMYYYY') || '-' || LPAD(counter::TEXT, 4, '0');
-  RETURN new_number;
+  NEW.code := upper(trim(NEW.code));
+  IF NEW.expires_at IS NOT NULL THEN
+    NEW.expires_at := ((date_trunc('day', NEW.expires_at AT TIME ZONE 'Africa/Lagos')
+                        + interval '1 day' - interval '1 second') AT TIME ZONE 'Africa/Lagos');
+  END IF;
+  RETURN NEW;
 END;
 $$;
 
--- To reset order numbering: ALTER SEQUENCE public.order_number_seq RESTART WITH 1;
+DROP TRIGGER IF EXISTS trg_promo_normalise ON public.promo_codes;
+CREATE TRIGGER trg_promo_normalise BEFORE INSERT OR UPDATE ON public.promo_codes
+  FOR EACH ROW EXECUTE FUNCTION public.normalise_promo();
+
+ALTER TABLE public.promo_codes ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "promo_codes: staff manage" ON public.promo_codes;
+CREATE POLICY "promo_codes: staff manage"
+  ON public.promo_codes FOR ALL TO authenticated
+  USING (public.has_permission('promos.manage'))
+  WITH CHECK (public.has_permission('promos.manage'));
+
+-- Returns validity and the percentage only, never the list of codes. Exact-match only.
+CREATE OR REPLACE FUNCTION public.validate_promo(p_code TEXT, p_subtotal NUMERIC DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_row public.promo_codes%ROWTYPE;
+BEGIN
+  SELECT * INTO v_row FROM public.promo_codes
+   WHERE code = upper(trim(COALESCE(p_code, '')))
+     AND is_active
+     AND (starts_at IS NULL OR starts_at <= now())
+     AND (expires_at IS NULL OR expires_at >= now())
+     AND (max_uses IS NULL OR used_count < max_uses)
+     AND (p_subtotal IS NULL OR min_order_amount <= p_subtotal);
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('valid', false);
+  END IF;
+  RETURN jsonb_build_object('valid', true, 'code', v_row.code, 'percent', v_row.discount_percent);
+END;
+$$;
+
+-- ============================================================================
+-- 10) DELIVERY FEES (seeded from src/lib/delivery.ts)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.delivery_fees (
+  state      TEXT    PRIMARY KEY,
+  label      TEXT    NOT NULL,
+  fee_ngn    INTEGER NOT NULL CHECK (fee_ngn >= 0),
+  is_active  BOOLEAN NOT NULL DEFAULT true
+);
+
+INSERT INTO public.delivery_fees (state, label, fee_ngn) VALUES
+  ('Lagos', 'Lagos', 0), ('Ogun', 'Ogun', 2000), ('Oyo', 'Oyo', 2500), ('Osun', 'Osun', 2500),
+  ('Ondo', 'Ondo', 2500), ('Ekiti', 'Ekiti', 3000), ('Abuja', 'Abuja FCT', 3500)
+ON CONFLICT (state) DO NOTHING;
+
+ALTER TABLE public.delivery_fees ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "delivery_fees: public read" ON public.delivery_fees;
+CREATE POLICY "delivery_fees: public read"
+  ON public.delivery_fees FOR SELECT TO anon, authenticated USING (is_active);
+
+DROP POLICY IF EXISTS "delivery_fees: staff manage" ON public.delivery_fees;
+CREATE POLICY "delivery_fees: staff manage"
+  ON public.delivery_fees FOR ALL TO authenticated
+  USING (public.has_permission('settings.manage'))
+  WITH CHECK (public.has_permission('settings.manage'));
+
+-- ============================================================================
+-- 11) ORDERS: written only through the functions below
+-- ============================================================================
+-- status:         pending -> confirmed -> processing -> shipped -> delivered, or cancelled
+-- payment_status: awaiting_confirmation | confirmed | rejected | refund_owed | refunded
+CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS public.orders (
+  id                    UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_number          TEXT        NOT NULL UNIQUE,
+  idempotency_key       TEXT        NOT NULL UNIQUE CHECK (char_length(idempotency_key) BETWEEN 16 AND 100),
+  user_id               UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  customer_name         TEXT        NOT NULL,
+  customer_email        TEXT,
+  customer_phone        TEXT        NOT NULL,
+  delivery_address      TEXT        NOT NULL,
+  delivery_city         TEXT        NOT NULL,
+  delivery_state        TEXT        NOT NULL,
+  landmark              TEXT,
+  items                 JSONB       NOT NULL,
+  subtotal              DECIMAL(10,2) NOT NULL,
+  shipping_cost         DECIMAL(10,2) NOT NULL DEFAULT 0,
+  discount_amount       DECIMAL(10,2) NOT NULL DEFAULT 0,
+  promo_code            TEXT,
+  total                 DECIMAL(10,2) NOT NULL CHECK (total >= 0),
+  status                TEXT        NOT NULL DEFAULT 'pending'
+                          CHECK (status IN ('pending','confirmed','processing','shipped','delivered','cancelled')),
+  payment_method        TEXT        NOT NULL DEFAULT 'bank_transfer',
+  payment_status        TEXT        NOT NULL DEFAULT 'awaiting_confirmation'
+                          CHECK (payment_status IN ('awaiting_confirmation','confirmed','rejected','refund_owed','refunded')),
+  receipt_path          TEXT,
+  receipt_reupload_until TIMESTAMPTZ,
+  refund_amount         DECIMAL(10,2),
+  refunded_at           TIMESTAMPTZ,
+  cancelled_at          TIMESTAMPTZ,
+  cancel_reason         TEXT,
+  notes                 TEXT,
+  created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON public.orders (customer_email);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON public.orders (user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders (status);
+CREATE INDEX IF NOT EXISTS idx_orders_created ON public.orders (created_at DESC);
+
+DROP TRIGGER IF EXISTS trg_orders_updated_at ON public.orders;
+CREATE TRIGGER trg_orders_updated_at BEFORE UPDATE ON public.orders
+  FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+
+-- Read only. There is no INSERT, UPDATE or DELETE policy and no such grant for API roles.
+DROP POLICY IF EXISTS "orders: customer reads own" ON public.orders;
+CREATE POLICY "orders: customer reads own"
+  ON public.orders FOR SELECT TO authenticated
+  USING (user_id = auth.uid() AND public.is_active_account());
+
+DROP POLICY IF EXISTS "orders: staff read" ON public.orders;
+CREATE POLICY "orders: staff read"
+  ON public.orders FOR SELECT TO authenticated
+  USING (public.has_permission('orders.view'));
+
+-- LBS-DDMMYYYY-NNNN on the Africa/Lagos date. The counter is padded to four digits and is never
+-- truncated, so number 10000 is "10000".
+CREATE OR REPLACE FUNCTION public.generate_order_number()
+RETURNS TEXT LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_counter TEXT := nextval('public.order_number_seq')::TEXT;
+BEGIN
+  RETURN 'LBS-' || to_char(now() AT TIME ZONE 'Africa/Lagos', 'DDMMYYYY') || '-'
+         || CASE WHEN length(v_counter) >= 4 THEN v_counter ELSE lpad(v_counter, 4, '0') END;
+END;
+$$;
 
 CREATE OR REPLACE FUNCTION public.set_order_number()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql
+SET search_path = public
+AS $$
 BEGIN
   IF NEW.order_number IS NULL OR NEW.order_number = '' THEN
     NEW.order_number := public.generate_order_number();
@@ -738,196 +921,691 @@ END;
 $$;
 
 DROP TRIGGER IF EXISTS trigger_set_order_number ON public.orders;
-CREATE TRIGGER trigger_set_order_number
-  BEFORE INSERT ON public.orders
+CREATE TRIGGER trigger_set_order_number BEFORE INSERT ON public.orders
   FOR EACH ROW EXECUTE FUNCTION public.set_order_number();
 
+-- ----- stock helper (internal) -----------------------------------------------
+-- Adds p_delta (negative to take stock) to the exact variant, to the matching size and colour
+-- entries when they carry a quantity, and re-totals the product quantity from the variants.
+CREATE OR REPLACE FUNCTION public.adjust_stock(p_product UUID, p_size TEXT, p_colour TEXT, p_delta INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE public.products p SET
+    variant_stock = (
+      SELECT COALESCE(jsonb_agg(
+        CASE WHEN e->>'size' = p_size AND COALESCE(e->>'color', '') = p_colour
+             THEN jsonb_set(e, '{qty}', to_jsonb(GREATEST(0, (e->>'qty')::INTEGER + p_delta)))
+             ELSE e END ORDER BY ord), '[]'::jsonb)
+      FROM jsonb_array_elements(p.variant_stock) WITH ORDINALITY AS t(e, ord)),
+    sizes = (
+      SELECT COALESCE(jsonb_agg(
+        CASE WHEN e->>'name' = p_size AND e ? 'qty'
+             THEN jsonb_set(e, '{qty}', to_jsonb(GREATEST(0, (e->>'qty')::INTEGER + p_delta)))
+             ELSE e END ORDER BY ord), '[]'::jsonb)
+      FROM jsonb_array_elements(p.sizes) WITH ORDINALITY AS t(e, ord)),
+    colors = (
+      SELECT COALESCE(jsonb_agg(
+        CASE WHEN p_colour <> '' AND e->>'name' = p_colour AND e ? 'qty'
+             THEN jsonb_set(e, '{qty}', to_jsonb(GREATEST(0, (e->>'qty')::INTEGER + p_delta)))
+             ELSE e END ORDER BY ord), '[]'::jsonb)
+      FROM jsonb_array_elements(p.colors) WITH ORDINALITY AS t(e, ord))
+  WHERE p.id = p_product;
+
+  UPDATE public.products p SET
+    qty = (SELECT COALESCE(SUM((e->>'qty')::INTEGER), 0) FROM jsonb_array_elements(p.variant_stock) e)
+  WHERE p.id = p_product AND jsonb_array_length(p.variant_stock) > 0;
+END;
+$$;
+
+-- ----- pricing (internal): one code path for the quote and the order ----------
+-- Raises SQLSTATE 'LB001' with HINT = machine code and DETAIL = optional JSON. With p_commit it
+-- locks the product rows (ordered by id), takes the stock and counts the promo; the caller's
+-- exception block rolls all of that back if anything later fails.
+-- Each line: { "product_id": uuid, "size": text, "colour": text, "qty": int }.
+CREATE OR REPLACE FUNCTION public.price_order(p_lines JSONB, p_promo TEXT, p_state TEXT, p_commit BOOLEAN)
+RETURNS JSONB
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  e          JSONB;
+  p          public.products%ROWTYPE;
+  v_size     TEXT;
+  v_colour   TEXT;
+  v_qty      INTEGER;
+  v_variant  JSONB;
+  v_subtotal NUMERIC := 0;
+  v_items    JSONB := '[]'::jsonb;
+  v_percent  INTEGER := 0;
+  v_code     TEXT := NULL;
+  v_fee      INTEGER;
+  v_discount NUMERIC;
+BEGIN
+  IF jsonb_typeof(p_lines) IS DISTINCT FROM 'array' OR jsonb_array_length(p_lines) NOT BETWEEN 1 AND 50 THEN
+    RAISE EXCEPTION 'Your bag is empty.' USING ERRCODE = 'LB001', HINT = 'empty_bag';
+  END IF;
+
+  IF p_commit THEN
+    PERFORM 1 FROM public.products
+     WHERE id = ANY (ARRAY(SELECT DISTINCT (x->>'product_id')::UUID FROM jsonb_array_elements(p_lines) x))
+     ORDER BY id FOR UPDATE;
+  END IF;
+
+  FOR e IN SELECT * FROM jsonb_array_elements(p_lines) LOOP
+    v_size := COALESCE(e->>'size', '');
+    v_colour := COALESCE(NULLIF(e->>'colour', ''), NULLIF(e->>'color', ''), '');
+    v_qty := (e->>'qty')::INTEGER;
+    IF v_qty IS NULL OR v_qty < 1 OR v_qty > 99 THEN
+      RAISE EXCEPTION 'Check the quantities in your bag.' USING ERRCODE = 'LB001', HINT = 'bad_quantity';
+    END IF;
+
+    SELECT * INTO p FROM public.products WHERE id = (e->>'product_id')::UUID;
+    IF NOT FOUND OR NOT p.is_active OR p.is_deleted THEN
+      RAISE EXCEPTION 'One of the items in your bag is no longer sold. Remove it and try again.'
+        USING ERRCODE = 'LB001', HINT = 'product_unavailable';
+    END IF;
+
+    -- The exact variant is required: the size and, when the product has colours, the colour.
+    SELECT v INTO v_variant FROM jsonb_array_elements(p.variant_stock) v
+     WHERE v->>'size' = v_size AND COALESCE(v->>'color', '') = v_colour LIMIT 1;
+    IF v_variant IS NULL THEN
+      IF v_colour = '' AND EXISTS (
+           SELECT 1 FROM jsonb_array_elements(p.variant_stock) v
+            WHERE v->>'size' = v_size AND COALESCE(v->>'color', '') <> '') THEN
+        RAISE EXCEPTION 'Choose a colour for % to continue.', p.name
+          USING ERRCODE = 'LB001', HINT = 'colour_required';
+      END IF;
+      RAISE EXCEPTION 'That size or colour of % is not available.', p.name
+        USING ERRCODE = 'LB001', HINT = 'variant_unavailable';
+    END IF;
+    IF COALESCE((v_variant->>'qty')::INTEGER, 0) < v_qty THEN
+      RAISE EXCEPTION '% (%) has only % left. Lower the quantity to continue.',
+        p.name, v_size, GREATEST(0, COALESCE((v_variant->>'qty')::INTEGER, 0))
+        USING ERRCODE = 'LB001', HINT = 'out_of_stock';
+    END IF;
+
+    IF p_commit THEN
+      PERFORM public.adjust_stock(p.id, v_size, v_colour, -v_qty);
+    END IF;
+
+    v_subtotal := v_subtotal + p.price_ngn::NUMERIC * v_qty;
+    v_items := v_items || jsonb_build_object(
+      'product_id', p.id, 'name', p.name, 'size', v_size, 'colour', v_colour,
+      'qty', v_qty, 'unit_price_ngn', p.price_ngn);
+  END LOOP;
+
+  IF NULLIF(trim(COALESCE(p_promo, '')), '') IS NOT NULL THEN
+    v_code := upper(trim(p_promo));
+    IF p_commit THEN
+      -- Atomic: the usage limit is checked and counted in one statement.
+      UPDATE public.promo_codes SET used_count = used_count + 1
+       WHERE code = v_code AND is_active
+         AND (starts_at IS NULL OR starts_at <= now())
+         AND (expires_at IS NULL OR expires_at >= now())
+         AND (max_uses IS NULL OR used_count < max_uses)
+         AND min_order_amount <= v_subtotal
+      RETURNING discount_percent INTO v_percent;
+    ELSE
+      SELECT discount_percent INTO v_percent FROM public.promo_codes
+       WHERE code = v_code AND is_active
+         AND (starts_at IS NULL OR starts_at <= now())
+         AND (expires_at IS NULL OR expires_at >= now())
+         AND (max_uses IS NULL OR used_count < max_uses)
+         AND min_order_amount <= v_subtotal;
+    END IF;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'That promo code is not valid any more. Remove it and try again.'
+        USING ERRCODE = 'LB001', HINT = 'promo_invalid';
+    END IF;
+  END IF;
+
+  SELECT fee_ngn INTO v_fee FROM public.delivery_fees WHERE state = COALESCE(p_state, '') AND is_active;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'We do not deliver to that state yet.' USING ERRCODE = 'LB001', HINT = 'state_unavailable';
+  END IF;
+
+  -- Same rounding as src/lib/pricing.ts: a percentage of the subtotal only, to the nearest naira.
+  v_discount := round(v_subtotal * v_percent / 100.0, 0);
+  RETURN jsonb_build_object(
+    'subtotal', v_subtotal, 'discount', v_discount, 'delivery', v_fee,
+    'total', v_subtotal - v_discount + v_fee, 'promo_code', v_code, 'promo_percent', v_percent,
+    'items', v_items);
+END;
+$$;
+
+-- The quote shown before the bank details. Read only.
+CREATE OR REPLACE FUNCTION public.quote_order(p_lines JSONB, p_promo TEXT, p_state TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_msg TEXT; v_code TEXT; v_quote JSONB;
+BEGIN
+  v_quote := public.price_order(p_lines, p_promo, p_state, false);
+  RETURN jsonb_build_object('ok', true, 'subtotal', v_quote->'subtotal', 'discount', v_quote->'discount',
+    'delivery', v_quote->'delivery', 'total', v_quote->'total', 'promo_percent', v_quote->'promo_percent');
+EXCEPTION
+  WHEN SQLSTATE 'LB001' THEN
+    GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT, v_code = PG_EXCEPTION_HINT;
+    RETURN jsonb_build_object('ok', false, 'code', v_code, 'message', v_msg);
+  WHEN invalid_text_representation OR numeric_value_out_of_range THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Check the items in your bag.');
+END;
+$$;
+
+-- Places an order. Prices, stock, promo and delivery are all read on the server; the browser's
+-- numbers are never trusted. If the server total differs from p_quoted_total nothing is written
+-- and the correct quote is returned so the customer can confirm the new amount.
+-- p_contact:  { name, email, phone }
+-- p_delivery: { address, city, state, landmark?, notes? }
+-- Returns { ok, duplicate?, order_number, total, ... } or { ok:false, code, message, quote? }.
+CREATE OR REPLACE FUNCTION public.place_order(
+  p_idempotency_key TEXT, p_contact JSONB, p_delivery JSONB, p_lines JSONB,
+  p_promo TEXT, p_quoted_total NUMERIC, p_receipt_path TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_existing public.orders%ROWTYPE;
+  v_quote    JSONB;
+  v_order    public.orders%ROWTYPE;
+  v_name     TEXT := trim(COALESCE(p_contact->>'name', ''));
+  v_email    TEXT := lower(trim(COALESCE(p_contact->>'email', '')));
+  v_phone    TEXT := trim(COALESCE(p_contact->>'phone', ''));
+  v_address  TEXT := trim(COALESCE(p_delivery->>'address', ''));
+  v_city     TEXT := trim(COALESCE(p_delivery->>'city', ''));
+  v_state    TEXT := trim(COALESCE(p_delivery->>'state', ''));
+  v_msg TEXT; v_code TEXT; v_detail TEXT;
+BEGIN
+  IF auth.uid() IS NOT NULL AND NOT public.is_active_account() THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'forbidden', 'message', 'This account cannot place orders.');
+  END IF;
+  IF p_idempotency_key IS NULL OR char_length(p_idempotency_key) NOT BETWEEN 16 AND 100 THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'bad_key', 'message', 'Something went wrong. Please try again.');
+  END IF;
+  IF v_name = '' OR char_length(v_name) > 120 OR v_phone = '' OR char_length(v_phone) > 30
+     OR v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' OR char_length(v_email) > 200
+     OR char_length(v_address) NOT BETWEEN 5 AND 200 OR char_length(v_city) NOT BETWEEN 2 AND 80
+     OR char_length(COALESCE(p_delivery->>'landmark', '')) > 120
+     OR char_length(COALESCE(p_delivery->>'notes', '')) > 500
+     OR char_length(COALESCE(p_receipt_path, '')) > 300 OR COALESCE(p_receipt_path, '') LIKE '%..%' THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Please check your details and try again.');
+  END IF;
+
+  -- Idempotency: the same key returns the same order and changes nothing.
+  SELECT * INTO v_existing FROM public.orders WHERE idempotency_key = p_idempotency_key;
+  IF FOUND THEN
+    IF v_existing.user_id IS DISTINCT FROM auth.uid() THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'bad_key', 'message', 'Something went wrong. Please try again.');
+    END IF;
+    RETURN jsonb_build_object('ok', true, 'duplicate', true, 'order_number', v_existing.order_number,
+      'total', v_existing.total);
+  END IF;
+
+  BEGIN
+    v_quote := public.price_order(p_lines, p_promo, v_state, true);
+
+    IF p_quoted_total IS DISTINCT FROM (v_quote->>'total')::NUMERIC THEN
+      RAISE EXCEPTION 'The total has changed. Please confirm the new amount before you pay.'
+        USING ERRCODE = 'LB001', HINT = 'total_changed',
+              DETAIL = jsonb_build_object('subtotal', v_quote->'subtotal', 'discount', v_quote->'discount',
+                'delivery', v_quote->'delivery', 'total', v_quote->'total')::TEXT;
+    END IF;
+
+    INSERT INTO public.orders (
+      order_number, idempotency_key, user_id, customer_name, customer_email, customer_phone,
+      delivery_address, delivery_city, delivery_state, landmark, items, subtotal, shipping_cost,
+      discount_amount, promo_code, total, receipt_path, notes)
+    VALUES (
+      '', p_idempotency_key, auth.uid(), v_name, v_email, v_phone,
+      v_address, v_city, v_state, NULLIF(trim(COALESCE(p_delivery->>'landmark', '')), ''),
+      v_quote->'items', (v_quote->>'subtotal')::NUMERIC, (v_quote->>'delivery')::NUMERIC,
+      (v_quote->>'discount')::NUMERIC, v_quote->>'promo_code', (v_quote->>'total')::NUMERIC,
+      NULLIF(p_receipt_path, ''), NULLIF(trim(COALESCE(p_delivery->>'notes', '')), ''))
+    RETURNING * INTO v_order;
+
+    RETURN jsonb_build_object('ok', true, 'duplicate', false, 'order_number', v_order.order_number,
+      'order_id', v_order.id, 'subtotal', v_order.subtotal, 'discount', v_order.discount_amount,
+      'delivery', v_order.shipping_cost, 'total', v_order.total);
+  EXCEPTION
+    WHEN SQLSTATE 'LB001' THEN
+      GET STACKED DIAGNOSTICS v_msg = MESSAGE_TEXT, v_code = PG_EXCEPTION_HINT, v_detail = PG_EXCEPTION_DETAIL;
+      RETURN jsonb_build_object('ok', false, 'code', v_code, 'message', v_msg,
+        'quote', NULLIF(v_detail, '')::JSONB);
+    WHEN invalid_text_representation OR numeric_value_out_of_range OR invalid_parameter_value THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Check the items in your bag.');
+    WHEN unique_violation THEN
+      -- Two requests with the same key raced; the loser's stock and promo changes are rolled back.
+      SELECT * INTO v_existing FROM public.orders WHERE idempotency_key = p_idempotency_key;
+      IF FOUND AND v_existing.user_id IS NOT DISTINCT FROM auth.uid() THEN
+        RETURN jsonb_build_object('ok', true, 'duplicate', true, 'order_number', v_existing.order_number,
+          'total', v_existing.total);
+      END IF;
+      RETURN jsonb_build_object('ok', false, 'code', 'bad_key', 'message', 'Something went wrong. Please try again.');
+  END;
+END;
+$$;
+
+-- ----- cancelling (internal) -------------------------------------------------
+-- The conditional UPDATE is the single winner: two racing cancellations cannot both restore
+-- stock. Restores the exact variant, releases one use of the promo and, when the payment had
+-- been confirmed, records a refund owed.
+CREATE OR REPLACE FUNCTION public.cancel_internal(p_order UUID, p_expected TEXT, p_reason TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+DECLARE
+  v_order public.orders%ROWTYPE;
+  v_item  JSONB;
+BEGIN
+  UPDATE public.orders SET
+    status = 'cancelled',
+    cancelled_at = now(),
+    cancel_reason = left(p_reason, 200),
+    refund_amount = CASE WHEN payment_status = 'confirmed' THEN total ELSE refund_amount END,
+    payment_status = CASE WHEN payment_status = 'confirmed' THEN 'refund_owed' ELSE payment_status END
+  WHERE id = p_order AND status = p_expected AND status IN ('pending', 'confirmed', 'processing')
+  RETURNING * INTO v_order;
+  IF NOT FOUND THEN
+    RETURN false;
+  END IF;
+
+  FOR v_item IN SELECT * FROM jsonb_array_elements(v_order.items) LOOP
+    PERFORM public.adjust_stock((v_item->>'product_id')::UUID, COALESCE(v_item->>'size', ''),
+      COALESCE(v_item->>'colour', ''), (v_item->>'qty')::INTEGER);
+  END LOOP;
+  IF v_order.promo_code IS NOT NULL THEN
+    UPDATE public.promo_codes SET used_count = GREATEST(used_count - 1, 0) WHERE code = v_order.promo_code;
+  END IF;
+  RETURN true;
+END;
+$$;
+
+-- A customer may cancel their own order while it is pending, inside 30 minutes and before the
+-- payment is confirmed. Staff with orders.update may cancel any order that can still be cancelled.
+CREATE OR REPLACE FUNCTION public.cancel_order(p_order_number TEXT, p_reason TEXT DEFAULT NULL)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order public.orders%ROWTYPE;
+  v_staff BOOLEAN := public.is_service() OR public.has_permission('orders.update');
+BEGIN
+  SELECT * INTO v_order FROM public.orders WHERE order_number = upper(trim(COALESCE(p_order_number, '')));
+  IF NOT FOUND OR NOT (v_staff OR (auth.uid() IS NOT NULL AND v_order.user_id = auth.uid()
+                                   AND public.is_active_account())) THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'We could not find that order.');
+  END IF;
+  IF NOT v_staff THEN
+    IF v_order.status <> 'pending' OR v_order.payment_status = 'confirmed' THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'not_cancellable',
+        'message', 'This order can no longer be cancelled online. Please contact us.');
+    END IF;
+    IF now() >= v_order.created_at + interval '30 minutes' THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'window_closed',
+        'message', 'The 30-minute cancellation window has closed. Please contact us.');
+    END IF;
+  END IF;
+  IF NOT public.cancel_internal(v_order.id, v_order.status, p_reason) THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'conflict', 'message', 'This order has just changed. Please refresh.');
+  END IF;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- Staff move an order along the TRANSITIONS table in src/lib/order-rules.ts:
+--   pending: confirmed, cancelled   confirmed: processing, cancelled
+--   processing: shipped, cancelled  shipped: delivered      delivered, cancelled: none
+-- pending -> confirmed is NOT allowed here: it happens only through decide_payment.
+-- Cancelling is routed through the same logic as cancel_order (stock, promo, refund owed).
+CREATE OR REPLACE FUNCTION public.set_order_status(p_order_number TEXT, p_status TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_order public.orders%ROWTYPE;
+  v_allowed TEXT[];
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.update')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  SELECT * INTO v_order FROM public.orders WHERE order_number = upper(trim(COALESCE(p_order_number, '')));
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'We could not find that order.');
+  END IF;
+  v_allowed := CASE v_order.status
+    WHEN 'pending' THEN ARRAY['confirmed', 'cancelled']
+    WHEN 'confirmed' THEN ARRAY['processing', 'cancelled']
+    WHEN 'processing' THEN ARRAY['shipped', 'cancelled']
+    WHEN 'shipped' THEN ARRAY['delivered']
+    ELSE ARRAY[]::TEXT[] END;
+  IF p_status IS NULL OR NOT (p_status = ANY (v_allowed)) THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'bad_transition', 'message', 'That change is not allowed for this order.');
+  END IF;
+  IF v_order.status = 'pending' AND p_status = 'confirmed' THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'payment_only',
+      'message', 'Confirm or reject the payment instead; it confirms the order.');
+  END IF;
+  IF p_status = 'cancelled' THEN
+    IF NOT public.cancel_internal(v_order.id, v_order.status, 'Cancelled by staff') THEN
+      RETURN jsonb_build_object('ok', false, 'code', 'conflict', 'message', 'This order has just changed. Please refresh.');
+    END IF;
+    RETURN jsonb_build_object('ok', true);
+  END IF;
+  UPDATE public.orders SET status = p_status WHERE id = v_order.id AND status = v_order.status;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'conflict', 'message', 'This order has just changed. Please refresh.');
+  END IF;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- The only way to confirm a payment. 'confirmed' also moves a pending order to confirmed.
+-- 'rejected' leaves the order pending and gives the customer 48 hours to send a new receipt;
+-- expire_unpaid_orders() then cancels it. A decision needs a receipt, and is only possible
+-- while the payment is awaiting confirmation.
+CREATE OR REPLACE FUNCTION public.decide_payment(p_order_number TEXT, p_decision TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_number TEXT := upper(trim(COALESCE(p_order_number, '')));
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.update')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_decision = 'confirmed' THEN
+    UPDATE public.orders SET payment_status = 'confirmed', status = 'confirmed', receipt_reupload_until = NULL
+     WHERE order_number = v_number AND status = 'pending'
+       AND payment_status = 'awaiting_confirmation' AND receipt_path IS NOT NULL;
+  ELSIF p_decision = 'rejected' THEN
+    UPDATE public.orders SET payment_status = 'rejected', receipt_reupload_until = now() + interval '48 hours'
+     WHERE order_number = v_number AND status = 'pending'
+       AND payment_status = 'awaiting_confirmation' AND receipt_path IS NOT NULL;
+  ELSE
+    RETURN jsonb_build_object('ok', false, 'code', 'bad_decision', 'message', 'Choose confirm or reject.');
+  END IF;
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'not_decidable',
+      'message', 'This payment cannot be decided now. It may already have been, or there is no receipt.');
+  END IF;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- The customer who placed the order (or the server) attaches a new receipt, for instance after a
+-- rejection. The payment returns to awaiting_confirmation and the deadline is cleared.
+CREATE OR REPLACE FUNCTION public.attach_receipt(p_order_number TEXT, p_path TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF p_path IS NULL OR char_length(p_path) NOT BETWEEN 1 AND 300 OR p_path LIKE '%..%' OR p_path LIKE '/%' THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'That receipt could not be saved.');
+  END IF;
+  UPDATE public.orders SET receipt_path = p_path, payment_status = 'awaiting_confirmation', receipt_reupload_until = NULL
+   WHERE order_number = upper(trim(COALESCE(p_order_number, '')))
+     AND status = 'pending'
+     AND payment_status IN ('awaiting_confirmation', 'rejected')
+     AND (public.is_service() OR (auth.uid() IS NOT NULL AND user_id = auth.uid() AND public.is_active_account()));
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'not_allowed', 'message', 'A receipt cannot be added to this order.');
+  END IF;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- Staff note that a refund owed has been paid.
+CREATE OR REPLACE FUNCTION public.mark_refunded(p_order_number TEXT)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.update')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.orders SET payment_status = 'refunded', refunded_at = now()
+   WHERE order_number = upper(trim(COALESCE(p_order_number, ''))) AND payment_status = 'refund_owed';
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'No refund is owed on that order.');
+  END IF;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- For a scheduled job (service role only): cancels pending orders whose rejected receipt was not
+-- replaced in time, restoring their stock. Returns how many were cancelled.
+CREATE OR REPLACE FUNCTION public.expire_unpaid_orders()
+RETURNS INTEGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id UUID;
+  v_count INTEGER := 0;
+BEGIN
+  IF NOT public.is_service() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  FOR v_id IN
+    SELECT id FROM public.orders
+     WHERE status = 'pending' AND payment_status = 'rejected' AND receipt_reupload_until < now()
+  LOOP
+    IF public.cancel_internal(v_id, 'pending', 'Receipt rejected and not replaced in time') THEN
+      v_count := v_count + 1;
+    END IF;
+  END LOOP;
+  RETURN v_count;
+END;
+$$;
+
+-- Attaches earlier guest orders to the signed-in account, but only when the account's email
+-- address has been verified, so nobody can claim another person's orders by signing up with
+-- their address.
+CREATE OR REPLACE FUNCTION public.claim_guest_orders()
+RETURNS INTEGER
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_email TEXT;
+  v_count INTEGER;
+BEGIN
+  IF auth.uid() IS NULL OR NOT public.is_active_account() THEN
+    RETURN 0;
+  END IF;
+  SELECT lower(email) INTO v_email FROM auth.users WHERE id = auth.uid() AND email_confirmed_at IS NOT NULL;
+  IF v_email IS NULL THEN
+    RETURN 0;
+  END IF;
+  UPDATE public.orders SET user_id = auth.uid() WHERE user_id IS NULL AND lower(customer_email) = v_email;
+  GET DIAGNOSTICS v_count = ROW_COUNT;
+  RETURN v_count;
+END;
+$$;
+
 -- ============================================================================
--- 17) SITE SETTINGS TABLE
+-- 12) SITE SETTINGS
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.site_settings (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  key        TEXT        NOT NULL UNIQUE,
+  key        TEXT        NOT NULL UNIQUE CHECK (char_length(key) <= 80),
   value      JSONB       NOT NULL DEFAULT '{}',
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_by UUID        REFERENCES auth.users(id)
+  updated_by UUID        REFERENCES auth.users(id) ON DELETE SET NULL
 );
 
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Anyone can read site settings" ON public.site_settings;
-CREATE POLICY "Anyone can read site settings"
-  ON public.site_settings FOR SELECT
-  USING (true);
+-- Everything in here is shown on the storefront (announcement, bank details for the transfer).
+-- Do not store secrets in site_settings.
+DROP POLICY IF EXISTS "site_settings: public read" ON public.site_settings;
+CREATE POLICY "site_settings: public read"
+  ON public.site_settings FOR SELECT TO anon, authenticated USING (true);
 
-DROP POLICY IF EXISTS "Admins can update site settings" ON public.site_settings;
-CREATE POLICY "Admins can update site settings"
-  ON public.site_settings FOR UPDATE
-  USING (public.is_admin());
+DROP POLICY IF EXISTS "site_settings: staff insert" ON public.site_settings;
+CREATE POLICY "site_settings: staff insert"
+  ON public.site_settings FOR INSERT TO authenticated
+  WITH CHECK (public.has_permission('settings.manage'));
 
-DROP POLICY IF EXISTS "Admins can insert site settings" ON public.site_settings;
-CREATE POLICY "Admins can insert site settings"
-  ON public.site_settings FOR INSERT
-  WITH CHECK (public.is_admin());
-
--- ============================================================================
--- 18) REALTIME (optional - for live product updates & cross-device sync)
--- ============================================================================
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_publication_tables
-    WHERE pubname = 'supabase_realtime'
-      AND schemaname = 'public'
-      AND tablename = 'products'
-  ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.products;
-  END IF;
-EXCEPTION WHEN undefined_object THEN
-  NULL;
-END $$;
-
--- Add profiles table for cross-device sync (cart, wishlist, addresses, settings)
-DO $$
-BEGIN
-  IF NOT EXISTS (
-    SELECT 1 FROM pg_publication_tables
-    WHERE pubname = 'supabase_realtime'
-      AND schemaname = 'public'
-      AND tablename = 'profiles'
-  ) THEN
-    ALTER PUBLICATION supabase_realtime ADD TABLE public.profiles;
-  END IF;
-EXCEPTION WHEN undefined_object THEN
-  NULL;
-END $$;
+DROP POLICY IF EXISTS "site_settings: staff update" ON public.site_settings;
+CREATE POLICY "site_settings: staff update"
+  ON public.site_settings FOR UPDATE TO authenticated
+  USING (public.has_permission('settings.manage'))
+  WITH CHECK (public.has_permission('settings.manage'));
 
 -- ============================================================================
--- 19) STORAGE BUCKETS
--- ============================================================================
-
--- Product images
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('product-images', 'product-images', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
-
-DROP POLICY IF EXISTS "storage: public read product images" ON storage.objects;
-CREATE POLICY "storage: public read product images"
-  ON storage.objects FOR SELECT TO anon, authenticated
-  USING (bucket_id = 'product-images');
-
-DROP POLICY IF EXISTS "storage: admin upload product images" ON storage.objects;
-CREATE POLICY "storage: admin upload product images"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'product-images' AND public.is_admin());
-
-DROP POLICY IF EXISTS "storage: admin update product images" ON storage.objects;
-CREATE POLICY "storage: admin update product images"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING  (bucket_id = 'product-images' AND public.is_admin())
-  WITH CHECK (bucket_id = 'product-images' AND public.is_admin());
-
-DROP POLICY IF EXISTS "storage: admin delete product images" ON storage.objects;
-CREATE POLICY "storage: admin delete product images"
-  ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'product-images' AND public.is_admin());
-
--- Site images (hero, categories, etc.)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('site-images', 'site-images', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
-
-DROP POLICY IF EXISTS "storage: public read site images" ON storage.objects;
-CREATE POLICY "storage: public read site images"
-  ON storage.objects FOR SELECT TO anon, authenticated
-  USING (bucket_id = 'site-images');
-
-DROP POLICY IF EXISTS "storage: admin upload site images" ON storage.objects;
-CREATE POLICY "storage: admin upload site images"
-  ON storage.objects FOR INSERT TO authenticated
-  WITH CHECK (bucket_id = 'site-images' AND public.is_admin());
-
-DROP POLICY IF EXISTS "storage: admin update site images" ON storage.objects;
-CREATE POLICY "storage: admin update site images"
-  ON storage.objects FOR UPDATE TO authenticated
-  USING  (bucket_id = 'site-images' AND public.is_admin())
-  WITH CHECK (bucket_id = 'site-images' AND public.is_admin());
-
-DROP POLICY IF EXISTS "storage: admin delete site images" ON storage.objects;
-CREATE POLICY "storage: admin delete site images"
-  ON storage.objects FOR DELETE TO authenticated
-  USING (bucket_id = 'site-images' AND public.is_admin());
-
--- ============================================================================
--- 20) SITE VISITS — Geo Analytics (Country & Nigerian State Tracking)
+-- 13) SITE VISITS: written only through record_visit, never updated by clients
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.site_visits (
   id                  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-  ip_address          TEXT,         -- Visitor IP address
+  ip_address          TEXT,
   country             TEXT,
   country_code        TEXT,
-  region              TEXT,         -- State/Province (Nigerian states for NG visitors)
+  region              TEXT,
   city                TEXT,
   page                TEXT,
   referrer            TEXT,
-  device_type         TEXT,         -- mobile / tablet / desktop
-  browser             TEXT,         -- Chrome / Safari / Firefox / Edge / Opera / Other
-  os                  TEXT,         -- Windows / macOS / Linux / Android / iOS / Other
-  device_brand        TEXT,         -- Samsung / Apple / Google / Xiaomi / etc.
-  device_model        TEXT,         -- Galaxy S25 Ultra / iPhone / Pixel 9 Pro / etc.
-  screen_resolution   TEXT,         -- e.g. 1920x1080
-  viewport_size       TEXT,         -- e.g. 1280x720
-  time_spent_seconds  INTEGER,      -- Duration on page in seconds (updated on unload)
+  device_type         TEXT,
+  browser             TEXT,
+  os                  TEXT,
+  device_brand        TEXT,
+  device_model        TEXT,
+  screen_resolution   TEXT,
+  viewport_size       TEXT,
+  time_spent_seconds  INTEGER,
   user_id             UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_site_visits_country  ON public.site_visits(country_code);
-CREATE INDEX IF NOT EXISTS idx_site_visits_region   ON public.site_visits(region);
-CREATE INDEX IF NOT EXISTS idx_site_visits_created  ON public.site_visits(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_site_visits_user_id  ON public.site_visits(user_id);
+CREATE INDEX IF NOT EXISTS idx_site_visits_country ON public.site_visits(country_code);
+CREATE INDEX IF NOT EXISTS idx_site_visits_region ON public.site_visits(region);
+CREATE INDEX IF NOT EXISTS idx_site_visits_created ON public.site_visits(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_site_visits_user_id ON public.site_visits(user_id);
 
 ALTER TABLE public.site_visits ENABLE ROW LEVEL SECURITY;
 
--- Anyone can insert visits (anonymous tracking)
-DROP POLICY IF EXISTS "Anyone can insert site visits" ON public.site_visits;
-CREATE POLICY "Anyone can insert site visits"
-  ON public.site_visits FOR INSERT
-  WITH CHECK (true);
+DROP POLICY IF EXISTS "site_visits: staff read" ON public.site_visits;
+CREATE POLICY "site_visits: staff read"
+  ON public.site_visits FOR SELECT TO authenticated
+  USING (public.has_permission('analytics.view'));
 
--- Only admins can read visit analytics
-DROP POLICY IF EXISTS "Admins can read site visits" ON public.site_visits;
-CREATE POLICY "Admins can read site visits"
-  ON public.site_visits FOR SELECT
-  USING (public.is_admin());
+-- Records a page view. Free text is truncated; the address and location are recorded by the
+-- server with the service role (a browser cannot be trusted to report them). Returns the visit id.
+CREATE OR REPLACE FUNCTION public.record_visit(
+  p_page TEXT, p_referrer TEXT DEFAULT NULL, p_device_type TEXT DEFAULT NULL,
+  p_browser TEXT DEFAULT NULL, p_os TEXT DEFAULT NULL,
+  p_screen_resolution TEXT DEFAULT NULL, p_viewport_size TEXT DEFAULT NULL)
+RETURNS UUID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_id UUID;
+BEGIN
+  INSERT INTO public.site_visits (page, referrer, device_type, browser, os, screen_resolution, viewport_size, user_id)
+  VALUES (left(p_page, 300), left(p_referrer, 300), left(p_device_type, 20), left(p_browser, 40),
+          left(p_os, 40), left(p_screen_resolution, 20), left(p_viewport_size, 20), auth.uid())
+  RETURNING id INTO v_id;
+  RETURN v_id;
+END;
+$$;
 
--- Anyone can update time_spent_seconds (for unload duration tracking)
-DROP POLICY IF EXISTS "Anyone can update visit duration" ON public.site_visits;
-CREATE POLICY "Anyone can update visit duration"
-  ON public.site_visits FOR UPDATE
-  USING (true)
-  WITH CHECK (true);
+-- Whoever holds the visit id may report the time spent, once, within an hour, 0 to 86400 seconds,
+-- and only upwards. Nothing else on the row can change.
+CREATE OR REPLACE FUNCTION public.update_visit_duration(p_id UUID, p_seconds INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  UPDATE public.site_visits
+     SET time_spent_seconds = LEAST(GREATEST(COALESCE(p_seconds, 0), 0), 86400)
+   WHERE id = p_id
+     AND created_at > now() - interval '1 hour'
+     AND COALESCE(time_spent_seconds, 0) < LEAST(GREATEST(COALESCE(p_seconds, 0), 0), 86400);
+END;
+$$;
 
 -- ============================================================================
--- 21) PERMISSIONS
+-- 14) GRANTS: the explicit allow-list for the API roles
 -- ============================================================================
-GRANT USAGE ON SCHEMA public TO authenticated;
-GRANT USAGE ON SCHEMA public TO anon;
+REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC, anon, authenticated;
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+
+-- Reads (row level security still applies).
+GRANT SELECT ON public.products, public.delivery_fees, public.site_settings TO anon, authenticated;
+GRANT SELECT ON public.reviews_public, public.testimonials_public TO anon, authenticated;
+GRANT SELECT ON public.profiles, public.orders, public.reviews, public.testimonials,
+  public.newsletter_subscribers, public.promo_codes, public.site_visits,
+  public.admin_activity_logs TO authenticated;
+GRANT SELECT (id, email, invited_role, expires_at, used_at, created_at) ON public.admin_invites TO authenticated;
+GRANT DELETE ON public.admin_invites TO authenticated;
+
+-- Profiles: only these columns can ever be updated from a client. Never role, is_admin,
+-- account_status, return_privilege_revoked, deletion_requested_at or email.
+GRANT UPDATE (first_name, last_name, full_name, phone, date_of_birth, whatsapp_number,
+  whatsapp_opted_in, wishlist, cart, saved_addresses, dashboard_settings)
+  ON public.profiles TO authenticated;
+
+-- Staff writes (the policies decide who). Orders and visits are deliberately absent.
+GRANT INSERT, UPDATE, DELETE ON public.products TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.promo_codes TO authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.delivery_fees TO authenticated;
+GRANT INSERT, UPDATE ON public.site_settings TO authenticated;
+GRANT UPDATE, DELETE ON public.reviews, public.testimonials TO authenticated;
+GRANT UPDATE ON public.newsletter_subscribers TO authenticated;
+GRANT INSERT (action, entity, entity_id, subject, metadata, admin_id) ON public.admin_activity_logs TO authenticated;
+
+-- Public submissions, by column, so approval flags cannot even be named.
+GRANT INSERT (product_id, customer_name, customer_email, rating, title, comment)
+  ON public.reviews TO anon, authenticated;
+GRANT INSERT (customer_name, customer_location, rating, comment)
+  ON public.testimonials TO anon, authenticated;
+GRANT INSERT (email) ON public.newsletter_subscribers TO anon, authenticated;
+
+-- The server (service role) can do everything; it bypasses row level security.
+GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO service_role;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;
+
+-- Functions the browser may call.
+GRANT EXECUTE ON FUNCTION public.is_admin() TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.is_active_account() TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.has_permission(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.validate_invite_token(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.validate_promo(TEXT, NUMERIC) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.quote_order(JSONB, TEXT, TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.place_order(TEXT, JSONB, JSONB, JSONB, TEXT, NUMERIC, TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.record_visit(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.update_visit_duration(UUID, INTEGER) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.cancel_order(TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.attach_receipt(TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_guest_orders() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.request_account_deletion(BOOLEAN) TO authenticated;
+-- Staff functions (each one checks has_permission itself).
+GRANT EXECUTE ON FUNCTION public.set_staff_role(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.set_account_status(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.set_return_privilege(UUID, BOOLEAN) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.create_admin_invite(TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.set_order_status(TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.decide_payment(TEXT, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.mark_refunded(TEXT) TO authenticated;
+-- Not granted to browsers: expire_unpaid_orders (service role only), price_order, adjust_stock,
+-- cancel_internal, is_service, hash_token and the trigger functions.
 
 COMMIT;
-
--- ============================================================================
--- DONE!
---
--- Tables (11):
---   profiles, admin_invites, products, admin_activity_logs,
---   reviews, testimonials, newsletter_subscribers, promo_codes,
---   orders, site_settings, site_visits
---
--- Functions (7):
---   is_admin, set_updated_at, set_audit_fields, log_activity_with_name,
---   handle_new_user, update_product_rating_stats, generate_order_number
---
--- Storage buckets (2):
---   product-images, site-images
--- ============================================================================
