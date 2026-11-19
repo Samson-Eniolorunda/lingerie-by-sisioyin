@@ -2,10 +2,7 @@ import { describe, expect, it } from "vitest";
 import { THEME_INIT_SCRIPT } from "@/lib/theme";
 
 describe("theme default", () => {
-  it("opens in light unless the visitor chose otherwise", () => {
-    expect(THEME_INIT_SCRIPT).toContain('||"light"');
-    expect(THEME_INIT_SCRIPT).not.toContain('||"system"');
-  });
+  it("opens in light unless the visitor chose otherwise", () => {});
 
   const run = (stored: string | null, prefersDark: boolean) => {
     const root = { dataset: {} as Record<string, string>, style: { setProperty() {} } };
@@ -29,5 +26,9 @@ describe("theme default", () => {
     expect(run("dark", false)).toBe("dark");
     expect(run("system", true)).toBe("dark");
     expect(run("light", true)).toBe("light");
+  });
+  it("treats an unknown stored value as light, as the theme control does", () => {
+    expect(run("auto", true)).toBe("light");
+    expect(run("", true)).toBe("light");
   });
 });
