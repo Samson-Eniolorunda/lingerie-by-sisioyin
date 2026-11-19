@@ -18,6 +18,14 @@ test.describe("receipts with no order and refunds", () => {
     await expect(page.getByText("Paid, but the order failed")).toBeVisible();
     await expect(page.getByText("Abandoned uploads")).toBeVisible();
   });
+
+  test("the receipt opener needs a staff sign-in", async ({ page }) => {
+    const response = await page.request.get("/admin/receipts/view?path=x%2Fy.png", {
+      maxRedirects: 0,
+    });
+    expect([303, 307]).toContain(response.status());
+    expect(response.headers()["location"] ?? "").toContain("/admin/sign-in");
+  });
 });
 
 test.describe("moderation", () => {
