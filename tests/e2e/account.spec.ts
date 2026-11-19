@@ -58,8 +58,12 @@ test.describe("sign-in screen", () => {
     await signInAs(page, DEMO_CUSTOMER);
     await page.waitForURL("**/dashboard");
     await expect(page.getByRole("heading", { name: "Hello, Demo" })).toBeVisible();
-    await page.goto("/dashboard/settings");
-    await page.getByRole("button", { name: "Sign out" }).click();
+    // Sign out is in the account navigation on every account page, not only on Settings.
+    const nav = page.getByRole("navigation", { name: "Account" });
+    await page.goto("/dashboard/orders");
+    await expect(nav.getByRole("button", { name: "Sign out" })).toBeVisible();
+    await page.goto("/dashboard");
+    await nav.getByRole("button", { name: "Sign out" }).click();
     await page.waitForURL("**/");
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/\/sign-in\?next=%2Fdashboard/);

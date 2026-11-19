@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { signOutAction } from "@/server/actions/auth";
 
 const ITEMS = [
   { href: "/dashboard", label: "Overview" },
@@ -13,7 +14,7 @@ const ITEMS = [
   { href: "/dashboard/settings", label: "Settings" },
 ] as const;
 
-/** A scrolling row of 44 px links on phones, a vertical list from 1024 px. The current page is marked. */
+/** A scrolling row of 44 px links on phones, a vertical list from 1024 px. The current page is marked; Sign out ends the list. */
 export function AccountNav() {
   const pathname = usePathname();
   return (
@@ -42,6 +43,16 @@ export function AccountNav() {
             </li>
           );
         })}
+        <li className="shrink-0">
+          <form action={signOutAction}>
+            <button
+              type="submit"
+              className="flex min-h-11 items-center border-b-2 border-transparent px-3 text-base text-muted hover:text-ink lg:border-b-0 lg:border-l-2"
+            >
+              Sign out
+            </button>
+          </form>
+        </li>
       </ul>
     </nav>
   );
