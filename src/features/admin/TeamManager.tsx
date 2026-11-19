@@ -156,8 +156,11 @@ export function TeamManager({
             >
               {fullLink}
             </p>
+            <span role="status" aria-live="polite" className="sr-only">
+              {copy === "copied" ? "Link copied." : ""}
+            </span>
             {copy === "failed" ? (
-              <p className="text-sm font-medium text-error">
+              <p role="alert" className="text-sm font-medium text-error">
                 Could not copy. Select the link and copy it.
               </p>
             ) : null}

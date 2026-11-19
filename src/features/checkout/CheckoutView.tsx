@@ -64,8 +64,10 @@ export function CheckoutView({ account = null }: { readonly account?: CheckoutAc
       <div className="mx-auto min-h-[60dvh] max-w-[560px] px-4 pt-4 sm:pt-10" aria-busy="true">
         <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
         <p className="mt-2 max-w-[34rem] text-lg text-muted">
-          Pay by bank transfer, then upload your receipt. Your details are kept on this phone until
-          the order is placed.
+          Pay by bank transfer, then upload your receipt.
+          {account === null
+            ? " Your details are kept on this phone until the order is placed."
+            : null}
         </p>
       </div>
     );
@@ -306,8 +308,8 @@ function CheckoutForm({
       <div className="mx-auto max-w-[560px] px-4 pt-4 sm:pt-10">
         <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
         <p className="mt-2 max-w-[34rem] text-lg text-muted">
-          Pay by bank transfer, then upload your receipt. Your details are kept on this phone until
-          the order is placed.
+          Pay by bank transfer, then upload your receipt.
+          {!signedIn ? " Your details are kept on this phone until the order is placed." : null}
         </p>
         <h2 className="mt-12 font-display text-3xl">Your bag is empty</h2>
         <p className="mt-3 text-base text-muted">Add something to your bag before checking out.</p>
@@ -350,8 +352,8 @@ function CheckoutForm({
     <div className="mx-auto max-w-[560px] px-4 pt-4 pb-[calc(var(--bar-h)+var(--safe-bottom)+1rem)] sm:pt-10 sm:pb-16">
       <h1 className="font-display text-[2rem] leading-tight md:text-4xl">Checkout</h1>
       <p className="mt-2 max-w-[34rem] text-lg text-muted">
-        Pay by bank transfer, then upload your receipt. Your details are kept on this phone until
-        the order is placed.
+        Pay by bank transfer, then upload your receipt.
+        {!signedIn ? " Your details are kept on this phone until the order is placed." : null}
       </p>
 
       <details className="mt-4 border border-line bg-surface">
