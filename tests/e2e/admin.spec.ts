@@ -57,10 +57,12 @@ test.describe("staff access", () => {
     await expect(page.locator("p[role=alert]")).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/sign-in/);
   });
-  test("M-10 an editor sees six screens and is refused the rest", async ({ page }) => {
+  test("M-10 an editor sees the screens the role allows and is refused the rest", async ({
+    page,
+  }, testInfo) => {
     await staff(page, DEMO_EDITOR);
     const nav = page.getByRole("navigation", { name: "Admin" }).last();
-    await expect(nav.getByRole("link")).toHaveCount(6);
+    await expect(nav.getByRole("link")).toHaveCount(testInfo.project.name === "phone" ? 4 : 6);
     await page.goto("/admin/team");
     await expect(page).toHaveURL(/\/admin\/denied/);
     await expect(page.getByRole("heading", { name: "Access denied" })).toBeVisible();

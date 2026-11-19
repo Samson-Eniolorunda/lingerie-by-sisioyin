@@ -47,7 +47,9 @@ export default async function ActivityPage({
           {
             key: "subject",
             label: "Subject",
-            cell: (a) => <span className="break-all">{a.subject}</span>,
+            cell: (a) => (
+              <span className="block min-w-0 [overflow-wrap:anywhere]">{a.subject}</span>
+            ),
           },
           { key: "when", label: "When", cell: (a) => relativeTime(a.at) },
         ]}
