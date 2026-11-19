@@ -221,4 +221,10 @@ describe("e-mail senders (development store)", () => {
     expect(outbox()[0]?.subject).toContain("Action needed");
     void DEMO;
   });
+
+  it("puts the optional rejection reason in the e-mail, escaped", async () => {
+    await sendPaymentRejected(order, "Amount <b>differs</b>");
+    expect(outbox()[0]?.html).toContain("Amount &lt;b&gt;differs&lt;/b&gt;");
+    expect(outbox()[0]?.text).toContain("Reason given by our team: Amount <b>differs</b>");
+  });
 });

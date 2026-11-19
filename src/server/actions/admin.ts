@@ -143,10 +143,13 @@ export async function setOrderStatusAction(
 export async function paymentDecisionAction(
   orderNumber: string,
   decision: unknown,
+  reason?: unknown,
 ): Promise<AdminState> {
   const actor = await guard("orders.update");
   if (!actor) return DENIED;
   const parsed = paymentDecisionSchema.safeParse(decision);
+  // The optional reason goes to the customer in the rejection e-mail; short, plain text.
+  const why = typeof reason === "string" ? reason.trim().slice(0, 300) : "";
   if (!parsed.success) return BAD_REQUEST;
   const result = await data.admin.setPaymentDecision(orderNumber, parsed.data, actor);
   if (!result.ok) return result;
@@ -154,7 +157,7 @@ export async function paymentDecisionAction(
     const order = await data.admin.order(orderNumber);
     if (!order) return;
     if (parsed.data === "confirmed") await sendPaymentConfirmed(order);
-    else await sendPaymentRejected(order);
+    else await sendPaymentRejected(order, why);
   });
   refresh();
   return {

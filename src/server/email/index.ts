@@ -64,13 +64,13 @@ export async function sendPaymentConfirmed(order: StoredOrder): Promise<void> {
     );
 }
 
-export async function sendPaymentRejected(order: StoredOrder): Promise<void> {
+export async function sendPaymentRejected(order: StoredOrder, reason?: string): Promise<void> {
   if (!order.email) return;
   const bank = await data.payments.bankDetails().catch(() => null);
   await deliver(
     to(
       order.email,
-      templates.paymentRejected(order, bank, order.receiptReuploadUntil, context()),
+      templates.paymentRejected(order, bank, order.receiptReuploadUntil, context(), reason),
       reply(),
     ),
     "payment rejected",

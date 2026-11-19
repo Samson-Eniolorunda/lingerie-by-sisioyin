@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, ButtonRow } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
+import { Sheet } from "@/components/ui/Sheet";
 import { formatNaira } from "@/lib/money";
 import { canTransition } from "@/lib/order-rules";
 import {
@@ -42,6 +43,8 @@ export function OrderActions({
 }) {
   const { run, pending } = useAdminAction();
   const [received, setReceived] = useState("");
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
   if (!canUpdate)
     return <p className="text-base text-muted">Your role can view orders but not change them.</p>;
   if (status === "cancelled" && paymentStatus === "refund_check")
@@ -146,7 +149,7 @@ export function OrderActions({
               variant="secondary"
               aria-label="Reject receipt"
               disabled={pending || paymentStatus !== "awaiting_confirmation"}
-              onClick={() => run(() => paymentDecisionAction(orderNumber, "rejected"))}
+              onClick={() => setRejecting(true)}
             >
               Reject
             </Button>
@@ -162,6 +165,46 @@ export function OrderActions({
           }
         />
         <div className="flex justify-end">{cancel}</div>
+        <Sheet
+          open={rejecting}
+          onOpenChange={setRejecting}
+          title="Reject this receipt?"
+          footer={
+            <ButtonRow
+              secondary={
+                <Button variant="secondary" onClick={() => setRejecting(false)}>
+                  Cancel
+                </Button>
+              }
+              primary={
+                <Button
+                  variant="danger"
+                  disabled={pending}
+                  onClick={() => {
+                    setRejecting(false);
+                    run(() => paymentDecisionAction(orderNumber, "rejected", reason));
+                    setReason("");
+                  }}
+                >
+                  Reject receipt
+                </Button>
+              }
+            />
+          }
+        >
+          <p className="mb-3 text-base text-muted">
+            The customer is e-mailed and has 48 hours to send another receipt.
+          </p>
+          <TextField
+            label="Reason (optional)"
+            name="reason"
+            autoComplete="off"
+            maxLength={300}
+            hint="Included in the e-mail to the customer."
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
+        </Sheet>
       </div>
     );
 

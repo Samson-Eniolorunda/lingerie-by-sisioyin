@@ -162,8 +162,10 @@ export function paymentRejected(
   bank: BankDetails | null,
   deadline: string | null,
   ctx: MailContext,
+  reason?: string,
 ): Rendered {
   const pay = bankBlock(bank);
+  const why = reason?.trim() ?? "";
   const until = deadline
     ? new Intl.DateTimeFormat("en-GB", {
         dateStyle: "long",
@@ -182,13 +184,14 @@ export function paymentRejected(
         `Please send a clear photograph or PDF of your receipt${until ? ` by <strong>${esc(until)}</strong>` : ""}, from the <a href="${esc(ctx.siteUrl)}/track?order=${encodeURIComponent(order.orderNumber)}" style="color:${ACCENT};">tracking page</a>. If the order is not paid by then it will be cancelled and the items returned to stock. If you have not yet paid, the details are:`,
       ),
       pay.html,
+      ...(why ? [p(`<strong>Reason given by our team:</strong> ${esc(why)}`)] : []),
       p(
         "If you believe this is a mistake, please reply to this e-mail and we will look into it at once.",
       ),
     ].join("\n"),
     `We could not confirm the payment for order ${order.orderNumber}.`,
   );
-  const text = `Dear ${firstName(order)},\n\nWe were unable to match the receipt you sent for order ${order.orderNumber} with a payment of ${formatNaira(order.total)} in our account.\n\nPlease send a clear photograph or PDF of your receipt${until ? ` by ${until}` : ""} from ${ctx.siteUrl}/track?order=${encodeURIComponent(order.orderNumber)}. If the order is not paid by then it will be cancelled. Payment details:\n${pay.text}\n\nIf you believe this is a mistake, please reply to this e-mail.\n\n${BRAND}`;
+  const text = `Dear ${firstName(order)},\n\nWe were unable to match the receipt you sent for order ${order.orderNumber} with a payment of ${formatNaira(order.total)} in our account.\n\nPlease send a clear photograph or PDF of your receipt${until ? ` by ${until}` : ""} from ${ctx.siteUrl}/track?order=${encodeURIComponent(order.orderNumber)}. If the order is not paid by then it will be cancelled. Payment details:\n${pay.text}\n\n${why ? `Reason given by our team: ${why}\n\n` : ""}If you believe this is a mistake, please reply to this e-mail.\n\n${BRAND}`;
   return { subject: `Action needed: payment for order ${order.orderNumber}`, html, text };
 }
 
