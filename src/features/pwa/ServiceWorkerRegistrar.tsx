@@ -24,15 +24,19 @@ export function ServiceWorkerRegistrar({
       window.location.reload();
     };
     navigator.serviceWorker.addEventListener("controllerchange", onChange);
-    void navigator.serviceWorker.register(script, { scope }).then((registration) => {
-      registration.addEventListener("updatefound", () => {
-        const worker = registration.installing;
-        worker?.addEventListener("statechange", () => {
-          if (worker.state === "installed" && navigator.serviceWorker.controller)
-            worker.postMessage("SKIP_WAITING");
+    void navigator.serviceWorker
+      .register(script, { scope })
+      // Some browsers and embedded views resolve with nothing; never throw from here.
+      .then((registration: ServiceWorkerRegistration | undefined) => {
+        registration?.addEventListener("updatefound", () => {
+          const worker = registration.installing;
+          worker?.addEventListener("statechange", () => {
+            if (worker.state === "installed" && navigator.serviceWorker.controller)
+              worker.postMessage("SKIP_WAITING");
+          });
         });
-      });
-    });
+      })
+      .catch(() => undefined);
     return () => navigator.serviceWorker.removeEventListener("controllerchange", onChange);
   }, [script, scope]);
   return null;
