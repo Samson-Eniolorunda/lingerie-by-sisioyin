@@ -431,8 +431,10 @@ BEGIN
   IF NOT public.is_service() THEN
     RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
   END IF;
+  -- Only for a file that really is in the bucket: a script cannot fill this table with made-up paths.
   IF p_key IS NULL OR p_receipt_path IS NULL OR p_receipt_path NOT LIKE p_key || '/%'
-     OR EXISTS (SELECT 1 FROM public.orders WHERE receipt_path = p_receipt_path) THEN
+     OR EXISTS (SELECT 1 FROM public.orders WHERE receipt_path = p_receipt_path)
+     OR NOT EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id = 'payment-receipts' AND name = p_receipt_path) THEN
     RETURN;
   END IF;
   INSERT INTO public.checkout_failures (idempotency_key, receipt_path, customer_name, customer_email,

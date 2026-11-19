@@ -7,6 +7,7 @@ import { receipts } from "@/server/storage/receipts";
 import type { PromoRecord } from "@/types/account";
 import type { Product } from "@/types/domain";
 import type { PlaceOrderResult, Quote, StoredLine, StoredOrder } from "@/types/orders";
+import { mockReceiptPaths } from "@/server/storage/receipts";
 import { getDb, resetDb, type Db } from "./db";
 
 /**
@@ -171,6 +172,8 @@ export function sequenceNumber(db: Db, now: Date): string {
 }
 
 function recordMockFailure(db: Db, input: OrderInput, reason: string, now: Date): void {
+  // As in the database: only a file that is really stored is recorded.
+  if (!mockReceiptPaths().includes(input.receiptPath)) return;
   if (db.checkoutFailures.some((f) => f.path === input.receiptPath)) return;
   db.checkoutFailures.push({
     path: input.receiptPath,
