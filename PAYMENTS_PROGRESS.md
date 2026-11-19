@@ -8,3 +8,4 @@ IN PROGRESS. Branch `rebuild/production`. Part R (go/no-go review fixes) first, 
 - Part R (items 1 to 8) done and pushed: SQL 641 checks, contract 51, unit 161. Browser suites to be re-run at the end.
 - P1 done: bank details in database (0003_payments.sql), admin Settings -> Payments, checkout/tracking/terms/FAQ read stored values; BANK constant removed.
 - P2 done: provider interface, signature checks, webhook routes (503 until configured), per-method admin switch.
+- P3 code done: src/server/email (Resend over HTTP, memory transport in dev), British English HTML templates, hooks in placeOrder / payment decision / shipped / contact reply; unit tests.

@@ -1,12 +1,20 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { fieldErrors, forgotSchema, resetSchema, signInSchema, signUpSchema } from "@/schemas/auth";
+import {
+  fieldErrors,
+  forgotSchema,
+  inviteSignUpSchema,
+  resetSchema,
+  signInSchema,
+  signUpSchema,
+} from "@/schemas/auth";
 import { safeNext } from "@/lib/safe-next";
 import { cookies } from "next/headers";
 import { RESET_AUDIENCE_COOKIE, callbackUrl, clientIp } from "@/server/auth/request";
 import { clearSession, currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { allowRequest } from "@/server/rate-limit";
 
 export type AuthState =
   | {
@@ -103,6 +111,30 @@ export async function staffSignInAction(input: unknown, next: string | null): Pr
   });
   if (!result.ok) return invalid(result.message);
   redirect(safeNext(next, "/admin"));
+}
+
+/** Accepting a staff invitation: creates the account, then goes to the admin, or asks to confirm the address first. */
+export async function acceptInvitationAction(input: unknown): Promise<AuthState> {
+  const parsed = inviteSignUpSchema.safeParse(input);
+  if (!parsed.success)
+    return invalid("Please check the highlighted details.", fieldErrors(parsed.error));
+  if (
+    !(await allowRequest("invite", await clientIp(), [parsed.data.token.slice(0, 16)], {
+      ip: 10,
+      subject: 5,
+      windowMs: 3_600_000,
+    }))
+  )
+    return invalid("Too many attempts. Please wait a few minutes and try again.");
+  const result = await data.auth.acceptInvitation(parsed.data);
+  if (!result.ok) return invalid(result.message);
+  if (result.value === null)
+    return {
+      ok: true,
+      message:
+        "Check your email. We have sent a link to confirm your address, then you can sign in to the admin.",
+    };
+  redirect("/admin");
 }
 
 export async function staffSignOutAction(): Promise<void> {

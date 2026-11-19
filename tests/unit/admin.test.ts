@@ -58,9 +58,10 @@ describe("admin permissions and navigation", () => {
       "Orders",
       "Products",
       "Messages",
+      "Reviews",
       "Receipts with no order",
     ]);
-    expect(visibleNav("owner").length).toBe(11);
+    expect(visibleNav("owner").length).toBe(12);
     expect(can("editor", "roles.manage")).toBe(false);
     expect(can("super_admin", "roles.manage")).toBe(true);
   });

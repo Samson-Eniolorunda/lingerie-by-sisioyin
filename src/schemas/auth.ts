@@ -62,6 +62,24 @@ export const signUpSchema = z
       });
   });
 
+/** The form behind a staff invitation: the address and role come from the invitation, not from here. */
+export const inviteSignUpSchema = z
+  .object({
+    token: z.string().min(16).max(200),
+    firstName: z.string().trim().min(1, "Enter your first name.").max(60),
+    lastName: z.string().trim().min(1, "Enter your last name.").max(60),
+    password: newPassword,
+    confirmPassword: z.string().min(1, "Repeat your password."),
+  })
+  .superRefine((v, ctx) => {
+    if (v.password !== v.confirmPassword)
+      ctx.addIssue({
+        code: "custom",
+        path: ["confirmPassword"],
+        message: "The two passwords do not match.",
+      });
+  });
+
 export const forgotSchema = z.object({ email });
 
 export const resetSchema = z

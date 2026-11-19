@@ -1,6 +1,8 @@
 import type { AddressInput, ProfileInput } from "@/schemas/auth";
 import type {
   ActivityEntry,
+  AdminReview,
+  AdminTestimonial,
   Address,
   BankDetails,
   CustomerRecord,
@@ -63,6 +65,21 @@ export interface AuthRepository {
     firstName: string;
     lastName: string;
     email: string;
+    password: string;
+  }): Promise<Result<SessionUser | null>>;
+  /** What a staff invitation link carries (address and role), or null when it is unknown, used or expired. */
+  invitation(
+    token: string,
+  ): Promise<{ readonly email: string; readonly role: "editor" | "super_admin" } | null>;
+  /**
+   * Creates the staff account behind an invitation. The address and the role come from the
+   * invitation, never from the form. The value is the signed-in user, or `null` when the address
+   * must be confirmed first.
+   */
+  acceptInvitation(input: {
+    token: string;
+    firstName: string;
+    lastName: string;
     password: string;
   }): Promise<Result<SessionUser | null>>;
   /** The provider address to send the browser to; `redirectTo` is the absolute `/auth/callback` URL. */
@@ -258,6 +275,17 @@ export interface AdminRepository {
   resolveCheckoutFailure(id: string, resolution: string, actor: SessionUser): Promise<Result>;
   /** Deletes an abandoned upload (no failure on record) or a failure that has been resolved. */
   deleteOrphanReceipt(path: string, actor: SessionUser): Promise<Result>;
+  /** Moderation (products.manage): nothing a visitor sends in is shown until a member of staff approves it. */
+  reviews(status: "pending" | "approved", page: Page): Promise<Paged<AdminReview>>;
+  setReviewApproved(id: string, approved: boolean, actor: SessionUser): Promise<Result>;
+  deleteReview(id: string, actor: SessionUser): Promise<Result>;
+  testimonials(status: "pending" | "approved", page: Page): Promise<Paged<AdminTestimonial>>;
+  setTestimonial(
+    id: string,
+    change: { readonly approved?: boolean; readonly featured?: boolean },
+    actor: SessionUser,
+  ): Promise<Result>;
+  deleteTestimonial(id: string, actor: SessionUser): Promise<Result>;
   customers(search: string, page: Page): Promise<Paged<CustomerRecord>>;
   customerStats(since: Date): Promise<CustomerStats>;
   setCustomerStatus(

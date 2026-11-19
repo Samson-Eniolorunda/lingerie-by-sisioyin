@@ -113,6 +113,44 @@ export const mockAuth: AuthRepository = {
     return { ok: true, value: sessionUser(user) };
   },
 
+  async invitation(token) {
+    const invite = getDb().invites.get(token);
+    return invite && !invite.used ? { email: invite.email, role: invite.role } : null;
+  },
+
+  async acceptInvitation(input) {
+    const db = getDb();
+    const invite = db.invites.get(input.token);
+    if (!invite || invite.used)
+      return { ok: false, message: "This invitation has expired or has already been used." };
+    if (findByEmail(invite.email))
+      return { ok: false, message: "An account with this email already exists. Sign in instead." };
+    const id = nextId(db, "user");
+    const user: UserRecord = {
+      profile: {
+        id,
+        email: invite.email,
+        firstName: input.firstName,
+        lastName: input.lastName,
+        phone: "",
+        dateOfBirth: "",
+        gender: "",
+        createdAt: new Date().toISOString(),
+        status: "active",
+        deletionRequestedAt: null,
+      },
+      passwordHash: hashPassword(input.password),
+      role: invite.role,
+      addresses: [],
+      returnPrivilege: true,
+      emailVerified: true,
+    };
+    db.users.set(id, user);
+    db.invites.set(input.token, { ...invite, used: true });
+    await startSession(user, "staff");
+    return { ok: true, value: sessionUser(user) };
+  },
+
   async signInWithGoogle() {
     return {
       ok: false,

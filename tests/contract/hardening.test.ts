@@ -4,7 +4,9 @@ import { createClient } from "@supabase/supabase-js";
 import { resetFailureCounters } from "@/server/auth/throttle";
 import type { ProductDraft } from "@/server/data/contracts";
 import { supabaseAdmin } from "@/server/supabase/admin";
+import { supabaseAuth } from "@/server/supabase/auth";
 import { supabaseCatalogue } from "@/server/supabase/catalogue";
+import { supabaseEngagement } from "@/server/supabase/engagement";
 import { supabaseOrders } from "@/server/supabase/orders";
 import { receipts } from "@/server/storage/receipts";
 import type { SessionUser } from "@/types/account";
@@ -189,5 +191,107 @@ describe("review fix 5: an edit never overwrites stock that an order has just ta
     await supabaseAdmin.trashProduct(loaded.id, owner);
     void page;
     void stockedProduct;
+  });
+});
+
+describe("staff invitation sign-up", () => {
+  it("creates the account with the invited address and role, once", async () => {
+    await asOwner();
+    const email = `invitee.${randomUUID().slice(0, 8)}@example.test`;
+    const invited = await supabaseAdmin.inviteStaff(email, "editor", owner);
+    if (!invited.ok) throw new Error(invited.message);
+    const token = new URL(invited.value.link, "http://x").searchParams.get("invite") ?? "";
+    clearBrowser();
+    expect(await supabaseAuth.invitation(token)).toEqual({ email, role: "editor" });
+    expect(await supabaseAuth.invitation("0123456789abcdef-not-a-real-token")).toBeNull();
+    const accepted = await supabaseAuth.acceptInvitation({
+      token,
+      firstName: "New",
+      lastName: "Editor",
+      password: "Invited-Pass1!",
+    });
+    if (!accepted.ok) throw new Error(accepted.message);
+    expect(accepted.value).toMatchObject({ email, role: "editor" });
+    // The token is single use.
+    expect(await supabaseAuth.invitation(token)).toBeNull();
+    clearBrowser();
+    const again = await supabaseAuth.acceptInvitation({
+      token,
+      firstName: "Other",
+      lastName: "Person",
+      password: "Invited-Pass1!",
+    });
+    expect(again.ok).toBe(false);
+  });
+});
+
+describe("moderation of reviews and testimonials", () => {
+  it("shows nothing publicly until staff approve it, and hides it again", async () => {
+    const { product } = await stockedProduct();
+    expect(
+      await supabaseEngagement.submitReview({
+        productId: product.id,
+        name: "Moderation Tester",
+        email: "mod@example.test",
+        rating: 5,
+        title: "Lovely",
+        comment: "Moderation test review.",
+      }),
+    ).toBe(true);
+    expect(
+      await supabaseEngagement.submitTestimonial({
+        name: "Moderation Tester",
+        location: "Lagos",
+        rating: 5,
+        comment: "Moderation test testimonial.",
+      }),
+    ).toBe(true);
+    const visible = async () =>
+      (await supabaseEngagement.reviewsFor(product.id)).some(
+        (r) => r.comment === "Moderation test review.",
+      );
+    expect(await visible()).toBe(false);
+
+    await asOwner();
+    const waiting = await supabaseAdmin.reviews("pending", { limit: 50, offset: 0 });
+    const review = waiting.items.find((r) => r.comment === "Moderation test review.");
+    expect(review).toMatchObject({ email: "mod@example.test", productName: product.name });
+    expect((await supabaseAdmin.setReviewApproved(review?.id ?? "", true, owner)).ok).toBe(true);
+    clearBrowser();
+    expect(await visible()).toBe(true);
+    await asOwner();
+    expect((await supabaseAdmin.setReviewApproved(review?.id ?? "", false, owner)).ok).toBe(true);
+    expect((await supabaseAdmin.deleteReview(review?.id ?? "", owner)).ok).toBe(true);
+
+    const items = (await supabaseAdmin.testimonials("pending", { limit: 50, offset: 0 })).items;
+    const testimonial = items.find((t) => t.comment === "Moderation test testimonial.");
+    expect(testimonial).toBeTruthy();
+    expect(
+      (
+        await supabaseAdmin.setTestimonial(
+          testimonial?.id ?? "",
+          { approved: true, featured: true },
+          owner,
+        )
+      ).ok,
+    ).toBe(true);
+    clearBrowser();
+    expect(
+      (await supabaseEngagement.featuredTestimonials(20)).some(
+        (t) => t.comment === "Moderation test testimonial.",
+      ),
+    ).toBe(true);
+    await asOwner();
+    expect(
+      (await supabaseAdmin.setTestimonial(testimonial?.id ?? "", { approved: false }, owner)).ok,
+    ).toBe(true);
+    clearBrowser();
+    expect(
+      (await supabaseEngagement.featuredTestimonials(20)).some(
+        (t) => t.comment === "Moderation test testimonial.",
+      ),
+    ).toBe(false);
+    await asOwner();
+    expect((await supabaseAdmin.deleteTestimonial(testimonial?.id ?? "", owner)).ok).toBe(true);
   });
 });

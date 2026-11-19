@@ -5,6 +5,8 @@ import { formatOrderNumber } from "@/lib/order-number";
 import { computeTotals } from "@/lib/pricing";
 import type {
   ActivityEntry,
+  AdminReview,
+  AdminTestimonial,
   Address,
   BankDetails,
   InboxMessage,
@@ -52,6 +54,10 @@ export interface Db {
   activity: ActivityEntry[];
   /** Checkouts that failed after the receipt was uploaded. */
   checkoutFailures: OrphanReceipt[];
+  reviews: AdminReview[];
+  testimonials: AdminTestimonial[];
+  /** Staff invitations by token (the development store keeps the token itself). */
+  invites: Map<string, { email: string; role: "editor" | "super_admin"; used: boolean }>;
   bank: BankDetails | null;
   paymentMethods: PaymentMethodState[];
   paymentLog: PaymentChange[];
@@ -355,6 +361,45 @@ export function buildDb(): Db {
     ],
     paymentLog: [],
     checkoutFailures: [],
+    reviews: [
+      {
+        id: "rev-1",
+        productId: FIXTURE_PRODUCTS[0]?.id ?? "",
+        productName: FIXTURE_PRODUCTS[0]?.name ?? "A product",
+        name: "Ada Demo",
+        email: "ada.demo@example.test",
+        rating: 5,
+        title: "Lovely fit",
+        comment: "Soft, supportive and true to size.",
+        approved: false,
+        createdAt: now,
+      },
+      {
+        id: "rev-2",
+        productId: FIXTURE_PRODUCTS[1]?.id ?? "",
+        productName: FIXTURE_PRODUCTS[1]?.name ?? "A product",
+        name: "Tolu Sample",
+        email: "tolu.sample@example.test",
+        rating: 4,
+        title: "",
+        comment: "Arrived quickly and well packed.",
+        approved: true,
+        createdAt: now,
+      },
+    ],
+    testimonials: [
+      {
+        id: "tes-1",
+        name: "Ife Test",
+        location: "Lagos",
+        rating: 5,
+        comment: "My go-to shop for comfortable lingerie.",
+        approved: false,
+        featured: false,
+        createdAt: now,
+      },
+    ],
+    invites: new Map(),
     sequence: 0,
     id: 0,
   };

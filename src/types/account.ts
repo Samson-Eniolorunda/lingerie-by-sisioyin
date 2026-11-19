@@ -72,6 +72,31 @@ export interface InboxMessage {
   readonly replies: readonly MessageReply[];
 }
 
+/** A customer's review of a product, as staff see it (with the e-mail address, which the public never sees). */
+export interface AdminReview {
+  readonly id: string;
+  readonly productId: string;
+  readonly productName: string;
+  readonly name: string;
+  readonly email: string;
+  readonly rating: number;
+  readonly title: string;
+  readonly comment: string;
+  readonly approved: boolean;
+  readonly createdAt: string;
+}
+
+export interface AdminTestimonial {
+  readonly id: string;
+  readonly name: string;
+  readonly location: string;
+  readonly rating: number;
+  readonly comment: string;
+  readonly approved: boolean;
+  readonly featured: boolean;
+  readonly createdAt: string;
+}
+
 export interface PromoRecord {
   readonly id: string;
   readonly code: string;

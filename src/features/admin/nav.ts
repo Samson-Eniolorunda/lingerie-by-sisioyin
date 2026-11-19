@@ -10,6 +10,7 @@ export interface AdminNavItem {
     | "receipts"
     | "products"
     | "messages"
+    | "reviews"
     | "customers"
     | "promos"
     | "analytics"
@@ -43,6 +44,13 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     icon: "messages",
     permission: "messages.manage",
     primary: true,
+  },
+  {
+    href: "/admin/reviews",
+    label: "Reviews",
+    icon: "reviews",
+    permission: "products.manage",
+    primary: false,
   },
   {
     href: "/admin/receipts",

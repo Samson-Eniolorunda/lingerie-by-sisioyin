@@ -35,6 +35,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // A sign-up confirmation opened in another browser or after the first click cannot be exchanged
   // for a session, but the address is already confirmed: tell the person to sign in.
   if (searchParams.get("type") === "confirm")
-    return NextResponse.redirect(new URL("/sign-in?confirmed=1", origin));
+    return NextResponse.redirect(
+      new URL(audience === "staff" ? "/admin/sign-in?confirmed=1" : "/sign-in?confirmed=1", origin),
+    );
   return NextResponse.redirect(new URL("/forgot-password?link=expired", origin));
 }

@@ -446,6 +446,137 @@ export const supabaseAdmin: AdminRepository = {
     return okResult();
   },
 
+  async reviews(status, page) {
+    const client = await staff();
+    const { data, error, count } = await client
+      .from("reviews")
+      .select("*", { count: "exact" })
+      .eq("is_approved", status === "approved")
+      .order("created_at", { ascending: false })
+      .range(page.offset, page.offset + page.limit - 1);
+    if (error) throw new Error(`Database read failed: ${error.message}`);
+    const rows = data ?? [];
+    const ids = [...new Set(rows.map((r) => str(r.product_id)))];
+    const names = new Map<string, string>();
+    if (ids.length > 0)
+      for (const p of must(await client.from("products").select("id,name").in("id", ids)))
+        names.set(str(p.id), str(p.name));
+    return {
+      items: rows.map((r) => ({
+        id: str(r.id),
+        productId: str(r.product_id),
+        productName: names.get(str(r.product_id)) ?? "A removed product",
+        name: str(r.customer_name),
+        email: str(r.customer_email),
+        rating: num(r.rating),
+        title: str(r.title),
+        comment: str(r.comment),
+        approved: r.is_approved === true,
+        createdAt: str(r.created_at),
+      })),
+      total: count ?? 0,
+    };
+  },
+
+  async setReviewApproved(id, approved, actor) {
+    if (!isUuid(id)) return failResult("That review no longer exists.");
+    const { data, error } = await (
+      await staff()
+    )
+      .from("reviews")
+      .update({ is_approved: approved })
+      .eq("id", id)
+      .select("customer_name");
+    if (error) return failResult(sqlMessage(error));
+    if (!data?.length) return failResult("That review no longer exists.");
+    await log(
+      actor,
+      "review",
+      approved ? "review approved" : "review hidden",
+      str(data[0]?.customer_name),
+      id,
+    );
+    return okResult();
+  },
+
+  async deleteReview(id, actor) {
+    if (!isUuid(id)) return failResult("That review no longer exists.");
+    const { data, error } = await (
+      await staff()
+    )
+      .from("reviews")
+      .delete()
+      .eq("id", id)
+      .select("customer_name");
+    if (error) return failResult(sqlMessage(error));
+    if (!data?.length) return failResult("That review no longer exists.");
+    await log(actor, "review", "review deleted", str(data[0]?.customer_name), id);
+    return okResult();
+  },
+
+  async testimonials(status, page) {
+    const { data, error, count } = await (
+      await staff()
+    )
+      .from("testimonials")
+      .select("*", { count: "exact" })
+      .eq("is_approved", status === "approved")
+      .order("created_at", { ascending: false })
+      .range(page.offset, page.offset + page.limit - 1);
+    if (error) throw new Error(`Database read failed: ${error.message}`);
+    return {
+      items: (data ?? []).map((t) => ({
+        id: str(t.id),
+        name: str(t.customer_name),
+        location: str(t.customer_location),
+        rating: num(t.rating),
+        comment: str(t.comment),
+        approved: t.is_approved === true,
+        featured: t.is_featured === true,
+        createdAt: str(t.created_at),
+      })),
+      total: count ?? 0,
+    };
+  },
+
+  async setTestimonial(id, change, actor) {
+    if (!isUuid(id)) return failResult("That testimonial no longer exists.");
+    const update: Record<string, boolean> = {};
+    if (change.approved !== undefined) {
+      update.is_approved = change.approved;
+      // Hiding a testimonial also takes it off the featured list.
+      if (!change.approved) update.is_featured = false;
+    }
+    if (change.featured !== undefined && change.approved !== false)
+      update.is_featured = change.featured;
+    const { data, error } = await (
+      await staff()
+    )
+      .from("testimonials")
+      .update(update)
+      .eq("id", id)
+      .select("customer_name");
+    if (error) return failResult(sqlMessage(error));
+    if (!data?.length) return failResult("That testimonial no longer exists.");
+    await log(actor, "testimonial", "testimonial updated", str(data[0]?.customer_name), id);
+    return okResult();
+  },
+
+  async deleteTestimonial(id, actor) {
+    if (!isUuid(id)) return failResult("That testimonial no longer exists.");
+    const { data, error } = await (
+      await staff()
+    )
+      .from("testimonials")
+      .delete()
+      .eq("id", id)
+      .select("customer_name");
+    if (error) return failResult(sqlMessage(error));
+    if (!data?.length) return failResult("That testimonial no longer exists.");
+    await log(actor, "testimonial", "testimonial deleted", str(data[0]?.customer_name), id);
+    return okResult();
+  },
+
   async customers(search, page) {
     const { data, error } = await (
       await staff()

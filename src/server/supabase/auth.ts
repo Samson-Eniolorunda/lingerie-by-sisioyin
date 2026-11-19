@@ -4,7 +4,7 @@ import { callbackUrl } from "@/server/auth/request";
 import { clearAllFor, clearFailures, isLocked, noteFailure } from "@/server/auth/throttle";
 import type { AuthRepository } from "@/server/data/contracts";
 import type { SessionUser, StaffRole } from "@/types/account";
-import { freshClient, serviceClient, sessionClient } from "./clients";
+import { anonClient, freshClient, serviceClient, sessionClient } from "./clients";
 import { failResult, okResult, valueResult } from "./util";
 
 const GENERIC = "The email or password is not correct.";
@@ -117,6 +117,56 @@ export const supabaseAuth: AuthRepository = {
     if (!data.session || !data.user) return valueResult<SessionUser | null>(null);
     const row = await profileRow(data.user.id);
     return valueResult<SessionUser | null>(row ? toSessionUser(row) : null);
+  },
+
+  async invitation(token) {
+    if (token.length < 16 || token.length > 200) return null;
+    const { data, error } = await anonClient().rpc("validate_invite_token", { p_token: token });
+    const row = (data as { email?: string; invited_role?: string }[] | null)?.[0];
+    if (error || !row?.email) return null;
+    return {
+      email: row.email,
+      role: row.invited_role === "super_admin" ? "super_admin" : "editor",
+    };
+  },
+
+  async acceptInvitation(input) {
+    const invite = await this.invitation(input.token);
+    if (!invite) return failResult("This invitation has expired or has already been used.");
+    const client = await sessionClient("staff");
+    const { data, error } = await client.auth.signUp({
+      email: invite.email,
+      password: input.password,
+      options: {
+        // The database reads the token, checks it against the invitation for this very address and
+        // takes the role from the invitation; nothing the browser sends can choose a role.
+        data: {
+          first_name: input.firstName,
+          last_name: input.lastName,
+          full_name: `${input.firstName} ${input.lastName}`.trim(),
+          invite_token: input.token,
+        },
+        emailRedirectTo: callbackUrl("/admin", "staff", "confirm"),
+      },
+    });
+    if (error) {
+      if (error.code === "user_already_exists")
+        return failResult("An account with this email already exists. Sign in instead.");
+      if (error.code === "weak_password")
+        return failResult(
+          "Choose a stronger password: at least 8 characters, with letters and numbers.",
+        );
+      return failResult(
+        "We could not create your account. Please check your details and try again.",
+      );
+    }
+    if (data.user && (data.user.identities?.length ?? 1) === 0)
+      return failResult("An account with this email already exists. Sign in instead.");
+    if (!data.session || !data.user) return valueResult<SessionUser | null>(null);
+    const row = await profileRow(data.user.id);
+    return valueResult<SessionUser | null>(
+      row && row.role !== "customer" ? toSessionUser(row) : null,
+    );
   },
 
   async signInWithGoogle(redirectTo) {

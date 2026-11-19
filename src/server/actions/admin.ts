@@ -219,6 +219,58 @@ export async function deleteOrphanReceiptAction(path: string): Promise<AdminStat
   return { ok: true, message: "The receipt was deleted." };
 }
 
+/* Reviews and testimonials (moderation) */
+
+export async function setReviewApprovedAction(id: string, approved: unknown): Promise<AdminState> {
+  const actor = await guard("products.manage");
+  if (!actor) return DENIED;
+  if (typeof approved !== "boolean") return BAD_REQUEST;
+  const result = await data.admin.setReviewApproved(id, approved, actor);
+  if (!result.ok) return result;
+  refresh();
+  revalidatePath("/products", "layout");
+  return { ok: true, message: approved ? "The review is now shown." : "The review is hidden." };
+}
+
+export async function deleteReviewAction(id: string): Promise<AdminState> {
+  const actor = await guard("products.manage");
+  if (!actor) return DENIED;
+  const result = await data.admin.deleteReview(id, actor);
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: "The review was deleted." };
+}
+
+export async function setTestimonialAction(id: string, change: unknown): Promise<AdminState> {
+  const actor = await guard("products.manage");
+  if (!actor) return DENIED;
+  const parsed = z
+    .object({ approved: z.boolean().optional(), featured: z.boolean().optional() })
+    .safeParse(change);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.setTestimonial(
+    id,
+    {
+      ...(parsed.data.approved !== undefined ? { approved: parsed.data.approved } : {}),
+      ...(parsed.data.featured !== undefined ? { featured: parsed.data.featured } : {}),
+    },
+    actor,
+  );
+  if (!result.ok) return result;
+  refresh();
+  revalidatePath("/", "layout");
+  return { ok: true, message: "The testimonial was updated." };
+}
+
+export async function deleteTestimonialAction(id: string): Promise<AdminState> {
+  const actor = await guard("products.manage");
+  if (!actor) return DENIED;
+  const result = await data.admin.deleteTestimonial(id, actor);
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: "The testimonial was deleted." };
+}
+
 /* Customers */
 
 export async function customerStatusAction(id: string, status: unknown): Promise<AdminState> {

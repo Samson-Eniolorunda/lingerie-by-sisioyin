@@ -513,6 +513,60 @@ export const mockAdmin: AdminRepository = {
     return getDb().paymentLog.slice(0, limit);
   },
 
+  async reviews(status, page) {
+    const all = getDb().reviews.filter((r) => r.approved === (status === "approved"));
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
+  },
+
+  async setReviewApproved(id, approved, actor) {
+    const db = getDb();
+    const index = db.reviews.findIndex((r) => r.id === id);
+    const review = db.reviews[index];
+    if (!review) return { ok: false, message: "That review no longer exists." };
+    db.reviews[index] = { ...review, approved };
+    log(db, actor, approved ? "review approved" : "review hidden", review.name);
+    return { ok: true };
+  },
+
+  async deleteReview(id, actor) {
+    const db = getDb();
+    const review = db.reviews.find((r) => r.id === id);
+    if (!review) return { ok: false, message: "That review no longer exists." };
+    db.reviews = db.reviews.filter((r) => r.id !== id);
+    log(db, actor, "review deleted", review.name);
+    return { ok: true };
+  },
+
+  async testimonials(status, page) {
+    const all = getDb().testimonials.filter((t) => t.approved === (status === "approved"));
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
+  },
+
+  async setTestimonial(id, change, actor) {
+    const db = getDb();
+    const index = db.testimonials.findIndex((t) => t.id === id);
+    const item = db.testimonials[index];
+    if (!item) return { ok: false, message: "That testimonial no longer exists." };
+    const approved = change.approved ?? item.approved;
+    // A testimonial that is not approved can never be featured.
+    db.testimonials[index] = {
+      ...item,
+      approved,
+      featured: approved ? (change.featured ?? item.featured) : false,
+    };
+    log(db, actor, "testimonial updated", item.name);
+    return { ok: true };
+  },
+
+  async deleteTestimonial(id, actor) {
+    const db = getDb();
+    const item = db.testimonials.find((t) => t.id === id);
+    if (!item) return { ok: false, message: "That testimonial no longer exists." };
+    db.testimonials = db.testimonials.filter((t) => t.id !== id);
+    log(db, actor, "testimonial deleted", item.name);
+    return { ok: true };
+  },
+
   async customers(search, page) {
     const needle = search.trim().toLowerCase();
     const all = customerRows(getDb()).filter(
@@ -759,6 +813,7 @@ export const mockAdmin: AdminRepository = {
   async inviteStaff(email, role: Staffable, actor) {
     const db = getDb();
     const token = randomBytes(16).toString("hex");
+    db.invites.set(token, { email: email.trim().toLowerCase(), role, used: false });
     log(db, actor, "invitation", `${email} as ${role}`);
     return { ok: true, value: { link: `/admin/sign-in?invite=${token}` } };
   },
