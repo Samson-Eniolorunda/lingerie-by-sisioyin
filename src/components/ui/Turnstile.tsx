@@ -111,7 +111,7 @@ export function Turnstile({
           sitekey: siteKey,
           theme,
           size: "flexible",
-          language: "en-gb",
+          language: "en",
           callback: (token) => callback.current(token),
           "expired-callback": () => callback.current(null),
           "error-callback": () => {

@@ -92,14 +92,9 @@ function splitPath(path: string): [string, string] {
 
 export const config = {
   matcher: [
-    {
-      source: "/((?!_next/static|_next/image|favicon.ico|icons/).*)",
-      missing: [{ type: "header", key: "next-router-prefetch" }],
-    },
-    // The admin host also needs its prefetches rewritten, or `/orders` would not find `/admin/orders`.
-    {
-      source: "/((?!_next/static|_next/image|favicon.ico|icons/).*)",
-      has: [{ type: "host", value: "admin\\..+" }],
-    },
+    // Prefetches run through the proxy too (it skips the session refresh for them). Otherwise a
+    // `next-router-prefetch` header would let a request to /admin on the shop host bypass the 404,
+    // and the admin host's prefetches would not be rewritten.
+    { source: "/((?!_next/static|_next/image|favicon.ico|icons/).*)" },
   ],
 };

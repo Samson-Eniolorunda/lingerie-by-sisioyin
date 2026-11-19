@@ -355,7 +355,7 @@ prove, because they ran against a stand-in, not against Supabase.
                            where o.bucket_id = 'payment-receipts' and o.name = u.receipt_path);
        ```
 
-    7. Check `/admin` and `/admin/analytics`: orders, revenue, customers and visits must read as for a
+    7. Check `https://admin.lingeriebysisioyin.store/` and `https://admin.lingeriebysisioyin.store/analytics`: orders, revenue, customers and visits must read as for a
        brand new shop, and `select count(*) from public.orders;` must say `0`.
 
 16. **The admin panel has its own address.** On the live site (Vercel's Production environment only)
@@ -375,6 +375,17 @@ prove, because they ran against a stand-in, not against Supabase.
     4. Staff sign in separately on the admin address: the sign-in cookies belong to one address, so
        signing in to the shop does not sign anyone in to the admin. Password-reset and invitation
        links for staff return to the admin address.
+    5. **Before the first live deploy:** both `NEXT_PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY`
+       must be set for Production, and the Turnstile widget's hostnames must include
+       `www.lingeriebysisioyin.store` and `admin.lingeriebysisioyin.store`. Without them every protected
+       form refuses, including staff sign-in, so the admin would be locked until they are fixed and the
+       site redeployed.
+    6. **Right after the first live deploy**, check in this order: `https://www.lingeriebysisioyin.store/admin`
+       shows "Not Found"; `https://admin.lingeriebysisioyin.store/` shows the staff sign-in with the
+       Turnstile check, and signing in works; `https://admin.lingeriebysisioyin.store/orders` opens the
+       Orders screen; a staff password-reset e-mail link opens on the admin address and works; the
+       Turnstile check passes on the shop's sign-in and contact pages. Previews never show these, because
+       the admin address and the real Turnstile keys are used only on the live site.
 
 ## 12. After opening
 
@@ -387,7 +398,7 @@ prove, because they ran against a stand-in, not against Supabase.
   are a day old and have been opened.
 - **Refund checks**: an order cancelled while its receipt was waiting, or after a rejected receipt,
   is flagged **check the bank**. Look at your account, enter what arrived, and refund it.
-- **Reviews and testimonials** wait for your approval at `/admin/reviews`; nothing a visitor sends in
+- **Reviews and testimonials** wait for your approval at `https://admin.lingeriebysisioyin.store/reviews`; nothing a visitor sends in
   is shown until you approve it.
 - **Backups**: the free Supabase plan does not include point-in-time backups. Export the tables
   from the dashboard now and then, or move to a paid plan once the shop has regular orders.

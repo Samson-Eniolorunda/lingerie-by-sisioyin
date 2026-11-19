@@ -180,3 +180,13 @@ describe("auth e-mail links for staff", () => {
     expect(hostAllowed("admin.evil.example")).toBe(false);
   });
 });
+
+describe("proxy matcher", () => {
+  it("runs on prefetch requests too, so a prefetch header cannot bypass the /admin 404 on the shop host", async () => {
+    const { config } = await import("@/proxy");
+    for (const entry of config.matcher) {
+      expect(entry).not.toHaveProperty("missing");
+      expect(entry).not.toHaveProperty("has");
+    }
+  });
+});
