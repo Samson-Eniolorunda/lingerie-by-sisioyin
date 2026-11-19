@@ -376,8 +376,10 @@ BEGIN
 END;
 $$;
 
--- Staff record that they have opened a receipt (the first opening is kept).
-CREATE OR REPLACE FUNCTION public.mark_receipt_viewed(p_receipt_path TEXT)
+-- Server only: records that a member of staff has opened a receipt (the first opening is kept). The
+-- server calls it, with the service key, after it has checked the staff member's permission and made
+-- the signed link, so a browser session cannot mark a receipt as seen without opening it.
+CREATE OR REPLACE FUNCTION public.mark_receipt_viewed(p_receipt_path TEXT, p_actor UUID DEFAULT NULL)
 RETURNS VOID
 LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
@@ -387,10 +389,10 @@ BEGIN
     RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
   END IF;
   INSERT INTO public.receipt_uploads (receipt_path, idempotency_key, viewed_at, viewed_by)
-  VALUES (p_receipt_path, split_part(p_receipt_path, '/', 1), now(), auth.uid())
+  VALUES (p_receipt_path, split_part(p_receipt_path, '/', 1), now(), p_actor)
   ON CONFLICT (receipt_path) DO UPDATE
      SET viewed_at = COALESCE(public.receipt_uploads.viewed_at, now()),
-         viewed_by = COALESCE(public.receipt_uploads.viewed_by, auth.uid());
+         viewed_by = COALESCE(public.receipt_uploads.viewed_by, p_actor);
 END;
 $$;
 
@@ -517,10 +519,9 @@ REVOKE ALL ON FUNCTION public.record_checkout_failure(TEXT, TEXT, TEXT, TEXT, TE
 REVOKE ALL ON FUNCTION public.resolve_checkout_failure(UUID, TEXT) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.admin_orphan_receipts() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.record_receipt_upload(TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
-REVOKE ALL ON FUNCTION public.mark_receipt_viewed(TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.mark_receipt_viewed(TEXT, UUID) FROM PUBLIC, anon, authenticated;
 GRANT SELECT ON public.receipt_uploads TO authenticated;
 GRANT ALL ON public.receipt_uploads TO service_role;
-GRANT EXECUTE ON FUNCTION public.mark_receipt_viewed(TEXT) TO authenticated;
 GRANT SELECT ON public.checkout_failures TO authenticated;
 GRANT ALL ON public.rate_limits, public.checkout_failures TO service_role;
 GRANT EXECUTE ON FUNCTION public.resolve_checkout_failure(UUID, TEXT) TO authenticated;

@@ -438,7 +438,12 @@ export const supabaseAdmin: AdminRepository = {
   },
 
   async markReceiptViewed(path, actor) {
-    const { error } = await (await staff()).rpc("mark_receipt_viewed", { p_receipt_path: path });
+    // With the service key: the database refuses this call from a browser session. The route has
+    // already checked the staff member's permission and made the link.
+    const { error } = await serviceClient().rpc("mark_receipt_viewed", {
+      p_receipt_path: path,
+      p_actor: actor.id,
+    });
     if (error) return failResult(sqlMessage(error));
     await log(actor, "order", "receipt opened", path);
     return okResult();

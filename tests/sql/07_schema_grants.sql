@@ -9,7 +9,7 @@ DECLARE
   auth_ok text[] := anon_ok || ARRAY['cancel_order', 'claim_guest_orders', 'request_account_deletion',
                           'set_staff_role', 'set_account_status', 'set_return_privilege', 'create_admin_invite',
                           'set_order_status', 'decide_payment', 'mark_refunded', 'resolve_refund_check',
-                          'resolve_checkout_failure', 'admin_orphan_receipts', 'mark_receipt_viewed', 'reply_to_message',
+                          'resolve_checkout_failure', 'admin_orphan_receipts', 'reply_to_message',
                           'admin_customers', 'admin_customer_stats', 'admin_order_counts', 'admin_summary', 'admin_analytics'];
   bad text;
 BEGIN

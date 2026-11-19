@@ -5,9 +5,9 @@ import { data } from "@/server/data";
 import { receipts } from "@/server/storage/receipts";
 
 /**
- * Opens one receipt for a member of staff. Under /admin so the staff cookie is sent. Opening is
- * recorded first (a receipt nobody has opened can never be deleted), then the person is sent to a
- * short-lived signed link; the file itself is never public.
+ * Opens one receipt for a member of staff. Under /admin so the staff cookie is sent. The signed link
+ * is made first and the opening is then recorded (a receipt nobody has opened can never be deleted);
+ * the person is sent to the short-lived link, and the file itself is never public.
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const actor = await staffFor("orders.view");
@@ -24,8 +24,9 @@ export async function GET(request: Request): Promise<NextResponse> {
       { ok: false, message: "That receipt was not found." },
       { status: 404 },
     );
+  // The link first: a receipt counts as opened only once staff were really given the way to open it.
+  const link = await receipts.link(path);
   const marked = await data.admin.markReceiptViewed(path, actor);
   if (!marked.ok) return NextResponse.json(marked, { status: 500 });
-  const link = await receipts.link(path);
   return NextResponse.redirect(new URL(link.url, request.url), 303);
 }

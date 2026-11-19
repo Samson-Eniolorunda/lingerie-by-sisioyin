@@ -148,7 +148,13 @@ BEGIN
   PERFORM t.ok((SELECT customer_email = 'b@example.com' AND customer_phone = '0802' AND NOT viewed
                   FROM public.admin_orphan_receipts() WHERE path = 'never-ordered-key-0001/r.png'),
                'an upload with no order lists the contact details and is not yet viewed');
-  PERFORM public.mark_receipt_viewed('never-ordered-key-0001/r.png');
+  PERFORM t.ok(t.try($q$SELECT public.mark_receipt_viewed('never-ordered-key-0001/r.png')$q$) = 'error: 42501', 'staff in a browser session cannot mark a receipt as viewed');
+  PERFORM t.reset();
+  -- The server does it, with the service key, after checking the staff permission.
+  PERFORM t.as_service();
+  PERFORM public.mark_receipt_viewed('never-ordered-key-0001/r.png', ed);
+  PERFORM t.reset();
+  PERFORM t.as_user(ed);
   PERFORM t.ok((SELECT viewed FROM public.admin_orphan_receipts() WHERE path = 'never-ordered-key-0001/r.png'), 'opening a receipt is recorded');
   PERFORM t.reset();
   PERFORM t.ok((SELECT viewed_by = ed FROM public.receipt_uploads WHERE receipt_path = 'never-ordered-key-0001/r.png'), 'and names who opened it');
