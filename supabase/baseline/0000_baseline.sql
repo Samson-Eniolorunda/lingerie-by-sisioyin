@@ -837,6 +837,8 @@ CREATE POLICY "delivery_fees: staff manage"
 -- ============================================================================
 -- status:         pending -> confirmed -> processing -> shipped -> delivered, or cancelled
 -- payment_status: awaiting_confirmation | confirmed | rejected | refund_check | refund_owed | refunded
+--   gateway_pending / gateway_failed: card or transfer through Paystack or Flutterwave (prepared,
+--   not connected yet; see 0003_payments.sql). A confirmed gateway payment becomes 'confirmed'.
 --   refund_check: the order was cancelled while a receipt was on file that staff had not accepted;
 --   money may have arrived, so staff must check the bank account (resolve_refund_check).
 CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START WITH 1 INCREMENT BY 1;
@@ -861,9 +863,12 @@ CREATE TABLE IF NOT EXISTS public.orders (
   total                 DECIMAL(10,2) NOT NULL CHECK (total >= 0),
   status                TEXT        NOT NULL DEFAULT 'pending'
                           CHECK (status IN ('pending','confirmed','processing','shipped','delivered','cancelled')),
-  payment_method        TEXT        NOT NULL DEFAULT 'bank_transfer',
+  payment_method        TEXT        NOT NULL DEFAULT 'bank_transfer'
+                          CHECK (payment_method IN ('bank_transfer','paystack','flutterwave')),
   payment_status        TEXT        NOT NULL DEFAULT 'awaiting_confirmation'
-                          CHECK (payment_status IN ('awaiting_confirmation','confirmed','rejected','refund_check','refund_owed','refunded')),
+                          CHECK (payment_status IN ('awaiting_confirmation','confirmed','rejected','refund_check','refund_owed','refunded',
+                                                    'gateway_pending','gateway_failed')),
+  payment_reference     TEXT        CHECK (payment_reference IS NULL OR char_length(payment_reference) <= 200),
   receipt_path          TEXT,
   receipt_reupload_until TIMESTAMPTZ,
   refund_amount         DECIMAL(10,2),
@@ -876,6 +881,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
 );
 
 -- One receipt can belong to one order only.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_gateway_reference ON public.orders (payment_method, payment_reference) WHERE payment_reference IS NOT NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_receipt_path_unique ON public.orders (receipt_path) WHERE receipt_path IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON public.orders (customer_email);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON public.orders (user_id);
