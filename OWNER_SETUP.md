@@ -3,10 +3,12 @@
 Follow these steps in order. Nothing here has been run for you; no service is connected yet. Never
 paste a key into the code, a chat or a commit: keys go only into the Vercel environment settings.
 
-> **Important.** The application's Supabase data layer is not written yet (see `REBUILD_STATUS.md`,
-> "Known gaps"). Steps 1 to 4 prepare the database and can be done now. With the Supabase variables
-> set, the app will refuse to serve fake data and show a clear message until that layer is built and
-> tested. Do not set the Supabase variables on the live site before then; use a preview deployment.
+> **Status.** The application's Supabase data layer is written and tested (see `REBUILD_STATUS.md`).
+> It has been tested against a local PostgreSQL and a local stand-in for the Supabase service, never
+> against a real Supabase project, because none exists yet. Steps 1 to 9 are the exact go-live path.
+> With the Supabase variables **not** set, a live site refuses every request with a message naming the
+> missing variables; it never shows invented data. Do the steps on a Vercel **preview** deployment
+> first and move to the live address only after step 9 passes.
 
 ## 1. Create the Supabase organisation and project (London)
 
@@ -24,8 +26,9 @@ Open **SQL editor, New query**. Paste the whole file, read it, press **Run**, an
 
 1. `supabase/baseline/0000_baseline.sql`
 2. `supabase/baseline/0001_receipts_bucket.sql` (creates the private `payment-receipts` bucket)
+3. `supabase/baseline/0002_messages_and_admin_reports.sql` (contact messages and the admin figures)
 
-Do not run them in the other order and do not run either twice. If one fails, send the error text
+Do not run them in another order and do not run any of them twice. If one fails, send the error text
 to the developer; do not edit the file.
 
 ## 3. Create the owner account by hand
@@ -63,12 +66,18 @@ Google sign-in is optional; if wanted, switch it on under Providers.
    - API secret: `CLOUDINARY_API_SECRET` (server only)
 2. Until these are set, the admin shows marked placeholder images.
 
-## 6. Bank details for checkout
+## 6. Bank details for checkout: TO BE CONFIRMED BY THE OWNER
+
+> **The bank details in the code are not confirmed.** They are the details of the earlier shop and
+> nobody has checked them against your current account. Do not open the shop until you have read
+> them on the checkout page and they are exactly right: customers send real money to them.
 
 The bank transfer details are not an environment variable. They live in one place in the code:
-`BANK` in `src/config/site.ts` (`bankName`, `accountNumber`, `accountName`). They currently hold the
-earlier details and must be confirmed by you. Ask the developer to change them, or edit those three
-lines and commit. The terms and FAQ text under `src/content` also name the account and must match.
+`BANK` in `src/config/site.ts` (`bankName`, `accountNumber`, `accountName`), and the checkout shows
+what is written there. Ask the developer to change them, or edit those three lines and commit. The
+bank fields on the admin **Settings** page are saved in the database but the checkout does not read
+them, so changing them there does not change what customers see. The terms and FAQ text under
+`src/content` also name the account and must match.
 
 ## 7. Vercel environment variables
 
@@ -102,7 +111,36 @@ the first deployment, open **Project, Settings, Cron Jobs** and confirm both are
 
 ## 9. Final checks before opening
 
+Do these on the preview deployment, in this order. Each one is something the local tests could not
+prove, because they ran against a stand-in, not against Supabase.
+
 1. Run the SQL tests' checks once in the SQL editor of the real project (`tests/sql`), as the README
-   in `supabase/baseline` explains.
-2. Sign in as the owner at `/admin/sign-in`, place a test order, upload a receipt and confirm it.
-3. Make sure no demonstration sign-in or reset link is visible on the live site.
+   in `supabase/baseline` explains. (If any check fails, stop and tell the developer.)
+2. Open the preview address. The shop must show products only after you have added some at
+   `/admin/products`; an empty shop is correct for a new project.
+3. Sign in at `/admin/sign-in` as the owner. Add one product with a photograph and stock.
+4. Create a customer account at `/sign-up`. Confirm the e-mail address from the message Supabase
+   sends. Sign in.
+5. Place a test order as that customer and attach a receipt. This is the one step that proves the
+   private receipt upload works with the real Supabase Storage: the receipt must upload and, in the
+   admin, open from the order page. If the upload is refused, tell the developer before going on.
+6. In the admin, confirm the payment, then move the order to processing, shipped and delivered.
+7. Request a password reset for the customer; the link in the e-mail must open the page to choose a
+   new password, and the new password must work. Do the same for the owner at
+   `/admin/forgot-password`.
+8. Send a message from `/contact`; it must appear in `/admin/messages`.
+9. Accept analytics in the cookie card, browse two pages, and check `/admin/analytics` shows them
+   after a minute.
+10. Make sure no demonstration sign-in or reset link is visible, and that `LBS_ALLOW_DEMO` is not set.
+11. Read the bank details at checkout aloud against your bank app (step 6).
+
+## 10. After opening
+
+- **People you invite as staff**: from `/admin/team` the owner creates an invitation. The invited
+  person must sign up with the same address and the invitation token; the screen that accepts the
+  token is not built yet (see `REBUILD_STATUS.md`), so until it is, give staff access by asking the
+  developer to run the documented role statement for you.
+- **E-mail** (order confirmation, replies, invitations) is not sent by the application yet. Replies
+  you write in the admin are stored but not e-mailed; reply by WhatsApp or e-mail yourself for now.
+- **Backups**: the free Supabase plan does not include point-in-time backups. Export the tables
+  from the dashboard now and then, or move to a paid plan once the shop has regular orders.

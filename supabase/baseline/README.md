@@ -1,7 +1,7 @@
 # Fresh-project baseline
 
 The shop starts clean: a new, free Supabase project in a new organisation, with no data and no
-templates from the old site. `0000_baseline.sql` and `0001_receipts_bucket.sql` create everything.
+templates from the old site. `0000_baseline.sql`, `0001_receipts_bucket.sql` and `0002_messages_and_admin_reports.sql` create everything.
 Neither has been run on any live project. They were run only against a throwaway local PostgreSQL
 (see "Tests").
 
@@ -18,7 +18,7 @@ baseline are the real security boundary. The rules in short:
 
 1. Create the organisation and a free project at supabase.com. Choose a region close to Lagos.
 2. In the dashboard, open **SQL editor**, paste `0000_baseline.sql`, read it, run it. Then run
-   `0001_receipts_bucket.sql`. (Or `supabase db push` after copying the files into
+   `0001_receipts_bucket.sql`, then `0002_messages_and_admin_reports.sql`. (Or `supabase db push` after copying the files into
    `supabase/migrations` of a linked project.)
 3. Create the owner by hand (next section). There is no sign-up path to owner.
 4. In **Authentication**: turn on e-mail confirmation (guest orders are attached to an account only
@@ -83,6 +83,8 @@ await admin.auth.admin.updateUserById(id, { ban_duration: "876000h" }); // about
 | Attach guest orders after verification | `claim_guest_orders()` after sign-in |
 | Roles, status, privileges, deletion request | `set_staff_role`, `set_account_status`, `set_return_privilege`, `request_account_deletion` |
 | Record a visit | `record_visit(...)`, then `update_visit_duration(id, seconds)` |
+| Contact form | `submit_contact_message(...)`; staff reply with `reply_to_message(id, body)` |
+| Admin figures | `admin_summary()`, `admin_order_counts()`, `admin_customers(search, limit, offset)`, `admin_customer_stats(since)`, `admin_analytics(days)` |
 
 Line shape: `{ "product_id": uuid, "size": text, "colour": text, "qty": int }`; the colour is `''` for
 products without colours. Contact: `{ name, email, phone }`. Delivery: `{ address, city, state,
@@ -108,7 +110,7 @@ tests/sql/run.sh            # all files; or pass one: tests/sql/run.sh tests/sql
 
 The script starts a throwaway PostgreSQL (the server binaries must be installed; as root it re-runs
 itself as an unprivileged user), stubs the few Supabase pieces the baseline touches (`auth.users`,
-`auth.uid()`, `auth.jwt()`, the three API roles, `storage`), applies both baseline files, and runs the
+`auth.uid()`, `auth.jwt()`, the three API roles, `storage`), applies the baseline files, and runs the
 numbered test files, each in a rolled-back transaction, acting as `anon`, `authenticated` and
 `service_role` through `SET ROLE`. The stubs are close to, but not identical with, real Supabase, so
 run the same checks once against the real project's SQL editor before opening the shop.
@@ -122,6 +124,7 @@ run the same checks once against the real project's SQL editor before opening th
 | `05_orders_lifecycle.sql` | cancellation, transitions, payment decision, rejection and expiry, refund owed, guest-order claim |
 | `06_public_tables.sql` | promo codes hidden, editors cannot create them, reviews and testimonials unapproved, e-mails hidden, visits and activity log |
 | `07_schema_grants.sql` | schema shape, indexes, `search_path`, function and table grants |
+| `08_messages_admin.sql` | contact messages and replies, and the admin report functions with their permission checks |
 
 Not covered: real Supabase Auth behaviour (ban durations, e-mail confirmation flow), Realtime, and
 the storage API itself.

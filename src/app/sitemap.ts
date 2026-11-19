@@ -2,6 +2,9 @@ import type { MetadataRoute } from "next";
 import { BRAND } from "@/config/site";
 import { listProducts } from "@/server/queries/catalogue";
 
+/** Rebuilt at most hourly, so a new product reaches the sitemap without a deployment. */
+export const revalidate = 3600;
+
 const PAGES = ["", "/shop", "/size", "/faq", "/contact", "/privacy", "/terms", "/track"] as const;
 
 /** Public, indexable pages and every live product. Account, bag, checkout and admin pages are left out on purpose. */

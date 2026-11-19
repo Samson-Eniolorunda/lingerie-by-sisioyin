@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { Page } from "@playwright/test";
 
 export const PHONE_WIDTHS = [360, 390, 430] as const;
@@ -73,3 +74,16 @@ export async function signUpFresh(page: Page, password = "Fresh-Pass1!"): Promis
   await page.waitForURL("**/dashboard");
   return email;
 }
+
+/**
+ * Product ids. The development store uses `fixture-NN`; the local Supabase stack seeds the same
+ * products under deterministic UUIDs (tests/support/local-stack/seed.mjs). `LBS_E2E_DATA=supabase`
+ * selects the second.
+ */
+export function productId(fixtureId: string): string {
+  if (process.env.LBS_E2E_DATA !== "supabase") return fixtureId;
+  const h = createHash("sha1").update(`lbs:${fixtureId}`).digest("hex");
+  return `${h.slice(0, 8)}-${h.slice(8, 12)}-4${h.slice(13, 16)}-a${h.slice(17, 20)}-${h.slice(20, 32)}`;
+}
+
+export const SUPABASE_E2E = process.env.LBS_E2E_DATA === "supabase";

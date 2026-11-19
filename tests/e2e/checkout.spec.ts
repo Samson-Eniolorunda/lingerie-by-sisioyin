@@ -1,9 +1,10 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { productId } from "./helpers";
 
 const BRIEF = {
   variantId: "fixture-02-M-Black",
-  id: "fixture-02",
+  id: productId("fixture-02"),
   name: "Cotton high-waist brief",
   price_ngn: 6500,
   selectedSize: "M",
@@ -249,8 +250,10 @@ test("T-02 the confirmation page redirects to the shop without an order", async 
 test("W-02 to W-04 wishlist page lists saved items, removes one and shows the empty state", async ({
   page,
 }) => {
-  await page.addInitScript(() =>
-    localStorage.setItem("LBS_WISHLIST", JSON.stringify(["fixture-01"])),
+  const fixtureId = productId("fixture-01");
+  await page.addInitScript(
+    (id) => localStorage.setItem("LBS_WISHLIST", JSON.stringify([id])),
+    fixtureId,
   );
   await page.goto("/wishlist");
   await expect(page.getByText("Lace balconette bra")).toBeVisible();
