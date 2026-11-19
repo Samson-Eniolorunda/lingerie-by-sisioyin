@@ -1,6 +1,7 @@
 "use client";
 
 import { adminPath } from "@/lib/adminPath";
+import Link from "next/link";
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -118,7 +119,8 @@ export function OrphanReceipts({
 }) {
   const { run, pending } = useAdminAction();
   const failures = items.filter((i) => i.failureId);
-  const abandoned = items.filter((i) => !i.failureId);
+  const replaced = items.filter((i) => !i.failureId && i.orderNumber);
+  const abandoned = items.filter((i) => !i.failureId && !i.orderNumber);
   return (
     <div className="flex flex-col gap-8">
       <section aria-labelledby="failed-heading" className="flex flex-col gap-3">
@@ -131,6 +133,26 @@ export function OrphanReceipts({
           failures.map((f) => <Failure key={f.path} item={f} canUpdate={canUpdate} />)
         )}
       </section>
+      {replaced.length > 0 ? (
+        <section aria-labelledby="replaced-heading" className="flex flex-col gap-3">
+          <h3 id="replaced-heading" className="font-sans text-lg font-semibold">
+            Earlier receipts of an order ({replaced.length})
+          </h3>
+          <p className="text-base text-muted">
+            The customer sent a newer receipt for the order. These files are kept with the order and
+            cannot be deleted here.
+          </p>
+          <ul className="divide-y divide-line border border-line bg-surface">
+            {replaced.map((r) => (
+              <li key={r.path} className="p-3 text-sm break-all">
+                <Link href={adminPath(`/orders/${r.orderNumber}`)}>Order {r.orderNumber}</Link>
+                <span className="block text-subtle">{formatDateTime(r.uploadedAt)}</span>
+                <ViewLink path={r.path} viewed={r.viewed} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
       <section aria-labelledby="abandoned-heading" className="flex flex-col gap-3">
         <h3 id="abandoned-heading" className="font-sans text-lg font-semibold">
           Abandoned uploads ({abandoned.length})

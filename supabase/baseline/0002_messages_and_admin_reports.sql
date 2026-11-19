@@ -385,7 +385,7 @@ LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF NOT (public.is_service() OR public.has_permission('orders.view')) THEN
+  IF NOT public.is_service() THEN
     RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
   END IF;
   INSERT INTO public.receipt_uploads (receipt_path, idempotency_key, viewed_at, viewed_by)
@@ -462,13 +462,16 @@ BEGIN
 END;
 $$;
 
--- Receipt files in the private bucket that no order uses. Those with a checkout failure belong
+-- Receipt files in the private bucket that no order currently uses. A file that belongs to an order
+-- (order_number is set: the order's newer receipt replaced it) is shown with that order and is never
+-- deleted from here. Those with a checkout failure belong
 -- to a customer who paid and must be contacted; the rest are abandoned uploads, safe to delete
 -- once they are older than a day (an upload that is still being used by a checkout in progress
 -- is younger than that).
 CREATE OR REPLACE FUNCTION public.admin_orphan_receipts()
 RETURNS TABLE (path TEXT, uploaded_at TIMESTAMPTZ, failure_id UUID, customer_name TEXT, customer_email TEXT,
-               customer_phone TEXT, quoted_total NUMERIC, reason TEXT, resolved BOOLEAN, viewed BOOLEAN)
+               customer_phone TEXT, quoted_total NUMERIC, reason TEXT, resolved BOOLEAN, viewed BOOLEAN,
+               order_number TEXT)
 LANGUAGE plpgsql STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
@@ -482,10 +485,13 @@ BEGIN
            COALESCE(NULLIF(f.customer_email, ''), u.customer_email, '')::TEXT,
            COALESCE(NULLIF(f.customer_phone, ''), u.customer_phone, '')::TEXT,
            COALESCE(f.quoted_total, u.quoted_total), COALESCE(f.reason, '')::TEXT,
-           (f.resolved_at IS NOT NULL), (u.viewed_at IS NOT NULL)
+           (f.resolved_at IS NOT NULL), (u.viewed_at IS NOT NULL), ord.order_number::TEXT
       FROM storage.objects o
       LEFT JOIN public.checkout_failures f ON f.receipt_path = o.name
       LEFT JOIN public.receipt_uploads u ON u.receipt_path = o.name
+      -- An earlier receipt of an order that has a newer one (attach_receipt replaces the path) is
+      -- found through the order's idempotency key, so the file shows which order it belongs to.
+      LEFT JOIN public.orders ord ON ord.idempotency_key = split_part(o.name, '/', 1)
      WHERE o.bucket_id = 'payment-receipts'
        AND NOT EXISTS (SELECT 1 FROM public.orders x WHERE x.receipt_path = o.name)
      ORDER BY (f.id IS NOT NULL AND f.resolved_at IS NULL) DESC, o.created_at DESC

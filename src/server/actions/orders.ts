@@ -238,7 +238,13 @@ export async function createReceiptReupload(input: unknown): Promise<UploadState
   if (!(await limitLookups(parsed.data.email))) return { ok: false, message: LOOKUP_LIMITED };
   const order = await data.orders.lookup(parsed.data.order, parsed.data.email);
   if (!order) return { ok: false, message: "We could not find that order." };
-  return issueUpload(order.idempotencyKey, parsed.data.type, parsed.data.size);
+  // The order's own contact details, so a replacement receipt is traced like the first one.
+  return issueUpload(order.idempotencyKey, parsed.data.type, parsed.data.size, {
+    name: order.customerName,
+    email: order.email,
+    phone: order.phone,
+    quotedTotal: order.total,
+  });
 }
 
 const attachSchema = z.object({

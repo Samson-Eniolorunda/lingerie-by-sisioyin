@@ -401,7 +401,7 @@ export const mockAdmin: AdminRepository = {
     const order = db.orders.get(orderNumber);
     if (!order || order.paymentStatus !== "refund_check")
       return { ok: false, message: "No refund check is open on that order." };
-    if (!Number.isFinite(receivedNgn) || receivedNgn < 0)
+    if (!Number.isFinite(receivedNgn) || receivedNgn < 0 || receivedNgn > 99_999_999)
       return { ok: false, message: "Enter the amount that was received." };
     if (receivedNgn > order.total && !confirmOver)
       return {
@@ -453,6 +453,9 @@ export const mockAdmin: AdminRepository = {
           reason: failure?.reason ?? "",
           resolved: failure?.resolved ?? false,
           viewed: db.viewedReceipts.has(path),
+          orderNumber:
+            [...db.orders.values()].find((o) => path.startsWith(`${o.idempotencyKey}/`))
+              ?.orderNumber ?? null,
         };
       });
     return rows.sort((a, b) => Number(b.failureId !== null) - Number(a.failureId !== null));
@@ -476,8 +479,12 @@ export const mockAdmin: AdminRepository = {
   async deleteOrphanReceipt(path, actor) {
     const db = getDb();
     const failure = db.checkoutFailures.find((f) => f.path === path);
-    if ([...db.orders.values()].some((o) => o.receiptPath === path))
-      return { ok: false, message: "That receipt belongs to an order." };
+    const owner = [...db.orders.values()].find((o) => path.startsWith(`${o.idempotencyKey}/`));
+    if (owner)
+      return {
+        ok: false,
+        message: `That receipt belongs to order ${owner.orderNumber} and cannot be deleted here.`,
+      };
     if (failure && !failure.resolved)
       return { ok: false, message: "Close the failed checkout before deleting its receipt." };
     if (!db.viewedReceipts.has(path))

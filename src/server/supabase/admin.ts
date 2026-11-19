@@ -423,6 +423,7 @@ export const supabaseAdmin: AdminRepository = {
       reason: str(r.reason),
       resolved: r.resolved === true,
       viewed: r.viewed === true,
+      orderNumber: r.order_number ? str(r.order_number) : null,
     }));
   },
 
@@ -455,6 +456,10 @@ export const supabaseAdmin: AdminRepository = {
     const rows = await this.orphanReceipts();
     const row = rows.find((r) => r.path === path);
     if (!row) return failResult("That receipt is no longer an orphan, or does not exist.");
+    if (row.orderNumber)
+      return failResult(
+        `That receipt belongs to order ${row.orderNumber} and cannot be deleted here.`,
+      );
     if (row.failureId && !row.resolved)
       return failResult("Close the failed checkout before deleting its receipt.");
     if (!row.viewed)

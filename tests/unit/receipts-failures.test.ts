@@ -113,3 +113,43 @@ describe("the caller's address behind Vercel", () => {
     expect(await clientIp()).toBe("198.51.100.7");
   });
 });
+
+describe("a receipt that an order replaced", () => {
+  it("is listed with its order, and cannot be deleted from the orphan list", async () => {
+    const { placeTest } = await import("./helpers");
+    const placed = await placeTest(lines);
+    if (!placed.ok) throw new Error("order not placed");
+    const order = placed.order;
+    const second = `${order.idempotencyKey}/second.jpg`;
+    saveMockReceipt(second, { type: "image/jpeg", size: 1000 });
+    getDb().orders.set(order.orderNumber, { ...order, receiptPath: second });
+    const row = (await mockAdmin.orphanReceipts()).find((r) => r.path === order.receiptPath);
+    expect(row?.orderNumber).toBe(order.orderNumber);
+    expect((await mockAdmin.orphanReceipts()).some((r) => r.path === second)).toBe(false);
+    const actor = staff();
+    await mockAdmin.markReceiptViewed(order.receiptPath ?? "", actor);
+    const refused = await mockAdmin.deleteOrphanReceipt(order.receiptPath ?? "", actor);
+    expect(refused.ok).toBe(false);
+    if (!refused.ok) expect(refused.message).toContain(order.orderNumber);
+  });
+
+  it("is traced to the customer when a replacement is uploaded", async () => {
+    const { placeTest } = await import("./helpers");
+    const { createReceiptReupload } = await import("@/server/actions/orders");
+    const placed = await placeTest(lines);
+    if (!placed.ok) throw new Error("order not placed");
+    const upload = await createReceiptReupload({
+      order: placed.order.orderNumber,
+      email: placed.order.email,
+      type: "image/jpeg",
+      size: 1000,
+    });
+    if (!upload.ok) throw new Error(upload.message);
+    expect(getDb().receiptUploads.get(upload.path)).toMatchObject({
+      name: placed.order.customerName,
+      email: placed.order.email.toLowerCase(),
+      phone: placed.order.phone,
+      quotedTotal: placed.order.total,
+    });
+  });
+});

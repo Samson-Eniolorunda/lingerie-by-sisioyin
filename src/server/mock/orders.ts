@@ -186,6 +186,7 @@ function recordMockFailure(db: Db, input: OrderInput, reason: string, now: Date)
     reason,
     resolved: false,
     viewed: db.viewedReceipts.has(input.receiptPath),
+    orderNumber: null,
   });
 }
 

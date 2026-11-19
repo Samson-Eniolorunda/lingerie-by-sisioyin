@@ -96,6 +96,8 @@ export interface OrphanReceipt {
   readonly resolved: boolean;
   /** Whether a member of staff has opened the receipt (one that nobody has opened cannot be deleted). */
   readonly viewed: boolean;
+  /** The order this file belongs to, when a newer receipt on that order replaced it; otherwise null. */
+  readonly orderNumber: string | null;
 }
 
 export interface Quote {
