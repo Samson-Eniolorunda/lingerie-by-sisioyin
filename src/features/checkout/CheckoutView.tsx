@@ -7,9 +7,9 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore, useTransiti
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { CheckboxRow, SelectField, TextField, TextareaField } from "@/components/ui/Field";
 import { StickyActionBar } from "@/components/ui/StickyActionBar";
-import { BANK } from "@/config/site";
 import { clearCart, useCart } from "@/features/cart/store";
 import { DELIVERY_STATES } from "@/lib/delivery";
+import { PAYMENT_DETAILS_UPDATING } from "@/lib/bank-details";
 import { formatNaira } from "@/lib/money";
 import { computeTotals } from "@/lib/pricing";
 import { readStorage, writeStorage } from "@/lib/storage";
@@ -210,13 +210,15 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
       ? "Working out the amount to transfer."
       : !quote.ok
         ? "The amount could not be worked out."
-        : preparing
-          ? "Getting your receipt ready."
-          : receipt === null
-            ? "Attach your payment receipt."
-            : !confirmed
-              ? "Tick the box to confirm you have sent the payment."
-              : null;
+        : !quote.bank
+          ? `${PAYMENT_DETAILS_UPDATING}.`
+          : preparing
+            ? "Getting your receipt ready."
+            : receipt === null
+              ? "Attach your payment receipt."
+              : !confirmed
+                ? "Tick the box to confirm you have sent the payment."
+                : null;
 
   function submit() {
     if (submitting.current || missing || quote === "loading" || !quote.ok || !receipt) return;
@@ -598,6 +600,14 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
                         </Button>
                       </div>
                     </div>
+                  ) : !quote.bank ? (
+                    <p
+                      role="status"
+                      className="border-l-4 border-warning bg-warning-bg px-4 py-3 text-base"
+                    >
+                      {PAYMENT_DETAILS_UPDATING}. Please try again a little later, or message us on
+                      WhatsApp.
+                    </p>
                   ) : (
                     <>
                       <p className="font-medium">
@@ -606,18 +616,18 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
                       <dl className="mt-2 border border-line bg-surface px-3 py-2">
                         <div className="flex items-center justify-between gap-2">
                           <dt className="text-muted">Bank</dt>
-                          <dd>{BANK.bankName}</dd>
+                          <dd>{quote.bank.bankName}</dd>
                         </div>
                         <div className="flex items-center justify-between gap-2">
                           <dt className="text-muted">Account number</dt>
                           <dd className="tabular flex items-center">
-                            {BANK.accountNumber}
-                            <CopyButton value={BANK.accountNumber} label="account number" />
+                            {quote.bank.accountNumber}
+                            <CopyButton value={quote.bank.accountNumber} label="account number" />
                           </dd>
                         </div>
                         <div className="flex items-start justify-between gap-2 py-1">
                           <dt className="shrink-0 text-muted">Account name</dt>
-                          <dd className="text-right">{BANK.accountName}</dd>
+                          <dd className="text-right">{quote.bank.accountName}</dd>
                         </div>
                         <div className="flex items-center justify-between gap-2">
                           <dt className="text-muted">Amount</dt>
@@ -627,6 +637,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
                           </dd>
                         </div>
                       </dl>
+                      {quote.bank.note ? <p className="mt-2 text-base">{quote.bank.note}</p> : null}
                       <p className="mt-2 text-sm text-subtle">
                         You can leave this page to pay. Your bag and the details you have entered
                         will be here when you return.

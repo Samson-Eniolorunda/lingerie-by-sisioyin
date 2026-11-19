@@ -6,8 +6,11 @@ import { computeTotals } from "@/lib/pricing";
 import type {
   ActivityEntry,
   Address,
+  BankDetails,
   InboxMessage,
   OrderStatus,
+  PaymentChange,
+  PaymentMethodState,
   Profile,
   PromoRecord,
   StaffRole,
@@ -49,6 +52,9 @@ export interface Db {
   activity: ActivityEntry[];
   /** Checkouts that failed after the receipt was uploaded. */
   checkoutFailures: OrphanReceipt[];
+  bank: BankDetails | null;
+  paymentMethods: PaymentMethodState[];
+  paymentLog: PaymentChange[];
   sequence: number;
   id: number;
 }
@@ -331,13 +337,23 @@ export function buildDb(): Db {
       announcement: "Delivery to Lagos, Ogun, Oyo, Osun, Ondo, Ekiti and Abuja",
       whatsappNumber: "2349033344860",
       supportEmail: "support@lingeriebysisioyin.store",
-      bankName: "Moniepoint MFB",
-      accountNumber: "6327082294",
-      accountName: "Oyindamola Adelugba (LingeriesBySisioyin)",
       lowStockThreshold: 5,
       notifyNewOrders: true,
     },
     activity: [],
+    // Demonstration details only (the development store). A live shop shows what its owner saved.
+    bank: {
+      bankName: "Moniepoint Microfinance Bank",
+      accountNumber: "6327082294",
+      accountName: "Oyindamola Adelugba (LingeriesBySisioyin)",
+      note: "",
+    },
+    paymentMethods: [
+      { method: "bank_transfer", enabled: true, connected: true },
+      { method: "paystack", enabled: false, connected: false },
+      { method: "flutterwave", enabled: false, connected: false },
+    ],
+    paymentLog: [],
     checkoutFailures: [],
     sequence: 0,
     id: 0,

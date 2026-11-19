@@ -182,7 +182,7 @@
               "t": "strong",
               "c": ["bank transfer only"]
             },
-            ". At checkout, you'll be shown our bank details (Moniepoint MFB, Account Number: 6327082294, Account Name: Oyindamola Adelugba (LingeriesbySisioyin)). After making the transfer, you must upload a screenshot or photo of your payment receipt to confirm the order. Card payment will be available soon."
+            ". At checkout, you'll be shown our bank details ({{bank.summary}}). After making the transfer, you must upload a screenshot or photo of your payment receipt to confirm the order. Card payment will be available soon."
           ]
         },
         {

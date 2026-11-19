@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { visibleNav } from "@/features/admin/nav";
+import { fillBankDetails } from "@/lib/bank-details";
 import { can } from "@/lib/permissions";
 import {
   customerStatusSchema,
@@ -9,6 +10,7 @@ import {
   productDraftSchema,
   promoSchema,
   settingsSchema,
+  bankDetailsSchema,
   staffRoleSchema,
 } from "@/schemas/admin";
 import { mockAdmin } from "@/server/mock/admin";
@@ -208,15 +210,39 @@ describe("customers, promos, staff", () => {
       announcement: "",
       whatsappNumber: "2349033344860",
       supportEmail: "a@b.co",
-      bankName: "Bank",
-      accountNumber: "1234567890",
-      accountName: "Name",
       lowStockThreshold: 5,
       notifyNewOrders: true,
     };
     expect(settingsSchema.safeParse(base).success).toBe(true);
-    expect(settingsSchema.safeParse({ ...base, accountNumber: "123" }).success).toBe(false);
+    expect(settingsSchema.safeParse({ ...base, supportEmail: "nope" }).success).toBe(false);
     expect(settingsSchema.safeParse({ ...base, whatsappNumber: "+234 90" }).success).toBe(false);
+  });
+});
+
+describe("bank details", () => {
+  const base = {
+    bankName: "Access Bank",
+    accountNumber: "0123456789",
+    accountName: "Sisioyin Stores",
+    note: "",
+  };
+  it("accepts a listed bank, a ten digit number and a name", () => {
+    expect(bankDetailsSchema.safeParse(base).success).toBe(true);
+  });
+  it("refuses an unlisted bank, a short or lettered number, and a missing name", () => {
+    expect(bankDetailsSchema.safeParse({ ...base, bankName: "Made Up Bank" }).success).toBe(false);
+    expect(bankDetailsSchema.safeParse({ ...base, accountNumber: "123" }).success).toBe(false);
+    expect(bankDetailsSchema.safeParse({ ...base, accountNumber: "01234abcde" }).success).toBe(
+      false,
+    );
+    expect(bankDetailsSchema.safeParse({ ...base, accountName: "" }).success).toBe(false);
+  });
+  it("fills legal text from what was saved, or says the details are being updated", () => {
+    const text = ["Pay to ({{bank.summary}}) at {{bank.name}}."];
+    expect(fillBankDetails(text, base)[0]).toBe(
+      "Pay to (Access Bank, Account Number: 0123456789, Account Name: Sisioyin Stores) at Access Bank.",
+    );
+    expect(fillBankDetails(text, null)[0]).toContain("Payment details are being updated");
   });
 });
 

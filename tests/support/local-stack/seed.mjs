@@ -203,12 +203,14 @@ await pool.query(`INSERT INTO site_settings (key, value) VALUES ('store', $1::js
     announcement: "Delivery to Lagos, Ogun, Oyo, Osun, Ondo, Ekiti and Abuja",
     whatsappNumber: "2349033344860",
     supportEmail: "support@lingeriebysisioyin.store",
-    bankName: "Moniepoint MFB",
-    accountNumber: "6327082294",
-    accountName: "Oyindamola Adelugba (LingeriesBySisioyin)",
     lowStockThreshold: 5,
     notifyNewOrders: true,
   }),
 ]);
+// Demonstration bank details (the saved ones are what checkout shows).
+await pool.query(
+  `INSERT INTO payment_bank_details (bank_name, account_number, account_name, note)
+   VALUES ('Moniepoint Microfinance Bank', '6327082294', 'Oyindamola Adelugba (LingeriesBySisioyin)', '')`,
+);
 await pool.end();
 process.stderr.write(`${`seeded ${FIXTURE_PRODUCTS.length} products, ${n} orders`}\n`);

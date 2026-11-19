@@ -1,5 +1,6 @@
 import "@/lib/zod-config";
 import { z } from "zod";
+import { isKnownBank } from "@/config/banks";
 import { endOfLagosDay } from "@/lib/dates";
 import { normaliseNigerianPhone } from "@/lib/phone";
 import { ORDER_STATUSES } from "@/types/account";
@@ -80,12 +81,6 @@ export const settingsSchema = z.object({
       "Use digits only, with the country code, for example 2349033344860.",
     ),
   supportEmail: z.email("Enter a valid email address."),
-  bankName: z.string().trim().min(2, "Enter the bank name.").max(80),
-  accountNumber: z
-    .string()
-    .trim()
-    .regex(/^\d{10}$/, "An account number has 10 digits."),
-  accountName: z.string().trim().min(2, "Enter the account name.").max(120),
   lowStockThreshold: z.number().int("Use a whole number.").min(0).max(1000),
   notifyNewOrders: z.boolean(),
 });
@@ -114,3 +109,22 @@ export const messageMarkSchema = z.enum(["read", "unread"]);
 
 /** The amount of money that reached the account for a cancelled order, in whole naira (0 = nothing arrived). */
 export const receivedAmountSchema = z.number().int().min(0).max(100_000_000);
+
+export const bankDetailsSchema = z.object({
+  bankName: z
+    .string()
+    .trim()
+    .min(1, "Choose the bank.")
+    .refine(isKnownBank, "Choose the bank from the list."),
+  accountNumber: z
+    .string()
+    .trim()
+    .regex(/^\d{10}$/, "An account number has 10 digits."),
+  accountName: z.string().trim().min(2, "Enter the account name.").max(120),
+  note: z.string().trim().max(300, "Keep the note under 300 characters."),
+});
+
+export const paymentMethodSchema = z.object({
+  method: z.enum(["bank_transfer", "paystack", "flutterwave"]),
+  enabled: z.boolean(),
+});

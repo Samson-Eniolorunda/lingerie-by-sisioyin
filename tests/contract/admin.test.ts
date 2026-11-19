@@ -8,6 +8,7 @@ import { supabaseAuth } from "@/server/supabase/auth";
 import { supabaseCatalogue } from "@/server/supabase/catalogue";
 import { supabaseContact } from "@/server/supabase/contact";
 import { supabaseOrders } from "@/server/supabase/orders";
+import { supabasePayments } from "@/server/supabase/payments";
 import { receipts } from "@/server/storage/receipts";
 import {
   EDITOR,
@@ -477,7 +478,7 @@ describe("analytics and settings", () => {
   it("starts from the shop's own details and keeps what the owner saves", async () => {
     await asOwner();
     const first = await supabaseAdmin.settings();
-    expect(first.bankName).toBe("Moniepoint MFB");
+    expect(first.lowStockThreshold).toBe(5);
     const next = {
       ...first,
       announcement: `Sale ${randomUUID().slice(0, 4)}`,
@@ -489,6 +490,61 @@ describe("analytics and settings", () => {
       true,
     );
     expect((await supabaseAdmin.settings()).lowStockThreshold).toBe(4);
+  });
+});
+
+describe("payment settings", () => {
+  it("shows the saved bank details to everyone, logs each change, and keeps gateways off until connected", async () => {
+    const seen = await supabasePayments.bankDetails();
+    expect(seen?.accountNumber).toBe("6327082294");
+    await asOwner();
+    const saved = await supabaseAdmin.saveBankDetails(
+      {
+        bankName: "Access Bank",
+        accountNumber: "0123456789",
+        accountName: "Sisioyin Stores",
+        note: "Use your order number",
+      },
+      owner,
+    );
+    expect(saved.ok).toBe(true);
+    clearBrowser();
+    expect(await supabasePayments.bankDetails()).toMatchObject({
+      bankName: "Access Bank",
+      accountNumber: "0123456789",
+      note: "Use your order number",
+    });
+    await asOwner();
+    const changes = await supabaseAdmin.paymentChanges(5);
+    expect(changes[0]).toMatchObject({ entity: "bank_details" });
+    expect(changes[0]?.oldValue?.account_number).toBe("6327082294");
+    expect(changes[0]?.newValue.account_number).toBe("0123456789");
+    // Put the demonstration details back for the other tests.
+    await supabaseAdmin.saveBankDetails(
+      {
+        bankName: "Moniepoint Microfinance Bank",
+        accountNumber: "6327082294",
+        accountName: "Oyindamola Adelugba (LingeriesBySisioyin)",
+        note: "",
+      },
+      owner,
+    );
+    expect((await supabaseAdmin.setPaymentMethod("paystack", true, owner)).ok).toBe(false);
+    expect((await supabaseAdmin.setPaymentMethod("bank_transfer", false, owner)).ok).toBe(false);
+    expect((await supabasePayments.methods()).find((m) => m.method === "paystack")).toMatchObject({
+      enabled: false,
+      connected: false,
+    });
+  });
+
+  it("refuses an editor", async () => {
+    await asEditor();
+    const result = await supabaseAdmin.saveBankDetails(
+      { bankName: "Access Bank", accountNumber: "0123456789", accountName: "Someone", note: "" },
+      editor,
+    );
+    expect(result.ok).toBe(false);
+    expect((await supabasePayments.bankDetails())?.accountName).not.toBe("Someone");
   });
 });
 

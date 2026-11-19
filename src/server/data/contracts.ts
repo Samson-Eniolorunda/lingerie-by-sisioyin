@@ -2,9 +2,13 @@ import type { AddressInput, ProfileInput } from "@/schemas/auth";
 import type {
   ActivityEntry,
   Address,
+  BankDetails,
   CustomerRecord,
   InboxMessage,
   OrderStatus,
+  PaymentChange,
+  PaymentMethodId,
+  PaymentMethodState,
   PromoRecord,
   Profile,
   SessionUser,
@@ -279,6 +283,12 @@ export interface AdminRepository {
   analytics(days: 7 | 30 | 90): Promise<AnalyticsReport>;
   settings(): Promise<StoreSettings>;
   saveSettings(next: StoreSettings, actor: SessionUser): Promise<Result>;
+  /** Bank transfer details (Admin, Settings, Payments): saved in the database, every change logged. */
+  saveBankDetails(details: BankDetails, actor: SessionUser): Promise<Result>;
+  /** Switches a payment method on or off; a gateway that is not connected cannot be switched on. */
+  setPaymentMethod(method: PaymentMethodId, enabled: boolean, actor: SessionUser): Promise<Result>;
+  /** The latest changes to payment settings, with old and new values. */
+  paymentChanges(limit: number): Promise<readonly PaymentChange[]>;
   staff(): Promise<readonly StaffMember[]>;
   setStaffRole(
     id: string,
@@ -323,6 +333,13 @@ export interface VisitInput {
   readonly viewport?: string | undefined;
 }
 
+/** What checkout, e-mails and legal pages show about payment: read by everyone. */
+export interface PaymentsRepository {
+  /** The saved bank transfer details, or null when none have been saved yet. */
+  bankDetails(): Promise<BankDetails | null>;
+  methods(): Promise<readonly PaymentMethodState[]>;
+}
+
 /** Reviews, testimonials and page views: what visitors send in. Submissions always wait for approval. */
 export interface EngagementRepository {
   reviewsFor(productId: string, limit?: number): Promise<readonly PublicReview[]>;
@@ -348,6 +365,7 @@ export interface EngagementRepository {
 
 export interface DataLayer {
   readonly engagement: EngagementRepository;
+  readonly payments: PaymentsRepository;
   readonly catalogue: CatalogueRepository;
   readonly orders: OrdersRepository;
   readonly contact: ContactRepository;

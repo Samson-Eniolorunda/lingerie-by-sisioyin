@@ -375,7 +375,7 @@
                   "t": "strong",
                   "c": ["No Card Data:"]
                 },
-                " We do not collect, process, or store any credit or debit card information. Payment is made directly via bank transfer to our Moniepoint MFB account (Account Name: Oyindamola Adelugba (LingeriesbySisioyin))."
+                " We do not collect, process, or store any credit or debit card information. Payment is made directly via bank transfer to our bank account ({{bank.summary}})."
               ]
             },
             {

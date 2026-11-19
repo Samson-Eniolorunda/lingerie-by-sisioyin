@@ -471,6 +471,48 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
+  async saveBankDetails(details, actor) {
+    const db = getDb();
+    db.paymentLog.unshift({
+      id: nextId(db, "pay"),
+      at: new Date().toISOString(),
+      by: actor.email,
+      entity: "bank_details",
+      key: "",
+      oldValue: db.bank ? { ...db.bank } : null,
+      newValue: { ...details },
+    });
+    db.bank = details;
+    log(db, actor, "bank details saved", details.bankName);
+    return { ok: true };
+  },
+
+  async setPaymentMethod(method, enabled, actor) {
+    const db = getDb();
+    const current = db.paymentMethods.find((m) => m.method === method);
+    if (!current) return { ok: false, message: "That payment method does not exist." };
+    if (method === "bank_transfer" && !enabled)
+      return { ok: false, message: "Bank transfer cannot be switched off." };
+    if (enabled && !current.connected)
+      return { ok: false, message: "This method is not connected yet." };
+    db.paymentLog.unshift({
+      id: nextId(db, "pay"),
+      at: new Date().toISOString(),
+      by: actor.email,
+      entity: "payment_method",
+      key: method,
+      oldValue: { method, enabled: current.enabled, connected: current.connected },
+      newValue: { method, enabled, connected: current.connected },
+    });
+    db.paymentMethods = db.paymentMethods.map((m) => (m.method === method ? { ...m, enabled } : m));
+    log(db, actor, enabled ? "payment method on" : "payment method off", method);
+    return { ok: true };
+  },
+
+  async paymentChanges(limit) {
+    return getDb().paymentLog.slice(0, limit);
+  },
+
   async customers(search, page) {
     const needle = search.trim().toLowerCase();
     const all = customerRows(getDb()).filter(

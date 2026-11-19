@@ -80,6 +80,28 @@ export function TrackForm({ initialOrder }: { readonly initialOrder: string }) {
               placedAt={result.order.createdAt}
             />
             <OrderSummary order={result.order} />
+            {result.bank ? (
+              <section aria-labelledby="pay-heading" className="border border-line bg-surface p-4">
+                <h3 id="pay-heading" className="font-sans text-lg font-semibold">
+                  Where the payment goes
+                </h3>
+                <dl className="mt-2 space-y-1 text-base">
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Bank</dt>
+                    <dd>{result.bank.bankName}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="text-muted">Account number</dt>
+                    <dd className="tabular">{result.bank.accountNumber}</dd>
+                  </div>
+                  <div className="flex justify-between gap-3">
+                    <dt className="shrink-0 text-muted">Account name</dt>
+                    <dd className="text-right">{result.bank.accountName}</dd>
+                  </div>
+                </dl>
+                {result.bank.note ? <p className="mt-2 text-base">{result.bank.note}</p> : null}
+              </section>
+            ) : null}
             {result.order.status === "pending" && result.order.paymentStatus === "rejected" ? (
               <ReceiptReupload
                 orderNumber={result.order.orderNumber}

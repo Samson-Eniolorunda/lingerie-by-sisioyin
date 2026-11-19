@@ -416,7 +416,7 @@
                     "t": "strong",
                     "c": ["Bank:"]
                   },
-                  " Moniepoint MFB"
+                  " {{bank.name}}"
                 ]
               },
               {
@@ -426,7 +426,7 @@
                     "t": "strong",
                     "c": ["Account Number:"]
                   },
-                  " 6327082294"
+                  " {{bank.number}}"
                 ]
               },
               {
@@ -436,7 +436,7 @@
                     "t": "strong",
                     "c": ["Account Name:"]
                   },
-                  " Oyindamola Adelugba (LingeriesBySisioyin)"
+                  " {{bank.accountName}}"
                 ]
               }
             ]

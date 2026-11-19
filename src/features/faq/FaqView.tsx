@@ -6,6 +6,8 @@ import { useDeferredValue, useId, useMemo, useState } from "react";
 import { RichText } from "@/components/ui/RichText";
 import { Tabs, tabPanelProps } from "@/components/ui/Tabs";
 import { FAQ_GROUPS } from "@/content";
+import { fillBankDetails } from "@/lib/bank-details";
+import type { BankDetails } from "@/types/account";
 import type { ContentNode } from "@/content/schema";
 import { whatsappLink } from "@/config/site";
 import { cn } from "@/lib/cn";
@@ -14,7 +16,7 @@ function textOf(nodes: readonly ContentNode[]): string {
   return nodes.map((n) => (typeof n === "string" ? n : textOf(n.c))).join(" ");
 }
 
-export function FaqView() {
+export function FaqView({ bank }: { readonly bank: BankDetails | null }) {
   const [tab, setTab] = useState("all");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
@@ -25,13 +27,15 @@ export function FaqView() {
     return FAQ_GROUPS.filter((g) => deferred !== "" || tab === "all" || g.id === tab)
       .map((g) => ({
         ...g,
-        items: g.items.filter(
-          (item) =>
-            deferred === "" || `${item.q} ${textOf(item.a)}`.toLowerCase().includes(deferred),
-        ),
+        items: g.items
+          .map((item) => ({ ...item, a: fillBankDetails(item.a, bank) }))
+          .filter(
+            (item) =>
+              deferred === "" || `${item.q} ${textOf(item.a)}`.toLowerCase().includes(deferred),
+          ),
       }))
       .filter((g) => g.items.length > 0);
-  }, [tab, deferred]);
+  }, [tab, deferred, bank]);
 
   const total = groups.reduce((n, g) => n + g.items.length, 0);
 

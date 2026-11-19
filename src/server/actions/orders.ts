@@ -12,8 +12,10 @@ import {
 import { clientIp } from "@/server/auth/request";
 import { currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { PAYMENT_DETAILS_UPDATING } from "@/lib/bank-details";
 import { allowRequest, allowShared } from "@/server/rate-limit";
 import { newReceiptPath, receipts, type ReceiptUpload } from "@/server/storage/receipts";
+import type { BankDetails } from "@/types/account";
 import { trackedOrder, type Quote, type StoredOrder, type TrackedOrder } from "@/types/orders";
 
 export type PromoResult =
@@ -31,8 +33,10 @@ export async function applyPromo(input: string): Promise<PromoResult> {
   return result.ok ? { ok: true, ...result.value } : { ok: false, message: result.message };
 }
 
+/** The quote, plus the bank details to pay into (null while the owner has not saved any). */
 export type QuoteState =
-  ({ readonly ok: true } & Quote) | { readonly ok: false; readonly message: string };
+  | ({ readonly ok: true; readonly bank: BankDetails | null } & Quote)
+  | { readonly ok: false; readonly message: string };
 
 /** What to transfer: priced on the server, asked for before the bank details are shown. */
 export async function getQuote(input: unknown): Promise<QuoteState> {
@@ -42,7 +46,11 @@ export async function getQuote(input: unknown): Promise<QuoteState> {
       ok: false,
       message: parsed.error.issues[0]?.message ?? "Check your bag and delivery.",
     };
-  return data.orders.quote(parsed.data);
+  const [quote, bank] = await Promise.all([
+    data.orders.quote(parsed.data),
+    data.payments.bankDetails(),
+  ]);
+  return quote.ok ? { ...quote, bank } : quote;
 }
 
 export type UploadState =
@@ -93,6 +101,13 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderState> {
     return { ok: false, message: "Please check the highlighted details.", fieldErrors };
   }
 
+  // Nobody can be asked to pay into details that are not there.
+  if (!(await data.payments.bankDetails()))
+    return {
+      ok: false,
+      message: `${PAYMENT_DETAILS_UPDATING}. Please try again a little later, or message us on WhatsApp.`,
+    };
+
   // Shared limit by address and by e-mail: a script cannot hold stock or burn promo codes by
   // placing orders in a loop (each attempt counts, successful or not).
   if (
@@ -134,7 +149,7 @@ export async function lastOrder(): Promise<StoredOrder | null> {
 }
 
 export type TrackState =
-  | { readonly ok: true; readonly order: TrackedOrder }
+  | { readonly ok: true; readonly order: TrackedOrder; readonly bank: BankDetails | null }
   | { readonly ok: false; readonly message: string };
 
 const LOOKUP_LIMITED = "Too many attempts. Please wait a few minutes and try again.";
@@ -159,7 +174,14 @@ export async function trackOrder(input: { order: string; email: string }): Promi
   const order = await data.orders.lookup(parsed.data.order, parsed.data.email);
   if (!order)
     return { ok: false, message: "We could not find an order with that number and email address." };
-  return { ok: true, order: trackedOrder(order) };
+  const awaitingPayment =
+    order.status === "pending" &&
+    (order.paymentStatus === "awaiting_confirmation" || order.paymentStatus === "rejected");
+  return {
+    ok: true,
+    order: trackedOrder(order),
+    bank: awaitingPayment ? await data.payments.bankDetails() : null,
+  };
 }
 
 const reuploadSchema = z.object({

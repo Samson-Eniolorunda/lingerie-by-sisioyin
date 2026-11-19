@@ -12,15 +12,7 @@ export function SettingsForm({ initial }: { readonly initial: StoreSettings }) {
   const [f, setF] = useState({ ...initial, lowStockThreshold: String(initial.lowStockThreshold) });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { run, pending } = useAdminAction();
-  const text = (
-    key:
-      | "announcement"
-      | "whatsappNumber"
-      | "supportEmail"
-      | "bankName"
-      | "accountNumber"
-      | "accountName",
-  ) => ({
+  const text = (key: "announcement" | "whatsappNumber" | "supportEmail") => ({
     name: key,
     value: f[key],
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [key]: e.target.value }),
@@ -67,19 +59,6 @@ export function SettingsForm({ initial }: { readonly initial: StoreSettings }) {
           autoComplete="off"
           {...text("supportEmail")}
         />
-      </fieldset>
-      <fieldset className="flex flex-col gap-4">
-        <legend className="mb-1 font-sans text-lg font-semibold">
-          Bank details shown at checkout
-        </legend>
-        <TextField label="Bank" autoComplete="off" {...text("bankName")} />
-        <TextField
-          label="Account number"
-          inputMode="numeric"
-          autoComplete="off"
-          {...text("accountNumber")}
-        />
-        <TextField label="Account name" autoComplete="off" {...text("accountName")} />
       </fieldset>
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 font-sans text-lg font-semibold">Stock and notices</legend>

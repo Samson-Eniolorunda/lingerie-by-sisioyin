@@ -1,5 +1,5 @@
 import { deriveStock } from "@/lib/variants";
-import { BANK, CONTACT } from "@/config/site";
+import { CONTACT } from "@/config/site";
 import {
   ORDER_STATUSES,
   type OrderStatus,
@@ -103,9 +103,6 @@ const defaultSettings = (): StoreSettings => ({
   announcement: "",
   whatsappNumber: CONTACT.whatsappNumber,
   supportEmail: CONTACT.email,
-  bankName: BANK.bankName,
-  accountNumber: BANK.accountNumber,
-  accountName: BANK.accountName,
   lowStockThreshold: 5,
   notifyNewOrders: true,
 });
@@ -770,6 +767,71 @@ export const supabaseAdmin: AdminRepository = {
     if (error) return failResult(sqlMessage(error));
     await log(actor, "settings", "settings saved", "store settings");
     return okResult();
+  },
+
+  async saveBankDetails(details, actor) {
+    // One row, written by a member of staff with settings.manage; a trigger logs old and new values.
+    const client = await staff();
+    const columns = {
+      bank_name: details.bankName,
+      account_number: details.accountNumber,
+      account_name: details.accountName,
+      note: details.note,
+    };
+    const updated = await client
+      .from("payment_bank_details")
+      .update(columns)
+      .eq("id", true)
+      .select("id");
+    let error = updated.error;
+    if (!error && !updated.data?.length)
+      error = (await client.from("payment_bank_details").insert(columns)).error;
+    if (error) return failResult(sqlMessage(error));
+    await log(actor, "settings", "bank details saved", details.bankName);
+    return okResult();
+  },
+
+  async setPaymentMethod(method, enabled, actor) {
+    const { data, error } = await (
+      await staff()
+    )
+      .from("payment_methods")
+      .update({ enabled })
+      .eq("method", method)
+      .select("method");
+    if (error)
+      return failResult(
+        error.code === "23514"
+          ? "This method cannot be switched that way: a gateway must be connected first, and bank transfer stays on."
+          : sqlMessage(error),
+      );
+    if (!data?.length) return failResult("That payment method does not exist.");
+    await log(actor, "settings", enabled ? "payment method on" : "payment method off", method);
+    return okResult();
+  },
+
+  async paymentChanges(limit) {
+    const rows = must(
+      await (
+        await staff()
+      )
+        .from("payment_settings_log")
+        .select("*")
+        .order("changed_at", { ascending: false })
+        .limit(limit),
+    );
+    return rows.map((r) => ({
+      id: str(r.id),
+      at: str(r.changed_at),
+      by: r.changed_by ? str(r.changed_by) : "the server",
+      entity:
+        str(r.entity) === "payment_methods"
+          ? ("payment_method" as const)
+          : ("bank_details" as const),
+      key: str(r.entity_key),
+      oldValue: (r.old_value as Record<string, unknown> | null) ?? null,
+      newValue: (r.new_value as Record<string, unknown>) ?? {},
+    }));
   },
 
   async staff() {

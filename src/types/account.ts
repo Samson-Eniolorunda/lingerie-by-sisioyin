@@ -103,13 +103,38 @@ export interface StaffMember {
   readonly createdAt: string;
 }
 
+/** The bank transfer details customers are shown at checkout (stored in the database). */
+export interface BankDetails {
+  readonly bankName: string;
+  readonly accountNumber: string;
+  readonly accountName: string;
+  /** An optional line shown with the details, for example "Use your order number as the reference". */
+  readonly note: string;
+}
+
+export type PaymentMethodId = "bank_transfer" | "paystack" | "flutterwave";
+
+export interface PaymentMethodState {
+  readonly method: PaymentMethodId;
+  readonly enabled: boolean;
+  /** True only once a gateway is really integrated (set by the developer, never from the admin). */
+  readonly connected: boolean;
+}
+
+export interface PaymentChange {
+  readonly id: string;
+  readonly at: string;
+  readonly by: string;
+  readonly entity: "bank_details" | "payment_method";
+  readonly key: string;
+  readonly oldValue: Record<string, unknown> | null;
+  readonly newValue: Record<string, unknown>;
+}
+
 export interface StoreSettings {
   readonly announcement: string;
   readonly whatsappNumber: string;
   readonly supportEmail: string;
-  readonly bankName: string;
-  readonly accountNumber: string;
-  readonly accountName: string;
   readonly lowStockThreshold: number;
   readonly notifyNewOrders: boolean;
 }

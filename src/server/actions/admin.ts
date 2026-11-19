@@ -5,11 +5,13 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { fieldErrors } from "@/schemas/auth";
 import {
+  bankDetailsSchema,
   customerStatusSchema,
   inviteSchema,
   messageMarkSchema,
   orderStatusSchema,
   paymentDecisionSchema,
+  paymentMethodSchema,
   productDraftSchema,
   promoSchema,
   receivedAmountSchema,
@@ -308,6 +310,35 @@ export async function saveSettingsAction(input: unknown): Promise<AdminState> {
   if (!result.ok) return result;
   refresh();
   return { ok: true, message: "Settings saved." };
+}
+
+export async function saveBankDetailsAction(input: unknown): Promise<AdminState> {
+  const actor = await guard("settings.manage");
+  if (!actor) return DENIED;
+  const parsed = bankDetailsSchema.safeParse(input);
+  if (!parsed.success) return invalid(parsed.error);
+  const result = await data.admin.saveBankDetails(parsed.data, actor);
+  if (!result.ok) return result;
+  refresh();
+  revalidatePath("/", "layout");
+  return { ok: true, message: "Bank details saved. Checkout now shows them." };
+}
+
+export async function setPaymentMethodAction(
+  method: unknown,
+  enabled: unknown,
+): Promise<AdminState> {
+  const actor = await guard("settings.manage");
+  if (!actor) return DENIED;
+  const parsed = paymentMethodSchema.safeParse({ method, enabled });
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.setPaymentMethod(parsed.data.method, parsed.data.enabled, actor);
+  if (!result.ok) return result;
+  refresh();
+  return {
+    ok: true,
+    message: parsed.data.enabled ? "Payment method switched on." : "Payment method switched off.",
+  };
 }
 
 export async function setStaffRoleAction(id: string, role: unknown): Promise<AdminState> {

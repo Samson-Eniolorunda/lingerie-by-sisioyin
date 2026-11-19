@@ -6,6 +6,7 @@ import { mockCatalogue } from "@/server/mock/catalogue";
 import { mockContact } from "@/server/mock/contact";
 import { mockEngagement } from "@/server/mock/engagement";
 import { mockOrders } from "@/server/mock/orders";
+import { mockPayments } from "@/server/mock/payments";
 import { supabaseAccount } from "@/server/supabase/account";
 import { supabaseAdmin } from "@/server/supabase/admin";
 import { supabaseAuth } from "@/server/supabase/auth";
@@ -13,6 +14,7 @@ import { supabaseCatalogue } from "@/server/supabase/catalogue";
 import { supabaseContact } from "@/server/supabase/contact";
 import { supabaseEngagement } from "@/server/supabase/engagement";
 import { supabaseOrders } from "@/server/supabase/orders";
+import { supabasePayments } from "@/server/supabase/payments";
 import type { DataLayer } from "./contracts";
 
 export { DATA_MODE };
@@ -25,6 +27,7 @@ const mock: DataLayer = {
   account: mockAccount,
   admin: mockAdmin,
   engagement: mockEngagement,
+  payments: mockPayments,
 };
 
 const supabase: DataLayer = {
@@ -35,6 +38,7 @@ const supabase: DataLayer = {
   account: supabaseAccount,
   admin: supabaseAdmin,
   engagement: supabaseEngagement,
+  payments: supabasePayments,
 };
 
 /**
@@ -57,6 +61,7 @@ function unconfigured(): DataLayer {
     account: area as DataLayer["account"],
     admin: area as DataLayer["admin"],
     engagement: area as DataLayer["engagement"],
+    payments: area as DataLayer["payments"],
   };
 }
 

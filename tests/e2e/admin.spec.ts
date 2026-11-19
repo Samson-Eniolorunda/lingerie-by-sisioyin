@@ -266,12 +266,27 @@ test.describe("customers, promos, messages, settings, team", () => {
   test("settings validate and save", async ({ page }) => {
     await staff(page);
     await page.goto("/admin/settings");
-    await page.getByLabel("Account number").fill("123");
+    await page.getByLabel("WhatsApp number").fill("+234 90");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByText("An account number has 10 digits.")).toBeVisible();
-    await page.getByLabel("Account number").fill("6327082294");
+    await expect(page.getByText("Use digits only, with the country code")).toBeVisible();
+    await page.getByLabel("WhatsApp number").fill("2349033344860");
     await page.getByRole("button", { name: "Save settings" }).click();
     await expect(page.getByRole("status").getByText("Settings saved.")).toBeVisible();
+  });
+  test("bank details validate, save, show at checkout, and are logged", async ({ page }) => {
+    await staff(page);
+    await page.goto("/admin/settings/payments");
+    await page.getByLabel("Account number").fill("123");
+    await page.getByRole("button", { name: "Save bank details" }).click();
+    await expect(page.getByText("An account number has 10 digits.")).toBeVisible();
+    await page.getByLabel("Bank", { exact: true }).selectOption("Access Bank");
+    await page.getByLabel("Account number").fill("0123456789");
+    await page.getByLabel("Account name").fill("Sisioyin Stores");
+    await page.getByRole("button", { name: "Save bank details" }).click();
+    await expect(page.getByRole("status").getByText(/Bank details saved/)).toBeVisible();
+    await expect(page.getByText("Recent changes")).toBeVisible();
+    await expect(page.getByText(/Bank details: from/).first()).toBeVisible();
+    await expect(page.getByText("Not connected").first()).toBeVisible();
   });
   test("MX-07 an invitation produces a link; owners are protected", async ({ page }) => {
     await staff(page);
