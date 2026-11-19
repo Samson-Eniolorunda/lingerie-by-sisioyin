@@ -12,12 +12,25 @@ import { receipts } from "@/server/storage/receipts";
 export async function GET(request: Request): Promise<NextResponse> {
   const actor = await staffFor("orders.view");
   if (!actor) return NextResponse.redirect(new URL(adminPath("/sign-in"), request.url), 303);
-  const path = new URL(request.url).searchParams.get("path") ?? "";
+  const params = new URL(request.url).searchParams;
+  const path = params.get("path") ?? "";
+  const orderNumber = params.get("order") ?? "";
   if (path.length === 0 || path.length > 300 || path.includes(".."))
     return NextResponse.json(
       { ok: false, message: "That receipt was not found." },
       { status: 400 },
     );
+  // A receipt on an order is opened from that order's page; the order must really hold this path.
+  if (orderNumber) {
+    const order = await data.admin.order(orderNumber);
+    if (!order || order.receiptPath !== path)
+      return NextResponse.json(
+        { ok: false, message: "That receipt was not found." },
+        { status: 404 },
+      );
+    const link = await receipts.link(path);
+    return NextResponse.redirect(new URL(link.url, request.url), 303);
+  }
   const rows = await data.admin.orphanReceipts();
   if (!rows.some((r) => r.path === path))
     return NextResponse.json(

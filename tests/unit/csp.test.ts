@@ -22,6 +22,12 @@ describe("content security policy", () => {
       .find((d) => d.startsWith("connect-src"));
     expect(bare).not.toContain("supabase");
   });
+  it("allows images from the configured storage origin, so signed receipt links show", () => {
+    const local = buildCsp({ nonce: "x", supabaseUrl: "http://127.0.0.1:54321", isDev: false });
+    expect(local.split("; ").find((d) => d.startsWith("img-src"))).toContain(
+      "http://127.0.0.1:54321",
+    );
+  });
   it("allows Cloudinary images and sets framing and opener headers", () => {
     expect(csp.split("; ").find((d) => d.startsWith("img-src"))).toContain(
       "https://res.cloudinary.com",

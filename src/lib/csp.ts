@@ -35,6 +35,8 @@ export function buildCsp({
       "data:",
       "blob:",
       "https://*.supabase.co",
+      // The configured storage host too, so a signed link from a local stack still shows.
+      ...(supabaseUrl ? [new URL(supabaseUrl).origin] : []),
       "https://res.cloudinary.com",
       "https://www.google-analytics.com",
       "https://www.facebook.com",

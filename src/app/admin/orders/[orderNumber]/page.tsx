@@ -70,18 +70,32 @@ export default async function OrderDetailPage({
                 ? `. The customer may send another until ${formatDateTime(order.receiptReuploadUntil)}, then the order is cancelled.`
                 : ""}
             </p>
-            {receipt ? (
+            {receipt && order.receiptPath ? (
               <figure>
-                <div className="relative mx-auto aspect-[3/4] w-full max-w-[18rem] overflow-hidden border border-line bg-tint">
-                  <Image
-                    src={receipt.url}
-                    alt={`Receipt uploaded for order ${order.orderNumber}`}
-                    fill
-                    sizes="288px"
-                    unoptimized
-                    className="object-contain"
-                  />
-                </div>
+                {receipt.kind === "image" ? (
+                  <div className="relative mx-auto aspect-[3/4] w-full max-w-[18rem] overflow-hidden border border-line bg-tint">
+                    <Image
+                      src={receipt.url}
+                      alt={`Receipt uploaded for order ${order.orderNumber}`}
+                      fill
+                      sizes="288px"
+                      unoptimized
+                      className="object-contain"
+                    />
+                  </div>
+                ) : null}
+                <p className={receipt.kind === "image" ? "mt-3" : ""}>
+                  <a
+                    href={adminPath(
+                      `/receipts/view?order=${encodeURIComponent(order.orderNumber)}&path=${encodeURIComponent(order.receiptPath)}`,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-11 items-center justify-center border border-control px-4 text-base font-medium no-underline hover:bg-tint"
+                  >
+                    Open receipt{receipt.kind === "pdf" ? " (PDF)" : ""}
+                  </a>
+                </p>
                 <figcaption className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
                   {order.receiptPath}
                   {receipt.mocked ? <Badge tone="warning">Placeholder</Badge> : null}
