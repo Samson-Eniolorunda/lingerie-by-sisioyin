@@ -62,12 +62,13 @@ export default async function AnalyticsPage({
           </div>
         ))}
       </dl>
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid items-start gap-6 lg:grid-cols-2">
         <Panel title="Revenue each day">
           <BarChart
             days={report.series}
             value={(d) => d.revenueNgn}
             label="Revenue from delivered orders"
+            empty="No revenue yet"
             format={formatNaira}
           />
         </Panel>
@@ -76,6 +77,7 @@ export default async function AnalyticsPage({
             days={report.series}
             value={(d) => d.views}
             label="Page views"
+            empty="No visits yet"
             format={(n) => n.toLocaleString("en-GB")}
           />
         </Panel>
@@ -86,7 +88,7 @@ export default async function AnalyticsPage({
           <TallyList rows={report.topProducts} empty="No sales yet." />
         </Panel>
         <Panel title="Most viewed pages">
-          <TallyList rows={report.topPages} />
+          <TallyList rows={report.topPages} empty="No visits yet." />
         </Panel>
         <Panel title="Where orders go">
           <TallyList rows={report.states} />
