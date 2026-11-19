@@ -86,7 +86,7 @@ export default async function HomePage() {
             View all
           </Link>
         </div>
-        <ul className="mt-4 flex snap-x snap-mandatory scrollbar-none gap-3 overflow-x-auto px-4 pb-2 sm:px-8 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible">
+        <ul className="mt-4 flex snap-x snap-mandatory scroll-px-4 scrollbar-none gap-3 overflow-x-auto px-4 pb-2 sm:scroll-px-8 sm:px-8 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible">
           {products.slice(0, 8).map((product, index) => (
             <li key={product.id} className="w-[44vw] shrink-0 snap-start md:w-auto">
               <ProductCard product={product} priority={index < 2} />
