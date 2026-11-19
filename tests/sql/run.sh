@@ -30,6 +30,7 @@ LOAD=(env PGOPTIONS="-c client_min_messages=warning" "${PSQL[@]}")
 "${LOAD[@]}" -f "$HERE/stubs.sql" >/dev/null
 "${LOAD[@]}" -f "$ROOT/supabase/baseline/0000_baseline.sql" >/dev/null
 "${LOAD[@]}" -f "$ROOT/supabase/baseline/0001_receipts_bucket.sql" >/dev/null
+"${LOAD[@]}" -f "$ROOT/supabase/baseline/0002_messages_and_admin_reports.sql" >/dev/null
 "${LOAD[@]}" -f "$HERE/helpers.sql" >/dev/null
 echo "Baseline applied to a fresh database."
 

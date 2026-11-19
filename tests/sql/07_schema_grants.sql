@@ -4,10 +4,12 @@ DO $$
 DECLARE
   rec record;
   anon_ok text[] := ARRAY['has_permission', 'is_admin', 'is_active_account', 'validate_invite_token',
-                          'validate_promo', 'quote_order', 'place_order', 'record_visit', 'update_visit_duration'];
+                          'validate_promo', 'quote_order', 'place_order', 'record_visit', 'update_visit_duration',
+                          'submit_contact_message'];
   auth_ok text[] := anon_ok || ARRAY['cancel_order', 'attach_receipt', 'claim_guest_orders', 'request_account_deletion',
                           'set_staff_role', 'set_account_status', 'set_return_privilege', 'create_admin_invite',
-                          'set_order_status', 'decide_payment', 'mark_refunded'];
+                          'set_order_status', 'decide_payment', 'mark_refunded', 'reply_to_message',
+                          'admin_customers', 'admin_customer_stats', 'admin_order_counts', 'admin_summary', 'admin_analytics'];
   bad text;
 BEGIN
   -- Columns the app needs.
