@@ -288,7 +288,7 @@ describe("orders", () => {
       false,
     );
     const tooMany = await supabaseOrders.quote({
-      lines: [{ ...lines[0]!, qty: 100 }],
+      lines: [{ id: product.id, selectedSize: size, selectedColor: colour, qty: 100 }],
       state: "Lagos",
     });
     expect(!tooMany.ok && tooMany.message).toMatch(/quantities/i);
