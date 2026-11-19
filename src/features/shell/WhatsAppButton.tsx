@@ -4,6 +4,7 @@ import { MessageCircle, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { whatsappLink } from "@/config/site";
+import { cn } from "@/lib/cn";
 
 /** Pages with totals or order figures: the button would sit on them, so it is not shown. */
 const HIDDEN_ON = new RegExp("^/(cart|confirmation|dashboard/orders/[^/]+)(/|$)");
@@ -27,9 +28,12 @@ export function WhatsAppButton() {
   }, [open]);
 
   if (HIDDEN_ON.test(pathname)) return null;
+  // On a product page the heart and the add button sit where the corner button would float, so on
+  // wider screens it steps aside; phones keep it above the sticky add-to-bag bar.
+  const onProduct = pathname.startsWith("/products/");
   return (
     <div
-      className="whatsapp-fab flex flex-col items-end gap-3"
+      className={cn("whatsapp-fab flex flex-col items-end gap-3", onProduct && "md:hidden")}
       data-print="hide"
       data-keyboard-hide
     >

@@ -40,7 +40,8 @@ export function CookieSettingsButton({ className }: { readonly className?: strin
 
 /**
  * Asked once, in plain words, with both answers equally easy: "Essential only" on the left and
- * "Accept analytics" on the right. It does not cover the page or block it.
+ * "Accept analytics" on the right. On wider screens it is a slim bar along the bottom edge, stopping
+ * short of the chat button, so it does not sit on the page text.
  */
 export function ConsentBanner({ answered }: { readonly answered: boolean }) {
   const record = useConsent();
@@ -64,19 +65,21 @@ export function ConsentBanner({ answered }: { readonly answered: boolean }) {
     <section
       aria-labelledby="consent-title"
       data-print="hide"
-      className="fixed inset-x-0 z-[calc(var(--z-toast)+1)] mx-auto w-[min(32rem,calc(100vw-1.5rem))] border border-line bg-surface p-4 shadow-lg md:right-auto md:bottom-6! md:left-6 md:mx-0 md:w-[22rem]"
+      className="fixed inset-x-0 z-[calc(var(--z-toast)+1)] mx-auto w-[min(32rem,calc(100vw-1.5rem))] border border-line bg-surface p-4 shadow-lg sm:right-20 sm:mx-0 sm:flex sm:w-auto sm:items-center sm:justify-between sm:gap-8 sm:border-x-0 sm:border-b-0 sm:px-8 sm:py-3 sm:shadow-none md:bottom-0!"
       style={{ bottom: "calc(var(--bottom-nav-h) + var(--safe-bottom) + 0.75rem)" }}
     >
-      <h2 id="consent-title" className="font-sans text-sm font-semibold">
-        Cookies and measuring visits
-      </h2>
-      <p className="mt-0.5 text-sm text-muted">
-        We measure visits only with your permission.{" "}
-        <Link href="/privacy#cookies" className="text-primary underline underline-offset-4">
-          Privacy policy
-        </Link>
-      </p>
-      <div className="mt-3">
+      <div className="sm:min-w-0">
+        <h2 id="consent-title" className="font-sans text-sm font-semibold">
+          Cookies and measuring visits
+        </h2>
+        <p className="mt-0.5 text-sm text-muted">
+          We measure visits only with your permission.{" "}
+          <Link href="/privacy#cookies" className="text-primary underline underline-offset-4">
+            Privacy policy
+          </Link>
+        </p>
+      </div>
+      <div className="mt-3 sm:mt-0 sm:shrink-0">
         <ButtonRow
           secondary={
             <Button
