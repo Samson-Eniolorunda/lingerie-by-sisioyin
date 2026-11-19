@@ -81,3 +81,32 @@ describe("checkout schemas", () => {
     expect(trackSchema.safeParse({ order: "123", email: "a@b.co" }).success).toBe(false);
   });
 });
+
+describe("the receipt upload record", () => {
+  it("shortens long contact details instead of refusing the upload", async () => {
+    const { receiptUploadSchema } = await import("@/schemas/checkout");
+    const parsed = receiptUploadSchema.parse({
+      idempotencyKey: "upload-key-000000000001",
+      type: "image/jpeg",
+      size: 1000,
+      contact: { name: `  ${"N".repeat(300)} `, email: "a@b.co", phone: "0".repeat(90) },
+      quotedTotal: 7000,
+    });
+    expect(parsed.contact?.name).toHaveLength(120);
+    expect(parsed.contact?.phone).toHaveLength(30);
+    expect(parsed.quotedTotal).toBe(7000);
+  });
+
+  it("drops contact details that are not usable, and still accepts the upload", async () => {
+    const { receiptUploadSchema } = await import("@/schemas/checkout");
+    const parsed = receiptUploadSchema.parse({
+      idempotencyKey: "upload-key-000000000001",
+      type: "application/pdf",
+      size: 1000,
+      contact: { name: 5 },
+      quotedTotal: Number.NaN,
+    });
+    expect(parsed.contact).toBeUndefined();
+    expect(parsed.quotedTotal).toBeUndefined();
+  });
+});

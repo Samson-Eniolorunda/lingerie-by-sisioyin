@@ -72,15 +72,21 @@ export const receiptUploadSchema = z.object({
   idempotencyKey: orderInputKey(),
   type: z.string().max(60),
   size: z.number().int().min(1),
-  /** Who is uploading, so a receipt that never reaches an order can still be traced to a person. */
+  /**
+   * Who is uploading, so a receipt that never reaches an order can still be traced to a person.
+   * This is a record for staff, not a form check: the customer may already have paid, so a long
+   * name or phone number is trimmed and shortened to fit, never refused, and a malformed value is
+   * dropped rather than failing the upload.
+   */
   contact: z
     .object({
-      name: z.string().max(120),
-      email: z.string().max(200),
-      phone: z.string().max(30),
+      name: z.string().transform((value) => value.trim().slice(0, 120)),
+      email: z.string().transform((value) => value.trim().slice(0, 200)),
+      phone: z.string().transform((value) => value.trim().slice(0, 30)),
     })
-    .optional(),
-  quotedTotal: z.number().min(0).max(100_000_000).optional(),
+    .optional()
+    .catch(undefined),
+  quotedTotal: z.number().min(0).optional().catch(undefined),
 });
 
 export const trackSchema = z.object({

@@ -230,6 +230,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
       try {
         let path = uploaded.current?.file === file ? uploaded.current.path : null;
         if (!path) {
+          // The server trims and shortens these details to fit; it never refuses an upload for them.
           const sent = await uploadReceiptFor(idempotencyKey, file, undefined, {
             contact: {
               name: `${values.firstName} ${values.lastName}`.trim(),
