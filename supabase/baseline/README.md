@@ -121,7 +121,9 @@ Supabase project that is deleted afterwards. Any check kept for production must 
 |---|---|
 | `01_profiles_roles.sql` | no client can change role, `is_admin`, status, return privilege or deletion date; the owner cannot be demoted or deleted; nobody assigns owner |
 | `02_signup_invites.sql` | no first-user owner; roles never from metadata; hashed, single-use, expiring, e-mail-bound invitations |
-| `09_hardening.sql` | `place_order` and `quote_order` are server-only, the receipt must exist under the checkout's own folder and belong to one order; a cancelled order with an unaccepted receipt opens a refund check; failed checkouts and orphan receipts; `stock_version`; the shared rate limit; staff cannot edit other staff |
+| `09_hardening.sql` | `place_order` and `quote_order` are server-only, the receipt must exist under the checkout's own folder and belong to one order; a cancelled order with an unaccepted receipt opens a refund check; failed checkouts, receipt uploads with the customer's contact details and receipts opened by staff, overpayments owed in full; `stock_version`; the shared rate limit; staff cannot edit other staff |
+| `10_payments.sql` | bank details and payment methods are public to read but carry no staff identifier; every change is logged |
+| `11_owner_cleanup.sql` | the owner's test-data clean-up removes only rows with the `+lbstest` marker |
 | `03_status_permissions.sql` | suspended and banned accounts get nothing; `has_permission` matches `permissions.ts` |
 | `04_orders_place.sql` | no direct order writes; exact variant, inactive products, stock, promo, server total, idempotency, order numbers |
 | `05_orders_lifecycle.sql` | cancellation, transitions, payment decision, rejection and expiry, refund owed, guest-order claim |

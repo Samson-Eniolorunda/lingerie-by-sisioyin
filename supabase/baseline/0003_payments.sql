@@ -22,8 +22,7 @@ CREATE TABLE IF NOT EXISTS public.payment_bank_details (
   account_number TEXT        NOT NULL CHECK (account_number ~ '^[0-9]{10}$'),
   account_name   TEXT        NOT NULL CHECK (char_length(trim(account_name)) BETWEEN 2 AND 120),
   note           TEXT        NOT NULL DEFAULT '' CHECK (char_length(note) <= 300),
-  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_by     UUID        REFERENCES auth.users(id) ON DELETE SET NULL
+  updated_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 ALTER TABLE public.payment_bank_details ENABLE ROW LEVEL SECURITY;
 
@@ -53,7 +52,6 @@ CREATE TABLE IF NOT EXISTS public.payment_methods (
   -- Set only by the service role once a gateway really is integrated; never from the admin screen.
   connected  BOOLEAN     NOT NULL DEFAULT false,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_by UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
   CONSTRAINT payment_methods_enabled_needs_connection CHECK (NOT enabled OR connected),
   CONSTRAINT payment_methods_bank_transfer_always_on CHECK (method <> 'bank_transfer' OR (enabled AND connected))
 );
@@ -86,7 +84,6 @@ BEGIN
     END IF;
   END IF;
   NEW.updated_at := now();
-  NEW.updated_by := auth.uid();
   RETURN NEW;
 END;
 $$;
@@ -237,9 +234,8 @@ REVOKE ALL ON FUNCTION public.record_gateway_event(TEXT, TEXT, JSONB) FROM PUBLI
 REVOKE ALL ON FUNCTION public.confirm_gateway_payment(TEXT, TEXT, TEXT, NUMERIC) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.fail_gateway_payment(TEXT, TEXT, TEXT) FROM PUBLIC, anon, authenticated;
 
--- Public readers see exactly what the checkout shows; `updated_by` (a staff member's id) stays private.
-GRANT SELECT (id, bank_name, account_number, account_name, note, updated_at) ON public.payment_bank_details TO anon, authenticated;
-GRANT SELECT ON public.payment_methods TO anon, authenticated;
+-- These two tables are public, so they carry no staff identifiers: who changed what is in payment_settings_log (staff only).
+GRANT SELECT ON public.payment_bank_details, public.payment_methods TO anon, authenticated;
 GRANT SELECT ON public.payment_settings_log TO authenticated;
 GRANT INSERT (bank_name, account_number, account_name, note), UPDATE (bank_name, account_number, account_name, note)
   ON public.payment_bank_details TO authenticated;

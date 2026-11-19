@@ -40,10 +40,10 @@ BEGIN
   PERFORM t.reset();
   PERFORM t.as_anon();
   PERFORM t.ok(t.try('SELECT 1 FROM public.payment_bank_details') = 'rows: 1', 'the checkout can read what was saved');
-  PERFORM t.ok(t.try('SELECT updated_by FROM public.payment_bank_details') = 'error: 42501', 'the public cannot read which staff member saved the details');
+  PERFORM t.ok(NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name IN ('payment_bank_details', 'payment_methods') AND column_name = 'updated_by'),
+               'the public payment tables carry no staff identifier');
   PERFORM t.ok(t.try('SELECT bank_name, account_number, account_name, note FROM public.payment_bank_details') = 'rows: 1', 'the public reads the columns the checkout shows');
   PERFORM t.reset();
-  PERFORM t.ok((SELECT updated_by = adm FROM public.payment_bank_details), 'the row records who saved it');
 
   -- Every change is logged with the old and new values.
   PERFORM t.ok((SELECT count(*) FROM public.payment_settings_log WHERE entity = 'payment_bank_details') = 2, 'the insert and the update were both logged');
