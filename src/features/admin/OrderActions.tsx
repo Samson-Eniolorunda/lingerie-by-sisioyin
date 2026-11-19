@@ -164,7 +164,10 @@ export function OrderActions({
             </Button>
           }
         />
-        <div className="flex justify-end">{cancel}</div>
+        {cancel ? (
+          // A quieter action on its own row, apart from the two main buttons.
+          <div className="mt-2 flex border-t border-line pt-4">{cancel}</div>
+        ) : null}
         <Sheet
           open={rejecting}
           onOpenChange={setRejecting}
@@ -200,7 +203,7 @@ export function OrderActions({
             name="reason"
             autoComplete="off"
             maxLength={300}
-            hint="Included in the e-mail to the customer."
+            hint="Included in the e-mail to the customer and kept in the staff activity log."
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
