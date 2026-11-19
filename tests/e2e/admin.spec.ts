@@ -2,6 +2,7 @@ import { expect, test } from "./fixtures";
 import {
   DEMO_EDITOR,
   DEMO_OWNER,
+  SUPABASE_E2E,
   PHONE_WIDTHS,
   horizontalOverflow,
   signInAs,
@@ -85,7 +86,7 @@ test.describe("orders (MO)", () => {
     await page.goto("/admin/orders?status=pending");
     await page.getByRole("link", { name: /^LBS-/ }).last().click();
     await expect(page.getByText("Payment receipt")).toBeVisible();
-    await expect(page.getByText("Placeholder", { exact: true })).toBeVisible();
+    if (!SUPABASE_E2E) await expect(page.getByText("Placeholder", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Confirm payment" }).click();
     await expect(page.getByRole("button", { name: "Start preparing" })).toBeVisible();
     await page.getByRole("button", { name: "Start preparing" }).click();
@@ -290,7 +291,8 @@ test.describe("customers, promos, messages, settings, team", () => {
       "aria-current",
       "page",
     );
-    await expect(page.getByTestId("sample-note")).toBeVisible();
+    // The development store says its figures are samples; a real database's are not.
+    await expect(page.getByTestId("sample-note")).toHaveCount(SUPABASE_E2E ? 0 : 1);
     await expect(page.getByRole("img", { name: /Revenue from delivered orders/ })).toBeVisible();
     await page.getByRole("link", { name: "90 days" }).click();
     await expect(page.getByRole("img", { name: /over 90 days/ }).first()).toBeVisible();

@@ -1,5 +1,36 @@
 # Rebuild status
 
+## Session 6 (19 November 2026, scheduled run): the Supabase data layer
+
+**What was built.** Every data contract now has a real implementation against `supabase/baseline`, in `src/server/supabase`: catalogue, contact, auth, orders (quote, place, cancel, payment decision, receipt re-upload, expiry), account, admin (products, orders, customers, promos, messages, analytics, staff and invitations, activity log, settings), reviews, testimonials and page visits. Receipts use the private `payment-receipts` bucket with signed uploads and short signed links. `DATA_MODE` is `supabase` when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set; `mock` only on a developer's machine or with `LBS_ALLOW_DEMO=true`; otherwise `unconfigured`, and every call is refused with a message naming the missing variables. A production build never serves invented data.
+
+**Authentication.** `@supabase/ssr` cookies, one per audience (`lbs-auth` for the storefront, `lbs-staff-auth` for the admin), both HTTP-only and lax (an e-mail link is a cross-site navigation and must carry the PKCE verifier cookie). The proxy renews each session that has a cookie and costs a visitor with none no network call. `/auth/callback?code=&next=&aud=` exchanges the one-time code for a session of the right audience; a recovery link also leaves a short cookie so the new password goes to the right account. Google sign-in redirects through Supabase. Sign-up with e-mail confirmation on returns "check your e-mail"; guest orders attach to the account only after the address is verified (`claim_guest_orders`).
+
+**SQL changed (not applied to any real project).** New `0002_messages_and_admin_reports.sql`: `contact_messages`, `contact_replies`, `submit_contact_message`, `reply_to_message`, and the report functions `admin_summary`, `admin_order_counts`, `admin_customers`, `admin_customer_stats`, `admin_analytics`. `0000_baseline.sql` now sells assorted packs and products without variants (the app has such products; the first baseline could not order them) and uses the same stock wording as the app. SQL suite: **575 checks pass** (`08_messages_admin.sql` added; `04` extended).
+
+**How it was tested.** No Docker and no real Supabase, so `tests/support/local-stack` starts a throwaway PostgreSQL 16, applies the baseline in order and puts a small local stand-in for the Supabase HTTP API in front of it (the PostgREST query subset, the GoTrue password, PKCE, refresh and admin calls, and the Storage signed-upload calls the app uses; roles and claims are set per request like PostgREST does). Nothing connects to any remote service.
+
+| Gate | Result |
+|---|---|
+| format, lint (0 warnings), typecheck, forbidden patterns | clean |
+| unit tests | 156 pass (`data-mode.test.ts` added: production never falls back to fake data) |
+| SQL tests (`npm run test:sql`) | 575 checks pass |
+| data-layer contract tests (`npm run test:contract`) | 46 pass against the local stack: auth (lockout, suspended and banned, staff versus customer, sign-up, recovery with one-time code, Google), orders (variant stock, idempotency, changed total, receipts, promos, cancellation, expiry), account, every admin area including permissions for editors and visitors |
+| build | passes (mock with `LBS_ALLOW_DEMO=true`; and against the local stack) |
+| Playwright, mock (`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run test:e2e`) | 340 pass, 13 skipped |
+| Playwright, local Postgres (`npm run test:e2e:supabase`) | 340 pass, 13 skipped (the same suite; the Google, reset-link, receipt-upload and analytics-sample tests have a Supabase variant) |
+
+**What the stand-in cannot prove (do these on the real project; they are step 9 of `OWNER_SETUP.md`).**
+1. The signed receipt upload with a plain `PUT` and the file as the body, from the browser, against real Supabase Storage.
+2. Real GoTrue behaviour: e-mail confirmation and recovery e-mails and their redirect URLs, ban durations, Google.
+3. The `tests/sql` files once in the real project's SQL editor (the stubs are close to, not the same as, Supabase's `auth` and `storage`).
+4. Row level security as seen through the real PostgREST (the stand-in sets the role and claims the same way, but it is not PostgREST).
+
+**Known gaps (unchanged unless stated).** No e-mail is sent (orders, replies, invitations). The invitation link is created and shown, but the sign-up screen behind it is not built. Review and testimonial moderation screens do not exist (the data layer reads only approved ones; approving is done in the Supabase table editor for now). The catalogue is filtered in memory over the live list (fine for a few hundred products). The sign-in lock and the upload limiter are per server instance. Unused uploaded receipts are not cleaned up. The bank details in `src/config/site.ts` are **to be confirmed by the owner** (`OWNER_SETUP.md`, step 6).
+
+**Go-live steps:** `OWNER_SETUP.md`, steps 1 to 10, in order.
+
+---
 Branch `rebuild/production`, built from `REBUILD_PLAN.md`. Nothing here touched any Supabase project, database or other service, and no key exists in the code or in any file. All data comes from development fixtures and an in-memory mock store behind the data-access contracts in `src/server/data`. `main` was not changed, no pull request was opened, nothing was merged or deployed.
 
 Date of this run (session 4): 19 November 2026. Gates run on this branch: format, lint (max-warnings 0), typecheck, forbidden patterns, unit tests, SQL tests, build and the full Playwright suite, all clean.
@@ -7,7 +38,7 @@ Date of this run (session 4): 19 November 2026. Gates run on this branch: format
 ## Session 5 (19 November 2026, scheduled run)
 
 - Brand name is now "Lingeries by Sisioyin" in every visible text, metadata, manifest, emails, legal text, README and docs; `tests/unit/brand.test.ts` fails if the singular name returns in any tracked file. The wordmark and footer read "Lingeries".
-- Session 4 review fixes (A and B) were re-read against this file and the code; nothing further was found missing. The Supabase data layer is still not written (needs the real project).
+- Session 4 review fixes (A and B) were re-read against this file and the code; nothing further was found missing. (The Supabase data layer, then unwritten, is described in Session 6 below.)
 - `tests/e2e/responsive.spec.ts`: storefront, account and admin at 360, 390, 430, 768, 1280 and 1536 px, light and dark: no sideways scroll, 44 px targets below 1024 px, primary button right of the secondary at phone widths. It found a wishlist heart shrinking to 41 px at 768 px (fixed).
 - `OWNER_SETUP.md` written. Bank details live in `src/config/site.ts`, not in an environment variable.
 - Gates: format, lint, typecheck, forbidden patterns, unit tests, build and the full Playwright suite clean (the browser is selected with `CHROMIUM_PATH=/opt/pw-browsers/chromium` in this environment).
@@ -54,7 +85,7 @@ The anon key ships to browsers, so row level security and column grants are the 
 
 ### Known gaps after session 4
 
-- **The Supabase implementation of the contracts is not written.** The contracts and the SQL match, but nothing maps one to the other yet, and the signed-upload receipt store is a mock. It needs the real project to be built and tested against.
+- **(Closed in session 6.)** The Supabase implementation of the contracts is written in `src/server/supabase` and tested against a local database; see Session 6. Still open from this list: guest re-upload now runs on the server with the service role (done); unused uploaded receipts are still not cleaned up.
 - Guest re-upload of a receipt after a rejection must run on the server with the service role (the SQL forbids it for anon); the mock does this, the real store must too.
 - The in-memory upload limiter is per server instance; the bucket's size and type limits are the hard boundary. Unused uploaded receipts (an upload with no order) are not cleaned up yet.
 - Email (order, reply, invitation) is still not sent; no invitation sign-up screen yet.
@@ -144,7 +175,7 @@ Lighthouse 13.6.0, local production build, default mobile throttling, one run pe
 
 ## Honest verdict: is it production level on phones?
 
-**Closer, but still no.** The admin is usable on a 360 to 430 px phone for the daily jobs: check a receipt and move an order on, add or edit a product with stock and photographs, answer a message, set a promo, read the numbers, invite staff. Layouts, tap targets and keyboard handling hold at the three phone widths and the larger ones, and the storefront pages now score 99 to 100 on Lighthouse apart from the `/shop` simulation. But nothing runs against a real database: no sign-in survives a restart, orders do not reach anyone, no email is sent, product photographs are placeholders, and the checkout cannot place a real order. Three things in the admin are known to be thin: no customer detail with visit data, no reviews or site-image management, and no staff sign-up from an invitation link (the link is created and shown, but the sign-up screen behind it is not built). Nothing has been tried on a real phone. Do not point customers or staff at this branch yet.
+**Closer, but still no.** The admin is usable on a 360 to 430 px phone for the daily jobs: check a receipt and move an order on, add or edit a product with stock and photographs, answer a message, set a promo, read the numbers, invite staff. Layouts, tap targets and keyboard handling hold at the three phone widths and the larger ones, and the storefront pages now score 99 to 100 on Lighthouse apart from the `/shop` simulation. Since session 6 the app also runs against a database (a local one, in tests): sign-in survives a restart and orders are stored. It has still never run against a real Supabase project, no email is sent and product photographs are placeholders. Three things in the admin are known to be thin: no customer detail with visit data, no reviews or site-image management, and no staff sign-up from an invitation link (the link is created and shown, but the sign-up screen behind it is not built). Nothing has been tried on a real phone. Do not point customers or staff at this branch yet.
 
 ## What is still needed from the owner
 

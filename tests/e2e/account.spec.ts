@@ -1,6 +1,7 @@
 import { expect, test } from "./fixtures";
 import {
   DEMO_CUSTOMER,
+  SUPABASE_E2E,
   PHONE_WIDTHS,
   horizontalOverflow,
   signInAs,
@@ -45,6 +46,11 @@ test.describe("sign-in screen", () => {
   test("A-05 the Google button explains that it is not connected yet", async ({ page }) => {
     await page.goto("/sign-in");
     await page.getByRole("button", { name: "Continue with Google" }).click();
+    if (SUPABASE_E2E) {
+      // The local stack plays Google: it sends the browser back with a code, which signs it in.
+      await page.waitForURL("**/dashboard");
+      return;
+    }
     await expect(page.getByText("Google sign-in is not connected")).toBeVisible();
   });
 
@@ -127,8 +133,17 @@ test("A-06 A-07 forgotten and reset password: single use, then sign in with the 
   await page.getByLabel("Email address").fill(email);
   await page.getByRole("button", { name: "Send reset link" }).click();
   await expect(page.getByText(email)).toBeVisible();
-  const resetLink =
-    (await page.getByRole("link", { name: "Open the reset link" }).getAttribute("href")) ?? "";
+  let resetLink = "";
+  if (SUPABASE_E2E) {
+    // No inbox in the local stack: its test endpoint returns the link it "sent".
+    const mail = await page.request.get(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/test/mail?to=${encodeURIComponent(email)}`,
+    );
+    resetLink = ((await mail.json()) as { link: string }).link;
+  } else {
+    resetLink =
+      (await page.getByRole("link", { name: "Open the reset link" }).getAttribute("href")) ?? "";
+  }
   await page.goto(resetLink);
   await page.getByLabel("New password", { exact: true }).fill("Changed-Pass2!");
   await page.getByLabel("Confirm new password").fill("Changed-Pass2!");

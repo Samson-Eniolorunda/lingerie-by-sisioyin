@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { productId } from "./helpers";
+import { SUPABASE_E2E, productId } from "./helpers";
 
 const BRIEF = {
   variantId: "fixture-02-M-Black",
@@ -175,7 +175,9 @@ test("the receipt goes straight to storage, not through a server action", async 
     .click();
   await expect(page).toHaveURL(/\/confirmation$/);
   expect(uploads).toHaveLength(1);
-  expect(uploads[0]).toContain("/api/receipts/mock?path=");
+  expect(uploads[0]).toContain(
+    SUPABASE_E2E ? "/storage/v1/object/upload/sign/payment-receipts/" : "/api/receipts/mock?path=",
+  );
   expect(actionBodies).toBe(0);
 });
 
@@ -193,7 +195,10 @@ test("a receipt that is too large for its type is explained in plain words", asy
 
 test("a failed upload says so and keeps the order unplaced", async ({ page }) => {
   await seedBag(page, [BRIEF]);
-  await page.route("**/api/receipts/mock**", (route) => route.abort("failed"));
+  await page.route(
+    SUPABASE_E2E ? "**/storage/v1/object/upload/sign/**" : "**/api/receipts/mock**",
+    (route) => route.abort("failed"),
+  );
   await page.goto("/checkout");
   await fillContactAndDelivery(page);
   await page.locator("#receipt").setInputFiles(receipt);

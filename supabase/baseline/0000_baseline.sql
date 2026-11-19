@@ -1044,8 +1044,12 @@ BEGIN
         USING ERRCODE = 'LB001', HINT = 'variant_unavailable';
     END IF;
     IF COALESCE((v_variant->>'qty')::INTEGER, 0) < v_qty THEN
-      RAISE EXCEPTION '% (%) has only % left. Lower the quantity to continue.',
-        p.name, v_size, GREATEST(0, COALESCE((v_variant->>'qty')::INTEGER, 0))
+      IF COALESCE((v_variant->>'qty')::INTEGER, 0) <= 0 THEN
+        RAISE EXCEPTION '% (%) is out of stock. Remove it from your bag to continue.', p.name, v_size
+          USING ERRCODE = 'LB001', HINT = 'out_of_stock';
+      END IF;
+      RAISE EXCEPTION 'Only % of % (%) are left. Lower the quantity to continue.',
+        GREATEST(0, COALESCE((v_variant->>'qty')::INTEGER, 0)), p.name, v_size
         USING ERRCODE = 'LB001', HINT = 'out_of_stock';
     END IF;
 

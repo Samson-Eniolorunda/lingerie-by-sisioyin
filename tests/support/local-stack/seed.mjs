@@ -120,6 +120,21 @@ const { rows: variants } = await pool.query(
   `SELECT id, name, price_ngn, variant_stock FROM products WHERE qty > 20 AND jsonb_array_length(variant_stock) > 0 ORDER BY created_at LIMIT 6`,
 );
 let n = 0;
+
+/** A one-pixel JPEG in the private bucket, so an admin can open the seeded receipts. */
+async function seedReceipt(path) {
+  const sign = await fetch(`${API}/storage/v1/object/upload/sign/payment-receipts/${path}`, {
+    method: "POST",
+    headers: service,
+  });
+  const { url } = await sign.json();
+  const put = await fetch(`${API}/storage/v1${url}`, {
+    method: "PUT",
+    headers: { "content-type": "image/jpeg" },
+    body: new Uint8Array([0xff, 0xd8, 0xff, 0xd9]),
+  });
+  if (!put.ok) throw new Error(`seed receipt ${path}: ${put.status}`);
+}
 async function order(userId, status, hoursAgo) {
   n += 1;
   const v = variants[n % variants.length];
@@ -149,11 +164,12 @@ async function order(userId, status, hoursAgo) {
       ],
     );
     if (!r.rows[0].r.ok) throw new Error(JSON.stringify(r.rows[0].r));
+    await seedReceipt(`${key}/receipt.jpg`);
     const num = r.rows[0].r.order_number;
     await c.query("RESET ROLE");
     await c.query(
       `UPDATE orders SET user_id = $2, status = $3,
-         payment_status = CASE WHEN $3 = 'pending' THEN 'awaiting_confirmation' ELSE 'confirmed' END,
+         payment_status = CASE WHEN $3 = 'pending' THEN 'awaiting_confirmation' WHEN $3 = 'cancelled' THEN 'rejected' ELSE 'confirmed' END,
          created_at = now() - ($4 || ' hours')::interval WHERE order_number = $1`,
       [num, userId, status, String(hoursAgo)],
     );
@@ -166,6 +182,7 @@ async function order(userId, status, hoursAgo) {
   }
 }
 await order(demo, "delivered", 24 * 20);
+await order(demo, "cancelled", 24 * 12);
 await order(demo, "shipped", 24 * 6);
 await order(demo, "processing", 24 * 3);
 for (const [i, id] of customers.slice(0, 8).entries()) await order(id, "pending", 2 + i * 5);

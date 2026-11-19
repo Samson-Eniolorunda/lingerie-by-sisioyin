@@ -21,7 +21,8 @@
     "test:sql": "bash tests/sql/run.sh",
     "stack:up": "bash tests/support/local-stack/up.sh",
     "stack:down": "bash tests/support/local-stack/down.sh",
-    "test:contract": "bash tests/contract/run.sh"
+    "test:contract": "bash tests/contract/run.sh",
+    "test:e2e:supabase": "bash tests/e2e/run-supabase.sh"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.3.1",
