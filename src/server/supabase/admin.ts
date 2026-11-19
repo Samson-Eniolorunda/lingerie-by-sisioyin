@@ -376,10 +376,14 @@ export const supabaseAdmin: AdminRepository = {
     return okResult();
   },
 
-  async resolveRefundCheck(orderNumber, receivedNgn, actor) {
+  async resolveRefundCheck(orderNumber, receivedNgn, actor, confirmOver = false) {
     const { data, error } = await (
       await staff()
-    ).rpc("resolve_refund_check", { p_order_number: orderNumber, p_received: receivedNgn });
+    ).rpc("resolve_refund_check", {
+      p_order_number: orderNumber,
+      p_received: receivedNgn,
+      p_confirm_over: confirmOver,
+    });
     if (error) return failResult(sqlMessage(error));
     const result = data as { ok: boolean; message?: string };
     if (!result.ok) return failResult(result.message ?? TRY_AGAIN);

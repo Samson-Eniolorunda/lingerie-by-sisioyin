@@ -107,8 +107,9 @@ export const paymentDecisionSchema = z.enum(["confirmed", "rejected"]);
 export const orderStatusSchema = z.enum(ORDER_STATUSES as [string, ...string[]]);
 export const messageMarkSchema = z.enum(["read", "unread"]);
 
-/** The amount of money that reached the account for a cancelled order, in whole naira (0 = nothing arrived). */
-export const receivedAmountSchema = z.number().int().min(0).max(100_000_000);
+/** The amount of money that reached the account for a cancelled order, in whole naira (0 = nothing arrived).
+ * The largest value is what the refund_amount column (DECIMAL(10,2)) can hold. */
+export const receivedAmountSchema = z.number().int().min(0).max(99_999_999);
 
 export const bankDetailsSchema = z.object({
   bankName: z

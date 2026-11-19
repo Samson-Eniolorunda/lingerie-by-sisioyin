@@ -280,7 +280,13 @@ export interface AdminRepository {
     actor: SessionUser,
   ): Promise<Result>;
   /** A cancelled order with an unaccepted receipt: staff checked the bank and enter what arrived (0 = nothing). */
-  resolveRefundCheck(orderNumber: string, receivedNgn: number, actor: SessionUser): Promise<Result>;
+  /** `confirmOver` must be true to record more than the order total (an overpayment). */
+  resolveRefundCheck(
+    orderNumber: string,
+    receivedNgn: number,
+    actor: SessionUser,
+    confirmOver?: boolean,
+  ): Promise<Result>;
   /** The refund owed on a cancelled order has been paid back. */
   markRefunded(orderNumber: string, actor: SessionUser): Promise<Result>;
   /** Receipts with no order, open failures first. */

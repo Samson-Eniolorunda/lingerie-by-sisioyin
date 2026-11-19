@@ -1445,11 +1445,20 @@ BEGIN
   RETURN jsonb_build_object('ok', true);
 END;
 $$;
+  IF NOT COALESCE(p_confirm_over, false)
+     AND EXISTS (SELECT 1 FROM public.orders
+                  WHERE order_number = upper(trim(COALESCE(p_order_number, '')))
+                    AND payment_status = 'refund_check' AND p_received > total) THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'confirm_overpayment',
+      'message', 'That is more than the order total. Confirm that this amount was received and is owed back.');
+  END IF;
 
 -- Staff checked the bank account for a cancelled order with an unaccepted receipt. An amount above
 -- zero turns it into a refund owed for that amount (an overpayment is owed in full, not capped at
--- the order total); zero means no money arrived and nothing is owed.
-CREATE OR REPLACE FUNCTION public.resolve_refund_check(p_order_number TEXT, p_received NUMERIC)
+-- the order total, but staff must confirm it: p_confirm_over); zero means no money arrived and
+-- nothing is owed. The amount must fit the refund_amount column (DECIMAL(10,2)).
+CREATE OR REPLACE FUNCTION public.resolve_refund_check(
+  p_order_number TEXT, p_received NUMERIC, p_confirm_over BOOLEAN DEFAULT false)
 RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
@@ -1458,7 +1467,7 @@ BEGIN
   IF NOT (public.is_service() OR public.has_permission('orders.update')) THEN
     RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
   END IF;
-  IF p_received IS NULL OR p_received < 0 THEN
+  IF p_received IS NULL OR p_received < 0 OR p_received > 99999999.99 THEN
     RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Enter the amount that was received.');
   END IF;
   UPDATE public.orders SET
@@ -1692,7 +1701,7 @@ GRANT EXECUTE ON FUNCTION public.create_admin_invite(TEXT, TEXT) TO authenticate
 GRANT EXECUTE ON FUNCTION public.set_order_status(TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.decide_payment(TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.mark_refunded(TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.resolve_refund_check(TEXT, NUMERIC) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.resolve_refund_check(TEXT, NUMERIC, BOOLEAN) TO authenticated;
 -- Not granted to browsers: quote_order, place_order, attach_receipt, expire_unpaid_orders (service role only), price_order, adjust_stock,
 -- cancel_internal, is_service, hash_token and the trigger functions.
 

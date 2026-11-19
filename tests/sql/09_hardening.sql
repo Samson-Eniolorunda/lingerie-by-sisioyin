@@ -95,7 +95,10 @@ BEGIN
   n := r->>'order_number';
   PERFORM t.as_service();
   PERFORM public.set_order_status(n, 'cancelled');
-  PERFORM public.resolve_refund_check(n, 999999);
+  PERFORM t.ok(public.resolve_refund_check(n, 999999)->>'code' = 'confirm_overpayment', 'an overpayment must be confirmed by staff');
+  PERFORM t.ok((SELECT payment_status = 'refund_check' FROM public.orders WHERE order_number = n), 'and nothing changes until it is');
+  PERFORM t.ok(public.resolve_refund_check(n, 100000000)->>'code' = 'invalid_input', 'an amount too large for the column is refused');
+  PERFORM t.ok((public.resolve_refund_check(n, 999999, true)->>'ok')::boolean, 'the confirmed overpayment is accepted');
   PERFORM t.reset();
   PERFORM t.ok((SELECT payment_status = 'refund_owed' AND refund_amount = 999999 FROM public.orders WHERE order_number = n), 'an overpayment is recorded as owed in full');
   DELETE FROM storage.objects WHERE bucket_id = 'payment-receipts' AND name NOT IN (SELECT receipt_path FROM public.orders WHERE receipt_path IS NOT NULL);

@@ -59,15 +59,31 @@ export function OrderActions({
           autoComplete="off"
           hint={`The order total was ${formatNaira(total)}.`}
           value={received}
-          onChange={(e) => setReceived(e.target.value.replace(/[^\d]/g, ""))}
+          onChange={(e) => setReceived(e.target.value.replace(/[^\d]/g, "").slice(0, 8))}
         />
         <div className="flex justify-end">
-          <Button
-            disabled={pending || received === ""}
-            onClick={() => run(() => resolveRefundCheckAction(orderNumber, Number(received)))}
-          >
-            Record amount
-          </Button>
+          {Number(received) > total ? (
+            // More than the order total is possible (a double payment) but must be confirmed.
+            <ConfirmButton
+              label="Record amount"
+              title="Record an overpayment?"
+              message={`${formatNaira(Number(received))} is more than the order total of ${formatNaira(total)}. Confirm that this amount reached the account; all of it will be recorded as owed back to the customer.`}
+              confirmLabel="Record amount"
+              tone="neutral"
+              variant="primary"
+              disabled={pending}
+              onConfirm={() =>
+                run(() => resolveRefundCheckAction(orderNumber, Number(received), true))
+              }
+            />
+          ) : (
+            <Button
+              disabled={pending || received === ""}
+              onClick={() => run(() => resolveRefundCheckAction(orderNumber, Number(received)))}
+            >
+              Record amount
+            </Button>
+          )}
         </div>
       </div>
     );

@@ -396,13 +396,19 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
-  async resolveRefundCheck(orderNumber, receivedNgn, actor) {
+  async resolveRefundCheck(orderNumber, receivedNgn, actor, confirmOver = false) {
     const db = getDb();
     const order = db.orders.get(orderNumber);
     if (!order || order.paymentStatus !== "refund_check")
       return { ok: false, message: "No refund check is open on that order." };
     if (!Number.isFinite(receivedNgn) || receivedNgn < 0)
       return { ok: false, message: "Enter the amount that was received." };
+    if (receivedNgn > order.total && !confirmOver)
+      return {
+        ok: false,
+        message:
+          "That is more than the order total. Confirm that this amount was received and is owed back.",
+      };
     db.orders.set(orderNumber, {
       ...order,
       paymentStatus: receivedNgn > 0 ? "refund_owed" : "rejected",

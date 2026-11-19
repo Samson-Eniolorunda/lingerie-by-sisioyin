@@ -170,13 +170,19 @@ export async function paymentDecisionAction(
 export async function resolveRefundCheckAction(
   orderNumber: string,
   received: unknown,
+  confirmOver = false,
 ): Promise<AdminState> {
   const actor = await guard("orders.update");
   if (!actor) return DENIED;
   const parsed = receivedAmountSchema.safeParse(received);
   if (!parsed.success)
     return { ok: false, message: "Enter the amount that reached the account, in naira." };
-  const result = await data.admin.resolveRefundCheck(orderNumber, parsed.data, actor);
+  const result = await data.admin.resolveRefundCheck(
+    orderNumber,
+    parsed.data,
+    actor,
+    confirmOver === true,
+  );
   if (!result.ok) return result;
   refresh();
   return {
