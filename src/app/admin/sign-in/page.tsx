@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthCard, AuthLink } from "@/features/auth/AuthCard";
@@ -26,7 +27,7 @@ export default async function StaffSignInPage({
         lead="Create your staff account for Lingeries by Sisioyin."
         footer={
           <>
-            Already have an account? <AuthLink href="/admin/sign-in">Sign in</AuthLink>
+            Already have an account? <AuthLink href={adminPath("/sign-in")}>Sign in</AuthLink>
           </>
         }
       >
@@ -41,7 +42,7 @@ export default async function StaffSignInPage({
       </AuthCard>
     );
   }
-  if (await currentUser("staff")) redirect(safeNext(next, "/admin"));
+  if (await currentUser("staff")) redirect(safeNext(next, adminPath("/")));
   return (
     <AuthCard
       title="Staff sign-in"
@@ -56,7 +57,7 @@ export default async function StaffSignInPage({
       <SignInForm
         next={next ?? null}
         action={staffSignInAction}
-        forgotHref="/admin/forgot-password"
+        forgotHref={adminPath("/forgot-password")}
         emailLabel="Staff email address"
       />
     </AuthCard>

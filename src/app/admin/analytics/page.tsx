@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart, TallyList } from "@/features/admin/Charts";
@@ -15,7 +16,7 @@ export default async function AnalyticsPage({
 }: {
   searchParams: Promise<{ days?: string }>;
 }) {
-  await requireStaff("analytics.view", "/admin/analytics");
+  await requireStaff("analytics.view", adminPath("/analytics"));
   const { days: raw } = await searchParams;
   const days = PERIODS.find((d) => String(d) === raw) ?? 30;
   const report = await data.admin.analytics(days);
@@ -33,7 +34,7 @@ export default async function AnalyticsPage({
         {PERIODS.map((d) => (
           <Link
             key={d}
-            href={`/admin/analytics?days=${d}`}
+            href={adminPath(`/analytics?days=${d}`)}
             aria-current={d === days ? "page" : undefined}
             className={`inline-flex min-h-11 min-w-20 items-center justify-center rounded-sm border px-4 text-base no-underline ${d === days ? "border-primary bg-selected font-medium text-ink" : "border-control text-muted"}`}
           >
@@ -100,7 +101,7 @@ export default async function AnalyticsPage({
       <p className="mt-6 text-sm text-muted">
         Revenue counts delivered orders only. Orders per customer is orders divided by registered
         customers.{" "}
-        <Link href="/admin/export/orders" prefetch={false}>
+        <Link href={adminPath("/export/orders")} prefetch={false}>
           Export orders (CSV)
         </Link>
       </p>

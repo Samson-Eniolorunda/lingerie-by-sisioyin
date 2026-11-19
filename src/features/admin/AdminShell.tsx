@@ -1,5 +1,6 @@
 "use client";
 
+import { adminPath, shopHref } from "@/lib/adminPath";
 import {
   Activity,
   BarChart3,
@@ -76,7 +77,7 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
 
   return (
     <ToastProvider>
-      <ServiceWorkerRegistrar script="/admin/sw.js" scope="/admin" />
+      <ServiceWorkerRegistrar script={adminPath("/sw.js")} scope={adminPath("/")} />
       <a
         href="#main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:bg-surface focus:p-3"
@@ -99,7 +100,7 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
         <div className="flex items-center gap-2">
           <ThemeControl className="hidden sm:inline-flex" />
           <Link
-            href="/"
+            href={shopHref("/")}
             className="hidden min-h-11 items-center text-sm text-muted underline underline-offset-4 sm:inline-flex"
           >
             View the shop
@@ -204,7 +205,7 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
           })}
           <li>
             <Link
-              href="/"
+              href={shopHref("/")}
               className="flex min-h-12 items-center gap-3 border-b border-line text-base text-ink no-underline"
             >
               View the shop

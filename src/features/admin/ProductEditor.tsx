@@ -1,5 +1,6 @@
 "use client";
 
+import { adminPath } from "@/lib/adminPath";
 import { ArrowDown, ArrowUp, Minus, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -149,7 +150,7 @@ export function ProductEditor({
       return;
     }
     toast.show(result.message ?? "Saved.", { tone: "success" });
-    router.push("/admin/products");
+    router.push(adminPath("/products"));
     router.refresh();
   }
 
@@ -203,7 +204,7 @@ export function ProductEditor({
       const file = await compressImage(original);
       const body = new FormData();
       body.set("file", file);
-      const response = await fetch("/admin/api/upload", { method: "POST", body });
+      const response = await fetch(adminPath("/api/upload"), { method: "POST", body });
       const json = (await response.json()) as {
         ok: boolean;
         message?: string;
@@ -660,7 +661,7 @@ export function ProductEditor({
                   run(() => trashProductsAction([id]), {
                     undo: { label: "Undo", run: () => restoreProductsAction([id]) },
                     onDone: (state) => {
-                      if (state.ok) router.push("/admin/products");
+                      if (state.ok) router.push(adminPath("/products"));
                     },
                   })
                 }

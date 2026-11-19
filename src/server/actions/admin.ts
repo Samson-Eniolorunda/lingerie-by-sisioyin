@@ -1,5 +1,6 @@
 "use server";
 
+import { adminPath } from "@/lib/adminPath";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
@@ -377,7 +378,7 @@ export async function deleteMessageAction(id: string): Promise<AdminState> {
   const result = await data.admin.deleteMessage(id, actor);
   if (!result.ok) return result;
   refresh();
-  redirect("/admin/messages");
+  redirect(adminPath("/messages"));
 }
 
 /* Settings, roles and invitations */

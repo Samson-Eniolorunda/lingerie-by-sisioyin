@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { OrphanReceipts } from "@/features/admin/OrphanReceipts";
 import { PageHeader } from "@/features/admin/PageHeader";
@@ -8,7 +9,7 @@ import { data } from "@/server/data";
 export const metadata: Metadata = { title: "Receipts with no order" };
 
 export default async function OrphanReceiptsPage() {
-  const user = await requireStaff("orders.view", "/admin/receipts");
+  const user = await requireStaff("orders.view", adminPath("/receipts"));
   const rows = await data.admin.orphanReceipts();
   return (
     <>

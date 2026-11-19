@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,7 +33,7 @@ export default async function OrderDetailPage({
   params: Promise<{ orderNumber: string }>;
 }) {
   const { orderNumber } = await params;
-  const user = await requireStaff("orders.view", `/admin/orders/${orderNumber}`);
+  const user = await requireStaff("orders.view", adminPath(`/orders/${orderNumber}`));
   const order = await data.admin.order(orderNumber);
   if (!order) notFound();
   const receipt = order.receiptPath ? await receipts.link(order.receiptPath) : null;
@@ -40,7 +41,7 @@ export default async function OrderDetailPage({
   return (
     <>
       <p className="mb-2">
-        <Link href="/admin/orders" className="inline-flex min-h-11 items-center text-sm">
+        <Link href={adminPath("/orders")} className="inline-flex min-h-11 items-center text-sm">
           ← All orders
         </Link>
       </p>

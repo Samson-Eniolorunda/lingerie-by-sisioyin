@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { Badge } from "@/components/ui/Badge";
 import { DataTable } from "@/components/ui/DataTable";
@@ -19,7 +20,7 @@ export default async function ActivityPage({
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  await requireStaff("roles.manage", "/admin/activity");
+  await requireStaff("roles.manage", adminPath("/activity"));
   const { q = "", page } = await searchParams;
   const pageNumber = parsePageNumber(page);
   const { items: rows, total } = await data.admin.activity(q, pageFor(pageNumber, PER_PAGE));
@@ -27,7 +28,7 @@ export default async function ActivityPage({
     <>
       <PageHeader title="Activity log" lead={`${total} things staff have done, newest first.`} />
       <FilterBar
-        action="/admin/activity"
+        action={adminPath("/activity")}
         search={{
           name: "q",
           label: "Search the log",
@@ -60,7 +61,7 @@ export default async function ActivityPage({
         ]}
       />
       <Pager
-        base="/admin/activity"
+        base={adminPath("/activity")}
         params={{ q }}
         page={pageNumber}
         perPage={PER_PAGE}

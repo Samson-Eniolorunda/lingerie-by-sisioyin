@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
@@ -22,7 +23,7 @@ export default async function CustomersPage({
 }: {
   searchParams: Promise<{ q?: string; page?: string }>;
 }) {
-  const user = await requireStaff("customers.view", "/admin/customers");
+  const user = await requireStaff("customers.view", adminPath("/customers"));
   const { q = "", page } = await searchParams;
   const pageNumber = parsePageNumber(page);
   const monthAgo = new Date((await nowMs()) - 30 * 86_400_000);
@@ -42,7 +43,7 @@ export default async function CustomersPage({
         lead="Spend counts delivered orders only."
         actions={
           <Link
-            href="/admin/export/customers"
+            href={adminPath("/export/customers")}
             className="inline-flex min-h-11 items-center text-base"
             prefetch={false}
           >
@@ -61,7 +62,7 @@ export default async function CustomersPage({
         ))}
       </dl>
       <FilterBar
-        action="/admin/customers"
+        action={adminPath("/customers")}
         search={{
           name: "q",
           label: "Search customers",
@@ -119,7 +120,7 @@ export default async function CustomersPage({
         ]}
       />
       <Pager
-        base="/admin/customers"
+        base={adminPath("/customers")}
         params={{ q }}
         page={pageNumber}
         perPage={PER_PAGE}

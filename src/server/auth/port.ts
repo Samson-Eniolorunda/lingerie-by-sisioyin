@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import { cookies } from "next/headers";
 import type { Audience } from "@/server/data/contracts";
 
@@ -16,7 +17,8 @@ export const CUSTOMER_COOKIE = "lbs_session";
 export const STAFF_COOKIE = "lbs_staff_session";
 
 const name = (audience: Audience) => (audience === "staff" ? STAFF_COOKIE : CUSTOMER_COOKIE);
-const path = (audience: Audience) => (audience === "staff" ? "/admin" : "/");
+// Scoped to the admin pages, which are at the root of their own host in production.
+const path = (audience: Audience) => (audience === "staff" ? adminPath("/") : "/");
 
 /** The storefront and the admin keep separate sessions, so one never signs the other in (A-14). */
 export const cookieSessionPort: SessionPort = {

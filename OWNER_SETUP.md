@@ -75,10 +75,11 @@ commit;
 ## 4. Authentication settings
 
 In **Authentication, Providers, Email**: keep **Confirm email** on. In **Authentication, URL
-Configuration**: set **Site URL** to `https://www.lingeriebysisioyin.store` and put exactly these three
+Configuration**: set **Site URL** to `https://www.lingeriebysisioyin.store` and put exactly these
 entries in **Redirect URLs** (the `**` makes each one cover every path beneath it):
 
 - `https://www.lingeriebysisioyin.store/**`
+- `https://admin.lingeriebysisioyin.store/**` (the admin panel's own address, step 11.16)
 - `http://localhost:3000/**`
 - the Vercel preview pattern, for example `https://*-YOUR-TEAM.vercel.app/**` (Vercel shows the exact
   team part in **Project, Settings, Domains**; copy it from there)
@@ -332,6 +333,24 @@ prove, because they ran against a stand-in, not against Supabase.
        uploads need to be a day old before they can be deleted.
     7. Check `/admin` and `/admin/analytics`: orders, revenue, customers and visits must read as for a
        brand new shop, and `select count(*) from public.orders;` must say `0`.
+
+16. **The admin panel has its own address.** On the live site (Vercel's Production environment only)
+    the admin is served at `https://admin.lingeriebysisioyin.store`, with the `/admin` part dropped:
+    `admin.lingeriebysisioyin.store/orders` is the Orders screen. On previews and on a developer's
+    machine it stays at `/admin/...`. The shop address answers `/admin` with a plain "Not Found" and
+    never mentions the admin. Set up as follows:
+    1. **Cloudflare** (already done by the owner): a `CNAME` record named `admin` pointing to
+       `cname.vercel-dns.com`, **Proxy status: DNS only** (grey cloud), for the same reason as `www`
+       in check 14.
+    2. **Supabase** (already done by the owner): the Redirect URL `https://admin.lingeriebysisioyin.store/**`
+       (step 4).
+    3. **Vercel**: the domain `admin.lingeriebysisioyin.store` is added to the project under
+       **Settings, Domains** by the developer. Nothing else is needed: the address is worked out from
+       `NEXT_PUBLIC_SITE_URL`. (`NEXT_PUBLIC_ADMIN_HOST` exists only to test this on another host; do
+       not set it on the live site.)
+    4. Staff sign in separately on the admin address: the sign-in cookies belong to one address, so
+       signing in to the shop does not sign anyone in to the admin. Password-reset and invitation
+       links for staff return to the admin address.
 
 ## 12. After opening
 

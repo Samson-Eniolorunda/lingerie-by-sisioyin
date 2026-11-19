@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { PageHeader } from "@/features/admin/PageHeader";
 import { PaymentsSettings } from "@/features/admin/PaymentsSettings";
@@ -8,7 +9,7 @@ export const metadata: Metadata = { title: "Payment settings" };
 export const dynamic = "force-dynamic";
 
 export default async function PaymentSettingsPage() {
-  await requireStaff("settings.manage", "/admin/settings/payments");
+  await requireStaff("settings.manage", adminPath("/settings/payments"));
   const [bank, methods, changes] = await Promise.all([
     data.payments.bankDetails(),
     data.payments.methods(),

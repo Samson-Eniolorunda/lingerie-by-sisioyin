@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -13,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MessagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const user = await requireStaff("messages.manage", `/admin/messages/${id}`);
+  const user = await requireStaff("messages.manage", adminPath(`/messages/${id}`));
   const message = await data.admin.message(id);
   if (!message) notFound();
   const thread = [
@@ -35,7 +36,7 @@ export default async function MessagePage({ params }: { params: Promise<{ id: st
   return (
     <>
       <p className="mb-2">
-        <Link href="/admin/messages" className="inline-flex min-h-11 items-center text-sm">
+        <Link href={adminPath("/messages")} className="inline-flex min-h-11 items-center text-sm">
           ← Messages
         </Link>
       </p>

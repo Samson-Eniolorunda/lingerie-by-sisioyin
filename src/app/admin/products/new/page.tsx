@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/features/admin/PageHeader";
@@ -7,11 +8,11 @@ import { requireStaff } from "@/server/auth/session";
 export const metadata: Metadata = { title: "Add a product" };
 
 export default async function NewProductPage() {
-  await requireStaff("products.manage", "/admin/products/new");
+  await requireStaff("products.manage", adminPath("/products/new"));
   return (
     <>
       <p className="mb-2">
-        <Link href="/admin/products" className="inline-flex min-h-11 items-center text-sm">
+        <Link href={adminPath("/products")} className="inline-flex min-h-11 items-center text-sm">
           ← Products
         </Link>
       </p>

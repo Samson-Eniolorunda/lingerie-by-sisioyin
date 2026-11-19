@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
@@ -23,7 +24,7 @@ export default async function MessagesPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
-  await requireStaff("messages.manage", "/admin/messages");
+  await requireStaff("messages.manage", adminPath("/messages"));
   const { status = "", q = "", page } = await searchParams;
   const pageNumber = parsePageNumber(page);
   const known =
@@ -44,7 +45,7 @@ export default async function MessagesPage({
         {FILTERS.map((f) => (
           <Link
             key={f.id}
-            href={f.id ? `/admin/messages?status=${f.id}` : "/admin/messages"}
+            href={f.id ? adminPath(`/messages?status=${f.id}`) : adminPath("/messages")}
             aria-current={status === f.id ? "page" : undefined}
             className={`inline-flex min-h-11 shrink-0 items-center rounded-sm border px-4 text-base no-underline ${status === f.id ? "border-primary bg-selected font-medium text-ink" : "border-control text-muted"}`}
           >
@@ -53,7 +54,7 @@ export default async function MessagesPage({
         ))}
       </nav>
       <FilterBar
-        action="/admin/messages"
+        action={adminPath("/messages")}
         search={{
           name: "q",
           label: "Search messages",
@@ -76,7 +77,7 @@ export default async function MessagesPage({
             return (
               <li key={m.id}>
                 <Link
-                  href={`/admin/messages/${m.id}`}
+                  href={adminPath(`/messages/${m.id}`)}
                   className="flex min-h-16 items-start gap-3 p-3 text-ink no-underline hover:bg-tint"
                 >
                   <span
@@ -122,7 +123,7 @@ export default async function MessagesPage({
         </ul>
       )}
       <Pager
-        base="/admin/messages"
+        base={adminPath("/messages")}
         params={{ status, q }}
         page={pageNumber}
         perPage={PER_PAGE}

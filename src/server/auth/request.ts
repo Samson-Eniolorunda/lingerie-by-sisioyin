@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { publicEnv } from "@/config/env";
+import { ADMIN_HOST } from "@/lib/adminPath";
 
 const PRODUCTION_HOST = "www.lingeriebysisioyin.store";
 
@@ -42,6 +43,8 @@ export function hostAllowed(host: string): boolean {
     // an unusable site address allows nothing extra
   }
   if (name === PRODUCTION_HOST) return true;
+  // The admin has its own host in production; its e-mail links must be allowed to return to it.
+  if (ADMIN_HOST && name === ADMIN_HOST) return true;
   for (const own of [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL])
     if (own && name === own.toLowerCase()) return true;
   const slug = process.env.VERCEL_GIT_REPO_SLUG?.toLowerCase();
@@ -86,7 +89,10 @@ export async function callbackUrl(
   kind?: "confirm",
 ): Promise<string> {
   const type = kind ? `&type=${kind}` : "";
-  return `${await requestOrigin()}/auth/callback?next=${encodeURIComponent(next)}&aud=${audience}${type}`;
+  // Staff links return to the admin host, where the staff session cookie lives (cookies are host-only).
+  const origin =
+    audience === "staff" && ADMIN_HOST ? `https://${ADMIN_HOST}` : await requestOrigin();
+  return `${origin}/auth/callback?next=${encodeURIComponent(next)}&aud=${audience}${type}`;
 }
 
 /** Set by `/auth/callback` after a recovery link, so the new password goes to the right account. */

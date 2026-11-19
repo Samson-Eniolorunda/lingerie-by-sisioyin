@@ -1,3 +1,4 @@
+import { adminUrl } from "@/lib/adminPath";
 import { formatNaira } from "@/lib/money";
 import { DELIVERY_STATES } from "@/lib/delivery";
 import { bankSummary } from "@/lib/bank-details";
@@ -243,11 +244,11 @@ export function newOrderAlert(order: StoredOrder, ctx: MailContext): Rendered {
         `${esc(order.customerName)} placed an order for <strong>${formatNaira(order.total)}</strong>. A receipt is waiting to be checked.`,
       ),
       p(
-        `<a href="${esc(ctx.siteUrl)}/admin/orders/${encodeURIComponent(order.orderNumber)}" style="color:${ACCENT};">Open the order</a>`,
+        `<a href="${esc(adminUrl(`/orders/${encodeURIComponent(order.orderNumber)}`, ctx.siteUrl))}" style="color:${ACCENT};">Open the order</a>`,
       ),
     ].join("\n"),
     `New order ${order.orderNumber}: ${formatNaira(order.total)}.`,
   );
-  const text = `${order.customerName} placed order ${order.orderNumber} for ${formatNaira(order.total)}. A receipt is waiting to be checked.\n${ctx.siteUrl}/admin/orders/${order.orderNumber}`;
+  const text = `${order.customerName} placed order ${order.orderNumber} for ${formatNaira(order.total)}. A receipt is waiting to be checked.\n${adminUrl(`/orders/${order.orderNumber}`, ctx.siteUrl)}`;
   return { subject: `New order ${order.orderNumber} (${formatNaira(order.total)})`, html, text };
 }

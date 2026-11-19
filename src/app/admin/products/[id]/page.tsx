@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -11,13 +12,13 @@ export const metadata: Metadata = { title: "Edit product" };
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await requireStaff("products.manage", `/admin/products/${id}`);
+  await requireStaff("products.manage", adminPath(`/products/${id}`));
   const product = await data.admin.product(id);
   if (!product || product.deletedAt !== null) notFound();
   return (
     <>
       <p className="mb-2">
-        <Link href="/admin/products" className="inline-flex min-h-11 items-center text-sm">
+        <Link href={adminPath("/products")} className="inline-flex min-h-11 items-center text-sm">
           ← Products
         </Link>
       </p>

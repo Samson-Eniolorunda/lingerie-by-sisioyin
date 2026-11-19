@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
@@ -33,7 +34,7 @@ function Figure({ label, value, href }: { label: string; value: string; href?: s
 }
 
 export default async function AdminDashboard() {
-  const user = await requireStaff(null, "/admin");
+  const user = await requireStaff(null, adminPath("/"));
   const [summary, settings] = await Promise.all([data.admin.summary(), data.admin.settings()]);
   const low = summary.lowStock.filter((p) => p.qty <= Math.max(settings.lowStockThreshold, 9));
   return (
@@ -41,20 +42,24 @@ export default async function AdminDashboard() {
       <PageHeader
         title={`Good day, ${user.firstName || "there"}`}
         lead="What needs you today."
-        actions={<ButtonLink href="/admin/products/new">Add a product</ButtonLink>}
+        actions={<ButtonLink href={adminPath("/products/new")}>Add a product</ButtonLink>}
       />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Figure
           label="Orders to check"
           value={String(summary.pendingOrders)}
-          href="/admin/orders?status=pending"
+          href={adminPath("/orders?status=pending")}
         />
         <Figure
           label="Unread messages"
           value={String(summary.unreadMessages)}
-          href="/admin/messages"
+          href={adminPath("/messages")}
         />
-        <Figure label="Products" value={String(summary.productCount)} href="/admin/products" />
+        <Figure
+          label="Products"
+          value={String(summary.productCount)}
+          href={adminPath("/products")}
+        />
         <Figure label="Revenue, delivered orders" value={formatNaira(summary.revenueNgn)} />
       </div>
 
@@ -63,7 +68,10 @@ export default async function AdminDashboard() {
           title="Latest orders"
           action={
             can(user.role, "orders.view") ? (
-              <Link href="/admin/orders" className="inline-flex min-h-11 items-center text-sm">
+              <Link
+                href={adminPath("/orders")}
+                className="inline-flex min-h-11 items-center text-sm"
+              >
                 View all
               </Link>
             ) : null
@@ -76,7 +84,7 @@ export default async function AdminDashboard() {
               {summary.recentOrders.map((o) => (
                 <li key={o.orderNumber}>
                   <Link
-                    href={`/admin/orders/${o.orderNumber}`}
+                    href={adminPath(`/orders/${o.orderNumber}`)}
                     className="flex min-h-14 items-center justify-between gap-3 py-2 text-ink no-underline"
                   >
                     <span className="min-w-0">
@@ -101,7 +109,7 @@ export default async function AdminDashboard() {
           action={
             can(user.role, "products.manage") ? (
               <Link
-                href="/admin/products?stock=low"
+                href={adminPath("/products?stock=low")}
                 className="inline-flex min-h-11 items-center text-sm"
               >
                 View all
@@ -116,7 +124,7 @@ export default async function AdminDashboard() {
               {low.map((p) => (
                 <li key={p.id}>
                   <Link
-                    href={`/admin/products/${p.id}`}
+                    href={adminPath(`/products/${p.id}`)}
                     className="flex min-h-12 items-center justify-between gap-3 py-2 text-ink no-underline"
                   >
                     <span className="min-w-0 truncate text-base">{p.name}</span>

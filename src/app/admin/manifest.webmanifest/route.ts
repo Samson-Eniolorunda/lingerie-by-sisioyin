@@ -1,13 +1,14 @@
+import { adminPath } from "@/lib/adminPath";
 import { BRAND } from "@/config/site";
 
-/** Separate manifest so the staff area installs as its own app, scoped to /admin (Q-02). */
+/** Separate manifest so the staff area installs as its own app, scoped to the admin pages (Q-02). */
 export function GET(): Response {
   return Response.json(
     {
       name: `${BRAND.name} Admin`,
       short_name: "LBS Admin",
-      start_url: "/admin",
-      scope: "/admin",
+      start_url: adminPath("/"),
+      scope: adminPath("/"),
       display: "standalone",
       background_color: "#FAF6F0",
       theme_color: "#6B1F2E",

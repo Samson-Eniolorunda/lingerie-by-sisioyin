@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { KeyboardWatcher } from "@/features/shell/KeyboardWatcher";
 import { AdminShell } from "@/features/admin/AdminShell";
@@ -8,7 +9,7 @@ import { data } from "@/server/data";
 export const metadata: Metadata = {
   title: { default: "Admin", template: "%s | Admin" },
   robots: { index: false, follow: false },
-  manifest: "/admin/manifest.webmanifest",
+  manifest: adminPath("/manifest.webmanifest"),
 };
 
 /**
@@ -32,7 +33,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       items={visibleNav(user.role)}
       name={`${user.firstName} ${user.lastName}`.trim() || user.email}
       role={user.role}
-      badges={{ "/admin/orders": summary.pendingOrders, "/admin/messages": summary.unreadMessages }}
+      badges={{
+        [adminPath("/orders")]: summary.pendingOrders,
+        [adminPath("/messages")]: summary.unreadMessages,
+      }}
     >
       <KeyboardWatcher />
       {children}

@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -6,11 +7,14 @@ export default function SettingsLayout({ children }: { readonly children: ReactN
   return (
     <>
       <nav aria-label="Settings sections" className="mb-5 flex gap-1 border-b border-line">
-        <Link href="/admin/settings" className="inline-flex min-h-11 items-center px-3 text-base">
+        <Link
+          href={adminPath("/settings")}
+          className="inline-flex min-h-11 items-center px-3 text-base"
+        >
           The shop
         </Link>
         <Link
-          href="/admin/settings/payments"
+          href={adminPath("/settings/payments")}
           className="inline-flex min-h-11 items-center px-3 text-base"
         >
           Payments

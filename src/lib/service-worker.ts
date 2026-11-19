@@ -4,7 +4,7 @@
  * the network, and only when the network fails is the offline page shown. Account, bag, checkout, admin
  * and API responses are never stored, so private data never lands in a cache (Q-03, Q-04, Q-08).
  */
-export function serviceWorkerSource(cacheName: string, scope: "/" | "/admin"): string {
+export function serviceWorkerSource(cacheName: string, scope: string): string {
   return `const CACHE = ${JSON.stringify(cacheName)};
 const SHELL = ["/offline", "/icons/icon-192.png", "/icons/icon-512.png"];
 const SCOPE = ${JSON.stringify(scope)};

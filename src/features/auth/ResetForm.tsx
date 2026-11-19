@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { adminPath } from "@/lib/adminPath";
 import { Button, ButtonLink } from "@/components/ui/Button";
 import { Form } from "@/components/ui/Form";
 import { resetAction } from "@/server/actions/auth";
 import { PasswordField, PasswordRules } from "./PasswordField";
 
 /**
- * `hasSession` is false when the emailed link was not exchanged for a session. It is read again after
+ * `staff` is for the admin's own copy of this page. `hasSession` is false when the emailed link was not exchanged for a session. It is read again after
  * the password is changed (the session ends then), so the success message is kept in local state.
  */
-export function ResetForm({ hasSession }: { readonly hasSession: boolean }) {
+export function ResetForm({
+  hasSession,
+  staff = false,
+}: {
+  readonly hasSession: boolean;
+  readonly staff?: boolean;
+}) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -22,7 +29,7 @@ export function ResetForm({ hasSession }: { readonly hasSession: boolean }) {
     return (
       <div role="status" className="flex flex-col gap-4">
         <p className="border-l-4 border-success bg-success-bg p-3 text-base">{done}</p>
-        <ButtonLink href="/sign-in" block>
+        <ButtonLink href={staff ? adminPath("/sign-in") : "/sign-in"} block>
           Sign in
         </ButtonLink>
       </div>
@@ -35,7 +42,7 @@ export function ResetForm({ hasSession }: { readonly hasSession: boolean }) {
         <p className="text-base text-muted">
           Reset links work once and expire after an hour. Request a new one and try again.
         </p>
-        <ButtonLink href="/forgot-password" block>
+        <ButtonLink href={staff ? adminPath("/forgot-password") : "/forgot-password"} block>
           Request a new link
         </ButtonLink>
       </div>

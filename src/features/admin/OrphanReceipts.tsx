@@ -1,5 +1,6 @@
 "use client";
 
+import { adminPath } from "@/lib/adminPath";
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -18,7 +19,7 @@ function ViewLink({ path, viewed }: { readonly path: string; readonly viewed: bo
   return (
     <p className="mt-3 text-base">
       <a
-        href={`/admin/receipts/view?path=${encodeURIComponent(path)}`}
+        href={adminPath(`/receipts/view?path=${encodeURIComponent(path)}`)}
         target="_blank"
         rel="noopener noreferrer"
       >

@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { ButtonLink } from "@/components/ui/Button";
 import { FilterBar, Pager } from "@/features/admin/Filters";
@@ -24,7 +25,7 @@ export default async function ProductsPage({
     page?: string;
   }>;
 }) {
-  const user = await requireStaff("products.manage", "/admin/products");
+  const user = await requireStaff("products.manage", adminPath("/products"));
   const { q = "", category = "", stock = "", view, page } = await searchParams;
   const trash = view === "trash";
   const pageNumber = parsePageNumber(page);
@@ -49,18 +50,21 @@ export default async function ProductsPage({
         }
         actions={
           trash ? (
-            <Link href="/admin/products" className="inline-flex min-h-11 items-center text-base">
+            <Link
+              href={adminPath("/products")}
+              className="inline-flex min-h-11 items-center text-base"
+            >
               Back to products
             </Link>
           ) : (
-            <ButtonLink href="/admin/products/new">Add a product</ButtonLink>
+            <ButtonLink href={adminPath("/products/new")}>Add a product</ButtonLink>
           )
         }
       />
       {!trash ? (
         <>
           <FilterBar
-            action="/admin/products"
+            action={adminPath("/products")}
             search={{
               name: "q",
               label: "Search products",
@@ -94,7 +98,10 @@ export default async function ProductsPage({
           />
           {inTrash > 0 ? (
             <p className="mb-4 text-sm">
-              <Link href="/admin/products?view=trash" className="inline-flex min-h-11 items-center">
+              <Link
+                href={adminPath("/products?view=trash")}
+                className="inline-flex min-h-11 items-center"
+              >
                 Trash ({inTrash})
               </Link>
             </p>
@@ -116,7 +123,7 @@ export default async function ProductsPage({
         }))}
       />
       <Pager
-        base="/admin/products"
+        base={adminPath("/products")}
         params={{ q, category, stock, ...(trash ? { view: "trash" } : {}) }}
         page={pageNumber}
         perPage={PER_PAGE}

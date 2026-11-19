@@ -1,5 +1,6 @@
 "use client";
 
+import { adminPath } from "@/lib/adminPath";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -135,7 +136,7 @@ export function ProductList({
                   </>
                 ) : (
                   <Link
-                    href={`/admin/products/${p.id}`}
+                    href={adminPath(`/products/${p.id}`)}
                     className="inline-flex min-h-11 items-center justify-center rounded-sm border border-control px-5 text-base text-ink no-underline hover:bg-tint"
                   >
                     Edit

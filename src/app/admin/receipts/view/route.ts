@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { adminPath } from "@/lib/adminPath";
 import { staffFor } from "@/server/auth/session";
 import { data } from "@/server/data";
 import { receipts } from "@/server/storage/receipts";
@@ -10,7 +11,7 @@ import { receipts } from "@/server/storage/receipts";
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const actor = await staffFor("orders.view");
-  if (!actor) return NextResponse.redirect(new URL("/admin/sign-in", request.url), 303);
+  if (!actor) return NextResponse.redirect(new URL(adminPath("/sign-in"), request.url), 303);
   const path = new URL(request.url).searchParams.get("path") ?? "";
   if (path.length === 0 || path.length > 300 || path.includes(".."))
     return NextResponse.json(

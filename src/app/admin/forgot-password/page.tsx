@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { AuthCard, AuthLink } from "@/features/auth/AuthCard";
 import { ForgotForm } from "@/features/auth/ForgotForm";
@@ -15,7 +16,7 @@ export default async function StaffForgotPage({
     <AuthCard
       title="Forgotten your password?"
       lead="Enter your staff email address and we will send a link to choose a new password."
-      footer={<AuthLink href="/admin/sign-in">Back to staff sign-in</AuthLink>}
+      footer={<AuthLink href={adminPath("/sign-in")}>Back to staff sign-in</AuthLink>}
     >
       <ForgotForm initialEmail={email?.slice(0, 120) ?? ""} action={staffForgotAction} />
     </AuthCard>

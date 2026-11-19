@@ -1,3 +1,4 @@
+import { adminUrl } from "@/lib/adminPath";
 import { deriveStock } from "@/lib/variants";
 import { CONTACT } from "@/config/site";
 import {
@@ -1027,7 +1028,7 @@ export const supabaseAdmin: AdminRepository = {
     });
     if (error || typeof data !== "string") return failResult(error ? sqlMessage(error) : TRY_AGAIN);
     await log(actor, "staff", "invitation", `${email} as ${role}`);
-    return valueResult({ link: `/admin/sign-in?invite=${data}` });
+    return valueResult({ link: adminUrl(`/sign-in?invite=${data}`) });
   },
 
   async activity(search, page) {

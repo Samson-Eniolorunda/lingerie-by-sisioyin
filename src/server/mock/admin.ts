@@ -1,3 +1,4 @@
+import { adminUrl } from "@/lib/adminPath";
 import { randomBytes } from "node:crypto";
 import { canTransition } from "@/lib/order-rules";
 import { REUPLOAD_HOURS, applyCancellation } from "./orders";
@@ -827,7 +828,7 @@ export const mockAdmin: AdminRepository = {
     const token = randomBytes(16).toString("hex");
     db.invites.set(token, { email: email.trim().toLowerCase(), role, used: false });
     log(db, actor, "invitation", `${email} as ${role}`);
-    return { ok: true, value: { link: `/admin/sign-in?invite=${token}` } };
+    return { ok: true, value: { link: adminUrl(`/sign-in?invite=${token}`) } };
   },
 
   async activity(search, page) {

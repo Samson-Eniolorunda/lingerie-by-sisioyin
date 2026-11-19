@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { adminPath } from "@/lib/adminPath";
 import { AUDIENCES, type Audience } from "@/lib/supabase-cookies";
 import { callbackUrl } from "@/server/auth/request";
 import { clearAllFor, clearFailures, isLocked, noteFailure } from "@/server/auth/throttle";
@@ -146,7 +147,7 @@ export const supabaseAuth: AuthRepository = {
           full_name: `${input.firstName} ${input.lastName}`.trim(),
           invite_token: input.token,
         },
-        emailRedirectTo: await callbackUrl("/admin", "staff", "confirm"),
+        emailRedirectTo: await callbackUrl(adminPath("/"), "staff", "confirm"),
       },
     });
     if (error) {

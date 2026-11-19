@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import { redirect } from "next/navigation";
 import { can, type Permission } from "@/lib/permissions";
 import { data } from "@/server/data";
@@ -26,8 +27,8 @@ export async function requireStaff(
   returnTo: string,
 ): Promise<SessionUser> {
   const user = await currentUser("staff");
-  if (!user) redirect(`/admin/sign-in?next=${encodeURIComponent(returnTo)}`);
-  if (permission && !can(user.role, permission)) redirect("/admin/denied");
+  if (!user) redirect(adminPath(`/sign-in?next=${encodeURIComponent(returnTo)}`));
+  if (permission && !can(user.role, permission)) redirect(adminPath("/denied"));
   return user;
 }
 

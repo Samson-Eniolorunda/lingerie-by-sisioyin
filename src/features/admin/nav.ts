@@ -1,3 +1,4 @@
+import { adminPath, stripAdminPrefix } from "@/lib/adminPath";
 import { can, type Permission } from "@/lib/permissions";
 import type { StaffRole } from "@/types/account";
 
@@ -23,79 +24,79 @@ export interface AdminNavItem {
 }
 
 export const ADMIN_NAV: readonly AdminNavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: "dashboard", permission: null, primary: true },
+  { href: adminPath("/"), label: "Dashboard", icon: "dashboard", permission: null, primary: true },
   {
-    href: "/admin/orders",
+    href: adminPath("/orders"),
     label: "Orders",
     icon: "orders",
     permission: "orders.view",
     primary: true,
   },
   {
-    href: "/admin/products",
+    href: adminPath("/products"),
     label: "Products",
     icon: "products",
     permission: "products.manage",
     primary: true,
   },
   {
-    href: "/admin/messages",
+    href: adminPath("/messages"),
     label: "Messages",
     icon: "messages",
     permission: "messages.manage",
     primary: true,
   },
   {
-    href: "/admin/reviews",
+    href: adminPath("/reviews"),
     label: "Reviews",
     icon: "reviews",
     permission: "products.manage",
     primary: false,
   },
   {
-    href: "/admin/receipts",
+    href: adminPath("/receipts"),
     label: "Receipts with no order",
     icon: "receipts",
     permission: "orders.view",
     primary: false,
   },
   {
-    href: "/admin/customers",
+    href: adminPath("/customers"),
     label: "Customers",
     icon: "customers",
     permission: "customers.view",
     primary: false,
   },
   {
-    href: "/admin/promos",
+    href: adminPath("/promos"),
     label: "Promo codes",
     icon: "promos",
     permission: "promos.manage",
     primary: false,
   },
   {
-    href: "/admin/analytics",
+    href: adminPath("/analytics"),
     label: "Analytics",
     icon: "analytics",
     permission: "analytics.view",
     primary: false,
   },
   {
-    href: "/admin/settings",
+    href: adminPath("/settings"),
     label: "Settings",
     icon: "settings",
     permission: "settings.manage",
     primary: false,
   },
   {
-    href: "/admin/team",
+    href: adminPath("/team"),
     label: "Roles and invites",
     icon: "team",
     permission: "roles.manage",
     primary: false,
   },
   {
-    href: "/admin/activity",
+    href: adminPath("/activity"),
     label: "Activity log",
     icon: "activity",
     permission: "roles.manage",
@@ -108,7 +109,8 @@ export function visibleNav(role: StaffRole | null): readonly AdminNavItem[] {
 }
 
 export function isCurrent(pathname: string, href: string): boolean {
-  return href === "/admin"
-    ? pathname === "/admin"
-    : pathname === href || pathname.startsWith(`${href}/`);
+  // Both sides are compared without the prefix, so the visible path and the route agree.
+  const here = stripAdminPrefix(pathname);
+  const target = stripAdminPrefix(href);
+  return target === "/" ? here === "/" : here === target || here.startsWith(`${target}/`);
 }

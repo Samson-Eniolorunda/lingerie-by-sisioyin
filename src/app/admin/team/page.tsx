@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import { PageHeader } from "@/features/admin/PageHeader";
 import { TeamManager } from "@/features/admin/TeamManager";
@@ -8,7 +9,7 @@ export const metadata: Metadata = { title: "Roles and invites" };
 export const dynamic = "force-dynamic";
 
 export default async function TeamPage() {
-  const user = await requireStaff("roles.manage", "/admin/team");
+  const user = await requireStaff("roles.manage", adminPath("/team"));
   return (
     <>
       <PageHeader

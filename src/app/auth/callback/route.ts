@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { adminPath, stripAdminPrefix } from "@/lib/adminPath";
 import { safeNext } from "@/lib/safe-next";
 import { RESET_AUDIENCE_COOKIE } from "@/server/auth/request";
 import { data } from "@/server/data";
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const result = await data.auth.exchangeCode(code, audience);
     if (result.ok) {
       const response = NextResponse.redirect(new URL(next, origin));
-      if (next.startsWith("/reset-password"))
+      if (stripAdminPrefix(next).startsWith("/reset-password"))
         response.cookies.set(RESET_AUDIENCE_COOKIE, audience, {
           httpOnly: true,
           sameSite: "lax",
@@ -36,7 +37,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // for a session, but the address is already confirmed: tell the person to sign in.
   if (searchParams.get("type") === "confirm")
     return NextResponse.redirect(
-      new URL(audience === "staff" ? "/admin/sign-in?confirmed=1" : "/sign-in?confirmed=1", origin),
+      new URL(
+        audience === "staff" ? adminPath("/sign-in?confirmed=1") : "/sign-in?confirmed=1",
+        origin,
+      ),
     );
-  return NextResponse.redirect(new URL("/forgot-password?link=expired", origin));
+  return NextResponse.redirect(
+    new URL(
+      audience === "staff"
+        ? adminPath("/forgot-password?link=expired")
+        : "/forgot-password?link=expired",
+      origin,
+    ),
+  );
 }

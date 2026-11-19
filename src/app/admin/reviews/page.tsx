@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Pager } from "@/features/admin/Filters";
@@ -16,7 +17,7 @@ export default async function ReviewsPage({
 }: {
   searchParams: Promise<{ show?: string; page?: string }>;
 }) {
-  await requireStaff("products.manage", "/admin/reviews");
+  await requireStaff("products.manage", adminPath("/reviews"));
   const { show, page } = await searchParams;
   const status = show === "approved" ? "approved" : "pending";
   const pageNumber = parsePageNumber(page);
@@ -29,7 +30,7 @@ export default async function ReviewsPage({
   ]);
   const tab = (value: "pending" | "approved", label: string) => (
     <Link
-      href={`/admin/reviews?show=${value}`}
+      href={adminPath(`/reviews?show=${value}`)}
       aria-current={status === value ? "page" : undefined}
       className={`inline-flex min-h-11 items-center border-b-2 px-3 text-base ${status === value ? "border-primary font-semibold" : "border-transparent"}`}
     >
@@ -48,7 +49,7 @@ export default async function ReviewsPage({
       </nav>
       <ReviewModeration reviews={reviews.items} testimonials={testimonials.items} />
       <Pager
-        base="/admin/reviews"
+        base={adminPath("/reviews")}
         params={{ show: status }}
         page={pageNumber}
         perPage={PER_PAGE}

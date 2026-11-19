@@ -1,5 +1,6 @@
 "use server";
 
+import { adminPath } from "@/lib/adminPath";
 import { redirect } from "next/navigation";
 import {
   fieldErrors,
@@ -110,7 +111,7 @@ export async function staffSignInAction(input: unknown, next: string | null): Pr
     ip: await clientIp(),
   });
   if (!result.ok) return invalid(result.message);
-  redirect(safeNext(next, "/admin"));
+  redirect(safeNext(next, adminPath("/")));
 }
 
 /** Accepting a staff invitation: creates the account, then goes to the admin, or asks to confirm the address first. */
@@ -134,12 +135,12 @@ export async function acceptInvitationAction(input: unknown): Promise<AuthState>
       message:
         "Check your email. We have sent a link to confirm your address, then you can sign in to the admin.",
     };
-  redirect("/admin");
+  redirect(adminPath("/"));
 }
 
 export async function staffSignOutAction(): Promise<void> {
   await clearSession("staff");
-  redirect("/admin/sign-in");
+  redirect(adminPath("/sign-in"));
 }
 
 export async function staffForgotAction(input: unknown): Promise<AuthState> {
@@ -148,7 +149,7 @@ export async function staffForgotAction(input: unknown): Promise<AuthState> {
   const { devLink } = await data.auth.requestPasswordReset(
     parsed.data.email,
     "staff",
-    await callbackUrl("/reset-password", "staff"),
+    await callbackUrl(adminPath("/reset-password"), "staff"),
   );
   return {
     ok: true,

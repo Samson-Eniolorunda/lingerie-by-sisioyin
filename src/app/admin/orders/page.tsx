@@ -1,3 +1,4 @@
+import { adminPath } from "@/lib/adminPath";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DataTable } from "@/components/ui/DataTable";
@@ -20,7 +21,7 @@ export default async function OrdersPage({
 }: {
   searchParams: Promise<{ status?: string; q?: string; page?: string }>;
 }) {
-  await requireStaff("orders.view", "/admin/orders");
+  await requireStaff("orders.view", adminPath("/orders"));
   const { status, q, page } = await searchParams;
   const current = ORDER_STATUSES.find((s) => s === status) as OrderStatus | undefined;
   const pageNumber = parsePageNumber(page);
@@ -35,7 +36,7 @@ export default async function OrdersPage({
     <>
       <PageHeader title="Orders" lead="Check each receipt, then move the order along." />
       <FilterBar
-        action="/admin/orders"
+        action={adminPath("/orders")}
         search={{
           name: "q",
           label: "Search orders",
@@ -63,7 +64,7 @@ export default async function OrdersPage({
             label: "Order",
             title: true,
             cell: (o) => (
-              <Link href={`/admin/orders/${o.orderNumber}`} className="font-medium">
+              <Link href={adminPath(`/orders/${o.orderNumber}`)} className="font-medium">
                 {o.orderNumber}
               </Link>
             ),
@@ -85,7 +86,7 @@ export default async function OrdersPage({
         ]}
       />
       <Pager
-        base="/admin/orders"
+        base={adminPath("/orders")}
         params={{ status: current ?? "", q: q ?? "" }}
         page={pageNumber}
         perPage={PER_PAGE}
