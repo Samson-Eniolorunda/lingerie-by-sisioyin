@@ -1,0 +1,17 @@
+node_modules
+.next
+legacy
+package-lock.json
+*.html
+assets
+admin-sw.js
+sw.js
+public/sw.js
+playwright-report
+test-results
+screenshots
+REBUILD_PLAN.md
+REBUILD_STATUS.md
+supabase/functions
+IMAGE_SIZING_GUIDE.md
+README.md

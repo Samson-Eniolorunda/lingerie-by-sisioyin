@@ -1,0 +1,234 @@
+@layer base {
+  html {
+    font-size: calc(16px * var(--font-scale));
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: calc(var(--header-h) + var(--safe-top) + 8px);
+    background: var(--c-page);
+  }
+
+  body {
+    margin: 0;
+    background: var(--c-page);
+    color: var(--c-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.625;
+    font-variant-numeric: lining-nums;
+    text-rendering: optimizeLegibility;
+    overflow-wrap: break-word;
+  }
+
+  :where(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    text-wrap: balance;
+  }
+
+  :where(a) {
+    color: var(--c-primary);
+    text-underline-offset: 0.2em;
+  }
+  :where(a:hover) {
+    color: var(--c-primary-hover);
+  }
+
+  :where(input, select, textarea, button) {
+    font: inherit;
+    color: inherit;
+  }
+  :where(input, select, textarea) {
+    font-size: max(1rem, 16px);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--c-selected);
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+    white-space: nowrap;
+  }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  @media print {
+    [data-print="hide"] {
+      display: none !important;
+    }
+  }
+}
+
+@layer components {
+  html[data-keyboard-open] [data-keyboard-hide] {
+    display: none;
+  }
+
+  .whatsapp-fab {
+    position: fixed;
+    right: max(16px, var(--safe-right));
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + 16px);
+    z-index: var(--z-whatsapp);
+  }
+  html[data-bar] .whatsapp-fab {
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom) + var(--bar-h) + 16px);
+  }
+  @media (min-width: 48rem) {
+    .whatsapp-fab,
+    html[data-bar] .whatsapp-fab {
+      bottom: 24px;
+    }
+  }
+}
+
+@layer components {
+  /*
+   * One table, two shapes. From 48rem it is a table; below that each row becomes a card and each
+   * cell prints its own label, so the same markup serves phones and desks (M-29).
+   */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .data-table [role="columnheader"] {
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--c-muted);
+    padding: 0.625rem 0.75rem;
+    border-bottom: 1px solid var(--c-rule);
+    white-space: nowrap;
+  }
+  .data-table [role="cell"] {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--c-line);
+    vertical-align: middle;
+  }
+  @media (max-width: 47.99rem) {
+    .data-table,
+    .data-table [role="rowgroup"],
+    .data-table [role="row"],
+    .data-table [role="cell"] {
+      display: block;
+    }
+    .data-table [role="rowgroup"]:first-child {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    .data-table [role="row"] {
+      margin-bottom: 0.75rem;
+      border: 1px solid var(--c-line);
+      border-radius: 0.375rem;
+      background: var(--c-surface);
+      padding: 0.25rem 0.875rem;
+    }
+    .data-table [role="cell"] {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--c-line);
+      text-align: right;
+    }
+    .data-table [role="cell"]:last-child {
+      border-bottom: 0;
+    }
+    .data-table [role="cell"]::before {
+      content: attr(data-label);
+      flex: none;
+      font-size: 0.875rem;
+      color: var(--c-muted);
+      text-align: left;
+    }
+    .data-table [role="cell"][data-card="title"] {
+      display: block;
+      text-align: left;
+      font-weight: 500;
+    }
+    .data-table [role="cell"][data-card="title"]::before,
+    .data-table [role="cell"][data-card="actions"]::before {
+      display: none;
+    }
+    .data-table [role="cell"][data-card="actions"] {
+      justify-content: flex-end;
+    }
+  }
+
+  /* A sticky bar that sits above the admin bottom bar, and stays put when the keyboard opens, so a tap on it is never moved from under the finger. */
+  .admin-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: calc(var(--bottom-nav-h) + var(--safe-bottom));
+    z-index: var(--z-bar);
+  }
+  @media (min-width: 64rem) {
+    .admin-bar {
+      bottom: 0;
+      left: 16rem;
+    }
+  }
+
+  @media print {
+    [data-admin-chrome] {
+      display: none !important;
+    }
+    [data-admin-main] {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+  }
+}
+
+@layer components {
+  /* Two thumbs on one track: the track ignores the pointer, each thumb takes it. */
+  .dual-range::-webkit-slider-thumb {
+    pointer-events: auto;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 9999px;
+    background: var(--c-surface);
+    border: 2px solid var(--c-primary);
+    cursor: pointer;
+  }
+  .dual-range::-moz-range-thumb {
+    pointer-events: auto;
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: var(--c-surface);
+    border: 2px solid var(--c-primary);
+    cursor: pointer;
+  }
+  .dual-range::-webkit-slider-runnable-track {
+    background: transparent;
+  }
+  .dual-range::-moz-range-track {
+    background: transparent;
+  }
+}

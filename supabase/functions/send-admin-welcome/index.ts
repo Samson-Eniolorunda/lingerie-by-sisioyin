@@ -8,7 +8,7 @@ import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY")!;
 const FROM_EMAIL = "noreply@lingeriebysisioyin.store";
-const BRAND = "Lingerie by Sisioyin";
+const BRAND = "Lingeries by Sisioyin";
 const SITE_URL = "https://lingeriebysisioyin.store";
 
 interface WelcomeRequest {

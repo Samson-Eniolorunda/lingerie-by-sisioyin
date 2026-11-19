@@ -1,0 +1,577 @@
+{
+  "updated": "February 15, 2026",
+  "intro": [
+    {
+      "t": "p",
+      "c": [
+        "Welcome to Lingeries by Sisioyin (\"LBS,\" \"we,\" \"us,\" or \"our\"). These Terms of Service (\"Terms\") govern your use of our website at ",
+        {
+          "t": "strong",
+          "c": ["lingeriebysisioyin.store"]
+        },
+        " and your purchase of products from us. By accessing our website or placing an order, you agree to be bound by these Terms."
+      ]
+    },
+    {
+      "t": "p",
+      "c": [
+        "Please read these terms carefully before using our services. If you do not agree with any part of these terms, please do not use our website."
+      ]
+    }
+  ],
+  "sections": [
+    {
+      "id": "acceptance",
+      "title": "Acceptance of Terms",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "By accessing and using this website, you accept and agree to be bound by these Terms and our ",
+            {
+              "t": "a",
+              "c": ["Privacy Policy"],
+              "href": "/privacy"
+            },
+            ". We may update these Terms from time to time. Continued use of the website after any changes constitutes acceptance of those changes. We encourage you to review these Terms periodically."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "eligibility",
+      "title": "Eligibility",
+      "body": [
+        {
+          "t": "p",
+          "c": ["To use our services and make purchases, you must:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": ["Be at least 18 years of age or have parental/guardian consent"]
+            },
+            {
+              "t": "li",
+              "c": ["Be a resident of Nigeria or have a valid Nigerian delivery address"]
+            },
+            {
+              "t": "li",
+              "c": ["Provide accurate and complete information during registration and checkout"]
+            },
+            {
+              "t": "li",
+              "c": ["Not use the site for any unlawful purpose"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "title": "Account Registration",
+      "body": [
+        {
+          "t": "p",
+          "c": ["When creating an account on our website, you agree to:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                "Provide accurate, current, and complete information (name, email, phone number, date of birth)"
+              ]
+            },
+            {
+              "t": "li",
+              "c": ["Keep your login credentials secure and confidential"]
+            },
+            {
+              "t": "li",
+              "c": ["Notify us immediately if you suspect unauthorized access to your account"]
+            },
+            {
+              "t": "li",
+              "c": ["Accept responsibility for all activities that occur under your account"]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            "We reserve the right to suspend or terminate accounts that violate these Terms, provide false information, or engage in fraudulent activity. Suspended accounts may be reinstated after review. Banned accounts are permanently closed. Return privileges may also be revoked independently if our return policy is misused."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Account Deletion:"]
+            },
+            " You may delete your own account at any time from your Dashboard settings. Upon deletion, your account is locked immediately. Your personal data is permanently purged after a 30-day grace period. Order records are anonymised and retained for legal purposes. See our ",
+            {
+              "t": "a",
+              "c": ["Privacy Policy"],
+              "href": "/privacy#data-deletion"
+            },
+            " for full details."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Security:"]
+            },
+            " Our sign-in, sign-up, password-reset and contact forms are protected by Cloudflare Turnstile. You may also sign in using your Google account; if you do, you agree to Google's ",
+            {
+              "t": "a",
+              "c": ["Terms of Service"],
+              "href": "https://policies.google.com/terms"
+            },
+            " and ",
+            {
+              "t": "a",
+              "c": ["Privacy Policy"],
+              "href": "https://policies.google.com/privacy"
+            },
+            "."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "orders",
+      "title": "Orders & Payment",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Order Placement:"]
+            },
+            " Adding items to your cart and completing checkout constitutes an offer to purchase. We reserve the right to accept or reject any order due to product availability, pricing errors, or suspected fraud."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Pricing:"]
+            },
+            " All prices are displayed in Nigerian Naira (\u20a6). We reserve the right to change prices at any time. The price shown at the time you place your order is the price you'll be charged."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Payment Method:"]
+            },
+            " We currently accept payment via ",
+            {
+              "t": "strong",
+              "c": ["bank transfer only"]
+            },
+            ". At checkout, you'll be shown our bank details ({{bank.summary}}). After making the transfer, you must upload a screenshot or photo of your payment receipt to confirm the order. Card payment will be available soon."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Payment Verification:"]
+            },
+            " Orders are confirmed once we verify your payment receipt. Verification typically takes a few hours during business hours. You'll receive an email notification once your order is confirmed."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Order Cancellation:"]
+            },
+            " Orders may be cancelled within 30 minutes of placement via your Dashboard (under \"My Orders\") or by contacting us via WhatsApp (+234 903 334 4860) or our ",
+            {
+              "t": "a",
+              "c": ["Contact page"],
+              "href": "/contact"
+            },
+            ". After this window, orders enter processing and cannot be cancelled. For refund requests on processed orders, please contact support."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "shipping",
+      "title": "Shipping & Delivery",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Delivery Area:"]
+            },
+            " We currently ship within Nigeria only. Delivery fees vary by state and are calculated automatically at checkout."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Delivery Fees:"]
+            }
+          ]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Lagos:"]
+                },
+                " Free delivery"
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Ogun:"]
+                },
+                " \u20a62,000"
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Oyo, Osun, Ondo:"]
+                },
+                " \u20a62,500"
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Ekiti:"]
+                },
+                " \u20a63,000"
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Abuja (FCT):"]
+                },
+                " \u20a63,500"
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Other states:"]
+                },
+                " \u20a62,500"
+              ]
+            }
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Delivery Times:"]
+            },
+            " Lagos orders typically arrive in 1\u20133 business days. South-West states take 2\u20134 business days. Other locations take 3\u20135 business days. Delays may occur during public holidays or peak periods."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Risk of Loss:"]
+            },
+            " We are not responsible for packages lost in transit by third-party logistics providers once they have been dispatched."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "returns",
+      "title": "Returns & Refunds",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Return Window:"]
+            },
+            " We accept returns within 7 days of delivery for unworn items with original tags and packaging intact. After 7 days, return requests will not be accepted."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Non-Returnable Items:"]
+            },
+            " Due to hygiene reasons, underwear, panties, and bodysuits cannot be returned unless they arrive damaged, defective, or incorrect."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Valid Return Reasons:"]
+            },
+            " Returns are accepted ",
+            {
+              "t": "strong",
+              "c": ["only"]
+            },
+            " when the issue is caused by us \u2014 the store. Qualifying reasons include: item arrived damaged, item is defective, wrong item was sent, or the size does not match what was described on our size chart. We do ",
+            {
+              "t": "strong",
+              "c": ["not"]
+            },
+            " accept returns for reasons such as \"changed my mind\", \"no longer needed\", or buyer's remorse. Return privileges may be permanently revoked if this policy is misused."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["How to Return:"]
+            },
+            " Within 7 days of delivery, you can submit a return request through your Dashboard (under \"My Orders\") or contact us via our ",
+            {
+              "t": "a",
+              "c": ["Contact page"],
+              "href": "/contact"
+            },
+            " or WhatsApp (+234 903 334 4860) with your order number, reason, and photos of the item. We'll review your request and respond within 24 hours."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Refunds:"]
+            },
+            " Approved refunds are processed within 3\u20135 business days via bank transfer to an account you provide."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            {
+              "t": "strong",
+              "c": ["Exchanges:"]
+            },
+            " We offer size exchanges within 7 days of delivery, subject to stock availability. Please note that the delivery fee for exchange shipments is the responsibility of the customer."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intellectual-property",
+      "title": "Intellectual Property",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "All content on this website \u2014 including text, graphics, logos, product images, and design \u2014 is the property of Lingeries by Sisioyin and is protected by applicable intellectual property laws."
+          ]
+        },
+        {
+          "t": "p",
+          "c": ["You may not:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                "Copy, reproduce, or distribute any content from our website without written permission"
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                "Use the \"Lingeries by Sisioyin\" or \"LBS\" name, logo, or branding for any purpose"
+              ]
+            },
+            {
+              "t": "li",
+              "c": ["Scrape, download, or re-use our product images or descriptions"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prohibited",
+      "title": "Prohibited Activities",
+      "body": [
+        {
+          "t": "p",
+          "c": ["When using our website, you agree not to:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": ["Violate any laws, regulations, or the rights of others"]
+            },
+            {
+              "t": "li",
+              "c": ["Submit false, misleading, or fraudulent information or payment receipts"]
+            },
+            {
+              "t": "li",
+              "c": ["Attempt to gain unauthorized access to our systems or other users' accounts"]
+            },
+            {
+              "t": "li",
+              "c": [
+                "Use bots, scrapers, or automated tools to access or collect data from our website"
+              ]
+            },
+            {
+              "t": "li",
+              "c": ["Interfere with the proper functioning of the website"]
+            },
+            {
+              "t": "li",
+              "c": ["Post or submit abusive, offensive, or spam content"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "limitation",
+      "title": "Limitation of Liability",
+      "body": [
+        {
+          "t": "p",
+          "c": [
+            "To the maximum extent permitted by Nigerian law, Lingeries by Sisioyin shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of our website or purchase of our products."
+          ]
+        },
+        {
+          "t": "p",
+          "c": [
+            "Our total liability for any claim shall not exceed the amount you paid for the product giving rise to the claim."
+          ]
+        },
+        {
+          "t": "div",
+          "c": [
+            {
+              "t": "p",
+              "c": [
+                "Product colours may appear slightly different on screen due to device display settings. This is not grounds for a return unless the product is materially different from its description."
+              ]
+            }
+          ],
+          "callout": true
+        }
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "Contact Us",
+      "body": [
+        {
+          "t": "p",
+          "c": ["If you have any questions about these Terms of Service, please reach out:"]
+        },
+        {
+          "t": "ul",
+          "c": [
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Contact Form:"]
+                },
+                " ",
+                {
+                  "t": "a",
+                  "c": ["Contact Page"],
+                  "href": "/contact"
+                }
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["WhatsApp:"]
+                },
+                " ",
+                {
+                  "t": "a",
+                  "c": ["+234 903 334 4860"],
+                  "href": "https://wa.me/2349033344860"
+                }
+              ]
+            },
+            {
+              "t": "li",
+              "c": [
+                {
+                  "t": "strong",
+                  "c": ["Instagram:"]
+                },
+                " ",
+                {
+                  "t": "a",
+                  "c": ["@lingeries_bysisioyin"],
+                  "href": "https://instagram.com/lingeries_bysisioyin"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
