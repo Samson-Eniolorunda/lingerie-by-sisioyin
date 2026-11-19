@@ -1,5 +1,6 @@
 "use client";
 
+import { countOf } from "@/lib/plural";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, FileText, X } from "lucide-react";
@@ -57,8 +58,14 @@ function loadValues(raw: string | null): CheckoutValues {
 const noopSubscribe = () => () => {};
 const readSaved = () => readStorage(FORM_KEY);
 
+/** The signed-in customer's details, from their account (null for a guest). */
+export type CheckoutAccount = Pick<
+  CheckoutValues,
+  "email" | "firstName" | "lastName" | "phone" | "address" | "city" | "state"
+>;
+
 /** Reads the saved form once the page is on the device, then hands it to the form as its starting state. */
-export function CheckoutView() {
+export function CheckoutView({ account = null }: { readonly account?: CheckoutAccount | null }) {
   const saved = useSyncExternalStore(noopSubscribe, readSaved, () => undefined);
   const choices = useCheckoutChoices();
   if (saved === undefined) {
@@ -72,12 +79,29 @@ export function CheckoutView() {
       </div>
     );
   }
-  return <CheckoutForm initial={parseSaved(saved, choices.state)} />;
+  return <CheckoutForm initial={parseSaved(saved, choices.state, account)} />;
 }
 
-function parseSaved(raw: string | null, stateFromBag: string): CheckoutValues {
+function parseSaved(
+  raw: string | null,
+  stateFromBag: string,
+  account: CheckoutAccount | null,
+): CheckoutValues {
   const saved = loadValues(raw);
-  return { ...saved, state: stateFromBag || saved.state };
+  if (!account) return { ...saved, state: stateFromBag || saved.state };
+  // The account's details win over anything an earlier guest order left in this browser; the saved
+  // form only fills what the account does not have.
+  const fill = (fromAccount: string, fromBrowser: string) => fromAccount || fromBrowser;
+  return {
+    ...saved,
+    email: account.email,
+    firstName: fill(account.firstName, saved.firstName),
+    lastName: fill(account.lastName, saved.lastName),
+    phone: fill(account.phone, saved.phone),
+    address: fill(account.address, saved.address),
+    city: fill(account.city, saved.city),
+    state: stateFromBag || fill(account.state, saved.state),
+  };
 }
 
 function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
@@ -361,7 +385,12 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
 
       <details className="mt-4 border border-line bg-surface">
         <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 px-4 text-base [&::-webkit-details-marker]:hidden">
-          <span>{lines.reduce((n, l) => n + l.qty, 0)} items</span>
+          <span>
+            {countOf(
+              lines.reduce((n, l) => n + l.qty, 0),
+              "item",
+            )}
+          </span>
           <span className="tabular font-semibold">{formatNaira(totals.total)}</span>
         </summary>
         <div className="border-t border-line px-4 py-3 text-base">
