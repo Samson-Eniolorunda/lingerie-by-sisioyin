@@ -29,7 +29,7 @@ export function WishlistHeart({
           durationMs: 2500,
         });
       }}
-      className={cn("flex size-11 items-center justify-center text-ink", className)}
+      className={cn("flex size-11 shrink-0 items-center justify-center text-ink", className)}
     >
       <Heart
         size={20}

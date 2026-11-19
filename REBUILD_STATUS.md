@@ -4,6 +4,14 @@ Branch `rebuild/production`, built from `REBUILD_PLAN.md`. Nothing here touched 
 
 Date of this run (session 4): 19 November 2026. Gates run on this branch: format, lint (max-warnings 0), typecheck, forbidden patterns, unit tests, SQL tests, build and the full Playwright suite, all clean.
 
+## Session 5 (19 November 2026, scheduled run)
+
+- Brand name is now "Lingeries by Sisioyin" in every visible text, metadata, manifest, emails, legal text, README and docs; `tests/unit/brand.test.ts` fails if the singular name returns in any tracked file. The wordmark and footer read "Lingeries".
+- Session 4 review fixes (A and B) were re-read against this file and the code; nothing further was found missing. The Supabase data layer is still not written (needs the real project).
+- `tests/e2e/responsive.spec.ts`: storefront, account and admin at 360, 390, 430, 768, 1280 and 1536 px, light and dark: no sideways scroll, 44 px targets below 1024 px, primary button right of the secondary at phone widths. It found a wishlist heart shrinking to 41 px at 768 px (fixed).
+- `OWNER_SETUP.md` written. Bank details live in `src/config/site.ts`, not in an environment variable.
+- Gates: format, lint, typecheck, forbidden patterns, unit tests, build and the full Playwright suite clean (the browser is selected with `CHROMIUM_PATH=/opt/pw-browsers/chromium` in this environment).
+
 ## Session 4: the review findings, fixed before a database is connected
 
 The owner decided to **start clean**: the old site was never really used, so there is no old data, no old email templates and no parity target with the old site. A fresh free Supabase project in a new organisation will be connected later; it does not exist yet. The legacy static site (`*.html`, `assets/`, workers, manifests, `supabase_complete.sql`, `supabase/migrations`) was removed.
