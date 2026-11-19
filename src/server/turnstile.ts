@@ -48,7 +48,7 @@ function secretForEnvironment(): Secret {
 export async function verifyTurnstile(
   token: string | undefined,
   ip: string,
-  fetcher: typeof fetch = fetch,
+  fetcher: (url: string, init: RequestInit) => Promise<Response> = fetch,
 ): Promise<TurnstileResult> {
   const where = secretForEnvironment();
   if ("skip" in where) return { ok: true };

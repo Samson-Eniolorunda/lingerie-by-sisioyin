@@ -12,8 +12,10 @@ afterEach(() => {
   vi.resetModules();
 });
 
+type Fetcher = (url: string, init: RequestInit) => Promise<Response>;
+
 const answer = (body: unknown, ok = true) =>
-  vi.fn(async () => new Response(JSON.stringify(body), { status: ok ? 200 : 500 }));
+  vi.fn<Fetcher>(async () => new Response(JSON.stringify(body), { status: ok ? 200 : 500 }));
 
 async function load(env: Record<string, string>) {
   vi.resetModules();
@@ -29,13 +31,13 @@ describe("verifyTurnstile", () => {
     });
     const fetcher = answer({ success: true });
     expect(await verifyTurnstile("tok", "1.2.3.4", fetcher)).toEqual({ ok: true });
-    const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    const [url, init] = fetcher.mock.calls[0] ?? [];
     expect(url).toBe("https://challenges.cloudflare.com/turnstile/v0/siteverify");
-    const body = init.body as URLSearchParams;
+    const body = init?.body as URLSearchParams;
     expect(body.get("secret")).toBe("real-secret");
     expect(body.get("response")).toBe("tok");
     expect(body.get("remoteip")).toBe("1.2.3.4");
-    expect(init.signal).toBeInstanceOf(AbortSignal);
+    expect(init?.signal).toBeInstanceOf(AbortSignal);
   });
 
   it("refuses a token Cloudflare rejects, and a missing token without calling it", async () => {
@@ -58,7 +60,7 @@ describe("verifyTurnstile", () => {
       VERCEL_ENV: "production",
       TURNSTILE_SECRET_KEY: "real-secret",
     });
-    const timeout = vi.fn(async () => {
+    const timeout = vi.fn<Fetcher>(async () => {
       throw new DOMException("The operation timed out.", "TimeoutError");
     });
     expect(await verifyTurnstile("tok", "ip", timeout)).toMatchObject({ ok: false });
@@ -82,8 +84,8 @@ describe("verifyTurnstile", () => {
     });
     const fetcher = answer({ success: true });
     await verifyTurnstile("tok", "ip", fetcher);
-    const init = (fetcher.mock.calls[0] as unknown as [string, RequestInit])[1];
-    expect((init.body as URLSearchParams).get("secret")).toBe(TURNSTILE_TEST_SECRET_KEY);
+    const init = fetcher.mock.calls[0]?.[1];
+    expect((init?.body as URLSearchParams).get("secret")).toBe(TURNSTILE_TEST_SECRET_KEY);
   });
 
   it("skips the check on the development store and where no key is set", async () => {
