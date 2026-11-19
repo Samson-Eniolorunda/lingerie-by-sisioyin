@@ -22,7 +22,7 @@ export function BarChart({
   return (
     <figure>
       <svg
-        viewBox={`0 0 ${w} ${h + 22}`}
+        viewBox={`0 0 ${w} ${h + 2}`}
         role="img"
         aria-label={`${label}: ${format(total)} over ${days.length} days, highest day ${format(max)}.`}
         className="h-auto w-full text-primary"
@@ -44,13 +44,12 @@ export function BarChart({
             </rect>
           );
         })}
-        <text x="0" y={h + 16} fontSize="11" fill="var(--c-muted)">
-          {days[0]?.date.slice(5)}
-        </text>
-        <text x={w} y={h + 16} fontSize="11" textAnchor="end" fill="var(--c-muted)">
-          {days.at(-1)?.date.slice(5)}
-        </text>
       </svg>
+      {/* Axis dates are HTML, not SVG text: the SVG scales down on phones and made them about 6 px. */}
+      <div aria-hidden="true" className="mt-1 flex justify-between text-xs text-muted">
+        <span>{days[0]?.date.slice(5)}</span>
+        <span>{days.at(-1)?.date.slice(5)}</span>
+      </div>
       <figcaption className="mt-1 text-sm text-muted">
         {label}. Highest day {format(max)}.
       </figcaption>
