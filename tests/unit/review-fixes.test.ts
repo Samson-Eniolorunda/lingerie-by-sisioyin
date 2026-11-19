@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { allowRequest, allowShared, resetRateLimits } from "@/server/rate-limit";
 import { callbackUrl, siteOrigin } from "@/server/auth/request";
 import { trackedOrder, type StoredOrder } from "@/types/orders";
@@ -54,6 +54,10 @@ describe("review fix 4: the tracking page sees only what it needs", () => {
 });
 
 describe("review fix 8: rate limits", () => {
+  beforeEach(() => {
+    vi.stubEnv("LBS_ALLOW_DEMO", "");
+  });
+
   it("limits by address and by subject, and counts each separately", async () => {
     const limits = { ip: 3, subject: 2, windowMs: 60_000 };
     expect(await allowRequest("t", "1.1.1.1", ["a@x.test"], limits)).toBe(true);
