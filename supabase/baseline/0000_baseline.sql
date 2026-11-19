@@ -426,21 +426,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.set_audit_fields()
-RETURNS TRIGGER LANGUAGE plpgsql
-SET search_path = public
-AS $$
-BEGIN
-  IF TG_OP = 'INSERT' THEN
-    NEW.created_by := auth.uid();
-    NEW.updated_by := auth.uid();
-  ELSE
-    NEW.updated_by := auth.uid();
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
 -- ============================================================================
 -- 5) PRODUCTS
 -- ============================================================================
@@ -469,8 +454,8 @@ CREATE TABLE IF NOT EXISTS public.products (
   review_count          INTEGER     DEFAULT 0,
   created_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now(),
-  created_by            UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
-  updated_by            UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  -- No created_by / updated_by here: this table is readable by the public, so a staff member's id
+  -- must not be on it. Who changed a product is in admin_activity_logs (staff only).
 
   CONSTRAINT products_price_nonneg CHECK (price_ngn >= 0),
   CONSTRAINT products_qty_nonneg   CHECK (qty >= 0),
@@ -501,9 +486,6 @@ CREATE TRIGGER trg_products_slug BEFORE INSERT ON public.products
 DROP TRIGGER IF EXISTS trg_products_updated_at ON public.products;
 CREATE TRIGGER trg_products_updated_at BEFORE UPDATE ON public.products
   FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
-DROP TRIGGER IF EXISTS trg_products_audit ON public.products;
-CREATE TRIGGER trg_products_audit BEFORE INSERT OR UPDATE ON public.products
-  FOR EACH ROW EXECUTE FUNCTION public.set_audit_fields();
 
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
@@ -1445,13 +1427,6 @@ BEGIN
   RETURN jsonb_build_object('ok', true);
 END;
 $$;
-  IF NOT COALESCE(p_confirm_over, false)
-     AND EXISTS (SELECT 1 FROM public.orders
-                  WHERE order_number = upper(trim(COALESCE(p_order_number, '')))
-                    AND payment_status = 'refund_check' AND p_received > total) THEN
-    RETURN jsonb_build_object('ok', false, 'code', 'confirm_overpayment',
-      'message', 'That is more than the order total. Confirm that this amount was received and is owed back.');
-  END IF;
 
 -- Staff checked the bank account for a cancelled order with an unaccepted receipt. An amount above
 -- zero turns it into a refund owed for that amount (an overpayment is owed in full, not capped at
@@ -1469,6 +1444,13 @@ BEGIN
   END IF;
   IF p_received IS NULL OR p_received < 0 OR p_received > 99999999.99 THEN
     RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Enter the amount that was received.');
+  END IF;
+  IF NOT COALESCE(p_confirm_over, false)
+     AND EXISTS (SELECT 1 FROM public.orders
+                  WHERE order_number = upper(trim(COALESCE(p_order_number, '')))
+                    AND payment_status = 'refund_check' AND p_received > total) THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'confirm_overpayment',
+      'message', 'That is more than the order total. Confirm that this amount was received and is owed back.');
   END IF;
   UPDATE public.orders SET
       payment_status = CASE WHEN p_received > 0 THEN 'refund_owed' ELSE 'rejected' END,
@@ -1539,8 +1521,8 @@ CREATE TABLE IF NOT EXISTS public.site_settings (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   key        TEXT        NOT NULL UNIQUE CHECK (char_length(key) <= 80),
   value      JSONB       NOT NULL DEFAULT '{}',
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_by UUID        REFERENCES auth.users(id) ON DELETE SET NULL
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  -- No updated_by: the table is public (see below); changes are recorded in admin_activity_logs.
 );
 
 ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
