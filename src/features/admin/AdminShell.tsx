@@ -98,7 +98,6 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <ThemeControl className="hidden sm:inline-flex" />
           <Link
             href={shopHref("/")}
             className="hidden min-h-11 items-center text-sm text-muted underline underline-offset-4 sm:inline-flex"
@@ -128,6 +127,10 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
             ))}
           </ul>
         </nav>
+        <div className="mt-4 border-t border-line pt-4">
+          <p className="mb-2 text-sm font-medium">Appearance</p>
+          <ThemeControl className="w-full [&>button]:flex-1" />
+        </div>
         <form action={staffSignOutAction} className="mt-4 border-t border-line pt-4">
           <Button type="submit" variant="secondary" block>
             Sign out
@@ -214,7 +217,7 @@ export function AdminShell({ items, name, role, badges, children }: Props) {
         </ul>
         <div className="mt-5 flex flex-col gap-4">
           <div>
-            <p className="mb-2 text-sm font-medium">Theme</p>
+            <p className="mb-2 text-sm font-medium">Appearance</p>
             <ThemeControl />
           </div>
           <form action={staffSignOutAction}>

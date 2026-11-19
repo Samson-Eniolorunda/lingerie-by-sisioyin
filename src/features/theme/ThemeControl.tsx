@@ -37,7 +37,14 @@ const options = [
 ] as const;
 
 /** One theme key (`LBS_THEME`) for the whole site; light unless the visitor chose otherwise; the live site's value is read unchanged. */
-export function ThemeControl({ className }: { readonly className?: string }) {
+export function ThemeControl({
+  className,
+  onFooter = false,
+}: {
+  readonly className?: string;
+  /** Colours for the dark footer band. */
+  readonly onFooter?: boolean;
+}) {
   const preference = useSyncExternalStore(
     subscribe,
     readPreference,
@@ -53,8 +60,12 @@ export function ThemeControl({ className }: { readonly className?: string }) {
   return (
     <div
       role="radiogroup"
-      aria-label="Theme"
-      className={cn("inline-flex rounded-sm border border-control", className)}
+      aria-label="Appearance"
+      className={cn(
+        "inline-flex rounded-sm border",
+        onFooter ? "border-on-footer/40" : "border-control",
+        className,
+      )}
     >
       {options.map(({ id, label, Icon }) => (
         <button
@@ -65,7 +76,13 @@ export function ThemeControl({ className }: { readonly className?: string }) {
           onClick={() => choose(id)}
           className={cn(
             "flex min-h-11 min-w-11 items-center justify-center gap-2 px-3 text-sm",
-            preference === id ? "bg-selected font-medium text-ink" : "text-muted hover:bg-tint",
+            onFooter
+              ? preference === id
+                ? "bg-on-footer/20 font-medium text-on-footer"
+                : "text-on-footer/80 hover:bg-on-footer/10"
+              : preference === id
+                ? "bg-selected font-medium text-ink"
+                : "text-muted hover:bg-tint",
           )}
         >
           <Icon size={18} strokeWidth={1.5} aria-hidden="true" />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ThemeControl } from "@/features/theme/ThemeControl";
 import { CookieSettingsButton } from "@/features/consent/ConsentBanner";
 import { BRAND, CATEGORY_LINKS, CONTACT, SUPPORT_LINKS, whatsappLink } from "@/config/site";
 
@@ -93,6 +94,10 @@ export function Footer() {
         <p>
           © {new Date().getFullYear()} {BRAND.name}
         </p>
+        <div className="hidden items-center gap-3 md:flex">
+          <span className="text-sm text-on-footer/80">Appearance</span>
+          <ThemeControl onFooter />
+        </div>
         <p className="flex gap-4">
           <Link
             href="/terms"

@@ -130,7 +130,9 @@ export function MenuSheet() {
           </ul>
         </div>
         <div>
-          <h2 className="mb-2 text-sm font-medium tracking-wider text-subtle uppercase">Theme</h2>
+          <h2 className="mb-2 text-sm font-medium tracking-wider text-subtle uppercase">
+            Appearance
+          </h2>
           <ThemeControl />
         </div>
       </nav>
