@@ -147,7 +147,7 @@ export function TeamManager({
               Send this link to the new member of staff. Email delivery is not connected yet.
             </p>
             <p
-              className="tabular border border-line bg-tint p-3 text-sm break-all"
+              className="border border-line bg-tint p-3 text-sm break-all"
               data-testid="invite-link"
             >
               {fullLink}

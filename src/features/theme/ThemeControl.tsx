@@ -85,7 +85,7 @@ export function ThemeControl({
                 : "text-muted hover:bg-tint",
           )}
         >
-          <Icon size={18} strokeWidth={1.5} aria-hidden="true" />
+          <Icon size={18} strokeWidth={1.5} aria-hidden="true" className="shrink-0" />
           <span className="sr-only sm:not-sr-only">{label}</span>
         </button>
       ))}
