@@ -86,10 +86,17 @@ test.describe("staff access", () => {
 });
 
 test.describe("orders (MO)", () => {
-  test("MO-04 a pending order is confirmed and moved on, step by step", async ({ page }) => {
+  test("MO-04 a pending order is confirmed and moved on, step by step", async ({
+    page,
+  }, testInfo) => {
     await staff(page);
     await page.goto("/admin/orders?status=pending");
-    await page.getByRole("link", { name: /^LBS-/ }).last().click();
+    // MO-08 takes the last two pending orders (one per project); this takes two others, so the tests
+    // running side by side never work on the same order.
+    await page
+      .getByRole("link", { name: /^LBS-/ })
+      .nth(testInfo.project.name === "phone" ? -3 : -4)
+      .click();
     await expect(page.getByText("Payment receipt")).toBeVisible();
     if (!SUPABASE_E2E) await expect(page.getByText("Placeholder", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Confirm payment" }).click();
