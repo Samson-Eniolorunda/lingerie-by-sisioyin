@@ -1,12 +1,57 @@
 # Rebuild status
 
-Branch `rebuild/production`, built from `REBUILD_PLAN.md`. Nothing here touched any live Supabase project, its data or its keys (the old project is gone and no backup exists). All data comes from development fixtures and an in-memory mock store behind the data-access contracts in `src/server/data`. `main` was not changed, no pull request was opened, nothing was merged or deployed.
+Branch `rebuild/production`, built from `REBUILD_PLAN.md`. Nothing here touched any Supabase project, database or other service, and no key exists in the code or in any file. All data comes from development fixtures and an in-memory mock store behind the data-access contracts in `src/server/data`. `main` was not changed, no pull request was opened, nothing was merged or deployed.
 
-Date of this run (session 3): 18 November 2026.
+Date of this run (session 4): 19 November 2026. Gates run on this branch: format, lint (max-warnings 0), typecheck, forbidden patterns, unit tests, SQL tests, build and the full Playwright suite, all clean.
 
-## What changed since session 2
+## Session 4: the review findings, fixed before a database is connected
 
-The owner decided that the shop gets a new, free Supabase project later. Until then the whole build runs on the mock store, and the contracts match the schema in `supabase_complete.sql` (tables `profiles`, `admin_invites`, `products`, `admin_activity_logs`, `reviews`, `testimonials`, `newsletter_subscribers`, `promo_codes`, `orders`, `site_settings`, `site_visits`). Product photographs go to Cloudinary, private receipts to a private Supabase bucket, each behind one module. The email functions are being supplied separately and were not invented: replying to a message and inviting staff save the record and show the link, but send nothing.
+The owner decided to **start clean**: the old site was never really used, so there is no old data, no old email templates and no parity target with the old site. A fresh free Supabase project in a new organisation will be connected later; it does not exist yet. The legacy static site (`*.html`, `assets/`, workers, manifests, `supabase_complete.sql`, `supabase/migrations`) was removed.
+
+### A. The baseline SQL (`supabase/baseline/0000_baseline.sql`, rewritten)
+
+The anon key ships to browsers, so row level security and column grants are the boundary. What changed, by finding:
+
+| # | Finding | What the SQL now does |
+|---|---|---|
+| 1 | Clients could change `role`, `is_admin`, status | `is_admin` is generated from `role`; column-level grants give users only their own safe columns; `account_status`, `return_privilege_revoked`, `deletion_requested_at`, `role` change only through definer functions (`set_staff_role`, `set_account_status`, `set_return_privilege`, `request_account_deletion`); a trigger protects owner and developer rows (no demotion, no deletion, nobody assigns owner, not even with the service role) |
+| 2 | First sign-up became owner; role from metadata | No first-user owner (the owner is created by hand, statement in the baseline README). `handle_new_user` takes a role only from `admin_invites.invited_role`, matched by a valid, unexpired, single-use token stored as a SHA-256 hash, for the same email; never from `raw_user_meta_data` |
+| 3 | Banned and suspended accounts | `is_admin()`, `has_permission()` and every policy and function check `account_status = 'active'`; bans also use `auth.admin.updateUserById` with `ban_duration` (documented) |
+| 4 | Orders open to clients | No client INSERT, UPDATE or DELETE. Definer functions: `quote_order`, `place_order` (exact variant, active product, ordered row locks, exact-variant stock decrement, promo use counted, server total compared with the quoted total, unique idempotency key), `cancel_order` (restores stock, conditional updates), `set_order_status` (the TRANSITIONS table), `decide_payment`, `attach_receipt`, `mark_refunded`, `expire_unpaid_orders`, `claim_guest_orders` (only after the email is verified). `orders.user_id` added |
+| 5 | Promo codes readable | No public SELECT; `validate_promo` returns validity and percentage only; creating codes needs `promos.manage` (editors cannot) |
+| 6 | Reviews, testimonials | Inserts forced to `is_approved = false`, `is_featured = false`; `customer_email` is not selectable by anon (public view) |
+| 7 | `site_visits` | No client UPDATE or INSERT; `record_visit` and `update_visit_duration` (limited window and range) |
+| 8 | Policies, logs, search path | `has_permission(text)` mirrors `src/lib/permissions.ts` and is used in every staff policy; activity-log `admin_id` forced to `auth.uid()` by trigger; `SET search_path` on all 26 definer functions; `EXECUTE` revoked from everyone and granted back one by one |
+| 9 | Schema | `payment_status` is `awaiting_confirmation`, `confirmed`, `rejected`, `refund_owed`, `refunded`; `products.slug`, `orders.receipt_path`, `orders.landmark`, `receipt_reupload_until`, refund fields added; indexes on `orders.customer_email` and `orders.user_id`; indexes that duplicated UNIQUE constraints removed; delivery fees in a table seeded from `src/lib/delivery.ts`; order numbers use the Lagos date and may pass four digits; promo expiry ends 23:59:59 Lagos |
+
+**How it was tested:** `npm run test:sql` (`tests/sql/run.sh`) starts a throwaway local PostgreSQL 16, stubs the few Supabase pieces (`auth.users`, `auth.uid()`, `auth.jwt()`, the three API roles, `storage`), applies both baseline files and runs seven test files as `anon`, `authenticated` and `service_role` through `SET ROLE`: **514 checks, all pass**. The stubs are close to, but not the same as, real Supabase; the same files must be run once in the real project's SQL editor before the shop opens. Not covered: real Auth behaviour (ban durations, confirmation email), Realtime, the storage API itself.
+
+### B. The application
+
+| # | Finding | What was done |
+|---|---|---|
+| 10 | Receipt upload | The browser uploads straight to storage on a signed address issued by a server action (`createReceiptUpload`); no file passes through an action, so Next's 1 MB default and Vercel's 4.5 MB cap do not apply. Photographs are scaled to fit 1600 px and re-encoded as JPEG in steps until they fit; limit 4 MB. One list of types in `src/lib/receipt-types.ts` (JPEG, PNG, WebP, PDF) shared by the form, the action, the storage module and the bucket. HEIC is not stored: it is converted to JPEG in the browser where the phone can decode it, otherwise the customer is told to share it as JPEG. Each failure has its own message (dropped connection, too large, refused, service problem) instead of "check your connection" |
+| 11 | Transfer amount | The checkout asks the server for a quote (`getQuote`) before showing bank details; the order carries `quotedTotal`; if it differs the order is refused with the new total, the quote is fetched again and the customer must tick the confirmation again |
+| 12 | Variants | `lookupVariant` requires an exact size, and a colour when colours exist, rejects inactive and trashed products, and decrements that exact variant; lines naming the same variant share its stock |
+| 13 | `vercel.json` | Crons only (keep-alive daily, expiry of unpaid orders daily); no rewrites, no second CSP, no `no-store` on assets. Legacy static files removed |
+| 14 | Contracts | Orders, promos, catalogue and contact go through `data.orders`, `data.catalogue`, `data.contact`; no action or query imports the mock; order types moved to `src/types/orders.ts`; the auth contract is session based (the repository owns the session; `exchangeCode`, `updatePassword`, `currentUser`, `refreshSession`, Google `redirectTo`); `/auth/callback` exchanges the one-time code; the proxy refreshes a Supabase session with `@supabase/ssr` when configured and does nothing otherwise; list calls take `limit` and `offset` and return `{items, total}`; customers are computed in one pass over the orders |
+| 15 | Receipts | The path returned by the signed upload is stored on the order (`receiptPath`) and the admin opens that path; the order is refused if the object never reached storage |
+| 16 | Enums | Role, customer status, payment decision, order status and message mark are checked with `z.enum` in the actions |
+| 17 | Payment states | Confirmation only through the payment decision; a rejected receipt keeps the order pending with a 48-hour re-upload window (the customer can send another from the tracking page or the account), after which a daily job cancels it and releases the stock; cancelling a paid order records `refund_owed`; cancelling twice restores stock once |
+| 18 | Idempotency | A client-generated key per checkout attempt, kept across reloads until the order is placed; a repeat returns the same order |
+| 19 | Mock mode | `DATA_MODE` is derived from the Supabase environment variables; demonstration sign-ins and reset links are shown only in `next dev` or where `LBS_ALLOW_DEMO=true` is set (the browser tests set it); with Supabase configured but no Supabase data layer, the app fails with a clear message instead of serving fake data |
+| 20 | Low items | Sign-in lock keyed by email and address, failures decay after 15 minutes, count restarts after a lock expires (a stranger cannot lock the owner out); the activity log is no longer capped and marking a message is logged; order numbers allow more than four digits and use the Lagos date; promo expiry ends 23:59 Lagos time; `<` is escaped in JSON-LD |
+
+**Tests added or changed:** `tests/unit/orders.test.ts` (variants, inactive products, quote mismatch, idempotency, receipts, promo expiry, Lagos order numbers, payment states, refund owed, expiry), `account.test.ts` (ownership by user id and verified email, paging), `admin.test.ts` (paging, enums, unbounded log, Lagos expiry, editor and promos), `auth.test.ts` (lockout rules, recovery code flow, demo hints off outside development), `media.test.ts` (receipt module), `misc-rules.test.ts` (JSON-LD, limiter, paging, variants, order input), `supabase-proxy.test.ts`; Playwright: server quote before bank details, direct upload with no large action body, double tap sends one upload and one order, failed upload message, too-large PDF, an unfulfillable order refused before payment, the one-time reset link.
+
+### Known gaps after session 4
+
+- **The Supabase implementation of the contracts is not written.** The contracts and the SQL match, but nothing maps one to the other yet, and the signed-upload receipt store is a mock. It needs the real project to be built and tested against.
+- Guest re-upload of a receipt after a rejection must run on the server with the service role (the SQL forbids it for anon); the mock does this, the real store must too.
+- The in-memory upload limiter is per server instance; the bucket's size and type limits are the hard boundary. Unused uploaded receipts (an upload with no order) are not cleaned up yet.
+- Email (order, reply, invitation) is still not sent; no invitation sign-up screen yet.
+- The proxy session refresh was tested with a mocked `@supabase/ssr`, never against Supabase.
+- `place_order`'s receipt path may be null in the SQL; the app always sends one.
 
 ## Phases and commits
 
@@ -57,14 +102,15 @@ Not built at all in the admin: reviews (MX-01, MX-02, MX-10), site images (MX-03
 | `eslint . --max-warnings 0` | 0 errors, 0 warnings |
 | `prettier --check .` | clean |
 | Forbidden-pattern scan | clean |
-| `vitest run` | 20 files, 110 tests, all pass |
-| `playwright test` (phone 390 and desktop 1280) | 321 tests: 320 pass, 1 skipped (a phone-only control on desktop), 0 fail |
+| `vitest run` | 22 files, 148 tests, all pass |
+| `npm run test:sql` (local PostgreSQL 16, Supabase stubs) | 7 files, 514 checks, all pass |
+| `playwright test` (phone 390 and desktop 1280) | 329 tests: 328 pass, 1 skipped (a phone-only control on desktop), 0 fail |
 | Admin, every screen at 360, 390 and 430 px | no horizontal scroll, all buttons and tabs 44 px or more (tested); also checked at 768, 1280 and 1536 px in light and dark by screenshot, no overflow |
 | Admin looked over by eye | phone and desktop renders of the dashboard, orders, order detail, products, editor, analytics in light and dark were viewed and judged; a desktop overflow (256 px from the side column) and old-style numerals on the figures were found that way and fixed |
 | `next build` | passes |
 | `npm audit --audit-level=high` | 0 vulnerabilities |
 
-Not run: policy tests (no database), the secret scan of the client bundle, header check on a preview deployment, the independent diff review, real-device checks, axe on the admin screens (axe covers the 14 storefront routes), Lighthouse on the admin, INP.
+Not run: the SQL tests against real Supabase (only the local stub run), the secret scan of the client bundle, header check on a preview deployment, the independent diff review, real-device checks, axe on the admin screens (axe covers the 14 storefront routes), Lighthouse on the admin, INP.
 
 Test-suite fixes made along the way: a status-text assertion left over from session 2 (the tracking page shows a badge, not the long label), and tests that share the one mock store were made independent of each other.
 
@@ -94,7 +140,13 @@ Lighthouse 13.6.0, local production build, default mobile throttling, one run pe
 
 ## What is still needed from the owner
 
-1. **The new Supabase project**, created by you in the new organisation, then: its URL and anon key (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`), the service role key as `SUPABASE_SERVICE_ROLE_KEY` in Vercel only, and permission to apply `supabase/baseline/0000_baseline.sql` and `0001_receipts_bucket.sql` (review them first; they carry the old open "anyone can create orders" rule, which the real `place_order` function must replace).
+1. **Create the new Supabase project** (free tier, new organisation, a region near Lagos), then, following `supabase/baseline/README.md`:
+   1. In the SQL editor run `0000_baseline.sql`, then `0001_receipts_bucket.sql` (read them first; they were run only on a local throwaway PostgreSQL).
+   2. Run the seven files in `tests/sql` once in the SQL editor as well (or ask for a run against the real project), because the local run uses stubs for Supabase's own schemas.
+   3. Create the owner by hand: sign up (or add under Authentication, Users, address verified), then run the documented statement that sets `role = 'owner'` inside a transaction with `lbs.allow_protected_roles` on. Nobody becomes owner through the application.
+   4. In Authentication: turn on email confirmation, add the site URL and the redirect URL `<site>/auth/callback`, and Google if wanted.
+   5. Give me, or set in Vercel yourself, only these names (never in a file): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server only), `CRON_SECRET`, `NEXT_PUBLIC_SITE_URL`. Do not set `LBS_ALLOW_DEMO`.
+   6. Then the next session writes and tests the Supabase implementation of the contracts. Until then, setting the Supabase variables makes the site fail with a clear message by design.
 2. **Cloudinary free account**: cloud name, API key and secret as `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` in Vercel.
 3. **`CRON_SECRET`** in Vercel, so the daily keep-alive can run.
 4. **The email functions** you said you are supplying (contact, admin reply, welcome, order email, invitation), and Resend: verified sending domain, sender addresses, `RESEND_API_KEY`.

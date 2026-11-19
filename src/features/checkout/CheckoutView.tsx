@@ -105,18 +105,8 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
   }, [values]);
 
   const promoCode = choices.promo?.code;
-  const quoteKey = JSON.stringify([
-    lines.map((l) => [l.id, l.selectedSize, l.selectedColor, l.qty]),
-    values.state,
-    promoCode,
-    quoteTick,
-  ]);
-  const quote: QuoteState | "loading" =
-    quoted && quoted.key === quoteKey ? quoted.result : "loading";
-  useEffect(() => {
-    if (step !== 2 || lines.length === 0) return;
-    let current = true;
-    getQuote({
+  const request = useMemo(
+    () => ({
       lines: lines.map((l) => ({
         id: l.id,
         selectedSize: l.selectedSize,
@@ -125,14 +115,25 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
       })),
       promoCode,
       state: values.state,
-    })
+    }),
+    [lines, promoCode, values.state],
+  );
+  const quoteKey = JSON.stringify([request, quoteTick]);
+  const quote: QuoteState | "loading" =
+    quoted && quoted.key === quoteKey ? quoted.result : "loading";
+  const bagIsEmpty = lines.length === 0;
+  useEffect(() => {
+    if (step !== 2 || bagIsEmpty) return;
+    let current = true;
+    const key = JSON.stringify([request, quoteTick]);
+    getQuote(request)
       .then((result) => {
-        if (current) setQuoted({ key: quoteKey, result });
+        if (current) setQuoted({ key, result });
       })
       .catch(() => {
         if (current)
           setQuoted({
-            key: quoteKey,
+            key,
             result: {
               ok: false,
               message:
@@ -143,9 +144,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
     return () => {
       current = false;
     };
-    // The key stands for the bag, state and promo; it is the only thing that should refetch.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step, quoteKey]);
+  }, [step, bagIsEmpty, request, quoteTick]);
 
   const totals = useMemo(
     () =>

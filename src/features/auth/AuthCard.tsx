@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SHOW_DEMO_HINTS } from "@/config/data-mode";
-import { DEMO } from "@/server/mock/db";
+import { DEMO } from "@/config/demo";
 
 /** The frame shared by the sign-in, sign-up and reset screens: a narrow column, serif title, quiet footer link. */
 export function AuthCard({

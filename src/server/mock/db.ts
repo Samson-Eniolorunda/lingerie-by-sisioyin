@@ -1,4 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { DEMO } from "@/config/demo";
 import { FIXTURE_PRODUCTS } from "@/data/fixtures";
 import { formatOrderNumber } from "@/lib/order-number";
 import { computeTotals } from "@/lib/pricing";
@@ -50,11 +51,7 @@ export interface Db {
   id: number;
 }
 
-export const DEMO = {
-  customer: { email: "demo.customer@example.test", password: "Demo-Pass1!" },
-  owner: { email: "owner@example.test", password: "Owner-Pass1!" },
-  editor: { email: "editor@example.test", password: "Editor-Pass1!" },
-} as const;
+export { DEMO };
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
