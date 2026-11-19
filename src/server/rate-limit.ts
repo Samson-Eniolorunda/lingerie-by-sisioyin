@@ -28,6 +28,9 @@ export function resetRateLimits(): void {
  * never silent).
  */
 export async function allowShared(key: string, limit: number, windowMs: number): Promise<boolean> {
+  // The automated browser tests (LBS_ALLOW_DEMO, never set on a live site) place hundreds of orders
+  // and messages from one address; the limits are proven by the unit tests instead.
+  if (process.env.LBS_ALLOW_DEMO === "true") return true;
   const { DATA_MODE } = await import("@/config/data-mode");
   if (DATA_MODE !== "supabase") return allow(key, limit, windowMs);
   const { createHash } = await import("node:crypto");
