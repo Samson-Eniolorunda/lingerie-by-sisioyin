@@ -15,7 +15,7 @@ export function Wordmark({ className }: { readonly className?: string }) {
       )}
     >
       <span className="font-display text-[1.375rem] font-semibold tracking-[0.22em] uppercase">
-        Lingerie
+        Lingeries
       </span>
       <span className="mt-0.5 font-display text-[0.8125rem] tracking-[0.18em] text-primary italic">
         by Sisioyin

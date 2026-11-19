@@ -2,7 +2,7 @@ import { publicEnv } from "./env";
 
 export const BRAND = {
   /** The logo and the emails use this spelling; the live site mixes two (decision in plan 9.5). */
-  name: "Lingerie by Sisioyin",
+  name: "Lingeries by Sisioyin",
   tagline: "Lingerie, loungewear and underwear, made for everyday comfort.",
   siteUrl: publicEnv.NEXT_PUBLIC_SITE_URL,
 } as const;

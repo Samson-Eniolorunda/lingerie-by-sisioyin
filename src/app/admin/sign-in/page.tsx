@@ -18,7 +18,7 @@ export default async function StaffSignInPage({
   return (
     <AuthCard
       title="Staff sign-in"
-      lead="For the owner and the team of Lingerie by Sisioyin."
+      lead="For the owner and the team of Lingeries by Sisioyin."
       demo="staff"
     >
       <SignInForm

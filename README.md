@@ -1,4 +1,4 @@
-# Lingerie by Sisioyin
+# Lingeries by Sisioyin
 
 A phone-first online shop for lingerie, loungewear and underwear, built with Next.js, strict
 TypeScript and Supabase. This branch (`rebuild/production`) replaces the old static site; the old

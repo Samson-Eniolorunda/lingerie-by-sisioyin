@@ -145,7 +145,7 @@ export const mockAccount: AccountRepository = {
     if (!record) return "";
     const p = record.profile;
     const lines = [
-      "Lingerie by Sisioyin: your data",
+      "Lingeries by Sisioyin: your data",
       "",
       "Profile",
       `Name: ${p.firstName} ${p.lastName}`,

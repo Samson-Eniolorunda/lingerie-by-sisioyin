@@ -1,5 +1,5 @@
 -- ============================================================================
--- Lingerie by Sisioyin: baseline schema for a FRESH Supabase project.
+-- Lingeries by Sisioyin: baseline schema for a FRESH Supabase project.
 --
 -- The anon key is public (it ships to every browser), so row level security and the grants in
 -- this file are the real security boundary. Principles:

@@ -14,7 +14,9 @@ export function Footer() {
     >
       <div className="mx-auto grid max-w-[1360px] gap-10 px-[max(var(--gutter),var(--safe-left))] py-12 sm:px-8 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
-          <p className="font-display text-2xl font-semibold tracking-[0.2em] uppercase">Lingerie</p>
+          <p className="font-display text-2xl font-semibold tracking-[0.2em] uppercase">
+            Lingeries
+          </p>
           <p className="font-display text-base tracking-[0.16em] text-on-footer/70 italic">
             by Sisioyin
           </p>

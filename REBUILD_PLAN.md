@@ -1,4 +1,4 @@
-# Lingerie by Sisioyin — Rebuild Plan
+# Lingeries by Sisioyin — Rebuild Plan
 
 Audit and plan only. Nothing in the repository has been changed other than the addition of this file.
 
@@ -11,7 +11,7 @@ Audit and plan only. Nothing in the repository has been changed other than the a
 
 ## 1. Product summary
 
-Lingerie by Sisioyin is a direct-to-consumer online shop for a Nigerian lingerie, loungewear and underwear brand (delivery within Lagos is free; the site keywords name Lagos and Nigeria). Prices are in Nigerian naira, delivery is offered to seven Nigerian states with a fee per state (`assets/js/config.js:32-41`), and customer service runs largely through WhatsApp.
+Lingeries by Sisioyin is a direct-to-consumer online shop for a Nigerian lingerie, loungewear and underwear brand (delivery within Lagos is free; the site keywords name Lagos and Nigeria). Prices are in Nigerian naira, delivery is offered to seven Nigerian states with a fee per state (`assets/js/config.js:32-41`), and customer service runs largely through WhatsApp.
 
 It is built as a static multi-page site (hand-written HTML, one 30,404-line stylesheet, vanilla JavaScript loaded with `<script defer>`), hosted on Vercel, with Supabase providing Postgres, Auth, Storage, Realtime and Edge Functions. There is no build step, no package manifest and no automated test.
 
@@ -706,7 +706,7 @@ Severity: Critical (money, data or access can be lost or taken), High, Medium, L
 | STR-08 | `assets/js/checkout.js:663`, `:925`; `assets/js/app.js:34`, `:2636`, `:2952`; `assets/js/contact.js:83`; `assets/js/shop.js:536` | Seven empty `catch` blocks in the storefront scripts; elsewhere errors are logged and then ignored, for example the newsletter handler, which reports success whatever happens (`assets/js/app.js:2073-2080`) | Medium |
 | STR-09 | `assets/js/config.js:32-41`; `checkout.html:687-693` | The list of delivery states exists twice (fee table and hard-coded options) | Low |
 | STR-10 | `checkout.html:833`; `faq.html:778`; `terms.html:505` | The bank account details are typed into three files | Medium |
-| STR-11 | `assets/js/config.js:19`; `supabase/functions/send-admin-invite/index.ts:11` | The brand is "Lingeries by Sisioyin" on the site and "Lingerie by Sisioyin" in emails and the logo | Low |
+| STR-11 | `assets/js/config.js:19`; `supabase/functions/send-admin-invite/index.ts:11` | The brand is "Lingeries by Sisioyin" everywhere (owner decision, 19 November 2026; the emails used the singular) and the logo | Low |
 | STR-12 | `assets/js/size.js:32`; `assets/js/cart.js:383` | 22 uses of `alert`, `confirm` and `prompt` for user dialogue | Low |
 | STR-13 | `assets/js/admin.js:7924` | Inline `onclick` handlers bound to functions hung on `window` | Low |
 | STR-14 | `assets/js/admin.js:3933-4017`, `:4179-4325`, `:4493-4569`, `:5729-5789` | About 500 lines of admin script have no markup to act on (see the dead-code table in section 2); the stylesheet still carries their rules (`assets/css/admin.css:5268`) | Medium |
@@ -1192,7 +1192,7 @@ The estimate assumes the owner's inputs in section 9 arrive before Phase 2 and t
 
 ### 9.5 Copy and content
 
-- The brand name: "Lingerie by Sisioyin" or "Lingeries by Sisioyin" (both are in use).
+- The brand name: settled as "Lingeries by Sisioyin" (owner, 19 November 2026).
 - Home headline and one supporting sentence in the owner's own voice; a one-line description of the brand for the footer.
 - Evidence for, or removal of, the "500+ happy customers" figure and the "24/7 support" claim; actual WhatsApp response hours.
 - The delivery states and fees to be shown, and whether delivery outside the seven listed states is offered (the home page says "Nationwide shipping", the checkout offers seven states).
