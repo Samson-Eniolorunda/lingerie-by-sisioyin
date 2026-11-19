@@ -22,19 +22,31 @@ export function ProductCard({
   const Heading = headingLevel;
   const soldOut = product.qty <= 0;
   return (
-    <article className="relative">
+    <article className="relative flex h-full flex-col">
       <Link
         href={`/products/${product.slug}`}
-        className="block text-ink no-underline hover:text-ink"
+        className="flex flex-1 flex-col text-ink no-underline hover:text-ink"
       >
-        <ProductImage image={product.images[0]} sizes={TILE_SIZES} priority={priority ?? false} />
-        <div className="mt-3 flex flex-col gap-1">
-          {product.isNew ? <Badge tone="new">New</Badge> : null}
-          <Heading className="line-clamp-2 font-sans text-base leading-snug font-normal">
+        {/* The chip overlays the image so it never changes the height of the text below. */}
+        <div className="relative">
+          <ProductImage image={product.images[0]} sizes={TILE_SIZES} priority={priority ?? false} />
+          {product.isNew ? (
+            <span className="absolute top-2 left-2">
+              <Badge tone="new">New</Badge>
+            </span>
+          ) : null}
+        </div>
+        <div className="mt-3 flex flex-1 flex-col gap-1">
+          {/* Two lines are always reserved, so prices line up across a row. */}
+          <Heading className="line-clamp-2 min-h-[2.75rem] font-sans text-base leading-snug font-normal">
             {product.name}
           </Heading>
-          <p className="tabular text-base font-medium">{formatNaira(product.priceNgn)}</p>
-          {soldOut ? <p className="text-sm text-subtle">Out of stock</p> : null}
+          <p className="tabular mt-auto text-base font-medium">
+            {formatNaira(product.priceNgn)}
+            {soldOut ? (
+              <span className="ml-2 text-sm font-normal text-subtle">Out of stock</span>
+            ) : null}
+          </p>
         </div>
       </Link>
       <WishlistHeart
@@ -42,7 +54,9 @@ export function ProductCard({
         name={product.name}
         className="absolute top-0 right-0"
       />
-      {soldOut ? null : (
+      {soldOut ? (
+        <div aria-hidden="true" className="h-11" />
+      ) : (
         <QuickViewButton productId={product.id} name={product.name} className="-ml-2" />
       )}
     </article>
