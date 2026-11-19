@@ -28,6 +28,11 @@ const BASE = process.env.LBS_STACK_URL ?? `http://127.0.0.1:${PORT}`;
 const FILES = join(process.env.LBS_STORAGE_DIR ?? tmpdir(), `lbs-storage-${PORT}`);
 mkdirSync(FILES, { recursive: true });
 
+// Like PostgREST, numbers come back as JSON numbers and dates as plain dates.
+pg.types.setTypeParser(1700, (v) => Number(v));
+pg.types.setTypeParser(20, (v) => Number(v));
+pg.types.setTypeParser(1082, (v) => v);
+
 const pool = new pg.Pool({ connectionString: process.env.LBS_DATABASE_URL, max: 8 });
 pool.on("error", () => {});
 
@@ -109,7 +114,14 @@ function userObject(u) {
     last_sign_in_at: u.last_sign_in_at,
     app_metadata: u.raw_app_meta_data ?? { provider: "email", providers: ["email"] },
     user_metadata: u.raw_user_meta_data ?? {},
-    identities: [],
+    identities: [
+      {
+        id: u.id,
+        user_id: u.id,
+        provider: (u.raw_app_meta_data ?? {}).provider ?? "email",
+        identity_data: { email: u.email },
+      },
+    ],
     created_at: u.created_at,
     updated_at: u.updated_at,
   };
@@ -411,7 +423,7 @@ const IDENT = /^[a-z_][a-z0-9_]*$/;
 const columnTypes = new Map();
 async function typesOf(client, table) {
   if (!columnTypes.has(table)) {
-    const { rows } = await client.query(
+    const { rows } = await pool.query(
       "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = 'public' AND table_name = $1",
       [table],
     );
@@ -419,6 +431,11 @@ async function typesOf(client, table) {
   }
   return columnTypes.get(table);
 }
+/** A column, or a JSON key of one (`metadata->>admin_name`) as PostgREST allows in filters. */
+const colSql = (name) => {
+  const m = name.match(/^([a-z_][a-z0-9_]*)->>([a-z_][a-z0-9_]*)$/);
+  return m ? `"${m[1]}"->>'${m[2]}'` : quoteId(name);
+};
 const quoteId = (name) => {
   if (!IDENT.test(name)) throw Object.assign(new Error(`bad identifier ${name}`), { status: 400 });
   return `"${name}"`;
@@ -434,7 +451,7 @@ function filterSql(params, filters, add) {
       [op, ...rest] = rest;
     }
     const value = rest.join(".");
-    const c = quoteId(col);
+    const c = colSql(col);
     let sql;
     switch (op) {
       case "eq":
@@ -598,6 +615,9 @@ async function handleRest(req, res, url, claims) {
       return { cols, vals };
     };
 
+    // Like PostgREST: rows come back only when the caller asked (Prefer: return=representation),
+    // so a write needs no SELECT privilege on the table unless it reads its own result.
+    const ret = prefer.includes("return=representation") ? " RETURNING *" : "";
     let rows;
     let total = null;
     let status = 200;
@@ -619,10 +639,10 @@ async function handleRest(req, res, url, claims) {
         const c = await client.query(`SELECT count(*)::int AS n FROM ${t}${whereSql}`, values);
         total = c.rows[0].n;
       }
-      const colSql = selectCols ? selectCols.map(quoteId).join(", ") : "*";
+      const colList = selectCols ? selectCols.map(quoteId).join(", ") : "*";
       const limSql = `${limit ? ` LIMIT ${Number(limit) | 0}` : ""}${offset ? ` OFFSET ${Number(offset) | 0}` : ""}`;
       const r = await client.query(
-        `SELECT ${colSql} FROM ${t}${whereSql}${orderSql}${limSql}`,
+        `SELECT ${colList} FROM ${t}${whereSql}${orderSql}${limSql}`,
         values,
       );
       rows = r.rows;
@@ -647,7 +667,7 @@ async function handleRest(req, res, url, claims) {
           ? ` ON CONFLICT (${conflict.split(",").map(quoteId).join(",")}) DO UPDATE SET ${cols.map((c) => `${quoteId(c)} = EXCLUDED.${quoteId(c)}`).join(", ")}`
           : ` ON CONFLICT (${conflict.split(",").map(quoteId).join(",")}) DO NOTHING`;
       const r = await client.query(
-        `INSERT INTO ${t} (${cols.map(quoteId).join(", ")}) VALUES ${tuples.join(", ")}${tail} RETURNING *`,
+        `INSERT INTO ${t} (${cols.map(quoteId).join(", ")}) VALUES ${tuples.join(", ")}${tail}${ret}`,
         values,
       );
       rows = r.rows;
@@ -656,13 +676,13 @@ async function handleRest(req, res, url, claims) {
       const { cols, vals } = prep(body);
       if (!cols.length) throw Object.assign(new Error("empty update"), { status: 400 });
       const sets = cols.map((c, i) => `${quoteId(c)} = $${values.length + i + 1}`);
-      const r = await client.query(`UPDATE ${t} SET ${sets.join(", ")}${whereSql} RETURNING *`, [
+      const r = await client.query(`UPDATE ${t} SET ${sets.join(", ")}${whereSql}${ret}`, [
         ...values,
         ...vals,
       ]);
       rows = r.rows;
     } else if (req.method === "DELETE") {
-      const r = await client.query(`DELETE FROM ${t}${whereSql} RETURNING *`, values);
+      const r = await client.query(`DELETE FROM ${t}${whereSql}${ret}`, values);
       rows = r.rows;
     } else {
       throw Object.assign(new Error("method not allowed"), { status: 405 });
@@ -785,13 +805,13 @@ async function handleStorage(req, res, url, claims) {
       const path = rest.join("/");
       const allowed = claims?.role === "service_role";
       if (!allowed)
-        return send(res, 400, {
+        return send(res, 404, {
           statusCode: "404",
           error: "not_found",
           message: "Object not found",
         });
       if (!existsSync(fileOf(bucket, path)))
-        return send(res, 400, {
+        return send(res, 404, {
           statusCode: "404",
           error: "not_found",
           message: "Object not found",
@@ -828,14 +848,13 @@ async function handleStorage(req, res, url, claims) {
       const path = rest.join("/");
       const ok = claims?.role === "service_role" && existsSync(fileOf(bucket, path));
       if (!ok)
-        return send(res, 400, {
+        return send(res, 404, {
           statusCode: "404",
           error: "not_found",
           message: "Object not found",
         });
       return send(res, 200, req.method === "HEAD" ? undefined : { name: path }, {
         "content-type": "application/json",
-        "content-length": req.method === "HEAD" ? "0" : undefined,
       });
     }
     return send(res, 404, { statusCode: "404", error: "not_found", message: "Not found" });
@@ -865,7 +884,12 @@ const server = createServer(async (req, res) => {
   const bearer = String(req.headers.authorization ?? "").replace(/^Bearer /i, "");
   const claims = verifyJwt(bearer) ?? verifyJwt(String(req.headers.apikey ?? ""));
   const apikey = verifyJwt(String(req.headers.apikey ?? ""));
-  if (!apikey && url.pathname !== "/auth/v1/authorize")
+  // A signed storage address carries its own token in the URL and needs no key, as on Supabase.
+  const signed =
+    url.searchParams.has("token") &&
+    /^\/storage\/v1\/object\/(upload\/)?sign\//.test(url.pathname) &&
+    (req.method === "PUT" || req.method === "GET");
+  if (!apikey && !signed && url.pathname !== "/auth/v1/authorize")
     return send(res, 401, {
       message: "No API key found in request",
       hint: "No `apikey` request header or url param was found.",
@@ -878,4 +902,6 @@ const server = createServer(async (req, res) => {
   return send(res, 404, { message: "Not found" });
 });
 
-server.listen(PORT, "127.0.0.1", () => console.log(`local stack listening on ${BASE}`));
+server.listen(PORT, "127.0.0.1", () =>
+  process.stdout.write(`local stack listening on ${BASE}` + "\n"),
+);

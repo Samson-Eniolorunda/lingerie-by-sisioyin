@@ -205,3 +205,31 @@ BEGIN
   PERFORM t.reset();
   PERFORM t.ok((r->>'ok')::boolean AND NOT (r2->>'ok')::boolean, 'only one of two orders for the last unit succeeds');
 END $$;
+
+-- Assorted packs and plain products: no variant stock, quantity on the sizes or on the product.
+DO $$
+DECLARE
+  pack uuid := gen_random_uuid(); plain uuid := gen_random_uuid(); r jsonb; cust uuid;
+BEGIN
+  cust := t.mkuser('packbuyer@example.com');
+  INSERT INTO public.products (id, name, category, gender, price_ngn, qty, sizes, colors, variant_stock, allow_color_selection, pack_type)
+  VALUES (pack, 'Boxer pack', 'Underwear', 'Men', 14000, 9, '[{"name":"M","qty":4},{"name":"L","qty":5}]', '[]', '[]', false, '3-in-1'),
+         (plain, 'Gift card sleeve', 'Accessories', 'Unisex', 2000, 7, '[]', '[]', '[]', false, 'Single');
+  PERFORM t.as_user(cust);
+  r := t.place(t.line(pack, 'M', '', 2), 28000);
+  PERFORM t.ok(r->>'ok' = 'true', 'an assorted pack is sold by listed size');
+  PERFORM t.reset();
+  PERFORM t.ok((SELECT (e->>'qty')::int FROM public.products, jsonb_array_elements(sizes) e WHERE id = pack AND e->>'name' = 'M') = 2, 'the size quantity falls by the units sold');
+  PERFORM t.ok((SELECT qty FROM public.products WHERE id = pack) = 7, 'the pack total follows its sizes');
+  PERFORM t.as_user(cust);
+  PERFORM t.ok(t.place(t.line(pack, 'M', '', 3), 42000)->>'code' = 'out_of_stock', 'more than the size holds is refused');
+  PERFORM t.ok(t.place(t.line(pack, 'XL', '', 1), 14000)->>'code' = 'variant_unavailable', 'an unlisted size is refused');
+  r := t.place(t.line(plain, '', '', 3), 6000);
+  PERFORM t.ok(r->>'ok' = 'true', 'a product with no sizes is sold as a whole');
+  PERFORM t.reset();
+  PERFORM t.ok((SELECT qty FROM public.products WHERE id = plain) = 4, 'its quantity falls');
+  PERFORM t.as_service();
+  PERFORM public.cancel_order(r->>'order_number', 'test');
+  PERFORM t.reset();
+  PERFORM t.ok((SELECT qty FROM public.products WHERE id = plain) = 7, 'cancelling puts it back');
+END $$;

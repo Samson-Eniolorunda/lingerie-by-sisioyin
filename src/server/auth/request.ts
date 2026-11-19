@@ -9,7 +9,10 @@ export async function clientIp(): Promise<string> {
 }
 
 /** The absolute address Supabase sends people back to after an email or Google link. */
-export function callbackUrl(next: string): string {
+export function callbackUrl(next: string, audience: "customer" | "staff" = "customer"): string {
   const base = publicEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-  return `${base}/auth/callback?next=${encodeURIComponent(next)}`;
+  return `${base}/auth/callback?next=${encodeURIComponent(next)}&aud=${audience}`;
 }
+
+/** Set by `/auth/callback` after a recovery link, so the new password goes to the right account. */
+export const RESET_AUDIENCE_COOKIE = "lbs_reset_aud";

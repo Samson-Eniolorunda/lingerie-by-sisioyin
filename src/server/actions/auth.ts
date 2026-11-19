@@ -3,8 +3,9 @@
 import { redirect } from "next/navigation";
 import { fieldErrors, forgotSchema, resetSchema, signInSchema, signUpSchema } from "@/schemas/auth";
 import { safeNext } from "@/lib/safe-next";
-import { callbackUrl, clientIp } from "@/server/auth/request";
-import { clearSession } from "@/server/auth/session";
+import { cookies } from "next/headers";
+import { RESET_AUDIENCE_COOKIE, callbackUrl, clientIp } from "@/server/auth/request";
+import { clearSession, currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
 
 export type AuthState =
@@ -40,6 +41,12 @@ export async function signUpAction(input: unknown, next: string | null): Promise
   const { firstName, lastName, email, password } = parsed.data;
   const result = await data.auth.signUp({ firstName, lastName, email, password });
   if (!result.ok) return invalid(result.message, { email: result.message });
+  if (result.value === null)
+    return {
+      ok: true,
+      message:
+        "Check your email. We have sent a link to confirm your address, then you can sign in.",
+    };
   redirect(safeNext(next, "/dashboard"));
 }
 
@@ -68,7 +75,16 @@ export async function resetAction(input: unknown): Promise<AuthState> {
   const parsed = resetSchema.safeParse(input);
   if (!parsed.success)
     return invalid("Please check the highlighted details.", fieldErrors(parsed.error));
-  const result = await data.auth.updatePassword(parsed.data.password);
+  const store = await cookies();
+  const remembered = store.get(RESET_AUDIENCE_COOKIE)?.value;
+  const audience =
+    remembered === "staff" || remembered === "customer"
+      ? remembered
+      : (await currentUser("customer"))
+        ? "customer"
+        : "staff";
+  const result = await data.auth.updatePassword(parsed.data.password, audience);
+  if (result.ok) store.set(RESET_AUDIENCE_COOKIE, "", { path: "/", maxAge: 0 });
   if (!result.ok) return invalid(result.message);
   return { ok: true, message: "Your password has been changed. Sign in with the new one." };
 }
@@ -100,7 +116,7 @@ export async function staffForgotAction(input: unknown): Promise<AuthState> {
   const { devLink } = await data.auth.requestPasswordReset(
     parsed.data.email,
     "staff",
-    callbackUrl("/reset-password"),
+    callbackUrl("/reset-password", "staff"),
   );
   return {
     ok: true,

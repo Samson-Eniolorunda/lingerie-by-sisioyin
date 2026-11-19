@@ -9,6 +9,14 @@ import { useConsent } from "./ConsentBanner";
 const GA_SRC = "https://www.googletagmanager.com/gtag/js?id=";
 const FB_SRC = "https://connect.facebook.net/en_US/fbevents.js";
 
+function referrerOrigin(): string | undefined {
+  try {
+    return document.referrer ? new URL(document.referrer).origin : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function addScript(id: string, src: string): void {
   if (document.getElementById(id)) return;
   const script = document.createElement("script");
@@ -63,6 +71,47 @@ export function AnalyticsLoader() {
     if (!allowed) return;
     window.gtag?.("event", "page_view", { page_path: pathname });
     window.fbq?.("track", "PageView");
+  }, [allowed, pathname]);
+
+  // The shop's own page-view count for the admin analytics page: the page, the kind of device and
+  // the browser, nothing that identifies the visitor. Only after consent.
+  useEffect(() => {
+    if (!allowed) return;
+    const width = window.innerWidth;
+    const ua = navigator.userAgent;
+    const browser = /SamsungBrowser/.test(ua)
+      ? "Samsung Internet"
+      : /Edg\//.test(ua)
+        ? "Edge"
+        : /Firefox/.test(ua)
+          ? "Firefox"
+          : /Chrome|CriOS/.test(ua)
+            ? "Chrome"
+            : /Safari/.test(ua)
+              ? "Safari"
+              : "Other";
+    void fetch("/api/visit", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      keepalive: true,
+      body: JSON.stringify({
+        page: pathname,
+        referrer: referrerOrigin(),
+        deviceType: width < 768 ? "mobile" : width < 1024 ? "tablet" : "desktop",
+        browser,
+        os: /Android/.test(ua)
+          ? "Android"
+          : /iPhone|iPad/.test(ua)
+            ? "iOS"
+            : /Windows/.test(ua)
+              ? "Windows"
+              : /Mac/.test(ua)
+                ? "macOS"
+                : "Other",
+        screen: `${screen.width}x${screen.height}`,
+        viewport: `${width}x${window.innerHeight}`,
+      }),
+    }).catch(() => undefined);
   }, [allowed, pathname]);
 
   return null;

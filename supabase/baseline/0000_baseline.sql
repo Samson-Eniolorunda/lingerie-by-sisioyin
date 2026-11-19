@@ -954,9 +954,17 @@ BEGIN
       FROM jsonb_array_elements(p.colors) WITH ORDINALITY AS t(e, ord))
   WHERE p.id = p_product;
 
+  -- The product total follows its stock: the variants when it has them, else the sizes that carry
+  -- a quantity (an assorted pack), else the total itself.
   UPDATE public.products p SET
-    qty = (SELECT COALESCE(SUM((e->>'qty')::INTEGER), 0) FROM jsonb_array_elements(p.variant_stock) e)
-  WHERE p.id = p_product AND jsonb_array_length(p.variant_stock) > 0;
+    qty = CASE
+      WHEN jsonb_array_length(p.variant_stock) > 0 THEN
+        (SELECT COALESCE(SUM((e->>'qty')::INTEGER), 0) FROM jsonb_array_elements(p.variant_stock) e)
+      WHEN EXISTS (SELECT 1 FROM jsonb_array_elements(p.sizes) e WHERE e ? 'qty') THEN
+        (SELECT COALESCE(SUM((e->>'qty')::INTEGER), 0) FROM jsonb_array_elements(p.sizes) e WHERE e ? 'qty')
+      ELSE GREATEST(0, p.qty + p_delta)
+    END
+  WHERE p.id = p_product;
 END;
 $$;
 
@@ -1009,8 +1017,22 @@ BEGIN
     END IF;
 
     -- The exact variant is required: the size and, when the product has colours, the colour.
-    SELECT v INTO v_variant FROM jsonb_array_elements(p.variant_stock) v
-     WHERE v->>'size' = v_size AND COALESCE(v->>'color', '') = v_colour LIMIT 1;
+    -- A product without variants (an assorted pack) is sold by listed size, or as a whole.
+    IF jsonb_array_length(p.variant_stock) = 0 THEN
+      IF jsonb_array_length(p.sizes) > 0 THEN
+        SELECT jsonb_build_object('size', sz->>'name', 'color', '', 'qty', COALESCE((sz->>'qty')::INTEGER, p.qty))
+          INTO v_variant FROM jsonb_array_elements(p.sizes) sz WHERE sz->>'name' = v_size LIMIT 1;
+        IF v_variant IS NULL THEN
+          RAISE EXCEPTION 'That size or colour of % is not available.', p.name
+            USING ERRCODE = 'LB001', HINT = 'variant_unavailable';
+        END IF;
+      ELSE
+        v_variant := jsonb_build_object('size', '', 'color', '', 'qty', p.qty);
+      END IF;
+    ELSE
+      SELECT v INTO v_variant FROM jsonb_array_elements(p.variant_stock) v
+       WHERE v->>'size' = v_size AND COALESCE(v->>'color', '') = v_colour LIMIT 1;
+    END IF;
     IF v_variant IS NULL THEN
       IF v_colour = '' AND EXISTS (
            SELECT 1 FROM jsonb_array_elements(p.variant_stock) v

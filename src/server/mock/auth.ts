@@ -5,36 +5,18 @@ import type { AuthRepository } from "@/server/data/contracts";
 import type { SessionUser } from "@/types/account";
 import { getDb, hashPassword, nextId, verifyPassword, type UserRecord } from "./db";
 
-/**
- * Sign-in throttling. A lock belongs to one email address from one network address, so someone who
- * guesses the owner's address from elsewhere can never lock the owner out. Failures older than the
- * decay window stop counting, and once a lock has run out the count starts again from zero.
- */
-export const MAX_FAILURES = 5;
-export const LOCK_MS = 10 * 60_000;
-export const DECAY_MS = 15 * 60_000;
-interface Attempts {
-  failures: number[];
-  lockedUntil: number;
-}
-const attempts = new Map<string, Attempts>();
+import {
+  DECAY_MS,
+  LOCK_MS,
+  MAX_FAILURES,
+  attemptKey,
+  attempts,
+  lockedFor,
+  recordFailure,
+  resetFailureCounters,
+} from "@/server/auth/throttle";
 
-const attemptKey = (email: string, ip: string) => `${email.trim().toLowerCase()}|${ip}`;
-
-function lockedFor(key: string, now: number): boolean {
-  const entry = attempts.get(key);
-  if (!entry) return false;
-  if (entry.lockedUntil > now) return true;
-  if (entry.lockedUntil !== 0) attempts.delete(key); // the lock has run out: start again from zero
-  return false;
-}
-
-function recordFailure(key: string, now: number): void {
-  const entry = attempts.get(key) ?? { failures: [], lockedUntil: 0 };
-  entry.failures = [...entry.failures.filter((t) => now - t < DECAY_MS), now];
-  if (entry.failures.length >= MAX_FAILURES) entry.lockedUntil = now + LOCK_MS;
-  attempts.set(key, entry);
-}
+export { DECAY_MS, LOCK_MS, MAX_FAILURES, resetFailureCounters };
 
 function sessionUser(user: UserRecord): SessionUser {
   return {
@@ -184,6 +166,11 @@ export const mockAuth: AuthRepository = {
     return { ok: true };
   },
 
+  async confirmPassword(email, password) {
+    const user = findByEmail(email);
+    return Boolean(user && verifyPassword(password, user.passwordHash));
+  },
+
   async currentUser(audience) {
     const user = await sessionFor(audience);
     return user ? sessionUser(user) : null;
@@ -199,8 +186,3 @@ export const mockAuth: AuthRepository = {
     await sessionPort().clear(audience);
   },
 };
-
-/** Tests use this to start from a clean slate, and to check the lock rules. */
-export function resetFailureCounters(): void {
-  attempts.clear();
-}

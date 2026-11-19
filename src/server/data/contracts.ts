@@ -44,12 +44,16 @@ export interface AuthRepository {
     audience: Audience,
     context: { readonly ip: string },
   ): Promise<Result<SessionUser>>;
+  /**
+   * Creates the account. The value is the signed-in user, or `null` when the project requires the
+   * address to be confirmed first (a confirmation link has been sent and there is no session yet).
+   */
   signUp(input: {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
-  }): Promise<Result<SessionUser>>;
+  }): Promise<Result<SessionUser | null>>;
   /** The provider address to send the browser to; `redirectTo` is the absolute `/auth/callback` URL. */
   signInWithGoogle(redirectTo: string): Promise<Result<{ readonly url: string }>>;
   /** `redirectTo` is the absolute `/auth/callback` URL. `devLink` is only ever set in local development. */
@@ -58,10 +62,12 @@ export interface AuthRepository {
     audience: Audience,
     redirectTo: string,
   ): Promise<{ readonly devLink: string | null }>;
-  /** Exchanges the one-time `code` from an email or provider link for a session. */
-  exchangeCode(code: string): Promise<Result>;
-  /** Sets a new password for the current session (a recovery session or a signed-in user). */
-  updatePassword(password: string): Promise<Result>;
+  /** Exchanges the one-time `code` from an email or provider link for a session of this audience. */
+  exchangeCode(code: string, audience: Audience): Promise<Result>;
+  /** Sets a new password for the current session of this audience (a recovery session or a signed-in user). */
+  updatePassword(password: string, audience: Audience): Promise<Result>;
+  /** Whether this password is right for the address; used before a sensitive change. Never signs anyone in. */
+  confirmPassword(email: string, password: string): Promise<boolean>;
   currentUser(audience: Audience): Promise<SessionUser | null>;
   /** Called by the proxy on every request so an expiring session is renewed. */
   refreshSession(): Promise<void>;
@@ -268,7 +274,60 @@ export interface AdminRepository {
   activity(search: string, page: Page): Promise<Paged<ActivityEntry>>;
 }
 
+export interface PublicReview {
+  readonly id: string;
+  readonly productId: string;
+  readonly name: string;
+  readonly rating: number;
+  readonly title: string;
+  readonly comment: string;
+  readonly createdAt: string;
+}
+
+export interface PublicTestimonial {
+  readonly id: string;
+  readonly name: string;
+  readonly location: string;
+  readonly rating: number;
+  readonly comment: string;
+  readonly featured: boolean;
+}
+
+export interface VisitInput {
+  readonly page: string;
+  readonly referrer?: string | undefined;
+  readonly deviceType?: string | undefined;
+  readonly browser?: string | undefined;
+  readonly os?: string | undefined;
+  readonly screen?: string | undefined;
+  readonly viewport?: string | undefined;
+}
+
+/** Reviews, testimonials and page views: what visitors send in. Submissions always wait for approval. */
+export interface EngagementRepository {
+  reviewsFor(productId: string, limit?: number): Promise<readonly PublicReview[]>;
+  submitReview(input: {
+    productId: string;
+    name: string;
+    email: string;
+    rating: number;
+    title: string;
+    comment: string;
+  }): Promise<boolean>;
+  featuredTestimonials(limit?: number): Promise<readonly PublicTestimonial[]>;
+  submitTestimonial(input: {
+    name: string;
+    location: string;
+    rating: number;
+    comment: string;
+  }): Promise<boolean>;
+  /** Records a page view and returns its id, or null when it could not be recorded. */
+  recordVisit(input: VisitInput): Promise<string | null>;
+  visitDuration(id: string, seconds: number): Promise<void>;
+}
+
 export interface DataLayer {
+  readonly engagement: EngagementRepository;
   readonly catalogue: CatalogueRepository;
   readonly orders: OrdersRepository;
   readonly contact: ContactRepository;

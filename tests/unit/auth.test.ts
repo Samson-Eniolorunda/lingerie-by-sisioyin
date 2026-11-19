@@ -162,10 +162,10 @@ describe("mock authentication", () => {
     if (!code) throw new Error("no code");
     expect(devLink).toMatch(/^\/auth\/callback\?next=%2Freset-password&code=/);
     await mockAuth.signOut("customer");
-    expect((await mockAuth.updatePassword("Brand-New1!")).ok).toBe(false); // no session yet
-    expect((await mockAuth.exchangeCode(code)).ok).toBe(true);
-    expect((await mockAuth.exchangeCode(code)).ok).toBe(false); // single use
-    expect((await mockAuth.updatePassword("Brand-New1!")).ok).toBe(true);
+    expect((await mockAuth.updatePassword("Brand-New1!", "customer")).ok).toBe(false); // no session yet
+    expect((await mockAuth.exchangeCode(code, "customer")).ok).toBe(true);
+    expect((await mockAuth.exchangeCode(code, "customer")).ok).toBe(false); // single use
+    expect((await mockAuth.updatePassword("Brand-New1!", "customer")).ok).toBe(true);
     expect(await mockAuth.currentUser("customer")).toBeNull();
     expect((await mockAuth.signIn(DEMO.customer.email, "Brand-New1!", "customer", IP)).ok).toBe(
       true,

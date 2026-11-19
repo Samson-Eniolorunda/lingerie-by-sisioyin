@@ -194,4 +194,4 @@ await pool.query(`INSERT INTO site_settings (key, value) VALUES ('store', $1::js
   }),
 ]);
 await pool.end();
-console.error(`seeded ${FIXTURE_PRODUCTS.length} products, ${n} orders`);
+process.stderr.write(`${`seeded ${FIXTURE_PRODUCTS.length} products, ${n} orders`}\n`);

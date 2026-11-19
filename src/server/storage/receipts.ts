@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { DATA_MODE } from "@/config/data-mode";
 import {
   MAX_RECEIPT_BYTES,
   RECEIPT_TYPES,
@@ -12,7 +13,7 @@ import {
  * (`payment-receipts`, no public read). The browser uploads straight to storage through a signed
  * upload address issued here, so the file never passes through a server action (Next's 1 MB default
  * and Vercel's 4.5 MB cap do not apply). Staff see receipts only through short-lived signed links.
- * Until the new project exists this runs in mock mode: files are held in memory by a route handler.
+ * In development mode files are held in memory by a route handler instead.
  */
 
 export const RECEIPT_BUCKET = "payment-receipts";
@@ -97,5 +98,25 @@ export const mockReceiptStore: ReceiptStore = {
   },
 };
 
-/** The one place that chooses the implementation; the Supabase store replaces the mock here. */
-export const receipts: ReceiptStore = mockReceiptStore;
+/**
+ * The one place that chooses the implementation: the private Supabase bucket whenever Supabase is
+ * configured, the in-memory development store otherwise. Chosen per call so no Supabase code is
+ * loaded in development mode.
+ */
+async function store(): Promise<ReceiptStore> {
+  if (DATA_MODE === "supabase") return (await import("./receipts-supabase")).supabaseReceiptStore;
+  if (DATA_MODE === "mock") return mockReceiptStore;
+  throw new Error("Receipt storage is not configured: set the Supabase environment variables.");
+}
+
+export const receipts: ReceiptStore = {
+  async createUpload(path, type) {
+    return (await store()).createUpload(path, type);
+  },
+  async exists(path) {
+    return (await store()).exists(path);
+  },
+  async link(path) {
+    return (await store()).link(path);
+  },
+};

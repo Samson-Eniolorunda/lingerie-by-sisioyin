@@ -4,7 +4,15 @@ import { mockAdmin } from "@/server/mock/admin";
 import { mockAuth } from "@/server/mock/auth";
 import { mockCatalogue } from "@/server/mock/catalogue";
 import { mockContact } from "@/server/mock/contact";
+import { mockEngagement } from "@/server/mock/engagement";
 import { mockOrders } from "@/server/mock/orders";
+import { supabaseAccount } from "@/server/supabase/account";
+import { supabaseAdmin } from "@/server/supabase/admin";
+import { supabaseAuth } from "@/server/supabase/auth";
+import { supabaseCatalogue } from "@/server/supabase/catalogue";
+import { supabaseContact } from "@/server/supabase/contact";
+import { supabaseEngagement } from "@/server/supabase/engagement";
+import { supabaseOrders } from "@/server/supabase/orders";
 import type { DataLayer } from "./contracts";
 
 export { DATA_MODE };
@@ -16,17 +24,28 @@ const mock: DataLayer = {
   auth: mockAuth,
   account: mockAccount,
   admin: mockAdmin,
+  engagement: mockEngagement,
+};
+
+const supabase: DataLayer = {
+  catalogue: supabaseCatalogue,
+  orders: supabaseOrders,
+  contact: supabaseContact,
+  auth: supabaseAuth,
+  account: supabaseAccount,
+  admin: supabaseAdmin,
+  engagement: supabaseEngagement,
 };
 
 /**
- * With the Supabase address and key configured this must return the Supabase implementation of the
- * contracts. That layer is not written yet, so a configured deployment fails loudly with a clear
- * message instead of quietly serving development data.
+ * A production build with no Supabase configuration refuses every call with a message that names
+ * the missing variables. It never serves invented data: the development store is for a developer's
+ * machine and for demonstrations switched on with `LBS_ALLOW_DEMO=true` (see `config/data-mode.ts`).
  */
-function notConnected(): DataLayer {
+function unconfigured(): DataLayer {
   const fail = (): never => {
     throw new Error(
-      "Supabase is configured but its data layer is not implemented in this build. Remove NEXT_PUBLIC_SUPABASE_URL to use the development store.",
+      "The shop's database is not configured. Set NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY (see OWNER_SETUP.md).",
     );
   };
   const area = new Proxy({}, { get: fail });
@@ -37,7 +56,9 @@ function notConnected(): DataLayer {
     auth: area as DataLayer["auth"],
     account: area as DataLayer["account"],
     admin: area as DataLayer["admin"],
+    engagement: area as DataLayer["engagement"],
   };
 }
 
-export const data: DataLayer = DATA_MODE === "mock" ? mock : notConnected();
+export const data: DataLayer =
+  DATA_MODE === "supabase" ? supabase : DATA_MODE === "mock" ? mock : unconfigured();
