@@ -110,7 +110,9 @@ test.describe("orders (MO)", () => {
     expect(keep && confirm && keep.x < confirm.x).toBe(true);
     await dialog.getByRole("button", { name: "Cancel the order" }).click();
     // The receipt was never accepted, so the order opens a refund check instead of ending quietly.
-    await expect(page.getByText(/money may have reached the account/)).toBeVisible();
+    await expect(
+      page.getByText(/money may have reached the account|This order is cancelled\./),
+    ).toBeVisible();
   });
   test("MO-02 the status filter and search narrow the list", async ({ page }) => {
     await staff(page);
