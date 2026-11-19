@@ -1,11 +1,16 @@
 "use client";
 
 import { MessageCircle, X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { whatsappLink } from "@/config/site";
 
+/** Pages with totals or order figures: the button would sit on them, so it is not shown. */
+const HIDDEN_ON = new RegExp("^/(cart|confirmation|dashboard/orders/[^/]+)(/|$)");
+
 /** A floating button that opens a small card with a greeting and a pre-filled message (G-10). */
 export function WhatsAppButton() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const toggle = useRef<HTMLButtonElement>(null);
 
@@ -21,6 +26,7 @@ export function WhatsAppButton() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  if (HIDDEN_ON.test(pathname)) return null;
   return (
     <div
       className="whatsapp-fab flex flex-col items-end gap-3"
