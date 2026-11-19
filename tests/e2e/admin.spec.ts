@@ -99,10 +99,14 @@ test.describe("orders (MO)", () => {
   });
   test("MO-08 cancelling asks first, with Cancel on the left and the confirming button on the right", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await staff(page);
     await page.goto("/admin/orders?status=pending");
-    await page.getByRole("link", { name: /^LBS-/ }).last().click();
+    // Each project cancels a different order, so the two runs cannot collide on one.
+    await page
+      .getByRole("link", { name: /^LBS-/ })
+      .nth(testInfo.project.name === "phone" ? -1 : -2)
+      .click();
     await page.getByRole("button", { name: "Cancel order" }).click();
     const dialog = page.getByRole("dialog", { name: "Cancel this order?" });
     const keep = await dialog.getByRole("button", { name: "Cancel", exact: true }).boundingBox();
