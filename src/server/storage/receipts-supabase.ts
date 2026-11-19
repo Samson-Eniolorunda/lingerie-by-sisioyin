@@ -27,6 +27,11 @@ export const supabaseReceiptStore: ReceiptStore = {
     }
   },
 
+  async remove(path) {
+    const { error } = await serviceClient().storage.from(RECEIPT_BUCKET).remove([path]);
+    if (error) throw new Error("Could not delete the receipt.");
+  },
+
   async link(path) {
     const { data, error } = await serviceClient()
       .storage.from(RECEIPT_BUCKET)

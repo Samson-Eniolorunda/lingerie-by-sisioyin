@@ -15,10 +15,14 @@ paste a key into the code, a chat or a commit: keys go only into the Vercel envi
 1. Go to supabase.com and sign in. Choose **New organisation**, name it "Lingeries by Sisioyin", plan **Free**.
 2. Choose **New project** in that organisation. Name: `lingeries-by-sisioyin`. Region: **West EU (London)**.
    Set a strong database password and keep it in a password manager (not in the code).
-3. When the project is ready, open **Project Settings, API** and copy three values:
+3. When the project is ready, open **Project Settings, API Keys** and copy three values. Supabase
+   now shows two kinds of key; either kind works, and the variable names below are the same:
    - Project URL: goes into `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon` public key: goes into `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` secret key: goes into `SUPABASE_SERVICE_ROLE_KEY` (server only; never expose it)
+   - the **publishable** key (`sb_publishable_...`), or on an older project the legacy `anon` public
+     key: goes into `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - the **secret** key (`sb_secret_...`), or on an older project the legacy `service_role` key: goes
+     into `SUPABASE_SERVICE_ROLE_KEY` (server only; never expose it, never put it in a variable that
+     starts with `NEXT_PUBLIC_`)
 
 ## 2. Run the baseline SQL, in this order
 
@@ -54,9 +58,18 @@ commit;
 ## 4. Authentication settings
 
 In **Authentication, Providers, Email**: keep **Confirm email** on. In **Authentication, URL
-Configuration**: set **Site URL** to your live address (the value of `NEXT_PUBLIC_SITE_URL`) and add
-`https://YOUR-DOMAIN/auth/callback` and `http://localhost:3000/auth/callback` to the redirect URLs.
-Google sign-in is optional; if wanted, switch it on under Providers.
+Configuration**: set **Site URL** to `https://www.lingeriebysisioyin.store` and put exactly these three
+entries in **Redirect URLs** (the `**` makes each one cover every path beneath it):
+
+- `https://www.lingeriebysisioyin.store/**`
+- `http://localhost:3000/**`
+- the Vercel preview pattern, for example `https://*-YOUR-TEAM.vercel.app/**` (Vercel shows the exact
+  team part in **Project, Settings, Domains**; copy it from there)
+
+Remove any other entry, in particular a bare `*`. Links in e-mails (confirmation, password reset)
+return to the address of the deployment that sent them: on a Vercel preview that is the preview's own
+address, on the live site `NEXT_PUBLIC_SITE_URL` (step 7). Google sign-in is optional; if wanted,
+switch it on under Providers.
 
 ## 5. Cloudinary (product photographs)
 
@@ -86,7 +99,7 @@ Preview). Mark the secret ones **Sensitive**.
 
 | Name                                                                   | Value                                                                    | Required                            |
 | ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
-| `NEXT_PUBLIC_SITE_URL`                                                 | your live address, for example `https://example.com` (no trailing slash) | yes                                 |
+| `NEXT_PUBLIC_SITE_URL`                                                 | **Production:** `https://www.lingeriebysisioyin.store`. **Preview:** the preview's own address (set it separately for each environment; no trailing slash) | yes                                 |
 | `NEXT_PUBLIC_SUPABASE_URL`                                             | Supabase Project URL (step 1)                                            | yes, when database is connected     |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                        | Supabase `anon` key (step 1)                                             | yes, when database is connected     |
 | `SUPABASE_SERVICE_ROLE_KEY`                                            | Supabase `service_role` key (step 1)                                     | yes, server only                    |
@@ -114,8 +127,12 @@ the first deployment, open **Project, Settings, Cron Jobs** and confirm both are
 Do these on the preview deployment, in this order. Each one is something the local tests could not
 prove, because they ran against a stand-in, not against Supabase.
 
-1. Run the SQL tests' checks once in the SQL editor of the real project (`tests/sql`), as the README
-   in `supabase/baseline` explains. (If any check fails, stop and tell the developer.)
+1. **Do not run `tests/sql` here.** Those tests create test owner and staff users and an open promo
+   code (`OPEN10`) and are meant only for a local database or a throwaway Supabase project that you
+   will delete afterwards. Running them in the real project would leave those accounts and that code
+   behind. If you want a check of the real project, use only a read-only one: in the SQL editor run
+   `select count(*) from public.orders;` (it must say 0 before opening) and
+   `select email, role from public.profiles where role <> 'customer';` (it must list only you).
 2. Open the preview address. The shop must show products only after you have added some at
    `/admin/products`; an empty shop is correct for a new project.
 3. Sign in at `/admin/sign-in` as the owner. Add one product with a photograph and stock.

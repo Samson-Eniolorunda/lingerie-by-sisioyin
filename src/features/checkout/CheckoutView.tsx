@@ -288,7 +288,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
         setServerError(result.message);
       } catch {
         setServerError(
-          "We could not place your order. Your bag is unchanged and nothing was charged. Check your connection and try again.",
+          "We could not confirm your order. If you have already made the transfer, please do not pay again: we have your receipt, and if the order cannot be completed we will contact you and refund you in full. Check your connection and try again.",
         );
       } finally {
         submitting.current = false;

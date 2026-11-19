@@ -41,6 +41,7 @@ export function productFromRow(row: Row): AdminProduct {
     avgRating: num(row.avg_rating),
     reviewCount: num(row.review_count),
     createdAt: str(row.created_at),
+    stockVersion: num(row.stock_version),
     active: Boolean(row.is_active),
     deletedAt: row.is_deleted ? str(row.updated_at) : null,
   };
@@ -76,6 +77,8 @@ export function orderFromRow(row: Row): StoredOrder {
     paymentStatus: str(row.payment_status) as PaymentStatus,
     receiptPath: row.receipt_path ? str(row.receipt_path) : null,
     receiptReuploadUntil: row.receipt_reupload_until ? str(row.receipt_reupload_until) : null,
+    refundAmount:
+      row.refund_amount === null || row.refund_amount === undefined ? null : num(row.refund_amount),
     idempotencyKey: str(row.idempotency_key),
     notes: str(row.notes),
     createdAt: str(row.created_at),

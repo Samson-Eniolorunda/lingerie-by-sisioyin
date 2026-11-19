@@ -24,6 +24,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
       <PageHeader title={product.name} lead="Edit details, stock and photographs." />
       <ProductEditor
         id={product.id}
+        stockVersion={product.stockVersion}
         initial={{
           name: product.name,
           category: product.category,

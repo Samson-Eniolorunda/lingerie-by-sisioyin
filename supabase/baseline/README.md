@@ -113,12 +113,15 @@ itself as an unprivileged user), stubs the few Supabase pieces the baseline touc
 `auth.uid()`, `auth.jwt()`, the three API roles, `storage`), applies the baseline files, and runs the
 numbered test files, each in a rolled-back transaction, acting as `anon`, `authenticated` and
 `service_role` through `SET ROLE`. The stubs are close to, but not identical with, real Supabase, so
-run the same checks once against the real project's SQL editor before opening the shop.
+**never run them against the real project**: they create test owner and staff users and an open
+promo code, which would stay in production. Run them only locally (this script) or on a throwaway
+Supabase project that is deleted afterwards. Any check kept for production must be read-only.
 
 | File | Proves |
 |---|---|
 | `01_profiles_roles.sql` | no client can change role, `is_admin`, status, return privilege or deletion date; the owner cannot be demoted or deleted; nobody assigns owner |
 | `02_signup_invites.sql` | no first-user owner; roles never from metadata; hashed, single-use, expiring, e-mail-bound invitations |
+| `09_hardening.sql` | `place_order` and `quote_order` are server-only, the receipt must exist under the checkout's own folder and belong to one order; a cancelled order with an unaccepted receipt opens a refund check; failed checkouts and orphan receipts; `stock_version`; the shared rate limit; staff cannot edit other staff |
 | `03_status_permissions.sql` | suspended and banned accounts get nothing; `has_permission` matches `permissions.ts` |
 | `04_orders_place.sql` | no direct order writes; exact variant, inactive products, stock, promo, server total, idempotency, order numbers |
 | `05_orders_lifecycle.sql` | cancellation, transitions, payment decision, rejection and expiry, refund owed, guest-order claim |

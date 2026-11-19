@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { redirect } from "next/navigation";
 import { fieldErrors } from "@/schemas/auth";
 import {
@@ -11,6 +12,7 @@ import {
   paymentDecisionSchema,
   productDraftSchema,
   promoSchema,
+  receivedAmountSchema,
   replySchema,
   settingsSchema,
   staffRoleSchema,
@@ -141,6 +143,60 @@ export async function paymentDecisionAction(
         ? "Payment confirmed."
         : "The receipt was rejected. The customer has 48 hours to send another.",
   };
+}
+
+/** Refunds: a cancelled order with an unaccepted receipt is checked against the bank, then refunded if money arrived. */
+export async function resolveRefundCheckAction(
+  orderNumber: string,
+  received: unknown,
+): Promise<AdminState> {
+  const actor = await guard("orders.update");
+  if (!actor) return DENIED;
+  const parsed = receivedAmountSchema.safeParse(received);
+  if (!parsed.success)
+    return { ok: false, message: "Enter the amount that reached the account, in naira." };
+  const result = await data.admin.resolveRefundCheck(orderNumber, parsed.data, actor);
+  if (!result.ok) return result;
+  refresh();
+  return {
+    ok: true,
+    message: parsed.data > 0 ? "A refund is now recorded as owed." : "Recorded: no money arrived.",
+  };
+}
+
+export async function markRefundedAction(orderNumber: string): Promise<AdminState> {
+  const actor = await guard("orders.update");
+  if (!actor) return DENIED;
+  const result = await data.admin.markRefunded(orderNumber, actor);
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: "The refund is recorded as paid." };
+}
+
+/** Receipts with no order: customers who paid but whose order failed, and abandoned uploads. */
+export async function closeCheckoutFailureAction(
+  id: string,
+  resolution: unknown,
+): Promise<AdminState> {
+  const actor = await guard("orders.update");
+  if (!actor) return DENIED;
+  const parsed = z.string().trim().max(300).safeParse(resolution);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.resolveCheckoutFailure(id, parsed.data, actor);
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: "The failed checkout is closed." };
+}
+
+export async function deleteOrphanReceiptAction(path: string): Promise<AdminState> {
+  const actor = await guard("orders.update");
+  if (!actor) return DENIED;
+  if (typeof path !== "string" || path.length === 0 || path.length > 300 || path.includes(".."))
+    return BAD_REQUEST;
+  const result = await data.admin.deleteOrphanReceipt(path, actor);
+  if (!result.ok) return result;
+  refresh();
+  return { ok: true, message: "The receipt was deleted." };
 }
 
 /* Customers */

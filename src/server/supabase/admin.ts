@@ -13,6 +13,7 @@ import type {
   ProductDraft,
   Tally,
 } from "@/server/data/contracts";
+import { receipts } from "@/server/storage/receipts";
 import { serviceClient, sessionClient } from "./clients";
 import {
   activityFromRow,
@@ -225,17 +226,39 @@ export const supabaseAdmin: AdminRepository = {
 
   async updateProduct(id, draft, actor) {
     if (!isUuid(id)) return failResult("That product no longer exists.");
-    const { data, error } = await (
-      await staff()
-    )
+    const client = await staff();
+    const { qty, sizes, colors, variant_stock, ...details } = draftColumns(draft);
+    if (draft.stockVersion === undefined)
+      return failResult("Please reload the product and try again.");
+    // Stock moves while the form is open (every order takes some), so it is written only if the
+    // version the form was loaded with is still current; the check and the write are one statement.
+    const { data, error } = await client
       .from("products")
-      .update(draftColumns(draft))
+      .update({
+        ...details,
+        qty,
+        sizes,
+        colors,
+        variant_stock,
+        stock_version: draft.stockVersion + 1,
+      })
       .eq("id", id)
+      .eq("stock_version", draft.stockVersion)
       .select("*")
       .limit(1);
-    const row = data?.[0];
     if (error) return failResult(sqlMessage(error));
-    if (!row) return failResult("That product no longer exists.");
+    let row = data?.[0];
+    if (!row) {
+      // Either the product is gone, or its stock changed meanwhile. Save the details alone.
+      const saved = await client.from("products").update(details).eq("id", id).select("*").limit(1);
+      if (saved.error) return failResult(sqlMessage(saved.error));
+      if (!saved.data?.[0]) return failResult("That product no longer exists.");
+      await log(actor, "product", "update", str(saved.data[0].name), id);
+      return failResult(
+        "Your other changes were saved, but the stock was not, because an order or another edit changed it while this page was open. Reload the product to see the current quantities, then enter yours again.",
+      );
+    }
+    row = row as Row;
     const product = productFromRow(row);
     await log(actor, "product", "update", product.name, product.id);
     return valueResult<AdminProduct>(product);
@@ -352,6 +375,77 @@ export const supabaseAdmin: AdminRepository = {
       orderNumber,
       orderNumber,
     );
+    return okResult();
+  },
+
+  async resolveRefundCheck(orderNumber, receivedNgn, actor) {
+    const { data, error } = await (
+      await staff()
+    ).rpc("resolve_refund_check", { p_order_number: orderNumber, p_received: receivedNgn });
+    if (error) return failResult(sqlMessage(error));
+    const result = data as { ok: boolean; message?: string };
+    if (!result.ok) return failResult(result.message ?? TRY_AGAIN);
+    await log(
+      actor,
+      "order",
+      "refund check",
+      `${orderNumber}: received ${receivedNgn}`,
+      orderNumber,
+    );
+    return okResult();
+  },
+
+  async markRefunded(orderNumber, actor) {
+    const { data, error } = await (
+      await staff()
+    ).rpc("mark_refunded", { p_order_number: orderNumber });
+    if (error) return failResult(sqlMessage(error));
+    const result = data as { ok: boolean; message?: string };
+    if (!result.ok) return failResult(result.message ?? TRY_AGAIN);
+    await log(actor, "order", "refund paid", orderNumber, orderNumber);
+    return okResult();
+  },
+
+  async orphanReceipts() {
+    const { data, error } = await (await staff()).rpc("admin_orphan_receipts");
+    if (error) throw new Error(`Database read failed: ${error.message}`);
+    return ((data as Row[] | null) ?? []).map((r) => ({
+      path: str(r.path),
+      uploadedAt: str(r.uploaded_at),
+      failureId: r.failure_id ? str(r.failure_id) : null,
+      customerName: str(r.customer_name),
+      email: str(r.customer_email),
+      phone: str(r.customer_phone),
+      quotedTotal:
+        r.quoted_total === null || r.quoted_total === undefined ? null : num(r.quoted_total),
+      reason: str(r.reason),
+      resolved: r.resolved === true,
+    }));
+  },
+
+  async resolveCheckoutFailure(id, resolution, actor) {
+    if (!isUuid(id)) return failResult("That failed checkout no longer exists.");
+    const { data, error } = await (
+      await staff()
+    ).rpc("resolve_checkout_failure", { p_id: id, p_resolution: resolution });
+    if (error) return failResult(sqlMessage(error));
+    if (data !== true) return failResult("That failed checkout was already closed.");
+    await log(actor, "order", "checkout failure closed", resolution || id, id);
+    return okResult();
+  },
+
+  async deleteOrphanReceipt(path, actor) {
+    // Re-read the list on the server: only a receipt that is still an orphan, and either abandoned
+    // or settled, can be deleted, whatever the browser asked for.
+    const rows = await this.orphanReceipts();
+    const row = rows.find((r) => r.path === path);
+    if (!row) return failResult("That receipt is no longer an orphan, or does not exist.");
+    if (row.failureId && !row.resolved)
+      return failResult("Close the failed checkout before deleting its receipt.");
+    if (!row.failureId && Date.now() - new Date(row.uploadedAt).getTime() < 24 * 3_600_000)
+      return failResult("That upload is less than a day old; a checkout may still be using it.");
+    await receipts.remove(path);
+    await log(actor, "order", "receipt deleted", path);
     return okResult();
   },
 

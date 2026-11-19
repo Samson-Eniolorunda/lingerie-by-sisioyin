@@ -21,6 +21,7 @@ const PAYMENT_LABEL = {
   awaiting_confirmation: "Waiting for a check",
   confirmed: "Payment confirmed",
   rejected: "Receipt rejected",
+  refund_check: "Cancelled with a receipt on file: check the bank",
   refund_owed: "Refund owed to the customer",
   refunded: "Refunded",
 } as const;
@@ -57,6 +58,8 @@ export default async function OrderDetailPage({
               status={order.status}
               paymentStatus={order.paymentStatus}
               canUpdate={can(user.role, "orders.update")}
+              total={order.total}
+              refundAmount={order.refundAmount ?? null}
             />
           </Panel>
           <Panel title="Payment receipt">
@@ -135,7 +138,9 @@ export default async function OrderDetailPage({
                 This order was cancelled.
                 {order.paymentStatus === "refund_owed"
                   ? " The customer had paid, so a refund is owed."
-                  : ""}
+                  : order.paymentStatus === "refund_check"
+                    ? " A receipt was on file, so money may have arrived: a refund check is open."
+                    : ""}
               </p>
             ) : (
               <OrderTimeline reached={timelineStep(order.status)} placedAt={order.createdAt} />

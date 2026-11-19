@@ -51,8 +51,14 @@ beforeEach(() => {
 describe("admin permissions and navigation", () => {
   it("M-10 an editor sees products, orders and messages only", () => {
     const labels = visibleNav("editor").map((i) => i.label);
-    expect(labels).toEqual(["Dashboard", "Orders", "Products", "Messages"]);
-    expect(visibleNav("owner").length).toBe(10);
+    expect(labels).toEqual([
+      "Dashboard",
+      "Orders",
+      "Products",
+      "Messages",
+      "Receipts with no order",
+    ]);
+    expect(visibleNav("owner").length).toBe(11);
     expect(can("editor", "roles.manage")).toBe(false);
     expect(can("super_admin", "roles.manage")).toBe(true);
   });

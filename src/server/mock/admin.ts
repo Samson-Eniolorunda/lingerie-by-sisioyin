@@ -13,6 +13,7 @@ import type {
 import type { CustomerRecord, OrderStatus, SessionUser } from "@/types/account";
 import { ORDER_STATUSES } from "@/types/account";
 import type { StoredOrder } from "@/types/orders";
+import { mockReceiptPaths, receipts } from "@/server/storage/receipts";
 import { getDb, nextId, seededRandom, type Db } from "./db";
 
 function log(db: Db, actor: SessionUser, action: string, subject: string): void {
@@ -391,6 +392,82 @@ export const mockAdmin: AdminRepository = {
       decision === "confirmed" ? "payment confirmed" : "receipt rejected",
       orderNumber,
     );
+    return { ok: true };
+  },
+
+  async resolveRefundCheck(orderNumber, receivedNgn, actor) {
+    const db = getDb();
+    const order = db.orders.get(orderNumber);
+    if (!order || order.paymentStatus !== "refund_check")
+      return { ok: false, message: "No refund check is open on that order." };
+    if (!Number.isFinite(receivedNgn) || receivedNgn < 0)
+      return { ok: false, message: "Enter the amount that was received." };
+    db.orders.set(orderNumber, {
+      ...order,
+      paymentStatus: receivedNgn > 0 ? "refund_owed" : "rejected",
+      refundAmount: receivedNgn > 0 ? Math.min(receivedNgn, order.total) : null,
+      updatedAt: new Date().toISOString(),
+    });
+    log(db, actor, "refund check", `${orderNumber}: received ${receivedNgn}`);
+    return { ok: true };
+  },
+
+  async markRefunded(orderNumber, actor) {
+    const db = getDb();
+    const order = db.orders.get(orderNumber);
+    if (!order || order.paymentStatus !== "refund_owed")
+      return { ok: false, message: "No refund is owed on that order." };
+    db.orders.set(orderNumber, {
+      ...order,
+      paymentStatus: "refunded",
+      updatedAt: new Date().toISOString(),
+    });
+    log(db, actor, "refund paid", orderNumber);
+    return { ok: true };
+  },
+
+  async orphanReceipts() {
+    const db = getDb();
+    const used = new Set([...db.orders.values()].map((o) => o.receiptPath));
+    const known = new Map(db.checkoutFailures.map((f) => [f.path, f]));
+    const rows = mockReceiptPaths()
+      .filter((p) => !used.has(p))
+      .map(
+        (path) =>
+          known.get(path) ?? {
+            path,
+            uploadedAt: new Date(0).toISOString(),
+            failureId: null,
+            customerName: "",
+            email: "",
+            phone: "",
+            quotedTotal: null,
+            reason: "",
+            resolved: false,
+          },
+      );
+    return rows.sort((a, b) => Number(b.failureId !== null) - Number(a.failureId !== null));
+  },
+
+  async resolveCheckoutFailure(id, resolution, actor) {
+    const db = getDb();
+    const index = db.checkoutFailures.findIndex((f) => f.failureId === id && !f.resolved);
+    const failure = db.checkoutFailures[index];
+    if (!failure) return { ok: false, message: "That failed checkout was already closed." };
+    db.checkoutFailures[index] = { ...failure, resolved: true, reason: failure.reason };
+    log(db, actor, "checkout failure closed", resolution || failure.path);
+    return { ok: true };
+  },
+
+  async deleteOrphanReceipt(path, actor) {
+    const db = getDb();
+    const failure = db.checkoutFailures.find((f) => f.path === path);
+    if ([...db.orders.values()].some((o) => o.receiptPath === path))
+      return { ok: false, message: "That receipt belongs to an order." };
+    if (failure && !failure.resolved)
+      return { ok: false, message: "Close the failed checkout before deleting its receipt." };
+    await receipts.remove(path);
+    log(db, actor, "receipt deleted", path);
     return { ok: true };
   },
 

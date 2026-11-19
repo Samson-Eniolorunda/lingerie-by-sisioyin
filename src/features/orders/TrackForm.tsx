@@ -83,7 +83,7 @@ export function TrackForm({ initialOrder }: { readonly initialOrder: string }) {
             {result.order.status === "pending" && result.order.paymentStatus === "rejected" ? (
               <ReceiptReupload
                 orderNumber={result.order.orderNumber}
-                email={result.order.email}
+                email={email}
                 until={result.order.receiptReuploadUntil}
               />
             ) : null}

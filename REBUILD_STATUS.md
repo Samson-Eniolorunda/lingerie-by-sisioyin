@@ -23,7 +23,7 @@
 **What the stand-in cannot prove (do these on the real project; they are step 9 of `OWNER_SETUP.md`).**
 1. The signed receipt upload with a plain `PUT` and the file as the body, from the browser, against real Supabase Storage.
 2. Real GoTrue behaviour: e-mail confirmation and recovery e-mails and their redirect URLs, ban durations, Google.
-3. The `tests/sql` files once in the real project's SQL editor (the stubs are close to, not the same as, Supabase's `auth` and `storage`).
+3. (Removed: the SQL tests must never run in the real project; a read-only check is in OWNER_SETUP step 9.)
 4. Row level security as seen through the real PostgREST (the stand-in sets the role and claims the same way, but it is not PostgREST).
 
 **Known gaps (unchanged unless stated).** No e-mail is sent (orders, replies, invitations). The invitation link is created and shown, but the sign-up screen behind it is not built. Review and testimonial moderation screens do not exist (the data layer reads only approved ones; approving is done in the Supabase table editor for now). The catalogue is filtered in memory over the live list (fine for a few hundred products). The sign-in lock and the upload limiter are per server instance. Unused uploaded receipts are not cleaned up. The bank details in `src/config/site.ts` are **to be confirmed by the owner** (`OWNER_SETUP.md`, step 6).
@@ -181,7 +181,7 @@ Lighthouse 13.6.0, local production build, default mobile throttling, one run pe
 
 1. **Create the new Supabase project** (free tier, new organisation, a region near Lagos), then, following `supabase/baseline/README.md`:
    1. In the SQL editor run `0000_baseline.sql`, then `0001_receipts_bucket.sql` (read them first; they were run only on a local throwaway PostgreSQL).
-   2. Run the seven files in `tests/sql` once in the SQL editor as well (or ask for a run against the real project), because the local run uses stubs for Supabase's own schemas.
+   2. Do NOT run `tests/sql` in the real project (it leaves test users and a promo code behind); they run only locally or on a throwaway project.
    3. Create the owner by hand: sign up (or add under Authentication, Users, address verified), then run the documented statement that sets `role = 'owner'` inside a transaction with `lbs.allow_protected_roles` on. Nobody becomes owner through the application.
    4. In Authentication: turn on email confirmation, add the site URL and the redirect URL `<site>/auth/callback`, and Google if wanted.
    5. Give me, or set in Vercel yourself, only these names (never in a file): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (server only), `CRON_SECRET`, `NEXT_PUBLIC_SITE_URL`. Do not set `LBS_ALLOW_DEMO`.

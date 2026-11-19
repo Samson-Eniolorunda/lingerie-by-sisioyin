@@ -31,6 +31,7 @@ export const productDraftSchema = z
     active: z.boolean(),
     allowColourSelection: z.boolean(),
     packType: z.string().max(20),
+    stockVersion: z.number().int().min(0).optional(),
     variants: z.array(variantSchema).max(200),
     images: z
       .array(z.object({ src: z.string().min(1).max(500), alt: z.string().trim().max(160) }))
@@ -110,3 +111,6 @@ export const customerStatusSchema = z.enum(["active", "suspended", "banned"]);
 export const paymentDecisionSchema = z.enum(["confirmed", "rejected"]);
 export const orderStatusSchema = z.enum(ORDER_STATUSES as [string, ...string[]]);
 export const messageMarkSchema = z.enum(["read", "unread"]);
+
+/** The amount of money that reached the account for a cancelled order, in whole naira (0 = nothing arrived). */
+export const receivedAmountSchema = z.number().int().min(0).max(100_000_000);

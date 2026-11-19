@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { clientIp } from "@/server/auth/request";
 import { data } from "@/server/data";
-import { allow } from "@/server/rate-limit";
+import { allowShared } from "@/server/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +21,7 @@ const visitSchema = z.object({
  * analytics. The address and location are not taken from the browser and are not stored.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  if (!allow(`visit:${await clientIp()}`, 120, 60_000))
+  if (!(await allowShared(`visit:${await clientIp()}`, 120, 60_000)))
     return NextResponse.json({ ok: false }, { status: 429 });
   const parsed = visitSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success || !parsed.data.page.startsWith("/"))

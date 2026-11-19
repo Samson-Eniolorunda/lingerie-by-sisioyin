@@ -16,7 +16,14 @@ import type { Product } from "@/types/domain";
 import type { CatalogueQuery } from "@/types/catalogue";
 import type { ContactMessage } from "@/schemas/contact";
 import type { OrderInput } from "@/schemas/checkout";
-import type { Page, Paged, PlaceOrderResult, QuoteResult, StoredOrder } from "@/types/orders";
+import type {
+  OrphanReceipt,
+  Page,
+  Paged,
+  PlaceOrderResult,
+  QuoteResult,
+  StoredOrder,
+} from "@/types/orders";
 
 /**
  * The data-access interface. The pages and server actions depend only on these contracts. Today the
@@ -168,10 +175,14 @@ export interface ProductDraft {
   readonly packType: string;
   readonly variants: readonly { size: string; color: string; qty: number }[];
   readonly images: readonly { src: string; alt: string }[];
+  /** The stock version the form was loaded with; stock is saved only if it is still current. */
+  readonly stockVersion?: number | undefined;
 }
 
 export interface AdminProduct extends Product {
   readonly active: boolean;
+  /** Rises every time stock changes (an order, a cancellation or an edit). */
+  readonly stockVersion?: number | undefined;
   readonly deletedAt: string | null;
 }
 
@@ -234,6 +245,15 @@ export interface AdminRepository {
     decision: "confirmed" | "rejected",
     actor: SessionUser,
   ): Promise<Result>;
+  /** A cancelled order with an unaccepted receipt: staff checked the bank and enter what arrived (0 = nothing). */
+  resolveRefundCheck(orderNumber: string, receivedNgn: number, actor: SessionUser): Promise<Result>;
+  /** The refund owed on a cancelled order has been paid back. */
+  markRefunded(orderNumber: string, actor: SessionUser): Promise<Result>;
+  /** Receipts with no order, open failures first. */
+  orphanReceipts(): Promise<readonly OrphanReceipt[]>;
+  resolveCheckoutFailure(id: string, resolution: string, actor: SessionUser): Promise<Result>;
+  /** Deletes an abandoned upload (no failure on record) or a failure that has been resolved. */
+  deleteOrphanReceipt(path: string, actor: SessionUser): Promise<Result>;
   customers(search: string, page: Page): Promise<Paged<CustomerRecord>>;
   customerStats(since: Date): Promise<CustomerStats>;
   setCustomerStatus(

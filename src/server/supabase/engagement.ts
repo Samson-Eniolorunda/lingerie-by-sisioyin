@@ -4,8 +4,19 @@ import type {
   PublicTestimonial,
   VisitInput,
 } from "@/server/data/contracts";
+import { clientIp } from "@/server/auth/request";
+import { allowRequest } from "@/server/rate-limit";
 import { anonClient } from "./clients";
 import { must, num, str } from "./util";
+
+/** Reviews and testimonials are public writes: limited per address and per author in the shared store. */
+async function publicWriteAllowed(scope: string, author: string): Promise<boolean> {
+  return allowRequest(scope, await clientIp(), [author], {
+    ip: 10,
+    subject: 5,
+    windowMs: 3_600_000,
+  });
+}
 
 export const supabaseEngagement: EngagementRepository = {
   async reviewsFor(productId: string, limit = 20): Promise<readonly PublicReview[]> {
@@ -36,6 +47,7 @@ export const supabaseEngagement: EngagementRepository = {
     title: string;
     comment: string;
   }): Promise<boolean> {
+    if (!(await publicWriteAllowed("review", input.email))) return false;
     const { error } = await anonClient().from("reviews").insert({
       product_id: input.productId,
       customer_name: input.name,
@@ -72,6 +84,7 @@ export const supabaseEngagement: EngagementRepository = {
     rating: number;
     comment: string;
   }): Promise<boolean> {
+    if (!(await publicWriteAllowed("testimonial", input.name))) return false;
     const { error } = await anonClient().from("testimonials").insert({
       customer_name: input.name,
       customer_location: input.location,

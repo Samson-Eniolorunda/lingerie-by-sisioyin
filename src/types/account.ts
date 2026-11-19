@@ -5,7 +5,7 @@ export type StaffRole = "owner" | "super_admin" | "developer" | "editor";
 export type OrderStatus =
   "pending" | "confirmed" | "processing" | "shipped" | "delivered" | "cancelled";
 export type PaymentStatus =
-  "awaiting_confirmation" | "confirmed" | "rejected" | "refund_owed" | "refunded";
+  "awaiting_confirmation" | "confirmed" | "rejected" | "refund_check" | "refund_owed" | "refunded";
 
 export const ORDER_STATUSES: readonly OrderStatus[] = [
   "pending",

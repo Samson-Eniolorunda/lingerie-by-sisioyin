@@ -145,9 +145,10 @@ async function order(userId, status, hoursAgo) {
   ];
   const c = await pool.connect();
   try {
+    const key = `seed-order-${n}-key-0000000000`;
+    await seedReceipt(`${key}/receipt.jpg`);
     await c.query("BEGIN");
     await c.query("SET LOCAL ROLE service_role");
-    const key = `seed-order-${n}-key-0000000000`;
     const r = await c.query(
       "SELECT place_order($1, $2::jsonb, $3::jsonb, $4::jsonb, NULL, $5, $6) AS r",
       [
@@ -164,7 +165,6 @@ async function order(userId, status, hoursAgo) {
       ],
     );
     if (!r.rows[0].r.ok) throw new Error(JSON.stringify(r.rows[0].r));
-    await seedReceipt(`${key}/receipt.jpg`);
     const num = r.rows[0].r.order_number;
     await c.query("RESET ROLE");
     await c.query(

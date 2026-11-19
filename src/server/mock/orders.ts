@@ -82,7 +82,15 @@ export function applyCancellation(db: Db, order: StoredOrder, now: Date): Stored
   const cancelled: StoredOrder = {
     ...current,
     status: "cancelled",
-    paymentStatus: current.paymentStatus === "confirmed" ? "refund_owed" : current.paymentStatus,
+    paymentStatus:
+      current.paymentStatus === "confirmed"
+        ? "refund_owed"
+        : current.receiptPath &&
+            (current.paymentStatus === "awaiting_confirmation" ||
+              current.paymentStatus === "rejected")
+          ? "refund_check"
+          : current.paymentStatus,
+    refundAmount: current.paymentStatus === "confirmed" ? current.total : null,
     receiptReuploadUntil: null,
     updatedAt: now.toISOString(),
   };
@@ -188,14 +196,33 @@ export const mockOrders: OrdersRepository = {
         message: "Your receipt did not finish uploading. Choose it again and place the order.",
       };
 
+    const failed = (reason: string) => {
+      if (!db.checkoutFailures.some((f) => f.path === input.receiptPath))
+        db.checkoutFailures.push({
+          path: input.receiptPath,
+          uploadedAt: now.toISOString(),
+          failureId: `fail-${db.checkoutFailures.length + 1}`,
+          customerName: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
+          email: input.contact.email.toLowerCase(),
+          phone: input.contact.phone,
+          quotedTotal: input.quotedTotal,
+          reason,
+          resolved: false,
+        });
+    };
     const priced = price(db, { ...input, state: input.delivery.state }, now);
-    if ("message" in priced) return { ok: false, message: priced.message };
-    if (priced.totals.total !== input.quotedTotal)
+    if ("message" in priced) {
+      failed(priced.message);
+      return { ok: false, message: priced.message };
+    }
+    if (priced.totals.total !== input.quotedTotal) {
+      failed("The total changed");
       return {
         ok: false,
         changedTotal: priced.totals.total,
         message: `The total has changed to ₦${priced.totals.total.toLocaleString("en-NG")}. Check the amount you transfer, then confirm again.`,
       };
+    }
 
     const order: StoredOrder = {
       orderNumber: sequenceNumber(db, now),

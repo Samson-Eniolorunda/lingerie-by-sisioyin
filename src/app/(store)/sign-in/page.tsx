@@ -12,9 +12,9 @@ export const metadata: Metadata = { title: "Sign in", robots: { index: false, fo
 export default async function SignInPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; confirmed?: string }>;
 }) {
-  const { next } = await searchParams;
+  const { next, confirmed } = await searchParams;
   const target = safeNext(next, "/dashboard");
   if (await currentUser("customer")) redirect(target);
   return (
@@ -31,6 +31,11 @@ export default async function SignInPage({
         </>
       }
     >
+      {confirmed === "1" ? (
+        <p role="status" className="mb-4 border-l-4 border-primary bg-primary-tint p-3 text-base">
+          Your address is confirmed, please sign in.
+        </p>
+      ) : null}
       <SignInForm next={next ?? null} action={signInAction} forgotHref="/forgot-password" />
       <OrDivider />
       <GoogleButton label="Continue with Google" />

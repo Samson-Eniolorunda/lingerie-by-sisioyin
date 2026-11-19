@@ -11,12 +11,14 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     upgradeInsecure: request.nextUrl.protocol === "https:",
   });
 
-  const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-nonce", nonce);
-  requestHeaders.set("Content-Security-Policy", csp);
-
-  const response = NextResponse.next({ request: { headers: requestHeaders } });
-  await refreshSupabaseSession(request, response, {
+  // Built again by the refresh if the session cookies change, from the request that now holds them.
+  const makeResponse = () => {
+    const headers = new Headers(request.headers);
+    headers.set("x-nonce", nonce);
+    headers.set("Content-Security-Policy", csp);
+    return NextResponse.next({ request: { headers } });
+  };
+  const response = await refreshSupabaseSession(request, makeResponse, {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL || undefined,
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || undefined,
   });

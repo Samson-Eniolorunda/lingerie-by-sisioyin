@@ -7,6 +7,7 @@ export interface AdminNavItem {
   readonly icon:
     | "dashboard"
     | "orders"
+    | "receipts"
     | "products"
     | "messages"
     | "customers"
@@ -42,6 +43,13 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     icon: "messages",
     permission: "messages.manage",
     primary: true,
+  },
+  {
+    href: "/admin/receipts",
+    label: "Receipts with no order",
+    icon: "receipts",
+    permission: "orders.view",
+    primary: false,
   },
   {
     href: "/admin/customers",

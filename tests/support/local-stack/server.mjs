@@ -798,6 +798,11 @@ async function handleStorage(req, res, url, claims) {
         });
       writeFileSync(fileOf(bucket, path), buf);
       writeFileSync(`${fileOf(bucket, path)}.type`, type);
+      // Supabase lists every stored object in storage.objects; the SQL functions read it.
+      await pool.query("INSERT INTO storage.objects (bucket_id, name) VALUES ($1, $2)", [
+        bucket,
+        path,
+      ]);
       return send(res, 200, { Key: `${bucket}/${path}` });
     }
     if ((m = route.match(/^\/object\/sign\/([^/]+)\/(.+)$/)) && req.method === "POST") {

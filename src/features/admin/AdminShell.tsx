@@ -4,6 +4,7 @@ import {
   Activity,
   BarChart3,
   Boxes,
+  FileQuestion,
   LayoutDashboard,
   Mail,
   Menu,
@@ -31,6 +32,7 @@ import { isCurrent, type AdminNavItem } from "./nav";
 const ICONS: Record<AdminNavItem["icon"], LucideIcon> = {
   dashboard: LayoutDashboard,
   orders: ReceiptText,
+  receipts: FileQuestion,
   products: Boxes,
   messages: Mail,
   customers: Users,

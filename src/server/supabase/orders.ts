@@ -1,7 +1,7 @@
 import type { OrderInput } from "@/schemas/checkout";
 import type { OrdersRepository } from "@/server/data/contracts";
 import { receipts } from "@/server/storage/receipts";
-import { anonClient, serviceClient, sessionClient } from "./clients";
+import { anonClient, serviceClient } from "./clients";
 import { orderFromRow } from "./mappers";
 import { failResult, must, okResult, TRY_AGAIN, valueResult } from "./util";
 
@@ -33,9 +33,22 @@ async function orderByNumber(orderNumber: string) {
   return rows[0] ? orderFromRow(rows[0]) : null;
 }
 
+/** The order could not be placed after the receipt was uploaded: staff see it and contact the customer. */
+async function recordFailure(input: OrderInput, reason: string): Promise<void> {
+  await serviceClient().rpc("record_checkout_failure", {
+    p_key: input.idempotencyKey,
+    p_receipt_path: input.receiptPath,
+    p_name: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
+    p_email: input.contact.email,
+    p_phone: input.contact.phone,
+    p_total: input.quotedTotal,
+    p_reason: reason,
+  });
+}
+
 export const supabaseOrders: OrdersRepository = {
   async quote(input) {
-    const { data, error } = await anonClient().rpc("quote_order", {
+    const { data, error } = await serviceClient().rpc("quote_order", {
       p_lines: sqlLines(input.lines),
       p_promo: input.promoCode ?? null,
       p_state: input.state,
@@ -64,9 +77,9 @@ export const supabaseOrders: OrdersRepository = {
         message: "Your receipt did not finish uploading. Choose it again and place the order.",
       };
 
-    // Signed in: the order is recorded against the account. A guest places it with the public key.
-    const client = context.userId ? await sessionClient("customer") : anonClient();
-    const { data, error } = await client.rpc("place_order", {
+    // Only the server may place an order (the browser has no EXECUTE on place_order). It names the
+    // signed-in customer, if any; the database refuses a receipt that is not in the bucket.
+    const { data, error } = await serviceClient().rpc("place_order", {
       p_idempotency_key: input.idempotencyKey,
       p_contact: {
         name: `${input.contact.firstName} ${input.contact.lastName}`.trim(),
@@ -84,6 +97,7 @@ export const supabaseOrders: OrdersRepository = {
       p_promo: input.promoCode ?? null,
       p_quoted_total: input.quotedTotal,
       p_receipt_path: input.receiptPath,
+      p_user: context.userId,
     });
     if (error) return { ok: false, message: TRY_AGAIN };
     const result = data as {
@@ -94,6 +108,9 @@ export const supabaseOrders: OrdersRepository = {
       quote?: { total?: number } | null;
     };
     if (!result.ok || !result.order_number) {
+      // The customer may already have paid: keep the receipt visible to staff (never silently lost).
+      if (result.code !== "bad_key")
+        await recordFailure(input, result.message ?? result.code ?? "");
       if (result.code === "total_changed" && result.quote?.total !== undefined)
         return {
           ok: false,

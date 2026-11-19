@@ -44,6 +44,8 @@ export interface ReceiptStore {
   exists(path: string): Promise<boolean>;
   /** A signed link that expires; never a public URL. */
   link(path: string): Promise<ReceiptLink>;
+  /** Deletes one stored receipt (clean-up of abandoned or settled uploads only). */
+  remove(path: string): Promise<void>;
 }
 
 /** `<scope>/<random>.<ext>`: the scope is the order's idempotency key, so a path can be matched to its order. */
@@ -88,6 +90,9 @@ export const mockReceiptStore: ReceiptStore = {
   async exists(path) {
     return objects().has(path);
   },
+  async remove(path) {
+    objects().delete(path);
+  },
   async link(path) {
     return {
       url: "/placeholders/receipt.svg",
@@ -119,4 +124,12 @@ export const receipts: ReceiptStore = {
   async link(path) {
     return (await store()).link(path);
   },
+  async remove(path) {
+    return (await store()).remove(path);
+  },
 };
+
+/** The paths held by the development store (for the mock admin's list of receipts with no order). */
+export function mockReceiptPaths(): readonly string[] {
+  return [...objects().keys()];
+}

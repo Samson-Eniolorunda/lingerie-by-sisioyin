@@ -77,6 +77,12 @@ export default async function OrderDetailPage({
             until={order.receiptReuploadUntil}
           />
         ) : null}
+        {order.paymentStatus === "refund_check" ? (
+          <p className="border-l-4 border-primary bg-primary-tint p-3 text-base">
+            This order was cancelled. If you sent a transfer, we are checking our account and will
+            refund whatever reached us. We will be in touch.
+          </p>
+        ) : null}
         {order.paymentStatus === "refund_owed" ? (
           <p className="border-l-4 border-primary bg-primary-tint p-3 text-base">
             You had paid for this order, so we owe you a refund. We will be in touch to arrange it.

@@ -95,11 +95,23 @@ export const supabaseAuth: AuthRepository = {
           last_name: input.lastName,
           full_name: `${input.firstName} ${input.lastName}`.trim(),
         },
-        emailRedirectTo: callbackUrl("/dashboard"),
+        emailRedirectTo: callbackUrl("/dashboard", "customer", "confirm"),
       },
     });
     const exists = "An account with this email already exists. Sign in instead.";
-    if (error) return failResult(error.code === "user_already_exists" ? exists : error.message);
+    // Never show the raw text of the auth service to a visitor.
+    if (error) {
+      if (error.code === "user_already_exists") return failResult(exists);
+      if (error.code === "weak_password")
+        return failResult(
+          "Choose a stronger password: at least 8 characters, with letters and numbers.",
+        );
+      if (error.code === "over_email_send_rate_limit" || error.status === 429)
+        return failResult("Too many attempts. Please wait a few minutes and try again.");
+      return failResult(
+        "We could not create your account. Please check your details and try again.",
+      );
+    }
     // With confirmation on, an address that already has an account comes back with no identities.
     if (data.user && (data.user.identities?.length ?? 1) === 0) return failResult(exists);
     if (!data.session || !data.user) return valueResult<SessionUser | null>(null);

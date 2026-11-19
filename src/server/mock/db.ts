@@ -14,7 +14,7 @@ import type {
   StoreSettings,
 } from "@/types/account";
 import type { AdminProduct } from "@/server/data/contracts";
-import type { StoredOrder } from "@/types/orders";
+import type { OrphanReceipt, StoredOrder } from "@/types/orders";
 
 /**
  * The development store. Everything here is invented: names use the reserved `example.test` domain
@@ -47,6 +47,8 @@ export interface Db {
   messages: InboxMessage[];
   settings: StoreSettings;
   activity: ActivityEntry[];
+  /** Checkouts that failed after the receipt was uploaded. */
+  checkoutFailures: OrphanReceipt[];
   sequence: number;
   id: number;
 }
@@ -336,6 +338,7 @@ export function buildDb(): Db {
       notifyNewOrders: true,
     },
     activity: [],
+    checkoutFailures: [],
     sequence: 0,
     id: 0,
   };

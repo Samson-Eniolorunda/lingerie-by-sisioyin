@@ -74,9 +74,11 @@ const QUICK_SIZES = ["S", "M", "L", "XL"];
 export function ProductEditor({
   id,
   initial,
+  stockVersion,
 }: {
   readonly id: string | null;
   readonly initial: EditorInitial;
+  readonly stockVersion?: number | undefined;
 }) {
   const router = useRouter();
   const toast = useToast();
@@ -108,6 +110,7 @@ export function ProductEditor({
       packType: colourless ? form.packType || "2-in-1" : "Single",
       variants: form.variants.map((v) => ({ ...v, color: colourless ? "" : v.color })),
       images: form.images,
+      stockVersion,
     };
   }
 

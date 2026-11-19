@@ -1,8 +1,9 @@
 import { formatNaira } from "@/lib/money";
 import { DELIVERY_STATES } from "@/lib/delivery";
-import type { StoredOrder } from "@/types/orders";
+import type { StoredOrder, TrackedOrder } from "@/types/orders";
 
-export function OrderSummary({ order }: { readonly order: StoredOrder }) {
+/** The full order (account pages) or the trimmed one (public tracking, no street address). */
+export function OrderSummary({ order }: { readonly order: StoredOrder | TrackedOrder }) {
   const state = DELIVERY_STATES.find((s) => s.id === order.state)?.label ?? order.state;
   return (
     <div className="border border-line bg-surface p-4">
@@ -43,7 +44,8 @@ export function OrderSummary({ order }: { readonly order: StoredOrder }) {
         </div>
       </dl>
       <p className="mt-4 text-base text-muted">
-        Delivering to {order.address}, {order.city}, {state}.
+        Delivering to{" "}
+        {["address" in order ? order.address : "", order.city, state].filter(Boolean).join(", ")}.
       </p>
     </div>
   );

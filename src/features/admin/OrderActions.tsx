@@ -1,8 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { Button, ButtonRow } from "@/components/ui/Button";
+import { TextField } from "@/components/ui/Field";
+import { formatNaira } from "@/lib/money";
 import { canTransition } from "@/lib/order-rules";
-import { paymentDecisionAction, setOrderStatusAction } from "@/server/actions/admin";
+import {
+  markRefundedAction,
+  paymentDecisionAction,
+  resolveRefundCheckAction,
+  setOrderStatusAction,
+} from "@/server/actions/admin";
 import type { OrderStatus, PaymentStatus } from "@/types/account";
 import { ConfirmButton } from "./ConfirmButton";
 import { useAdminAction } from "./useAdminAction";
@@ -22,15 +30,68 @@ export function OrderActions({
   status,
   paymentStatus,
   canUpdate,
+  total,
+  refundAmount,
 }: {
   readonly orderNumber: string;
   readonly status: OrderStatus;
   readonly paymentStatus: PaymentStatus;
   readonly canUpdate: boolean;
+  readonly total: number;
+  readonly refundAmount: number | null;
 }) {
   const { run, pending } = useAdminAction();
+  const [received, setReceived] = useState("");
   if (!canUpdate)
     return <p className="text-base text-muted">Your role can view orders but not change them.</p>;
+  if (status === "cancelled" && paymentStatus === "refund_check")
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-base text-muted">
+          This order was cancelled, but the customer sent a receipt that was never accepted, so
+          money may have reached the account. Check the bank statement and enter what arrived (0 if
+          nothing).
+        </p>
+        <TextField
+          label="Amount received (₦)"
+          name="received"
+          inputMode="numeric"
+          autoComplete="off"
+          hint={`The order total was ${formatNaira(total)}.`}
+          value={received}
+          onChange={(e) => setReceived(e.target.value.replace(/[^\d]/g, ""))}
+        />
+        <div className="flex justify-end">
+          <Button
+            disabled={pending || received === ""}
+            onClick={() => run(() => resolveRefundCheckAction(orderNumber, Number(received)))}
+          >
+            Record amount
+          </Button>
+        </div>
+      </div>
+    );
+  if (status === "cancelled" && paymentStatus === "refund_owed")
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="text-base text-muted">
+          A refund of {formatNaira(refundAmount ?? total)} is owed to the customer. Send it by bank
+          transfer, then record it here.
+        </p>
+        <div className="flex justify-end">
+          <ConfirmButton
+            label="Mark refund as paid"
+            title="Has the refund been paid?"
+            message={`Confirm that ${formatNaira(refundAmount ?? total)} has been transferred back to the customer.`}
+            confirmLabel="Refund paid"
+            tone="neutral"
+            variant="primary"
+            disabled={pending}
+            onConfirm={() => run(() => markRefundedAction(orderNumber))}
+          />
+        </div>
+      </div>
+    );
   if (status === "delivered" || status === "cancelled")
     return (
       <p className="text-base text-muted">
@@ -45,7 +106,9 @@ export function OrderActions({
       message={
         paymentStatus === "confirmed"
           ? "The stock goes back on sale and the customer will see the order as cancelled. They have already paid, so a refund will be recorded as owed. This cannot be undone."
-          : "The stock goes back on sale and the customer will see the order as cancelled. This cannot be undone."
+          : paymentStatus === "awaiting_confirmation" || paymentStatus === "rejected"
+            ? "The stock goes back on sale and the customer will see the order as cancelled. A receipt is on file, so you will be asked to check the bank for money that may have arrived. This cannot be undone."
+            : "The stock goes back on sale and the customer will see the order as cancelled. This cannot be undone."
       }
       confirmLabel="Cancel the order"
       disabled={pending}

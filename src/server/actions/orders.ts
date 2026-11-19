@@ -12,9 +12,9 @@ import {
 import { clientIp } from "@/server/auth/request";
 import { currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
-import { allow } from "@/server/rate-limit";
+import { allowRequest, allowShared } from "@/server/rate-limit";
 import { newReceiptPath, receipts, type ReceiptUpload } from "@/server/storage/receipts";
-import type { Quote, StoredOrder } from "@/types/orders";
+import { trackedOrder, type Quote, type StoredOrder, type TrackedOrder } from "@/types/orders";
 
 export type PromoResult =
   | { readonly ok: true; readonly code: string; readonly percent: number }
@@ -55,7 +55,7 @@ async function issueUpload(scope: string, type: string, size: number): Promise<U
   const problem = receiptProblem({ type, size });
   if (problem || !isReceiptType(type))
     return { ok: false, message: problem ?? "Attach a photograph or a PDF of your receipt." };
-  if (!allow(`upload:${await clientIp()}`, UPLOAD_LIMIT, HOUR))
+  if (!(await allowShared(`upload:${await clientIp()}`, UPLOAD_LIMIT, HOUR)))
     return {
       ok: false,
       message: "Too many uploads from this connection. Please wait a little and try again.",
@@ -80,6 +80,9 @@ export type PlaceOrderState =
       readonly changedTotal?: number;
     };
 
+const RECEIPT_SAFE =
+  "If you have already paid, please do not pay again: we have your receipt and, if the order cannot be completed, we will contact you and refund you in full.";
+
 const LAST_ORDER_COOKIE = "lbs_last_order";
 
 export async function placeOrder(input: unknown): Promise<PlaceOrderState> {
@@ -90,12 +93,27 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderState> {
     return { ok: false, message: "Please check the highlighted details.", fieldErrors };
   }
 
+  // Shared limit by address and by e-mail: a script cannot hold stock or burn promo codes by
+  // placing orders in a loop (each attempt counts, successful or not).
+  if (
+    !(await allowRequest("order", await clientIp(), [parsed.data.contact.email], {
+      ip: 10,
+      subject: 5,
+      windowMs: HOUR,
+    }))
+  )
+    return {
+      ok: false,
+      message: "Too many orders from this connection. Please wait a little and try again.",
+    };
+
   const user = await currentUser("customer");
   const result = await data.orders.place(parsed.data, { userId: user?.id ?? null });
   if (!result.ok)
     return {
       ok: false,
-      message: result.message,
+      // The transfer has usually been made by now, so never say that nothing was charged.
+      message: `${result.message} ${RECEIPT_SAFE}`,
       ...(result.changedTotal !== undefined ? { changedTotal: result.changedTotal } : {}),
     };
 
@@ -116,8 +134,19 @@ export async function lastOrder(): Promise<StoredOrder | null> {
 }
 
 export type TrackState =
-  | { readonly ok: true; readonly order: StoredOrder }
+  | { readonly ok: true; readonly order: TrackedOrder }
   | { readonly ok: false; readonly message: string };
+
+const LOOKUP_LIMITED = "Too many attempts. Please wait a few minutes and try again.";
+
+/** Order numbers can be guessed, so every look-up by number and e-mail is limited per address and per e-mail. */
+async function limitLookups(email: string): Promise<boolean> {
+  return allowRequest("lookup", await clientIp(), [email], {
+    ip: 30,
+    subject: 10,
+    windowMs: 15 * 60_000,
+  });
+}
 
 export async function trackOrder(input: { order: string; email: string }): Promise<TrackState> {
   const parsed = trackSchema.safeParse(input);
@@ -126,10 +155,11 @@ export async function trackOrder(input: { order: string; email: string }): Promi
       ok: false,
       message: parsed.error.issues[0]?.message ?? "Check the details and try again.",
     };
+  if (!(await limitLookups(parsed.data.email))) return { ok: false, message: LOOKUP_LIMITED };
   const order = await data.orders.lookup(parsed.data.order, parsed.data.email);
   if (!order)
     return { ok: false, message: "We could not find an order with that number and email address." };
-  return { ok: true, order };
+  return { ok: true, order: trackedOrder(order) };
 }
 
 const reuploadSchema = z.object({
@@ -143,6 +173,7 @@ const reuploadSchema = z.object({
 export async function createReceiptReupload(input: unknown): Promise<UploadState> {
   const parsed = reuploadSchema.safeParse(input);
   if (!parsed.success) return { ok: false, message: "Check the order number and email." };
+  if (!(await limitLookups(parsed.data.email))) return { ok: false, message: LOOKUP_LIMITED };
   const order = await data.orders.lookup(parsed.data.order, parsed.data.email);
   if (!order) return { ok: false, message: "We could not find that order." };
   return issueUpload(order.idempotencyKey, parsed.data.type, parsed.data.size);
@@ -159,6 +190,7 @@ export async function attachReceipt(
 ): Promise<{ readonly ok: true } | { readonly ok: false; readonly message: string }> {
   const parsed = attachSchema.safeParse(input);
   if (!parsed.success) return { ok: false, message: "Check the order number and email." };
+  if (!(await limitLookups(parsed.data.email))) return { ok: false, message: LOOKUP_LIMITED };
   const order = await data.orders.lookup(parsed.data.order, parsed.data.email);
   if (!order) return { ok: false, message: "We could not find that order." };
   return data.orders.attachReceipt(order.orderNumber, parsed.data.path);
