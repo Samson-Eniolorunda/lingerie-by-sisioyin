@@ -5,7 +5,8 @@ Audit 2026-11-19 (six widths, light and dark; home, cart, size guide, contact, t
 ## Findings, worst first
 
 1. [x] Consent card on phones: "Accept analytics" wrapped onto two lines. Labels now stay on one line.
-2. [ ] Remaining: product page, checkout, wishlist, admin screens, empty/loading/error states, Lighthouse re-run, share images.
+2. [x] Shop grid on tablets (768 px): two oversized columns because the custom `md` breakpoint is 1024 px. Now three columns from 768 px.
+3. [ ] Remaining: product page, checkout, wishlist, admin screens, empty/loading/error states, Lighthouse re-run, share images.
 
 ## Status
 
