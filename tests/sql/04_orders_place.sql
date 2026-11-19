@@ -48,23 +48,23 @@ BEGIN
 
   -- Quote.
   PERFORM t.as_anon();
-  r := public.quote_order(t.line(bra, 'M', 'Black', 2), NULL, 'Lagos');
+  r := t.quote(t.line(bra, 'M', 'Black', 2), NULL, 'Lagos');
   PERFORM t.ok((r->>'ok')::boolean AND (r->>'total')::numeric = 20000 AND (r->>'delivery')::numeric = 0, 'quote: two bras to Lagos');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 2), NULL, 'Ogun');
+  r := t.quote(t.line(bra, 'M', 'Black', 2), NULL, 'Ogun');
   PERFORM t.ok((r->>'total')::numeric = 22000, 'quote: delivery fee for Ogun comes from the table');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 2), 'save10', 'Ogun');
+  r := t.quote(t.line(bra, 'M', 'Black', 2), 'save10', 'Ogun');
   PERFORM t.ok((r->>'discount')::numeric = 2000 AND (r->>'total')::numeric = 20000, 'quote: promo applies to the subtotal only');
-  r := public.quote_order(t.line(cheap, 'One', '', 1), 'OPEN10', 'Lagos');
+  r := t.quote(t.line(cheap, 'One', '', 1), 'OPEN10', 'Lagos');
   PERFORM t.ok((r->>'discount')::numeric = 101 AND (r->>'total')::numeric = 904, 'quote: discount rounds half up like the app (100.5 gives 101)');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 9), NULL, 'Lagos');
+  r := t.quote(t.line(bra, 'M', 'Black', 9), NULL, 'Lagos');
   PERFORM t.ok(NOT (r->>'ok')::boolean AND r->>'code' = 'out_of_stock', 'quote: refuses more than the stock');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 1), 'OFF', 'Lagos');
+  r := t.quote(t.line(bra, 'M', 'Black', 1), 'OFF', 'Lagos');
   PERFORM t.ok(r->>'code' = 'promo_invalid', 'quote: an inactive promo is invalid');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 1), 'SOON', 'Lagos');
+  r := t.quote(t.line(bra, 'M', 'Black', 1), 'SOON', 'Lagos');
   PERFORM t.ok(r->>'code' = 'promo_invalid', 'quote: a promo that has not started is invalid');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 1), 'BIG', 'Lagos');
+  r := t.quote(t.line(bra, 'M', 'Black', 1), 'BIG', 'Lagos');
   PERFORM t.ok(r->>'code' = 'promo_invalid', 'quote: the promo minimum order is enforced');
-  r := public.quote_order(t.line(bra, 'M', 'Black', 1), NULL, 'Mars');
+  r := t.quote(t.line(bra, 'M', 'Black', 1), NULL, 'Mars');
   PERFORM t.ok(r->>'code' = 'state_unavailable', 'quote: unknown delivery state');
   PERFORM t.reset();
 
@@ -109,11 +109,11 @@ BEGIN
 
   -- A tampered price in the line is ignored; a rolled-back request leaves earlier lines untouched.
   PERFORM t.as_anon();
-  r := public.place_order('tamper-key-' || gen_random_uuid(), t.contact(), t.delivery(),
+  r := t.place_full('tamper-key-' || gen_random_uuid(), t.contact(), t.delivery(),
          jsonb_build_array(jsonb_build_object('product_id', plain, 'size', 'One', 'colour', '', 'qty', 1, 'unit_price_ngn', 1, 'price_ngn', 1)),
          NULL, 1, NULL);
   PERFORM t.ok(r->>'code' = 'total_changed' AND (r->'quote'->>'total')::numeric = 4000, 'client-sent prices are ignored');
-  r := public.place_order('multi-key-' || gen_random_uuid(), t.contact(), t.delivery(),
+  r := t.place_full('multi-key-' || gen_random_uuid(), t.contact(), t.delivery(),
          t.line(plain, 'One', '', 1) || t.line(bra, 'M', 'Black', 9), NULL, 94000, NULL);
   PERFORM t.ok(r->>'code' = 'out_of_stock', 'one bad line fails the whole order');
   PERFORM t.reset();
@@ -122,7 +122,7 @@ BEGIN
   -- A good order as a guest.
   PERFORM t.as_anon();
   k := 'guest-key-' || gen_random_uuid();
-  r := public.place_order(k, t.contact(), t.delivery('Ogun'), t.line(bra, 'M', 'Black', 2), NULL, 22000, 'tmp/r1.jpg');
+  r := t.place_full(k, t.contact(), t.delivery('Ogun'), t.line(bra, 'M', 'Black', 2), NULL, 22000);
   PERFORM t.ok((r->>'ok')::boolean AND (r->>'total')::numeric = 22000, 'a correct order is placed');
   n := r->>'order_number';
   PERFORM t.ok(n ~ '^LBS-[0-9]{8}-[0-9]{4,}$', 'order number has the LBS-DDMMYYYY-NNNN shape');
@@ -132,23 +132,23 @@ BEGIN
   PERFORM t.ok(t.variant_qty(bra, 'M', 'Red') = 1, 'other colours were not touched');
   PERFORM t.ok((SELECT qty FROM public.products WHERE id = bra) = 2, 'the product quantity is re-totalled from its variants');
   PERFORM t.ok((SELECT user_id IS NULL AND customer_email = 'ada@example.com' AND landmark = 'Opposite the bank'
-                  AND payment_status = 'awaiting_confirmation' AND status = 'pending' AND receipt_path = 'tmp/r1.jpg'
+                  AND payment_status = 'awaiting_confirmation' AND status = 'pending' AND receipt_path = k || '/receipt.jpg'
                   FROM public.orders WHERE order_number = n), 'guest order stored with lower-case email, landmark, receipt path and starting states');
   PERFORM t.ok((SELECT (items->0->>'unit_price_ngn')::int = 10000 AND (items->0->>'size') = 'M' FROM public.orders WHERE order_number = n),
                'lines are stored with the server price and the exact variant');
 
   -- Idempotency.
   PERFORM t.as_anon();
-  r2 := public.place_order(k, t.contact(), t.delivery('Ogun'), t.line(bra, 'M', 'Black', 2), NULL, 22000, 'tmp/r1.jpg');
+  r2 := t.place_full(k, t.contact(), t.delivery('Ogun'), t.line(bra, 'M', 'Black', 2), NULL, 22000);
   PERFORM t.ok((r2->>'ok')::boolean AND (r2->>'duplicate')::boolean AND r2->>'order_number' = n, 'the same key returns the same order');
   PERFORM t.reset();
   PERFORM t.ok(t.variant_qty(bra, 'M', 'Black') = 1 AND (SELECT count(*) FROM public.orders) = 1, 'a repeated key took stock only once');
   PERFORM t.as_user(other);
-  r2 := public.place_order(k, t.contact(), t.delivery('Ogun'), t.line(bra, 'M', 'Black', 2), NULL, 22000, NULL);
+  r2 := t.place_full(k, t.contact(), t.delivery('Ogun'), t.line(bra, 'M', 'Black', 2), NULL, 22000, NULL);
   PERFORM t.ok(r2->>'code' = 'bad_key', 'another account cannot read an order through a reused key');
   PERFORM t.reset();
   PERFORM t.as_anon();
-  r2 := public.place_order('short', t.contact(), t.delivery(), t.line(plain, 'One', '', 1), NULL, 4000, NULL);
+  r2 := t.place_full('short', t.contact(), t.delivery(), t.line(plain, 'One', '', 1), NULL, 4000, NULL);
   PERFORM t.ok(r2->>'code' = 'bad_key', 'a short idempotency key is refused');
   PERFORM t.reset();
 
@@ -181,12 +181,12 @@ BEGIN
   PERFORM t.ok((SELECT (expires_at AT TIME ZONE 'Africa/Lagos')::time = '23:59:59' FROM public.promo_codes WHERE code = 'TODAY'),
                'a promo expiry is normalised to 23:59:59 Lagos time');
   PERFORM t.as_anon();
-  r := public.quote_order(t.line(plain, 'One', '', 1), 'today', 'Lagos');
+  r := t.quote(t.line(plain, 'One', '', 1), 'today', 'Lagos');
   PERFORM t.ok((r->>'ok')::boolean, 'a promo expiring today is still valid during the day');
   PERFORM t.reset();
   UPDATE public.promo_codes SET expires_at = now() - interval '2 days' WHERE code = 'TODAY';
   PERFORM t.as_anon();
-  r := public.quote_order(t.line(plain, 'One', '', 1), 'TODAY', 'Lagos');
+  r := t.quote(t.line(plain, 'One', '', 1), 'TODAY', 'Lagos');
   PERFORM t.ok(r->>'code' = 'promo_invalid', 'an expired promo is invalid');
   PERFORM t.reset();
 

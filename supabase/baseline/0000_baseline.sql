@@ -176,8 +176,8 @@ CREATE POLICY "profiles: staff read"
 DROP POLICY IF EXISTS "profiles: staff update" ON public.profiles;
 CREATE POLICY "profiles: staff update"
   ON public.profiles FOR UPDATE TO authenticated
-  USING (public.has_permission('customers.manage'))
-  WITH CHECK (public.has_permission('customers.manage'));
+  USING (public.has_permission('customers.manage') AND role = 'customer')
+  WITH CHECK (public.has_permission('customers.manage') AND role = 'customer');
 
 -- ----- Controlled changes to protected columns ------------------------------
 
@@ -456,6 +456,7 @@ CREATE TABLE IF NOT EXISTS public.products (
   colors                JSONB       NOT NULL DEFAULT '[]',
   -- [{ "size": "M", "color": "Black", "qty": 3 }]; colour is '' when the product has none.
   variant_stock         JSONB       NOT NULL DEFAULT '[]',
+  stock_version         INTEGER     NOT NULL DEFAULT 0,  -- +1 whenever stock changes; the admin form saves stock only if it still matches
   description           TEXT        NOT NULL DEFAULT '',
   images                TEXT[]      NOT NULL DEFAULT '{}',
   is_active             BOOLEAN     NOT NULL DEFAULT true,
@@ -835,7 +836,9 @@ CREATE POLICY "delivery_fees: staff manage"
 -- 11) ORDERS: written only through the functions below
 -- ============================================================================
 -- status:         pending -> confirmed -> processing -> shipped -> delivered, or cancelled
--- payment_status: awaiting_confirmation | confirmed | rejected | refund_owed | refunded
+-- payment_status: awaiting_confirmation | confirmed | rejected | refund_check | refund_owed | refunded
+--   refund_check: the order was cancelled while a receipt was on file that staff had not accepted;
+--   money may have arrived, so staff must check the bank account (resolve_refund_check).
 CREATE SEQUENCE IF NOT EXISTS public.order_number_seq START WITH 1 INCREMENT BY 1;
 
 CREATE TABLE IF NOT EXISTS public.orders (
@@ -860,7 +863,7 @@ CREATE TABLE IF NOT EXISTS public.orders (
                           CHECK (status IN ('pending','confirmed','processing','shipped','delivered','cancelled')),
   payment_method        TEXT        NOT NULL DEFAULT 'bank_transfer',
   payment_status        TEXT        NOT NULL DEFAULT 'awaiting_confirmation'
-                          CHECK (payment_status IN ('awaiting_confirmation','confirmed','rejected','refund_owed','refunded')),
+                          CHECK (payment_status IN ('awaiting_confirmation','confirmed','rejected','refund_check','refund_owed','refunded')),
   receipt_path          TEXT,
   receipt_reupload_until TIMESTAMPTZ,
   refund_amount         DECIMAL(10,2),
@@ -872,6 +875,8 @@ CREATE TABLE IF NOT EXISTS public.orders (
   updated_at            TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+-- One receipt can belong to one order only.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_receipt_path_unique ON public.orders (receipt_path) WHERE receipt_path IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON public.orders (customer_email);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON public.orders (user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders (status);
@@ -934,6 +939,7 @@ SET search_path = public
 AS $$
 BEGIN
   UPDATE public.products p SET
+    stock_version = p.stock_version + 1,
     variant_stock = (
       SELECT COALESCE(jsonb_agg(
         CASE WHEN e->>'size' = p_size AND COALESCE(e->>'color', '') = p_colour
@@ -1128,10 +1134,12 @@ $$;
 -- and the correct quote is returned so the customer can confirm the new amount.
 -- p_contact:  { name, email, phone }
 -- p_delivery: { address, city, state, landmark?, notes? }
+-- Service role only. p_user is the signed-in customer's id (NULL for a guest). The receipt must
+-- already be in the bucket under '<idempotency key>/'.
 -- Returns { ok, duplicate?, order_number, total, ... } or { ok:false, code, message, quote? }.
 CREATE OR REPLACE FUNCTION public.place_order(
   p_idempotency_key TEXT, p_contact JSONB, p_delivery JSONB, p_lines JSONB,
-  p_promo TEXT, p_quoted_total NUMERIC, p_receipt_path TEXT)
+  p_promo TEXT, p_quoted_total NUMERIC, p_receipt_path TEXT, p_user UUID DEFAULT NULL)
 RETURNS JSONB
 LANGUAGE plpgsql SECURITY DEFINER
 SET search_path = public
@@ -1147,8 +1155,16 @@ DECLARE
   v_city     TEXT := trim(COALESCE(p_delivery->>'city', ''));
   v_state    TEXT := trim(COALESCE(p_delivery->>'state', ''));
   v_msg TEXT; v_code TEXT; v_detail TEXT;
+  v_uid      UUID;
 BEGIN
-  IF auth.uid() IS NOT NULL AND NOT public.is_active_account() THEN
+  -- Only the server (service role) may place an order; browsers have no EXECUTE on this function.
+  -- The server states which signed-in customer, if any, the order belongs to.
+  IF NOT public.is_service() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  v_uid := p_user;
+  IF v_uid IS NOT NULL AND NOT EXISTS (
+       SELECT 1 FROM public.profiles WHERE id = v_uid AND account_status = 'active') THEN
     RETURN jsonb_build_object('ok', false, 'code', 'forbidden', 'message', 'This account cannot place orders.');
   END IF;
   IF p_idempotency_key IS NULL OR char_length(p_idempotency_key) NOT BETWEEN 16 AND 100 THEN
@@ -1162,11 +1178,18 @@ BEGIN
      OR char_length(COALESCE(p_receipt_path, '')) > 300 OR COALESCE(p_receipt_path, '') LIKE '%..%' THEN
     RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Please check your details and try again.');
   END IF;
+  -- The receipt is mandatory, belongs to this checkout (its folder is the idempotency key) and
+  -- must really be in the private bucket.
+  IF p_receipt_path IS NULL OR p_receipt_path NOT LIKE p_idempotency_key || '/%' OR NOT EXISTS (
+       SELECT 1 FROM storage.objects WHERE bucket_id = 'payment-receipts' AND name = p_receipt_path) THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'invalid_receipt',
+      'message', 'Your receipt could not be matched to this order. Attach it again.');
+  END IF;
 
   -- Idempotency: the same key returns the same order and changes nothing.
   SELECT * INTO v_existing FROM public.orders WHERE idempotency_key = p_idempotency_key;
   IF FOUND THEN
-    IF v_existing.user_id IS DISTINCT FROM auth.uid() THEN
+    IF v_existing.user_id IS DISTINCT FROM v_uid THEN
       RETURN jsonb_build_object('ok', false, 'code', 'bad_key', 'message', 'Something went wrong. Please try again.');
     END IF;
     RETURN jsonb_build_object('ok', true, 'duplicate', true, 'order_number', v_existing.order_number,
@@ -1188,11 +1211,11 @@ BEGIN
       delivery_address, delivery_city, delivery_state, landmark, items, subtotal, shipping_cost,
       discount_amount, promo_code, total, receipt_path, notes)
     VALUES (
-      '', p_idempotency_key, auth.uid(), v_name, v_email, v_phone,
+      '', p_idempotency_key, v_uid, v_name, v_email, v_phone,
       v_address, v_city, v_state, NULLIF(trim(COALESCE(p_delivery->>'landmark', '')), ''),
       v_quote->'items', (v_quote->>'subtotal')::NUMERIC, (v_quote->>'delivery')::NUMERIC,
       (v_quote->>'discount')::NUMERIC, v_quote->>'promo_code', (v_quote->>'total')::NUMERIC,
-      NULLIF(p_receipt_path, ''), NULLIF(trim(COALESCE(p_delivery->>'notes', '')), ''))
+      p_receipt_path, NULLIF(trim(COALESCE(p_delivery->>'notes', '')), ''))
     RETURNING * INTO v_order;
 
     RETURN jsonb_build_object('ok', true, 'duplicate', false, 'order_number', v_order.order_number,
@@ -1208,7 +1231,7 @@ BEGIN
     WHEN unique_violation THEN
       -- Two requests with the same key raced; the loser's stock and promo changes are rolled back.
       SELECT * INTO v_existing FROM public.orders WHERE idempotency_key = p_idempotency_key;
-      IF FOUND AND v_existing.user_id IS NOT DISTINCT FROM auth.uid() THEN
+      IF FOUND AND v_existing.user_id IS NOT DISTINCT FROM v_uid THEN
         RETURN jsonb_build_object('ok', true, 'duplicate', true, 'order_number', v_existing.order_number,
           'total', v_existing.total);
       END IF;
@@ -1235,7 +1258,12 @@ BEGIN
     cancelled_at = now(),
     cancel_reason = left(p_reason, 200),
     refund_amount = CASE WHEN payment_status = 'confirmed' THEN total ELSE refund_amount END,
-    payment_status = CASE WHEN payment_status = 'confirmed' THEN 'refund_owed' ELSE payment_status END
+    payment_status = CASE
+      WHEN payment_status = 'confirmed' THEN 'refund_owed'
+      -- A receipt is on file but was never accepted (waiting, or rejected as short or unclear):
+      -- money may have arrived, so staff must check the bank account and refund what was received.
+      WHEN receipt_path IS NOT NULL AND payment_status IN ('awaiting_confirmation', 'rejected') THEN 'refund_check'
+      ELSE payment_status END
   WHERE id = p_order AND status = p_expected AND status IN ('pending', 'confirmed', 'processing')
   RETURNING * INTO v_order;
   IF NOT FOUND THEN
@@ -1381,6 +1409,8 @@ BEGIN
   END IF;
   UPDATE public.orders SET receipt_path = p_path, payment_status = 'awaiting_confirmation', receipt_reupload_until = NULL
    WHERE order_number = upper(trim(COALESCE(p_order_number, '')))
+     AND p_path LIKE idempotency_key || '/%'
+     AND EXISTS (SELECT 1 FROM storage.objects WHERE bucket_id = 'payment-receipts' AND name = p_path)
      AND status = 'pending'
      AND payment_status IN ('awaiting_confirmation', 'rejected')
      AND (public.is_service() OR (auth.uid() IS NOT NULL AND user_id = auth.uid() AND public.is_active_account()));
@@ -1405,6 +1435,32 @@ BEGIN
    WHERE order_number = upper(trim(COALESCE(p_order_number, ''))) AND payment_status = 'refund_owed';
   IF NOT FOUND THEN
     RETURN jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'No refund is owed on that order.');
+  END IF;
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- Staff checked the bank account for a cancelled order with an unaccepted receipt. An amount above
+-- zero turns it into a refund owed for that amount (never more than the order total); zero means
+-- no money arrived and nothing is owed.
+CREATE OR REPLACE FUNCTION public.resolve_refund_check(p_order_number TEXT, p_received NUMERIC)
+RETURNS JSONB
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.update')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_received IS NULL OR p_received < 0 THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'invalid_input', 'message', 'Enter the amount that was received.');
+  END IF;
+  UPDATE public.orders SET
+      payment_status = CASE WHEN p_received > 0 THEN 'refund_owed' ELSE 'rejected' END,
+      refund_amount = CASE WHEN p_received > 0 THEN LEAST(p_received, total) ELSE NULL END
+   WHERE order_number = upper(trim(COALESCE(p_order_number, ''))) AND payment_status = 'refund_check';
+  IF NOT FOUND THEN
+    RETURN jsonb_build_object('ok', false, 'code', 'not_found', 'message', 'No refund check is open on that order.');
   END IF;
   RETURN jsonb_build_object('ok', true);
 END;
@@ -1615,12 +1671,11 @@ GRANT EXECUTE ON FUNCTION public.is_active_account() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.has_permission(TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.validate_invite_token(TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.validate_promo(TEXT, NUMERIC) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.quote_order(JSONB, TEXT, TEXT) TO anon, authenticated;
-GRANT EXECUTE ON FUNCTION public.place_order(TEXT, JSONB, JSONB, JSONB, TEXT, NUMERIC, TEXT) TO anon, authenticated;
+-- quote_order and place_order are NOT granted to browsers: the server (service role) calls them,
+-- after its own rate limit and receipt checks, so a script cannot hold stock or use up promo codes.
 GRANT EXECUTE ON FUNCTION public.record_visit(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.update_visit_duration(UUID, INTEGER) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.cancel_order(TEXT, TEXT) TO authenticated;
-GRANT EXECUTE ON FUNCTION public.attach_receipt(TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_guest_orders() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.request_account_deletion(BOOLEAN) TO authenticated;
 -- Staff functions (each one checks has_permission itself).
@@ -1631,7 +1686,8 @@ GRANT EXECUTE ON FUNCTION public.create_admin_invite(TEXT, TEXT) TO authenticate
 GRANT EXECUTE ON FUNCTION public.set_order_status(TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.decide_payment(TEXT, TEXT) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.mark_refunded(TEXT) TO authenticated;
--- Not granted to browsers: expire_unpaid_orders (service role only), price_order, adjust_stock,
+GRANT EXECUTE ON FUNCTION public.resolve_refund_check(TEXT, NUMERIC) TO authenticated;
+-- Not granted to browsers: quote_order, place_order, attach_receipt, expire_unpaid_orders (service role only), price_order, adjust_stock,
 -- cancel_internal, is_service, hash_token and the trigger functions.
 
 COMMIT;

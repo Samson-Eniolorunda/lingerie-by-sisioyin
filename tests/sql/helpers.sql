@@ -81,12 +81,57 @@ CREATE FUNCTION t.contact() RETURNS jsonb LANGUAGE sql AS $$
 CREATE FUNCTION t.delivery(p_state text DEFAULT 'Lagos') RETURNS jsonb LANGUAGE sql AS $$
   SELECT jsonb_build_object('address','12 Marina Road','city','Ikeja','state',p_state,'landmark','Opposite the bank') $$;
 
+-- Places an order the way the server does: with the service role, naming the signed-in customer
+-- (the current user, if any). The role and claims of the caller are restored afterwards.
+-- p_receipt NULL: a receipt is uploaded under '<key>/' for the test; '<none>': really NULL; any other
+-- value is used as given (and is NOT created in storage).
+CREATE FUNCTION t.place_full(p_key text, p_contact jsonb, p_delivery jsonb, p_lines jsonb, p_promo text,
+                             p_total numeric, p_receipt text DEFAULT NULL) RETURNS jsonb
+LANGUAGE plpgsql AS $$
+DECLARE
+  v_role text := current_user;
+  v_claims text := coalesce(current_setting('request.jwt.claims', true), '');
+  v_uid uuid := auth.uid();
+  v_receipt text := p_receipt;
+  r jsonb;
+BEGIN
+  EXECUTE 'RESET ROLE';
+  IF p_receipt IS NULL THEN
+    v_receipt := p_key || '/receipt.jpg';
+    INSERT INTO storage.objects (bucket_id, name) VALUES ('payment-receipts', v_receipt);
+  ELSIF p_receipt = '<none>' THEN
+    v_receipt := NULL;
+  END IF;
+  PERFORM t.as_service();
+  r := public.place_order(p_key, p_contact, p_delivery, p_lines, p_promo, p_total, v_receipt, v_uid);
+  EXECUTE 'RESET ROLE';
+  PERFORM set_config('request.jwt.claims', v_claims, false);
+  IF v_role <> current_user THEN EXECUTE format('SET ROLE %I', v_role); END IF;
+  RETURN r;
+END $$;
+
+-- Prices a bag the way the server does (service role), then returns to the caller's role.
+CREATE FUNCTION t.quote(p_lines jsonb, p_promo text, p_state text) RETURNS jsonb LANGUAGE plpgsql AS $$
+DECLARE
+  v_role text := current_user;
+  v_claims text := coalesce(current_setting('request.jwt.claims', true), '');
+  r jsonb;
+BEGIN
+  EXECUTE 'RESET ROLE';
+  PERFORM t.as_service();
+  r := public.quote_order(p_lines, p_promo, p_state);
+  EXECUTE 'RESET ROLE';
+  PERFORM set_config('request.jwt.claims', v_claims, false);
+  IF v_role <> current_user THEN EXECUTE format('SET ROLE %I', v_role); END IF;
+  RETURN r;
+END $$;
+
 -- Places an order as the current role with a fresh key; returns the jsonb result.
 CREATE FUNCTION t.place(p_lines jsonb, p_total numeric, p_promo text DEFAULT NULL, p_state text DEFAULT 'Lagos',
-                        p_key text DEFAULT NULL, p_receipt text DEFAULT 'tmp/receipt.jpg') RETURNS jsonb
+                        p_key text DEFAULT NULL, p_receipt text DEFAULT NULL) RETURNS jsonb
 LANGUAGE sql AS $$
-  SELECT public.place_order(coalesce(p_key, 'key-' || gen_random_uuid()::text), t.contact(), t.delivery(p_state),
-                            p_lines, p_promo, p_total, p_receipt)
+  SELECT t.place_full(coalesce(p_key, 'key-' || gen_random_uuid()::text), t.contact(), t.delivery(p_state),
+                      p_lines, p_promo, p_total, p_receipt)
 $$;
 
 GRANT USAGE ON SCHEMA t TO anon, authenticated, service_role;

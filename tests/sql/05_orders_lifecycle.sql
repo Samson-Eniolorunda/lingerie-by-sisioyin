@@ -34,8 +34,8 @@ BEGIN
   PERFORM t.reset();
   PERFORM t.ok(t.variant_qty(bra, 'M', 'Black') = 10, 'cancelling restores the exact variant');
   PERFORM t.ok((SELECT used_count FROM public.promo_codes WHERE id = promo_id) = 0, 'cancelling releases the promo use');
-  PERFORM t.ok((SELECT status = 'cancelled' AND payment_status = 'awaiting_confirmation' FROM public.orders WHERE order_number = n),
-               'an unpaid cancelled order owes no refund');
+  PERFORM t.ok((SELECT status = 'cancelled' AND payment_status = 'refund_check' FROM public.orders WHERE order_number = n),
+               'cancelling an order whose receipt staff had not accepted opens a refund check (money may have arrived)');
   PERFORM t.as_user(cust);
   r := public.cancel_order(n);
   PERFORM t.ok(r->>'code' = 'not_cancellable', 'cancelling twice is refused');
@@ -160,16 +160,20 @@ BEGIN
   PERFORM t.ok((public.decide_payment(n3, 'confirmed')->>'code') = 'not_decidable', 'a rejected payment cannot be confirmed without a new receipt');
   PERFORM t.reset();
   PERFORM t.as_user(other);
-  PERFORM t.ok((public.attach_receipt(n3, 'x/new.jpg')->>'code') = 'not_allowed', 'another customer cannot attach a receipt');
+  PERFORM t.ok(t.try(format('SELECT public.attach_receipt(%L, ''x/new.jpg'')', n3)) = 'error: 42501', 'a customer cannot attach a receipt directly (the server does it with the service role)');
   PERFORM t.reset();
   PERFORM t.as_anon();
-  PERFORM t.ok(t.try(format('SELECT public.attach_receipt(%L, ''x/new.jpg'')', n3)) = 'error: 42501', 'a guest cannot attach a receipt directly (the server does it with the service role)');
+  PERFORM t.ok(t.try(format('SELECT public.attach_receipt(%L, ''x/new.jpg'')', n3)) = 'error: 42501', 'a guest cannot attach a receipt directly either');
   PERFORM t.reset();
-  PERFORM t.as_user(cust);
+  INSERT INTO storage.objects (bucket_id, name)
+    SELECT 'payment-receipts', idempotency_key || '/new.jpg' FROM public.orders WHERE order_number = n3;
+  PERFORM t.as_service();
   PERFORM t.ok((public.attach_receipt(n3, '../etc/passwd')->>'code') = 'invalid_input', 'a path with .. is refused');
-  PERFORM t.ok((public.attach_receipt(n3, 'LBS/new.jpg')->>'ok')::boolean, 'the owner attaches a new receipt after rejection');
+  PERFORM t.ok((public.attach_receipt(n3, 'LBS/new.jpg')->>'code') = 'not_allowed', 'a receipt outside the order''s own folder is refused');
+  PERFORM t.ok((public.attach_receipt(n3, (SELECT idempotency_key || '/never-uploaded.jpg' FROM public.orders WHERE order_number = n3))->>'code') = 'not_allowed', 'a receipt that is not in storage is refused');
+  PERFORM t.ok((public.attach_receipt(n3, (SELECT idempotency_key || '/new.jpg' FROM public.orders WHERE order_number = n3))->>'ok')::boolean, 'the server attaches a new receipt after rejection');
   PERFORM t.reset();
-  PERFORM t.ok((SELECT payment_status = 'awaiting_confirmation' AND receipt_reupload_until IS NULL AND receipt_path = 'LBS/new.jpg'
+  PERFORM t.ok((SELECT payment_status = 'awaiting_confirmation' AND receipt_reupload_until IS NULL AND receipt_path = idempotency_key || '/new.jpg'
                   FROM public.orders WHERE order_number = n3), 'attaching resets the payment to awaiting_confirmation and clears the deadline');
   PERFORM t.as_user(ed);
   PERFORM public.decide_payment(n3, 'rejected');
@@ -186,13 +190,14 @@ BEGIN
   PERFORM t.ok(public.expire_unpaid_orders() = 1, 'the service role expires the order after the deadline');
   PERFORM t.ok(public.expire_unpaid_orders() = 0, 'expiry runs once per order');
   PERFORM t.reset();
-  PERFORM t.ok((SELECT status = 'cancelled' AND payment_status = 'rejected' FROM public.orders WHERE order_number = n3), 'the expired order is cancelled');
+  PERFORM t.ok((SELECT status = 'cancelled' AND payment_status = 'refund_check' FROM public.orders WHERE order_number = n3), 'the expired order is cancelled and its rejected receipt is flagged for a refund check');
   PERFORM t.ok(t.variant_qty(bra, 'M', 'Black') = 8, 'the expired order restored its stock');
 
   -- No receipt, no decision.
   PERFORM t.as_anon();
-  r := public.place_order('norecpt-key-' || gen_random_uuid(), t.contact(), t.delivery(), t.line(bra, 'M', 'Black', 1), NULL, 10000, NULL);
+  r := t.place_full('norecpt-key-' || gen_random_uuid(), t.contact(), t.delivery(), t.line(bra, 'M', 'Black', 1), NULL, 10000, NULL);
   PERFORM t.reset();
+  UPDATE public.orders SET receipt_path = NULL WHERE order_number = r->>'order_number';
   PERFORM t.as_user(ed);
   PERFORM t.ok((public.decide_payment(r->>'order_number', 'confirmed')->>'code') = 'not_decidable', 'a payment cannot be confirmed without a receipt');
   PERFORM t.reset();

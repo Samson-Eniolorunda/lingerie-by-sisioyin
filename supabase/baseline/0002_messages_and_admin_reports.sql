@@ -293,6 +293,138 @@ END;
 $$;
 
 -- ============================================================================
+-- 2b) SHARED RATE LIMIT, CHECKOUT FAILURES and RECEIPTS WITH NO ORDER
+-- ============================================================================
+-- A fixed-window counter in the database, so every server instance shares one limit. Keys are
+-- hashed by the server before they arrive; no address or e-mail is stored in the clear. Service
+-- role only.
+CREATE TABLE IF NOT EXISTS public.rate_limits (
+  key          TEXT        NOT NULL,
+  window_start TIMESTAMPTZ NOT NULL,
+  hits         INTEGER     NOT NULL DEFAULT 0,
+  PRIMARY KEY (key, window_start)
+);
+ALTER TABLE public.rate_limits ENABLE ROW LEVEL SECURITY;
+
+-- Counts one attempt; false when the limit for the current window is already used.
+CREATE OR REPLACE FUNCTION public.rate_limit_hit(p_key TEXT, p_limit INTEGER, p_window_seconds INTEGER)
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_window TIMESTAMPTZ;
+  v_hits   INTEGER;
+BEGIN
+  IF NOT public.is_service() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_key IS NULL OR char_length(p_key) > 200 OR p_limit < 1 OR p_window_seconds < 1 THEN
+    RAISE EXCEPTION 'Invalid rate limit.' USING ERRCODE = '22023';
+  END IF;
+  v_window := to_timestamp(floor(extract(epoch FROM now()) / p_window_seconds) * p_window_seconds);
+  INSERT INTO public.rate_limits AS r (key, window_start, hits) VALUES (p_key, v_window, 1)
+  ON CONFLICT (key, window_start) DO UPDATE SET hits = r.hits + 1
+  RETURNING r.hits INTO v_hits;
+  -- Tidy up old windows now and then (about one call in fifty).
+  IF random() < 0.02 THEN
+    DELETE FROM public.rate_limits WHERE window_start < now() - interval '1 day';
+  END IF;
+  RETURN v_hits <= p_limit;
+END;
+$$;
+
+-- A customer paid and uploaded a receipt, but the order could not be placed (stock gone, promo
+-- used up, total changed). The receipt is kept so staff can contact the customer and refund.
+CREATE TABLE IF NOT EXISTS public.checkout_failures (
+  id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  idempotency_key TEXT        NOT NULL UNIQUE CHECK (char_length(idempotency_key) BETWEEN 16 AND 100),
+  receipt_path    TEXT        NOT NULL CHECK (char_length(receipt_path) <= 300),
+  customer_name   TEXT        NOT NULL DEFAULT '' CHECK (char_length(customer_name) <= 120),
+  customer_email  TEXT        NOT NULL DEFAULT '' CHECK (char_length(customer_email) <= 200),
+  customer_phone  TEXT        NOT NULL DEFAULT '' CHECK (char_length(customer_phone) <= 30),
+  quoted_total    NUMERIC     CHECK (quoted_total IS NULL OR quoted_total >= 0),
+  reason          TEXT        NOT NULL DEFAULT '' CHECK (char_length(reason) <= 200),
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  resolved_at     TIMESTAMPTZ,
+  resolved_by     UUID        REFERENCES auth.users(id) ON DELETE SET NULL,
+  resolution      TEXT        CHECK (resolution IS NULL OR char_length(resolution) <= 300)
+);
+CREATE INDEX IF NOT EXISTS idx_checkout_failures_open ON public.checkout_failures (created_at DESC) WHERE resolved_at IS NULL;
+ALTER TABLE public.checkout_failures ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "checkout_failures: staff read" ON public.checkout_failures;
+CREATE POLICY "checkout_failures: staff read"
+  ON public.checkout_failures FOR SELECT TO authenticated
+  USING (public.has_permission('orders.view'));
+
+-- Server only: records a failed checkout that has a receipt.
+CREATE OR REPLACE FUNCTION public.record_checkout_failure(
+  p_key TEXT, p_receipt_path TEXT, p_name TEXT, p_email TEXT, p_phone TEXT, p_total NUMERIC, p_reason TEXT)
+RETURNS VOID
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_service() THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  IF p_key IS NULL OR p_receipt_path IS NULL OR p_receipt_path NOT LIKE p_key || '/%'
+     OR EXISTS (SELECT 1 FROM public.orders WHERE receipt_path = p_receipt_path) THEN
+    RETURN;
+  END IF;
+  INSERT INTO public.checkout_failures (idempotency_key, receipt_path, customer_name, customer_email,
+                                        customer_phone, quoted_total, reason)
+  VALUES (p_key, p_receipt_path, left(COALESCE(p_name, ''), 120), left(lower(COALESCE(p_email, '')), 200),
+          left(COALESCE(p_phone, ''), 30), p_total, left(COALESCE(p_reason, ''), 200))
+  ON CONFLICT (idempotency_key) DO NOTHING;
+END;
+$$;
+
+-- Staff close a failed checkout once they have contacted the customer or refunded them.
+CREATE OR REPLACE FUNCTION public.resolve_checkout_failure(p_id UUID, p_resolution TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.update')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  UPDATE public.checkout_failures
+     SET resolved_at = now(), resolved_by = auth.uid(), resolution = left(NULLIF(trim(COALESCE(p_resolution, '')), ''), 300)
+   WHERE id = p_id AND resolved_at IS NULL;
+  RETURN FOUND;
+END;
+$$;
+
+-- Receipt files in the private bucket that no order uses. Those with a checkout failure belong
+-- to a customer who paid and must be contacted; the rest are abandoned uploads, safe to delete
+-- once they are older than a day (an upload that is still being used by a checkout in progress
+-- is younger than that).
+CREATE OR REPLACE FUNCTION public.admin_orphan_receipts()
+RETURNS TABLE (path TEXT, uploaded_at TIMESTAMPTZ, failure_id UUID, customer_name TEXT, customer_email TEXT,
+               customer_phone TEXT, quoted_total NUMERIC, reason TEXT, resolved BOOLEAN)
+LANGUAGE plpgsql STABLE SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT (public.is_service() OR public.has_permission('orders.view')) THEN
+    RAISE EXCEPTION 'Not allowed.' USING ERRCODE = '42501';
+  END IF;
+  RETURN QUERY
+    SELECT o.name::TEXT, o.created_at, f.id, f.customer_name, f.customer_email, f.customer_phone,
+           f.quoted_total, f.reason, (f.resolved_at IS NOT NULL)
+      FROM storage.objects o
+      LEFT JOIN public.checkout_failures f ON f.receipt_path = o.name
+     WHERE o.bucket_id = 'payment-receipts'
+       AND NOT EXISTS (SELECT 1 FROM public.orders x WHERE x.receipt_path = o.name)
+     ORDER BY (f.id IS NOT NULL AND f.resolved_at IS NULL) DESC, o.created_at DESC
+     LIMIT 500;
+END;
+$$;
+
+-- ============================================================================
 -- 3) GRANTS
 -- ============================================================================
 GRANT SELECT, DELETE ON public.contact_messages TO authenticated;
@@ -315,6 +447,14 @@ GRANT EXECUTE ON FUNCTION public.admin_customer_stats(TIMESTAMPTZ) TO authentica
 GRANT EXECUTE ON FUNCTION public.admin_order_counts() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_summary() TO authenticated;
 GRANT EXECUTE ON FUNCTION public.admin_analytics(INTEGER) TO authenticated;
+REVOKE ALL ON FUNCTION public.rate_limit_hit(TEXT, INTEGER, INTEGER) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.record_checkout_failure(TEXT, TEXT, TEXT, TEXT, TEXT, NUMERIC, TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.resolve_checkout_failure(UUID, TEXT) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.admin_orphan_receipts() FROM PUBLIC, anon, authenticated;
+GRANT SELECT ON public.checkout_failures TO authenticated;
+GRANT ALL ON public.rate_limits, public.checkout_failures TO service_role;
+GRANT EXECUTE ON FUNCTION public.resolve_checkout_failure(UUID, TEXT) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.admin_orphan_receipts() TO authenticated;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO service_role;
 
 COMMIT;

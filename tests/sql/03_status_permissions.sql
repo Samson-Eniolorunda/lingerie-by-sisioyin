@@ -64,7 +64,7 @@ BEGIN
   PERFORM t.as_user(banned);
   PERFORM t.ok(t.try('SELECT 1 FROM public.profiles') = 'rows: 0', 'a banned customer reads nothing of their profile');
   PERFORM t.ok(t.try(format('UPDATE public.profiles SET phone = %L WHERE id = %L', '0801', banned)) = 'rows: 0', 'a banned customer cannot update their profile');
-  res := public.place_order('banned-key-' || gen_random_uuid(), t.contact(), t.delivery(), t.line(prod, 'M', '', 1), NULL, 10000, NULL);
+  res := t.place_full('banned-key-' || gen_random_uuid(), t.contact(), t.delivery(), t.line(prod, 'M', '', 1), NULL, 10000, NULL);
   PERFORM t.ok((res->>'ok')::boolean = false AND res->>'code' = 'forbidden', 'a banned customer cannot place an order');
   PERFORM t.ok((public.claim_guest_orders()) = 0, 'a banned customer cannot claim orders');
   PERFORM t.ok(t.try('SELECT public.request_account_deletion(false)') = 'error: 42501', 'a banned customer cannot call account functions');

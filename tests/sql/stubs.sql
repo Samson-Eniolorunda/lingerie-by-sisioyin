@@ -28,7 +28,7 @@ CREATE TABLE storage.buckets (
   id text PRIMARY KEY, name text, public boolean DEFAULT false,
   file_size_limit bigint, allowed_mime_types text[]
 );
-CREATE TABLE storage.objects (id uuid DEFAULT gen_random_uuid(), bucket_id text, name text);
+CREATE TABLE storage.objects (id uuid DEFAULT gen_random_uuid(), bucket_id text, name text, created_at timestamptz DEFAULT now());
 ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
 GRANT SELECT, INSERT, UPDATE, DELETE ON storage.objects TO anon, authenticated, service_role;
 GRANT ALL ON auth.users TO service_role;
