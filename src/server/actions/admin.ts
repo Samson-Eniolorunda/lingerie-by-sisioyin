@@ -151,7 +151,12 @@ export async function paymentDecisionAction(
   // The optional reason goes to the customer in the rejection e-mail; short, plain text.
   const why = typeof reason === "string" ? reason.trim().slice(0, 300) : "";
   if (!parsed.success) return BAD_REQUEST;
-  const result = await data.admin.setPaymentDecision(orderNumber, parsed.data, actor);
+  const result = await data.admin.setPaymentDecision(
+    orderNumber,
+    parsed.data,
+    actor,
+    why || undefined,
+  );
   if (!result.ok) return result;
   after(async () => {
     const order = await data.admin.order(orderNumber);

@@ -357,7 +357,7 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
-  async setPaymentDecision(orderNumber, decision, actor) {
+  async setPaymentDecision(orderNumber, decision, actor, reason) {
     const db = getDb();
     const order = db.orders.get(orderNumber);
     if (!order) return { ok: false, message: "That order no longer exists." };
@@ -391,7 +391,7 @@ export const mockAdmin: AdminRepository = {
       db,
       actor,
       decision === "confirmed" ? "payment confirmed" : "receipt rejected",
-      orderNumber,
+      reason && decision === "rejected" ? `${orderNumber}: ${reason}` : orderNumber,
     );
     return { ok: true };
   },

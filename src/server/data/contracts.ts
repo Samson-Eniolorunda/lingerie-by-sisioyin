@@ -278,6 +278,8 @@ export interface AdminRepository {
     orderNumber: string,
     decision: "confirmed" | "rejected",
     actor: SessionUser,
+    /** Optional rejection reason, recorded in the activity log detail. */
+    reason?: string,
   ): Promise<Result>;
   /** A cancelled order with an unaccepted receipt: staff checked the bank and enter what arrived (0 = nothing). */
   /** `confirmOver` must be true to record more than the order total (an overpayment). */

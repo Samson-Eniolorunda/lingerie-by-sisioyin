@@ -140,6 +140,14 @@ describe("order workflow (MO-04, MO-08)", () => {
       "receipt rejected",
     );
   });
+  it("records the rejection reason in the activity log", async () => {
+    const owner = actor(DEMO.owner.email);
+    const pending = [...getDb().orders.values()].find((o) => o.status === "pending");
+    if (!pending) throw new Error("seed");
+    await mockAdmin.setPaymentDecision(pending.orderNumber, "rejected", owner, "Amount too low");
+    const top = (await mockAdmin.activity("", { limit: 5, offset: 0 })).items[0];
+    expect(top?.subject).toBe(`${pending.orderNumber}: Amount too low`);
+  });
 });
 
 describe("customers, promos, staff", () => {

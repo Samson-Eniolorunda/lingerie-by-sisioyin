@@ -353,7 +353,7 @@ export const supabaseAdmin: AdminRepository = {
     return okResult();
   },
 
-  async setPaymentDecision(orderNumber, decision, actor) {
+  async setPaymentDecision(orderNumber, decision, actor, reason) {
     const { data, error } = await (
       await staff()
     ).rpc("decide_payment", {
@@ -370,7 +370,7 @@ export const supabaseAdmin: AdminRepository = {
       actor,
       "order",
       decision === "confirmed" ? "payment confirmed" : "receipt rejected",
-      orderNumber,
+      reason && decision === "rejected" ? `${orderNumber}: ${reason}` : orderNumber,
       orderNumber,
     );
     return okResult();
