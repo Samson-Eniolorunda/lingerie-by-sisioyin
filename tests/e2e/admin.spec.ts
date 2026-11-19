@@ -57,10 +57,10 @@ test.describe("staff access", () => {
     await expect(page.locator("p[role=alert]")).toBeVisible();
     await expect(page).toHaveURL(/\/admin\/sign-in/);
   });
-  test("M-10 an editor sees four screens and is refused the rest", async ({ page }) => {
+  test("M-10 an editor sees six screens and is refused the rest", async ({ page }) => {
     await staff(page, DEMO_EDITOR);
     const nav = page.getByRole("navigation", { name: "Admin" }).last();
-    await expect(nav.getByRole("link")).toHaveCount(4);
+    await expect(nav.getByRole("link")).toHaveCount(6);
     await page.goto("/admin/team");
     await expect(page).toHaveURL(/\/admin\/denied/);
     await expect(page.getByRole("heading", { name: "Access denied" })).toBeVisible();
@@ -107,7 +107,8 @@ test.describe("orders (MO)", () => {
     const confirm = await dialog.getByRole("button", { name: "Cancel the order" }).boundingBox();
     expect(keep && confirm && keep.x < confirm.x).toBe(true);
     await dialog.getByRole("button", { name: "Cancel the order" }).click();
-    await expect(page.getByText("This order is cancelled.")).toBeVisible();
+    // The receipt was never accepted, so the order opens a refund check instead of ending quietly.
+    await expect(page.getByText(/money may have reached the account/)).toBeVisible();
   });
   test("MO-02 the status filter and search narrow the list", async ({ page }) => {
     await staff(page);
