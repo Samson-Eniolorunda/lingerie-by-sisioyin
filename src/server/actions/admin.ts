@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { z } from "zod";
 import { redirect } from "next/navigation";
 import { fieldErrors } from "@/schemas/auth";
@@ -21,6 +22,12 @@ import {
 } from "@/schemas/admin";
 import { staffFor } from "@/server/auth/session";
 import { data } from "@/server/data";
+import {
+  sendContactReply,
+  sendOrderShipped,
+  sendPaymentConfirmed,
+  sendPaymentRejected,
+} from "@/server/email";
 import type { Permission } from "@/lib/permissions";
 import type { OrderStatus, SessionUser } from "@/types/account";
 
@@ -123,6 +130,11 @@ export async function setOrderStatusAction(
   if (!parsed.success) return BAD_REQUEST;
   const result = await data.admin.setOrderStatus(orderNumber, parsed.data as OrderStatus, actor);
   if (!result.ok) return result;
+  if (parsed.data === "shipped")
+    after(async () => {
+      const order = await data.admin.order(orderNumber);
+      if (order) await sendOrderShipped(order);
+    });
   refresh();
   return { ok: true, message: "The order has been updated." };
 }
@@ -137,6 +149,12 @@ export async function paymentDecisionAction(
   if (!parsed.success) return BAD_REQUEST;
   const result = await data.admin.setPaymentDecision(orderNumber, parsed.data, actor);
   if (!result.ok) return result;
+  after(async () => {
+    const order = await data.admin.order(orderNumber);
+    if (!order) return;
+    if (parsed.data === "confirmed") await sendPaymentConfirmed(order);
+    else await sendPaymentRejected(order);
+  });
   refresh();
   return {
     ok: true,
@@ -284,10 +302,21 @@ export async function replyAction(id: string, input: unknown): Promise<AdminStat
   if (!actor) return DENIED;
   const parsed = replySchema.safeParse(input);
   if (!parsed.success) return invalid(parsed.error);
+  const original = await data.admin.message(id);
   const result = await data.admin.replyToMessage(id, parsed.data.body, actor);
   if (!result.ok) return result;
+  if (original)
+    after(() =>
+      sendContactReply({
+        to: original.email,
+        name: original.name,
+        subject: original.subject,
+        original: original.body,
+        reply: parsed.data.body,
+      }),
+    );
   refresh();
-  return { ok: true, message: "Reply saved." };
+  return { ok: true, message: "Reply saved and e-mailed to the customer." };
 }
 
 export async function deleteMessageAction(id: string): Promise<AdminState> {

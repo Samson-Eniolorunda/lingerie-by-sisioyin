@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { after } from "next/server";
 import { z } from "zod";
 import { isReceiptType, receiptProblem } from "@/lib/receipt-types";
 import {
@@ -12,6 +13,7 @@ import {
 import { clientIp } from "@/server/auth/request";
 import { currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { sendOrderPlaced } from "@/server/email";
 import { PAYMENT_DETAILS_UPDATING } from "@/lib/bank-details";
 import { allowRequest, allowShared } from "@/server/rate-limit";
 import { newReceiptPath, receipts, type ReceiptUpload } from "@/server/storage/receipts";
@@ -139,6 +141,9 @@ export async function placeOrder(input: unknown): Promise<PlaceOrderState> {
     path: "/",
     maxAge: 60 * 60 * 24,
   });
+  // The confirmation goes out after the response, so a slow mail service never holds the customer up.
+  const placed = result.order;
+  after(() => sendOrderPlaced(placed));
   return { ok: true, orderNumber: result.order.orderNumber };
 }
 
