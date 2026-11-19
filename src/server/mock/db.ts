@@ -13,7 +13,7 @@ import type {
   StoreSettings,
 } from "@/types/account";
 import type { AdminProduct } from "@/server/data/contracts";
-import type { StoredOrder } from "./orders";
+import type { StoredOrder } from "@/types/orders";
 
 /**
  * The development store. Everything here is invented: names use the reserved `example.test` domain
@@ -27,6 +27,8 @@ export interface UserRecord {
   role: StaffRole | null;
   addresses: Address[];
   returnPrivilege: boolean;
+  /** Only a verified address may claim the guest orders placed with it. */
+  emailVerified: boolean;
 }
 
 export interface SessionRecord {
@@ -128,6 +130,7 @@ function makeUser(
     role: input.role ?? null,
     addresses: [],
     returnPrivilege: true,
+    emailVerified: true,
   };
   db.users.set(id, user);
   return user;
@@ -163,12 +166,14 @@ function seedOrders(db: Db): void {
     const number = formatOrderNumber(created, 9000 + index);
     db.orders.set(number, {
       orderNumber: number,
+      userId: customer.profile.id,
       email: customer.profile.email,
       phone: "+2348012345678",
       customerName: `${customer.profile.firstName} ${customer.profile.lastName}`,
       address: `${10 + index} Sample Street`,
       city: state === "Abuja" ? "Garki" : "Ikeja",
       state,
+      landmark: "",
       lines,
       ...totals,
       promoCode: null,
@@ -179,7 +184,10 @@ function seedOrders(db: Db): void {
           : status === "cancelled"
             ? "rejected"
             : "confirmed",
-      receiptName: status === "cancelled" ? null : `receipt-${index}.jpg`,
+      receiptPath:
+        status === "cancelled" ? null : `seed-order-${index}-key00000/receipt-${index}.jpg`,
+      receiptReuploadUntil: null,
+      idempotencyKey: `seed-order-${index}-key00000`,
       notes: "",
       createdAt: created.toISOString(),
       updatedAt: created.toISOString(),

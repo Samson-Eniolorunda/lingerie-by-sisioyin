@@ -1,7 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { buildCsp, SECURITY_HEADERS } from "@/lib/csp";
+import { refreshSupabaseSession } from "@/lib/supabase-proxy";
 
-export function proxy(request: NextRequest): NextResponse {
+export async function proxy(request: NextRequest): Promise<NextResponse> {
   const nonce = btoa(crypto.randomUUID());
   const csp = buildCsp({
     nonce,
@@ -15,6 +16,10 @@ export function proxy(request: NextRequest): NextResponse {
   requestHeaders.set("Content-Security-Policy", csp);
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
+  await refreshSupabaseSession(request, response, {
+    url: process.env.NEXT_PUBLIC_SUPABASE_URL || undefined,
+    anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || undefined,
+  });
   response.headers.set("Content-Security-Policy", csp);
   for (const [name, value] of Object.entries(SECURITY_HEADERS)) response.headers.set(name, value);
   return response;

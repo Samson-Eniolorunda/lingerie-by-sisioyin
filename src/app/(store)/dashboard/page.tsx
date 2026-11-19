@@ -15,7 +15,11 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const user = await requireCustomer("/dashboard");
-  const orders = await data.account.orders(user.id);
+  const { items: orders, total: orderCount } = await data.account.orders(
+    user.id,
+    {},
+    { limit: 100, offset: 0 },
+  );
   const spent = orders.filter((o) => o.status !== "cancelled").reduce((n, o) => n + o.total, 0);
   return (
     <div>
@@ -26,7 +30,7 @@ export default async function DashboardPage() {
       <dl className="mt-6 grid grid-cols-3 divide-x divide-line border border-line bg-surface">
         <div className="p-3 sm:p-4">
           <dt className="text-sm text-muted">Orders</dt>
-          <dd className="tabular mt-1 text-xl font-semibold sm:text-2xl">{orders.length}</dd>
+          <dd className="tabular mt-1 text-xl font-semibold sm:text-2xl">{orderCount}</dd>
         </div>
         <div className="p-3 sm:p-4">
           <dt className="text-sm text-muted">Wishlist</dt>

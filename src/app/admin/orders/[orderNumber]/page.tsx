@@ -21,6 +21,8 @@ const PAYMENT_LABEL = {
   awaiting_confirmation: "Waiting for a check",
   confirmed: "Payment confirmed",
   rejected: "Receipt rejected",
+  refund_owed: "Refund owed to the customer",
+  refunded: "Refunded",
 } as const;
 
 export default async function OrderDetailPage({
@@ -32,9 +34,7 @@ export default async function OrderDetailPage({
   const user = await requireStaff("orders.view", `/admin/orders/${orderNumber}`);
   const order = await data.admin.order(orderNumber);
   if (!order) notFound();
-  const receipt = order.receiptName
-    ? await receipts.link(`${order.orderNumber}/${order.receiptName}`)
-    : null;
+  const receipt = order.receiptPath ? await receipts.link(order.receiptPath) : null;
 
   return (
     <>
@@ -60,7 +60,12 @@ export default async function OrderDetailPage({
             />
           </Panel>
           <Panel title="Payment receipt">
-            <p className="mb-3 text-base text-muted">{PAYMENT_LABEL[order.paymentStatus]}</p>
+            <p className="mb-3 text-base text-muted">
+              {PAYMENT_LABEL[order.paymentStatus]}
+              {order.paymentStatus === "rejected" && order.receiptReuploadUntil
+                ? `. The customer may send another until ${formatDateTime(order.receiptReuploadUntil)}, then the order is cancelled.`
+                : ""}
+            </p>
             {receipt ? (
               <figure>
                 <div className="relative mx-auto aspect-[3/4] w-full max-w-[18rem] overflow-hidden border border-line bg-tint">
@@ -74,7 +79,7 @@ export default async function OrderDetailPage({
                   />
                 </div>
                 <figcaption className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-                  {order.receiptName}
+                  {order.receiptPath}
                   {receipt.mocked ? <Badge tone="warning">Placeholder</Badge> : null}
                 </figcaption>
                 <p className="mt-1 text-sm text-subtle">
@@ -126,7 +131,12 @@ export default async function OrderDetailPage({
           </Panel>
           <Panel title="Progress">
             {order.status === "cancelled" ? (
-              <p className="text-base text-muted">This order was cancelled.</p>
+              <p className="text-base text-muted">
+                This order was cancelled.
+                {order.paymentStatus === "refund_owed"
+                  ? " The customer had paid, so a refund is owed."
+                  : ""}
+              </p>
             ) : (
               <OrderTimeline reached={timelineStep(order.status)} placedAt={order.createdAt} />
             )}

@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { listProducts } from "@/server/queries/catalogue";
+import type { Product } from "@/types/domain";
 
 const termSchema = z.string().trim().min(2).max(60);
 
@@ -22,7 +23,7 @@ export interface SearchResult {
   readonly total: number;
 }
 
-function toHit(p: Awaited<ReturnType<typeof listProducts>>[number]): SearchHit {
+function toHit(p: Product): SearchHit {
   return {
     id: p.id,
     slug: p.slug,
@@ -38,9 +39,9 @@ function toHit(p: Awaited<ReturnType<typeof listProducts>>[number]): SearchHit {
 export async function searchProducts(input: string): Promise<SearchResult> {
   const parsed = termSchema.safeParse(input);
   if (!parsed.success) return { hits: [], fallback: [], total: 0 };
-  const matches = await listProducts({ search: parsed.data });
-  if (matches.length > 0)
-    return { hits: matches.slice(0, 8).map(toHit), fallback: [], total: matches.length };
-  const latest = await listProducts({ sort: "newest" });
-  return { hits: [], fallback: latest.slice(0, 6).map(toHit), total: 0 };
+  const matches = await listProducts({ search: parsed.data }, { limit: 8, offset: 0 });
+  if (matches.total > 0)
+    return { hits: matches.items.map(toHit), fallback: [], total: matches.total };
+  const latest = await listProducts({ sort: "newest" }, { limit: 6, offset: 0 });
+  return { hits: [], fallback: latest.items.map(toHit), total: 0 };
 }

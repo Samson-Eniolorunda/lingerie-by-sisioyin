@@ -2,6 +2,7 @@ import { toCsv } from "@/lib/csv";
 import type { Permission } from "@/lib/permissions";
 import { staffFor } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { collectAll } from "@/server/paging";
 
 const PERMISSION: Record<string, Permission> = {
   products: "products.manage",
@@ -21,7 +22,7 @@ export async function GET(
 
   let body = "";
   if (kind === "products") {
-    const rows = (await data.admin.products()).filter((p) => p.deletedAt === null);
+    const rows = await collectAll((page) => data.admin.products({}, page));
     body = toCsv(
       [
         "Name",
@@ -63,7 +64,7 @@ export async function GET(
         "Items",
         "Placed",
       ],
-      (await data.admin.orders()).map((o) => [
+      (await collectAll((page) => data.admin.orders({}, page))).map((o) => [
         o.orderNumber,
         o.customerName,
         o.email,
@@ -80,7 +81,7 @@ export async function GET(
   } else if (kind === "customers") {
     body = toCsv(
       ["Name", "Email", "Phone", "Orders", "Spent, delivered (NGN)", "Joined", "Status"],
-      (await data.admin.customers()).map((c) => [
+      (await collectAll((page) => data.admin.customers("", page))).map((c) => [
         c.name,
         c.email,
         c.phone,
@@ -93,7 +94,13 @@ export async function GET(
   } else {
     body = toCsv(
       ["When", "Who", "Role", "Action", "Subject"],
-      (await data.admin.activity()).map((a) => [a.at, a.actor, a.role, a.action, a.subject]),
+      (await collectAll((page) => data.admin.activity("", page))).map((a) => [
+        a.at,
+        a.actor,
+        a.role,
+        a.action,
+        a.subject,
+      ]),
     );
   }
   return new Response(body, {

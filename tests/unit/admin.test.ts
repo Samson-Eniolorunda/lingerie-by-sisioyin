@@ -1,7 +1,16 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { visibleNav } from "@/features/admin/nav";
 import { can } from "@/lib/permissions";
-import { productDraftSchema, promoSchema, settingsSchema } from "@/schemas/admin";
+import {
+  customerStatusSchema,
+  messageMarkSchema,
+  orderStatusSchema,
+  paymentDecisionSchema,
+  productDraftSchema,
+  promoSchema,
+  settingsSchema,
+  staffRoleSchema,
+} from "@/schemas/admin";
 import { mockAdmin } from "@/server/mock/admin";
 import { DEMO, getDb, resetDb } from "@/server/mock/db";
 import type { SessionUser } from "@/types/account";
@@ -17,6 +26,8 @@ function actor(email: string): SessionUser {
     role: user.role,
   };
 }
+
+const ALL = { limit: 1000, offset: 0 };
 
 const draft = {
   name: "Test bra",
@@ -116,22 +127,28 @@ describe("order workflow (MO-04, MO-08)", () => {
     await mockAdmin.setPaymentDecision(pending.orderNumber, "rejected", owner);
     const after = await mockAdmin.order(pending.orderNumber);
     expect(after).toMatchObject({ status: "pending", paymentStatus: "rejected" });
-    expect((await mockAdmin.activity())[0]?.action).toBe("receipt rejected");
+    expect((await mockAdmin.activity("", { limit: 5, offset: 0 })).items[0]?.action).toBe(
+      "receipt rejected",
+    );
   });
 });
 
 describe("customers, promos, staff", () => {
   it("MC-03 suspending a customer signs them out; MC-12 deletion removes the profile and keeps orders", async () => {
     const owner = actor(DEMO.owner.email);
-    const customer = (await mockAdmin.customers()).find((c) => c.orderCount > 0);
+    const customer = (await mockAdmin.customers("", ALL)).items.find((c) => c.orderCount > 0);
     if (!customer) throw new Error("seed");
     expect((await mockAdmin.setCustomerStatus(customer.id, "suspended", owner)).ok).toBe(true);
-    const orders = (await mockAdmin.orders()).filter((o) => o.email === customer.email).length;
+    const orders = (await mockAdmin.orders({}, ALL)).items.filter(
+      (o) => o.email === customer.email,
+    ).length;
     expect((await mockAdmin.deleteCustomer(customer.id, owner)).ok).toBe(true);
-    expect((await mockAdmin.customers()).some((c) => c.id === customer.id)).toBe(false);
-    expect((await mockAdmin.orders()).filter((o) => o.email === customer.email).length).toBe(
-      orders,
+    expect((await mockAdmin.customers("", ALL)).items.some((c) => c.id === customer.id)).toBe(
+      false,
     );
+    expect(
+      (await mockAdmin.orders({}, ALL)).items.filter((o) => o.email === customer.email).length,
+    ).toBe(orders);
   });
   it("promo codes are upper-cased, unique and validated", async () => {
     expect(
@@ -194,5 +211,61 @@ describe("customers, promos, staff", () => {
     expect(settingsSchema.safeParse(base).success).toBe(true);
     expect(settingsSchema.safeParse({ ...base, accountNumber: "123" }).success).toBe(false);
     expect(settingsSchema.safeParse({ ...base, whatsappNumber: "+234 90" }).success).toBe(false);
+  });
+});
+
+describe("lists, enums and the activity log", () => {
+  it("pages every list and reports the total", async () => {
+    const page = await mockAdmin.orders({}, { limit: 5, offset: 0 });
+    expect(page.items).toHaveLength(5);
+    expect(page.total).toBeGreaterThan(5);
+    const counts = await mockAdmin.orderCounts();
+    expect(Object.values(counts).reduce((n, c) => n + c, 0)).toBe(page.total);
+    expect((await mockAdmin.messages({ status: "unread" }, ALL)).items.length).toBe(
+      (await mockAdmin.messageCounts()).unread,
+    );
+  });
+
+  it("customer totals come from one pass over the orders and match the order list", async () => {
+    const customers = (await mockAdmin.customers("", ALL)).items;
+    const orders = (await mockAdmin.orders({}, ALL)).items;
+    const demo = customers.find((c) => c.email === DEMO.customer.email);
+    expect(demo?.orderCount).toBe(orders.filter((o) => o.userId === demo?.id).length);
+    expect((await mockAdmin.customerStats(new Date(0))).total).toBe(customers.length);
+  });
+
+  it("the activity log keeps more than 200 entries and logs marking a message", async () => {
+    const owner = actor(DEMO.owner.email);
+    const id = getDb().messages[0]?.id ?? "";
+    for (let i = 0; i < 230; i += 1)
+      await mockAdmin.markMessage(id, i % 2 ? "read" : "unread", owner);
+    const log = await mockAdmin.activity("", { limit: 10, offset: 0 });
+    expect(log.total).toBe(230);
+    expect(log.items[0]?.action).toMatch(/message marked/);
+  });
+
+  it("role, customer status, payment decision and order status are checked as enums", () => {
+    expect(staffRoleSchema.safeParse("owner").success).toBe(false);
+    expect(staffRoleSchema.safeParse("editor").success).toBe(true);
+    expect(customerStatusSchema.safeParse("deleted").success).toBe(false);
+    expect(paymentDecisionSchema.safeParse("refunded").success).toBe(false);
+    expect(orderStatusSchema.safeParse("teleported").success).toBe(false);
+    expect(orderStatusSchema.safeParse("shipped").success).toBe(true);
+    expect(messageMarkSchema.safeParse("replied").success).toBe(false);
+  });
+
+  it("an editor cannot manage promo codes", () => {
+    expect(can("editor", "promos.manage")).toBe(false);
+    expect(can("super_admin", "promos.manage")).toBe(true);
+  });
+
+  it("a promo expiry date ends at 23:59 Lagos time", () => {
+    const parsed = promoSchema.safeParse({
+      code: "XMAS",
+      percent: 10,
+      expiresAt: "2026-12-25",
+      usageLimit: null,
+    });
+    expect(parsed.success && parsed.data.expiresAt).toBe("2026-12-25T22:59:59.000Z");
   });
 });

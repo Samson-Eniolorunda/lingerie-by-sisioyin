@@ -6,7 +6,11 @@ import { Form } from "@/components/ui/Form";
 import { resetAction } from "@/server/actions/auth";
 import { PasswordField, PasswordRules } from "./PasswordField";
 
-export function ResetForm({ token }: { readonly token: string }) {
+/**
+ * `hasSession` is false when the emailed link was not exchanged for a session. It is read again after
+ * the password is changed (the session ends then), so the success message is kept in local state.
+ */
+export function ResetForm({ hasSession }: { readonly hasSession: boolean }) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,6 +29,19 @@ export function ResetForm({ token }: { readonly token: string }) {
     );
   }
 
+  if (!hasSession) {
+    return (
+      <div className="flex flex-col gap-4">
+        <p className="text-base text-muted">
+          Reset links work once and expire after an hour. Request a new one and try again.
+        </p>
+        <ButtonLink href="/forgot-password" block>
+          Request a new link
+        </ButtonLink>
+      </div>
+    );
+  }
+
   return (
     <Form
       className="flex flex-col gap-4"
@@ -33,7 +50,7 @@ export function ResetForm({ token }: { readonly token: string }) {
         event.preventDefault();
         setMessage(undefined);
         start(async () => {
-          const result = await resetAction({ token, password, confirmPassword: confirm });
+          const result = await resetAction({ password, confirmPassword: confirm });
           if (result.ok) setDone(result.message ?? "Your password has been changed.");
           else {
             setErrors(result.fieldErrors);

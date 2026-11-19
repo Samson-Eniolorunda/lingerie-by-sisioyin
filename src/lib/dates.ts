@@ -7,6 +7,24 @@ const dateTime = new Intl.DateTimeFormat("en-GB", {
   timeZone: TZ,
 });
 
+const parts = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  timeZone: TZ,
+});
+
+/** The calendar date in Lagos, as two-digit day and month and a four-digit year. */
+export function lagosParts(date: Date): { day: string; month: string; year: string } {
+  const get = (type: string) => parts.formatToParts(date).find((p) => p.type === type)?.value ?? "";
+  return { day: get("day"), month: get("month"), year: get("year") };
+}
+
+/** The last moment of a `YYYY-MM-DD` day in Lagos (UTC+1, no daylight saving): 23:59:59. */
+export function endOfLagosDay(day: string): string {
+  return new Date(`${day}T23:59:59.000+01:00`).toISOString();
+}
+
 export const formatDate = (iso: string): string => dateOnly.format(new Date(iso));
 export const formatDateTime = (iso: string): string => dateTime.format(new Date(iso));
 

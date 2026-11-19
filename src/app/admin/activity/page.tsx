@@ -7,28 +7,25 @@ import { relativeTime } from "@/lib/dates";
 import { ROLE_LABELS } from "@/lib/permissions";
 import { requireStaff } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { pageFor, parsePageNumber } from "@/server/paging";
+import { Pager } from "@/features/admin/Filters";
 
 export const metadata: Metadata = { title: "Activity log" };
 export const dynamic = "force-dynamic";
+const PER_PAGE = 50;
 
 export default async function ActivityPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   await requireStaff("roles.manage", "/admin/activity");
-  const { q = "" } = await searchParams;
-  const needle = q.trim().toLowerCase();
-  const rows = (await data.admin.activity())
-    .filter(
-      (a) =>
-        needle === "" ||
-        [a.actor, a.action, a.subject].some((f) => f.toLowerCase().includes(needle)),
-    )
-    .slice(0, 100);
+  const { q = "", page } = await searchParams;
+  const pageNumber = parsePageNumber(page);
+  const { items: rows, total } = await data.admin.activity(q, pageFor(pageNumber, PER_PAGE));
   return (
     <>
-      <PageHeader title="Activity log" lead="The latest 100 things staff did." />
+      <PageHeader title="Activity log" lead={`${total} things staff have done, newest first.`} />
       <FilterBar
         action="/admin/activity"
         search={{
@@ -54,6 +51,13 @@ export default async function ActivityPage({
           },
           { key: "when", label: "When", cell: (a) => relativeTime(a.at) },
         ]}
+      />
+      <Pager
+        base="/admin/activity"
+        params={{ q }}
+        page={pageNumber}
+        perPage={PER_PAGE}
+        total={total}
       />
     </>
   );

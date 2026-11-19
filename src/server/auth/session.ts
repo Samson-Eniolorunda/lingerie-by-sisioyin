@@ -1,40 +1,16 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { can, type Permission } from "@/lib/permissions";
 import { data } from "@/server/data";
 import type { SessionUser } from "@/types/account";
 
-export const CUSTOMER_COOKIE = "lbs_session";
-export const STAFF_COOKIE = "lbs_staff_session";
-
 type Audience = "customer" | "staff";
 
-const cookieName = (audience: Audience) => (audience === "staff" ? STAFF_COOKIE : CUSTOMER_COOKIE);
-
-/** The storefront and the admin keep separate sessions, so one never signs the other in (A-14). */
-export async function setSessionCookie(audience: Audience, token: string): Promise<void> {
-  (await cookies()).set(cookieName(audience), token, {
-    httpOnly: true,
-    sameSite: audience === "staff" ? "strict" : "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: audience === "staff" ? "/admin" : "/",
-    maxAge: audience === "staff" ? 60 * 60 * 8 : 60 * 60 * 24 * 14,
-  });
-}
-
 export async function clearSession(audience: Audience): Promise<void> {
-  const jar = await cookies();
-  const token = jar.get(cookieName(audience))?.value;
-  await data.auth.signOut(token);
-  jar.set(cookieName(audience), "", {
-    path: audience === "staff" ? "/admin" : "/",
-    maxAge: 0,
-  });
+  await data.auth.signOut(audience);
 }
 
 export async function currentUser(audience: Audience = "customer"): Promise<SessionUser | null> {
-  const token = (await cookies()).get(cookieName(audience))?.value;
-  return data.auth.userForToken(token, audience);
+  return data.auth.currentUser(audience);
 }
 
 /** For account pages: sends a signed-out visitor to sign in and back again. */

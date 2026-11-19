@@ -6,15 +6,6 @@ import { ORDER_NUMBER_PATTERN } from "@/lib/order-number";
 
 const stateIds = DELIVERY_STATES.map((s) => s.id) as [string, ...string[]];
 
-export const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
-export const RECEIPT_TYPES = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/heic",
-  "application/pdf",
-] as const;
-
 export const contactSchema = z.object({
   firstName: z.string().trim().min(1, "Enter your first name.").max(60),
   lastName: z.string().trim().min(1, "Enter your last name.").max(60),
@@ -51,12 +42,36 @@ export const orderLineSchema = z.object({
   qty: z.number().int().min(1).max(99),
 });
 
+function orderInputKey() {
+  return z
+    .string()
+    .regex(/^[A-Za-z0-9-]{16,64}$/, "Something went wrong with the form. Please try again.");
+}
+
 export const orderInputSchema = z.object({
   contact: contactSchema,
   delivery: deliverySchema,
   lines: z.array(orderLineSchema).min(1, "Your bag is empty."),
   promoCode: z.string().trim().max(40).optional(),
   confirmedTransfer: z.literal(true, { error: "Confirm that you have sent the payment." }),
+  /** The total the customer was shown and transferred; the server refuses the order if it differs. */
+  quotedTotal: z.number().int().min(0),
+  /** Generated once per checkout attempt, so a retry or a double tap places one order. */
+  idempotencyKey: orderInputKey(),
+  /** The storage path returned by the signed upload; the file itself never passes through an action. */
+  receiptPath: z.string().min(1, "Attach your payment receipt.").max(200),
+});
+
+export const quoteSchema = z.object({
+  lines: z.array(orderLineSchema).min(1, "Your bag is empty."),
+  promoCode: z.string().trim().max(40).optional(),
+  state: z.enum(stateIds, { error: "Choose the state we should deliver to." }),
+});
+
+export const receiptUploadSchema = z.object({
+  idempotencyKey: orderInputKey(),
+  type: z.string().max(60),
+  size: z.number().int().min(1),
 });
 
 export const trackSchema = z.object({
@@ -72,13 +87,4 @@ export type OrderInput = z.infer<typeof orderInputSchema>;
 export type ContactInput = z.input<typeof contactSchema>;
 export type DeliveryInput = z.input<typeof deliverySchema>;
 
-export function receiptProblem(file: {
-  readonly size: number;
-  readonly type: string;
-}): string | null {
-  if (file.size > MAX_RECEIPT_BYTES)
-    return "That file is over 5 MB. Choose a smaller photograph or PDF.";
-  if (!(RECEIPT_TYPES as readonly string[]).includes(file.type))
-    return "Attach a photograph (JPG, PNG, WebP) or a PDF.";
-  return null;
-}
+export { MAX_RECEIPT_BYTES, RECEIPT_TYPES, receiptProblem } from "@/lib/receipt-types";

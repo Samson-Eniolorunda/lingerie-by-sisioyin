@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { MAX_RECEIPT_BYTES, RECEIPT_TYPES } from "@/lib/receipt-types";
 import { describe, expect, it, vi } from "vitest";
 import {
   cloudinaryConfig,
@@ -7,7 +8,12 @@ import {
   uploadProductImage,
   validateImage,
 } from "@/server/media/cloudinary";
-import { receiptPath, validateReceipt, mockReceiptStore } from "@/server/storage/receipts";
+import {
+  mockReceiptStore,
+  newReceiptPath,
+  saveMockReceipt,
+  validateReceipt,
+} from "@/server/storage/receipts";
 
 const bytes = new Uint8Array([1, 2, 3]);
 
@@ -81,13 +87,27 @@ describe("Cloudinary module", () => {
 });
 
 describe("Receipt storage module", () => {
-  it("keeps receipts under the order number with a safe name", () => {
-    expect(receiptPath("LBS-1", "my receipt (1).jpg")).toBe("LBS-1/my-receipt-1-.jpg");
+  it("keeps receipts under the order's key with a generated name", () => {
+    const path = newReceiptPath("idem-key-0000000001", "image/jpeg");
+    expect(path).toMatch(/^idem-key-0000000001\/[0-9a-f-]{36}\.jpg$/);
   });
-  it("checks type and size", () => {
-    expect(validateReceipt({ type: "text/html", size: 5 })).toMatch(/photograph or a PDF/);
-    expect(validateReceipt({ type: "application/pdf", size: 6 * 1024 * 1024 })).toMatch(/5 MB/);
+  it("one shared list: HEIC is not stored, the limit is under Vercel's 4.5 MB cap", () => {
+    expect(RECEIPT_TYPES).not.toContain("image/heic");
+    expect(MAX_RECEIPT_BYTES).toBeLessThan(4.5 * 1024 * 1024);
+    expect(validateReceipt({ type: "image/heic", size: 100 })).toMatch(/share it as JPEG/);
+    expect(validateReceipt({ type: "text/html", size: 5 })).toMatch(/photograph/);
+    expect(validateReceipt({ type: "application/pdf", size: 5 * 1024 * 1024 })).toMatch(/4 MB/);
     expect(validateReceipt({ type: "application/pdf", size: 100 })).toBeNull();
+    expect(validateReceipt({ type: "image/png", size: 0 })).toMatch(/empty/);
+  });
+  it("hands out a signed upload address and only reports a receipt that really arrived", async () => {
+    const path = newReceiptPath("idem-key-0000000002", "application/pdf");
+    const upload = await mockReceiptStore.createUpload(path, "application/pdf");
+    expect(upload).toMatchObject({ method: "PUT", path });
+    expect(upload.url).toContain("/api/receipts/mock?path=");
+    expect(await mockReceiptStore.exists(path)).toBe(false);
+    saveMockReceipt(path, { type: "application/pdf", size: 10 });
+    expect(await mockReceiptStore.exists(path)).toBe(true);
   });
   it("only ever returns a short-lived link, marked as a placeholder in mock mode", async () => {
     const link = await mockReceiptStore.link("LBS-1/x.pdf");

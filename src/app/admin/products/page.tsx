@@ -7,6 +7,7 @@ import { can } from "@/lib/permissions";
 import { CATEGORIES } from "@/schemas/admin";
 import { requireStaff } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { pageFor, parsePageNumber } from "@/server/paging";
 import Link from "next/link";
 
 export const metadata: Metadata = { title: "Products" };
@@ -26,28 +27,16 @@ export default async function ProductsPage({
   const user = await requireStaff("products.manage", "/admin/products");
   const { q = "", category = "", stock = "", view, page } = await searchParams;
   const trash = view === "trash";
-  const all = await data.admin.products();
-  const needle = q.trim().toLowerCase();
-  const rows = all
-    .filter((p) => (trash ? p.deletedAt !== null : p.deletedAt === null))
-    .filter((p) => (category ? p.category === category : true))
-    .filter((p) =>
-      stock === "out"
-        ? p.qty === 0
-        : stock === "in"
-          ? p.qty > 0
-          : stock === "low"
-            ? p.qty < 10
-            : true,
-    )
-    .filter(
-      (p) =>
-        needle === "" ||
-        [p.name, p.category, p.description].some((f) => f.toLowerCase().includes(needle)),
-    );
-  const inTrash = all.filter((p) => p.deletedAt !== null).length;
-  const pageNumber = Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
-  const shown = rows.slice((pageNumber - 1) * PER_PAGE, pageNumber * PER_PAGE);
+  const pageNumber = parsePageNumber(page);
+  const stockFilter = stock === "in" || stock === "out" || stock === "low" ? stock : undefined;
+  const [counts, { items: shown, total }] = await Promise.all([
+    data.admin.productCounts(),
+    data.admin.products(
+      { trash, category, stock: stockFilter, search: q },
+      pageFor(pageNumber, PER_PAGE),
+    ),
+  ]);
+  const inTrash = counts.trashed;
 
   return (
     <>
@@ -56,7 +45,7 @@ export default async function ProductsPage({
         lead={
           trash
             ? "Removed products wait here until you restore or delete them."
-            : `${rows.length} ${rows.length === 1 ? "product" : "products"}`
+            : `${total} ${total === 1 ? "product" : "products"}`
         }
         actions={
           trash ? (
@@ -131,7 +120,7 @@ export default async function ProductsPage({
         params={{ q, category, stock, ...(trash ? { view: "trash" } : {}) }}
         page={pageNumber}
         perPage={PER_PAGE}
-        total={rows.length}
+        total={total}
       />
     </>
   );

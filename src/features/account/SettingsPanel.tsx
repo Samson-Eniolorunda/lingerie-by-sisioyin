@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { Sheet } from "@/components/ui/Sheet";
@@ -61,9 +60,9 @@ export function SettingsPanel() {
             {devLink ? (
               <>
                 Development build: no email is sent.{" "}
-                <Link href={devLink} className="text-primary underline underline-offset-4">
+                <a href={devLink} className="text-primary underline underline-offset-4">
                   Open the link
-                </Link>
+                </a>
                 .
               </>
             ) : null}

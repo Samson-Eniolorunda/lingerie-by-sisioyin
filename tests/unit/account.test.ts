@@ -9,8 +9,8 @@ import {
 } from "@/lib/order-rules";
 import { mockAccount } from "@/server/mock/account";
 import { DEMO, getDb, resetDb } from "@/server/mock/db";
-import { placeMockOrder, stockOf } from "@/server/mock/orders";
-import type { OrderInput } from "@/schemas/checkout";
+import { stockOf } from "@/server/mock/orders";
+import { placeTest } from "./helpers";
 
 const demoId = () => {
   const user = [...getDb().users.values()].find((u) => u.profile.email === DEMO.customer.email);
@@ -21,12 +21,8 @@ const demoId = () => {
 const bra = FIXTURE_PRODUCTS[1];
 if (!bra) throw new Error("fixture missing");
 
-const order = (email: string): OrderInput => ({
-  contact: { firstName: "Demo", lastName: "Customer", email, phone: "+2348012345678" },
-  delivery: { address: "12 Allen Avenue", city: "Ikeja", state: "Lagos" },
-  lines: [{ id: bra.id, selectedSize: "M", selectedColor: "Black", qty: 2 }],
-  confirmedTransfer: true,
-});
+const lines = [{ id: bra.id, selectedSize: "M", selectedColor: "Black", qty: 2 }];
+const all = { limit: 200, offset: 0 };
 
 beforeEach(resetDb);
 
@@ -68,9 +64,9 @@ describe("order rules", () => {
 
 describe("account repository", () => {
   it("lists only the signed-in customer's orders, newest first, and hides others", async () => {
-    const orders = await mockAccount.orders(demoId());
+    const { items: orders } = await mockAccount.orders(demoId(), {}, all);
     expect(orders.length).toBeGreaterThanOrEqual(4);
-    expect(orders.every((o) => o.email === DEMO.customer.email)).toBe(true);
+    expect(orders.every((o) => o.userId === demoId())).toBe(true);
     const sorted = [...orders].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     expect(orders).toEqual(sorted);
     const foreign = [...getDb().orders.values()].find((o) => o.email !== DEMO.customer.email);
@@ -80,7 +76,7 @@ describe("account repository", () => {
 
   it("D-06 cancels a fresh pending order and puts the stock back", async () => {
     const before = stockOf(bra.id);
-    const placed = placeMockOrder(order(DEMO.customer.email));
+    const placed = await placeTest(lines, {}, { userId: demoId(), email: DEMO.customer.email });
     if (!placed.ok) throw new Error(placed.message);
     expect(stockOf(bra.id)).toBe((before ?? 0) - 2);
     const result = await mockAccount.cancelOrder(demoId(), placed.order.orderNumber);
@@ -90,7 +86,9 @@ describe("account repository", () => {
   });
 
   it("refuses to cancel an order already being processed or somebody else's", async () => {
-    const processing = (await mockAccount.orders(demoId())).find((o) => o.status === "processing");
+    const processing = (await mockAccount.orders(demoId(), {}, all)).items.find(
+      (o) => o.status === "processing",
+    );
     if (!processing) throw new Error("no processing order");
     expect((await mockAccount.cancelOrder(demoId(), processing.orderNumber)).ok).toBe(false);
     const foreign = [...getDb().orders.values()].find((o) => o.email !== DEMO.customer.email);
@@ -144,5 +142,34 @@ describe("account repository", () => {
     const text = await mockAccount.exportData(demoId());
     expect(text).toContain(DEMO.customer.email);
     expect(text).toContain("Orders");
+  });
+});
+
+describe("order ownership and paging", () => {
+  it("a guest order is attached to an account by its user id, or by a verified email only", async () => {
+    const guest = await placeTest(lines, {}, { userId: null, email: DEMO.customer.email });
+    if (!guest.ok) throw new Error(guest.message);
+    const n = guest.order.orderNumber;
+    expect((await mockAccount.order(demoId(), n))?.orderNumber).toBe(n);
+    const record = getDb().users.get(demoId());
+    if (!record) throw new Error("seed");
+    record.emailVerified = false;
+    expect(await mockAccount.order(demoId(), n)).toBeNull();
+    expect(
+      (await mockAccount.orders(demoId(), {}, all)).items.some((o) => o.orderNumber === n),
+    ).toBe(false);
+  });
+
+  it("lists in pages with a total", async () => {
+    const first = await mockAccount.orders(demoId(), {}, { limit: 2, offset: 0 });
+    const rest = await mockAccount.orders(demoId(), {}, { limit: 2, offset: 2 });
+    expect(first.items).toHaveLength(2);
+    expect(first.total).toBeGreaterThanOrEqual(4);
+    expect(rest.items[0]?.orderNumber).not.toBe(first.items[0]?.orderNumber);
+    expect(
+      (await mockAccount.orders(demoId(), { status: "delivered" }, all)).items.every(
+        (o) => o.status === "delivered",
+      ),
+    ).toBe(true);
   });
 });

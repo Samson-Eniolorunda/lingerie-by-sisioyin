@@ -4,11 +4,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { fieldErrors } from "@/schemas/auth";
 import {
+  customerStatusSchema,
   inviteSchema,
+  messageMarkSchema,
+  orderStatusSchema,
+  paymentDecisionSchema,
   productDraftSchema,
   promoSchema,
   replySchema,
   settingsSchema,
+  staffRoleSchema,
 } from "@/schemas/admin";
 import { staffFor } from "@/server/auth/session";
 import { data } from "@/server/data";
@@ -27,6 +32,11 @@ const DENIED: AdminState = {
 async function guard(permission: Permission): Promise<SessionUser | null> {
   return staffFor(permission);
 }
+
+const BAD_REQUEST: AdminState = {
+  ok: false,
+  message: "That request was not understood. Please reload the page and try again.",
+};
 
 const refresh = () => revalidatePath("/admin", "layout");
 
@@ -101,11 +111,13 @@ export async function emptyTrashAction(): Promise<AdminState> {
 
 export async function setOrderStatusAction(
   orderNumber: string,
-  status: OrderStatus,
+  status: unknown,
 ): Promise<AdminState> {
   const actor = await guard("orders.update");
   if (!actor) return DENIED;
-  const result = await data.admin.setOrderStatus(orderNumber, status, actor);
+  const parsed = orderStatusSchema.safeParse(status);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.setOrderStatus(orderNumber, parsed.data as OrderStatus, actor);
   if (!result.ok) return result;
   refresh();
   return { ok: true, message: "The order has been updated." };
@@ -113,36 +125,41 @@ export async function setOrderStatusAction(
 
 export async function paymentDecisionAction(
   orderNumber: string,
-  decision: "confirmed" | "rejected",
+  decision: unknown,
 ): Promise<AdminState> {
   const actor = await guard("orders.update");
   if (!actor) return DENIED;
-  const result = await data.admin.setPaymentDecision(orderNumber, decision, actor);
+  const parsed = paymentDecisionSchema.safeParse(decision);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.setPaymentDecision(orderNumber, parsed.data, actor);
   if (!result.ok) return result;
   refresh();
   return {
     ok: true,
-    message: decision === "confirmed" ? "Payment confirmed." : "The receipt was rejected.",
+    message:
+      parsed.data === "confirmed"
+        ? "Payment confirmed."
+        : "The receipt was rejected. The customer has 48 hours to send another.",
   };
 }
 
 /* Customers */
 
-export async function customerStatusAction(
-  id: string,
-  status: "active" | "suspended" | "banned",
-): Promise<AdminState> {
+export async function customerStatusAction(id: string, status: unknown): Promise<AdminState> {
   const actor = await guard("customers.manage");
   if (!actor) return DENIED;
-  const result = await data.admin.setCustomerStatus(id, status, actor);
+  const parsed = customerStatusSchema.safeParse(status);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.setCustomerStatus(id, parsed.data, actor);
   if (!result.ok) return result;
   refresh();
   return { ok: true, message: "The customer has been updated." };
 }
 
-export async function returnPrivilegeAction(id: string, allowed: boolean): Promise<AdminState> {
+export async function returnPrivilegeAction(id: string, allowed: unknown): Promise<AdminState> {
   const actor = await guard("customers.manage");
   if (!actor) return DENIED;
+  if (typeof allowed !== "boolean") return BAD_REQUEST;
   const result = await data.admin.setReturnPrivilege(id, allowed, actor);
   if (!result.ok) return result;
   refresh();
@@ -172,9 +189,10 @@ export async function savePromoAction(input: unknown): Promise<AdminState> {
   return { ok: true, message: "Promo code created." };
 }
 
-export async function promoActiveAction(id: string, active: boolean): Promise<AdminState> {
+export async function promoActiveAction(id: string, active: unknown): Promise<AdminState> {
   const actor = await guard("promos.manage");
   if (!actor) return DENIED;
+  if (typeof active !== "boolean") return BAD_REQUEST;
   const result = await data.admin.setPromoActive(id, active, actor);
   if (!result.ok) return result;
   refresh();
@@ -192,13 +210,12 @@ export async function deletePromoAction(id: string): Promise<AdminState> {
 
 /* Messages */
 
-export async function markMessageAction(
-  id: string,
-  status: "read" | "unread",
-): Promise<AdminState> {
+export async function markMessageAction(id: string, status: unknown): Promise<AdminState> {
   const actor = await guard("messages.manage");
   if (!actor) return DENIED;
-  const result = await data.admin.markMessage(id, status);
+  const parsed = messageMarkSchema.safeParse(status);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.markMessage(id, parsed.data, actor);
   if (!result.ok) return result;
   refresh();
   return { ok: true };
@@ -237,13 +254,12 @@ export async function saveSettingsAction(input: unknown): Promise<AdminState> {
   return { ok: true, message: "Settings saved." };
 }
 
-export async function setStaffRoleAction(
-  id: string,
-  role: "super_admin" | "editor",
-): Promise<AdminState> {
+export async function setStaffRoleAction(id: string, role: unknown): Promise<AdminState> {
   const actor = await guard("roles.manage");
   if (!actor) return DENIED;
-  const result = await data.admin.setStaffRole(id, role, actor);
+  const parsed = staffRoleSchema.safeParse(role);
+  if (!parsed.success) return BAD_REQUEST;
+  const result = await data.admin.setStaffRole(id, parsed.data, actor);
   if (!result.ok) return result;
   refresh();
   return { ok: true, message: "Role changed." };

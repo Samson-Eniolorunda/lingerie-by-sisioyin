@@ -6,6 +6,7 @@ import { PageHeader } from "@/features/admin/PageHeader";
 import { relativeTime } from "@/lib/dates";
 import { requireStaff } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { pageFor, parsePageNumber } from "@/server/paging";
 
 export const metadata: Metadata = { title: "Messages" };
 export const dynamic = "force-dynamic";
@@ -24,24 +25,18 @@ export default async function MessagesPage({
 }) {
   await requireStaff("messages.manage", "/admin/messages");
   const { status = "", q = "", page } = await searchParams;
-  const all = await data.admin.messages();
-  const needle = q.trim().toLowerCase();
-  const rows = all
-    .filter((m) => (status ? m.status === status : true))
-    .filter(
-      (m) =>
-        needle === "" ||
-        [m.name, m.email, m.body, m.orderNumber, m.subject].some((f) =>
-          f.toLowerCase().includes(needle),
-        ),
-    );
-  const pageNumber = Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
-  const shown = rows.slice((pageNumber - 1) * PER_PAGE, pageNumber * PER_PAGE);
-  const count = (s: string) => (s ? all.filter((m) => m.status === s).length : all.length);
+  const pageNumber = parsePageNumber(page);
+  const known =
+    status === "unread" || status === "read" || status === "replied" ? status : undefined;
+  const [counts, { items: shown, total }] = await Promise.all([
+    data.admin.messageCounts(),
+    data.admin.messages({ status: known, search: q }, pageFor(pageNumber, PER_PAGE)),
+  ]);
+  const count = (s: string) => (s ? counts[s as "unread" | "read" | "replied"] : counts.all);
 
   return (
     <>
-      <PageHeader title="Messages" lead={`${count("unread")} unread of ${all.length}`} />
+      <PageHeader title="Messages" lead={`${count("unread")} unread of ${counts.all}`} />
       <nav
         aria-label="Message filter"
         className="-mx-4 mb-4 flex scrollbar-none gap-2 overflow-x-auto px-4"
@@ -131,7 +126,7 @@ export default async function MessagesPage({
         params={{ status, q }}
         page={pageNumber}
         perPage={PER_PAGE}
-        total={rows.length}
+        total={total}
       />
     </>
   );

@@ -2,8 +2,8 @@ import { normaliseNigerianPhone } from "@/lib/phone";
 import { canCancelByCustomer } from "@/lib/order-rules";
 import type { AccountRepository } from "@/server/data/contracts";
 import { verifyPassword, getDb, nextId, type UserRecord } from "./db";
-import { restoreStock } from "./stock";
-import type { StoredOrder } from "./orders";
+import type { StoredOrder } from "@/types/orders";
+import { applyCancellation } from "./orders";
 
 const MAX_ADDRESSES = 5;
 
@@ -11,9 +11,15 @@ function user(id: string): UserRecord | undefined {
   return getDb().users.get(id);
 }
 
-function ordersFor(email: string): StoredOrder[] {
+/** An order belongs to an account by its user id, or by its email once that address is verified. */
+function owns(record: UserRecord, order: StoredOrder): boolean {
+  if (order.userId !== null) return order.userId === record.profile.id;
+  return record.emailVerified && order.email === record.profile.email;
+}
+
+function ordersFor(record: UserRecord): StoredOrder[] {
   return [...getDb().orders.values()]
-    .filter((o) => o.email === email)
+    .filter((o) => owns(record, o))
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
@@ -82,24 +88,27 @@ export const mockAccount: AccountRepository = {
     return { ok: true };
   },
 
-  async orders(userId) {
+  async orders(userId, query, page) {
     const record = user(userId);
-    return record ? ordersFor(record.profile.email) : [];
+    if (!record) return { items: [], total: 0 };
+    const all = ordersFor(record).filter((o) => (query.status ? o.status === query.status : true));
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
   },
 
   async order(userId, orderNumber) {
     const record = user(userId);
     const order = getDb().orders.get(orderNumber);
-    return record && order && order.email === record.profile.email ? order : null;
+    return record && order && owns(record, order) ? order : null;
   },
 
   async cancelOrder(userId, orderNumber) {
     const record = user(userId);
     const db = getDb();
     const order = db.orders.get(orderNumber);
-    if (!record || !order || order.email !== record.profile.email)
+    if (!record || !order || !owns(record, order))
       return { ok: false, message: "We could not find that order." };
-    if (!canCancelByCustomer(order, new Date()))
+    const now = new Date();
+    if (!canCancelByCustomer(order, now) || order.paymentStatus === "confirmed")
       return {
         ok: false,
         message:
@@ -107,12 +116,9 @@ export const mockAccount: AccountRepository = {
             ? "The 30-minute cancellation window has passed. Message us on WhatsApp and we will help."
             : "This order is already being handled. Message us on WhatsApp and we will help.",
       };
-    restoreStock(db, order);
-    db.orders.set(order.orderNumber, {
-      ...order,
-      status: "cancelled",
-      updatedAt: new Date().toISOString(),
-    });
+    // The conditional update inside applyCancellation stops a second tap restoring stock twice.
+    if (!applyCancellation(db, order, now))
+      return { ok: false, message: "This order has already been cancelled." };
     return { ok: true };
   },
 
@@ -154,7 +160,7 @@ export const mockAccount: AccountRepository = {
       ),
       "",
       "Orders",
-      ...ordersFor(p.email).map(
+      ...ordersFor(record).map(
         (o) => `${o.orderNumber} · ${o.createdAt.slice(0, 10)} · ${o.status} · NGN ${o.total}`,
       ),
     ];

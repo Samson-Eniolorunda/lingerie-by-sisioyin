@@ -67,8 +67,7 @@ export default async function ShopPage({
     if (target) permanentRedirect(`/products/${target.slug}`);
   }
   const { query, page } = parseCatalogueParams(params);
-  const all = await listProducts(query);
-  const shown = all.slice(0, page * PAGE_SIZE);
+  const { items: shown, total } = await listProducts(query, { limit: page * PAGE_SIZE, offset: 0 });
   const chips = chipsFor(query);
   const filterCount = chips.filter((c) => !c.label.startsWith("“")).length;
 
@@ -76,7 +75,7 @@ export default async function ShopPage({
     <div className="mx-auto max-w-[1360px] px-4 pt-6 sm:px-8 md:pt-10">
       <h1 className="font-display text-[2.125rem] leading-tight md:text-5xl">Shop</h1>
       <p className="mt-1 text-base text-muted" aria-live="polite">
-        {all.length} {all.length === 1 ? "piece" : "pieces"}
+        {total} {total === 1 ? "piece" : "pieces"}
       </p>
 
       <div className="mt-4 md:grid md:grid-cols-[15rem_1fr] md:gap-10">
@@ -131,7 +130,7 @@ export default async function ShopPage({
             </ul>
           )}
 
-          {all.length > shown.length ? (
+          {total > shown.length ? (
             <div className="mt-10 flex justify-center">
               <ButtonLink
                 href={href(query, page + 1)}
@@ -139,7 +138,7 @@ export default async function ShopPage({
                 scroll={false}
                 className="w-full sm:w-auto"
               >
-                Show more ({all.length - shown.length} left)
+                Show more ({total - shown.length} left)
               </ButtonLink>
             </div>
           ) : null}

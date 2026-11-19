@@ -90,7 +90,7 @@ test("K-01 to K-14 full checkout reaches the confirmation, then the order can be
   await place.click();
   await expect(page).toHaveURL(/\/confirmation$/);
   const number = (await page.locator("p.tabular").first().textContent())?.trim() ?? "";
-  expect(number).toMatch(/^LBS-\d{8}-\d{4}$/);
+  expect(number).toMatch(/^LBS-\d{8}-\d{4,}$/);
   expect(await page.evaluate(() => localStorage.getItem("LBS_CART_V1"))).toBe("[]");
 
   await page.getByRole("link", { name: "Track this order" }).click();
@@ -126,13 +126,44 @@ test("K-10 an oversize or wrong file is explained in text and not accepted", asy
   await page
     .locator("#receipt")
     .setInputFiles({ name: "notes.txt", mimeType: "text/plain", buffer: Buffer.from("hello") });
-  await expect(page.getByText("Attach a photograph (JPG, PNG, WebP) or a PDF.")).toBeVisible();
+  await expect(page.getByText("Attach a photograph (JPG, PNG or WebP) or a PDF.")).toBeVisible();
 });
 
-test("BUG-01 a refused order keeps the bag, shows the error and does not redirect", async ({
+test("BUG-01 an order that cannot be fulfilled is refused up front, keeps the bag and does not redirect", async ({
   page,
 }) => {
   await seedBag(page, [{ ...BRIEF, selectedSize: "XL", variantId: "fixture-02-XL-Black", qty: 9 }]);
+  await page.goto("/checkout");
+  await fillContactAndDelivery(page);
+  await expect(page.locator("[role=alert]:not(#__next-route-announcer__)")).toContainText(
+    "Only 2 of Cotton high-waist brief",
+  );
+  await expect(page.getByText("Send ₦")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/checkout$/);
+  expect(
+    await page.evaluate(() => JSON.parse(localStorage.getItem("LBS_CART_V1") ?? "[]").length),
+  ).toBe(1);
+});
+
+test("the amount to transfer comes from the server and bank details wait for it", async ({
+  page,
+}) => {
+  await seedBag(page, [BRIEF]);
+  await page.goto("/checkout");
+  await fillContactAndDelivery(page);
+  await expect(page.getByText("1. Send ₦15,000 from your banking app")).toBeVisible();
+  await expect(page.getByText("Account number")).toBeVisible();
+});
+
+test("the receipt goes straight to storage, not through a server action", async ({ page }) => {
+  await seedBag(page, [BRIEF]);
+  const uploads: string[] = [];
+  let actionBodies = 0;
+  page.on("request", (r) => {
+    if (r.method() === "PUT") uploads.push(r.url());
+    if (r.method() === "POST" && r.headers()["next-action"] && (r.postData() ?? "").length > 5000)
+      actionBodies += 1;
+  });
   await page.goto("/checkout");
   await fillContactAndDelivery(page);
   await page.locator("#receipt").setInputFiles(receipt);
@@ -141,18 +172,48 @@ test("BUG-01 a refused order keeps the bag, shows the error and does not redirec
     .getByRole("button", { name: /^Place order/ })
     .filter({ visible: true })
     .click();
-  await expect(page.locator("p[role=alert]")).toContainText("Only 2 of Cotton high-waist brief");
+  await expect(page).toHaveURL(/\/confirmation$/);
+  expect(uploads).toHaveLength(1);
+  expect(uploads[0]).toContain("/api/receipts/mock?path=");
+  expect(actionBodies).toBe(0);
+});
+
+test("a receipt that is too large for its type is explained in plain words", async ({ page }) => {
+  await seedBag(page, [BRIEF]);
+  await page.goto("/checkout");
+  await fillContactAndDelivery(page);
+  await page.locator("#receipt").setInputFiles({
+    name: "big.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.alloc(5 * 1024 * 1024, 1),
+  });
+  await expect(page.getByText("That PDF is too large.")).toBeVisible();
+});
+
+test("a failed upload says so and keeps the order unplaced", async ({ page }) => {
+  await seedBag(page, [BRIEF]);
+  await page.route("**/api/receipts/mock**", (route) => route.abort("failed"));
+  await page.goto("/checkout");
+  await fillContactAndDelivery(page);
+  await page.locator("#receipt").setInputFiles(receipt);
+  await page.getByLabel("I have sent the payment").check();
+  await page
+    .getByRole("button", { name: /^Place order/ })
+    .filter({ visible: true })
+    .click();
+  await expect(page.locator("[role=alert]:not(#__next-route-announcer__)")).toContainText(
+    "The receipt could not be sent",
+  );
   await expect(page).toHaveURL(/\/checkout$/);
-  expect(
-    await page.evaluate(() => JSON.parse(localStorage.getItem("LBS_CART_V1") ?? "[]").length),
-  ).toBe(1);
 });
 
 test("K-15 a double tap on Place order sends one request", async ({ page }) => {
   await seedBag(page, [BRIEF]);
   let actions = 0;
+  let uploads = 0;
   page.on("request", (r) => {
     if (r.method() === "POST" && r.headers()["next-action"]) actions += 1;
+    if (r.method() === "PUT") uploads += 1;
   });
   await page.goto("/checkout");
   await fillContactAndDelivery(page, "double@example.com");
@@ -162,7 +223,9 @@ test("K-15 a double tap on Place order sends one request", async ({ page }) => {
   const place = page.getByRole("button", { name: /^Place order/ }).filter({ visible: true });
   await place.dblclick();
   await expect(page).toHaveURL(/\/confirmation$/);
-  expect(actions).toBe(1);
+  // one action to issue the upload address, one to place the order, one upload: a double tap changes nothing
+  expect(actions).toBe(2);
+  expect(uploads).toBe(1);
 });
 
 test("G-16 contact details survive a reload", async ({ page }) => {

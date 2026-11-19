@@ -1,31 +1,24 @@
 import type { Metadata } from "next";
-import { AuthCard, AuthLink } from "@/features/auth/AuthCard";
+import { AuthCard } from "@/features/auth/AuthCard";
 import { ResetForm } from "@/features/auth/ResetForm";
+import { currentUser } from "@/server/auth/session";
 
 export const metadata: Metadata = {
   title: "Choose a new password",
   robots: { index: false, follow: false },
 };
 
-export default async function ResetPasswordPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token?: string }>;
-}) {
-  const { token } = await searchParams;
-  if (!token || token.length < 10) {
-    return (
-      <AuthCard
-        title="This link is not valid"
-        lead="Reset links work once and expire after an hour. Request a new one and try again."
-      >
-        <AuthLink href="/forgot-password">Request a new link</AuthLink>
-      </AuthCard>
-    );
-  }
+export const dynamic = "force-dynamic";
+
+/** The emailed link lands on `/auth/callback`, which exchanges its code for a session; this page needs that session. */
+export default async function ResetPasswordPage() {
+  const user = (await currentUser("customer")) ?? (await currentUser("staff"));
   return (
-    <AuthCard title="Choose a new password" lead="Pick something you do not use elsewhere.">
-      <ResetForm token={token} />
+    <AuthCard
+      title={user ? "Choose a new password" : "This link is not valid"}
+      {...(user ? { lead: "Pick something you do not use elsewhere." } : {})}
+    >
+      <ResetForm hasSession={user !== null} />
     </AuthCard>
   );
 }

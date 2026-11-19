@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { DATA_MODE } from "@/server/data";
+import { SHOW_DEMO_HINTS } from "@/config/data-mode";
 import { DEMO } from "@/server/mock/db";
 
 /** The frame shared by the sign-in, sign-up and reset screens: a narrow column, serif title, quiet footer link. */
@@ -25,7 +25,7 @@ export function AuthCard({
       {footer ? (
         <div className="mt-6 border-t border-line pt-4 text-base text-muted">{footer}</div>
       ) : null}
-      {DATA_MODE === "mock" && demo ? (
+      {SHOW_DEMO_HINTS && demo ? (
         <p
           className="mt-8 border border-line bg-tint p-3 text-sm text-muted"
           data-testid="demo-note"

@@ -11,22 +11,29 @@ import { formatNaira } from "@/lib/money";
 import { can } from "@/lib/permissions";
 import { requireStaff } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { pageFor, parsePageNumber } from "@/server/paging";
+import { Pager } from "@/features/admin/Filters";
 
 export const metadata: Metadata = { title: "Customers" };
+const PER_PAGE = 20;
 
 export default async function CustomersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }) {
   const user = await requireStaff("customers.view", "/admin/customers");
-  const { q = "" } = await searchParams;
-  const [all, rows] = await Promise.all([data.admin.customers(), data.admin.customers(q)]);
-  const monthAgo = (await nowMs()) - 30 * 86_400_000;
+  const { q = "", page } = await searchParams;
+  const pageNumber = parsePageNumber(page);
+  const monthAgo = new Date((await nowMs()) - 30 * 86_400_000);
+  const [summary, { items: rows, total }] = await Promise.all([
+    data.admin.customerStats(monthAgo),
+    data.admin.customers(q, pageFor(pageNumber, PER_PAGE)),
+  ]);
   const stats = [
-    ["Customers", all.length],
-    ["New in 30 days", all.filter((c) => new Date(c.createdAt).getTime() >= monthAgo).length],
-    ["With orders", all.filter((c) => c.orderCount > 0).length],
+    ["Customers", summary.total],
+    ["New in 30 days", summary.newSince],
+    ["With orders", summary.withOrders],
   ] as const;
   return (
     <>
@@ -110,6 +117,13 @@ export default async function CustomersPage({
             ),
           },
         ]}
+      />
+      <Pager
+        base="/admin/customers"
+        params={{ q }}
+        page={pageNumber}
+        perPage={PER_PAGE}
+        total={total}
       />
     </>
   );

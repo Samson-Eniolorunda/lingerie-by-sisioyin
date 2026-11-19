@@ -66,7 +66,6 @@ export const forgotSchema = z.object({ email });
 
 export const resetSchema = z
   .object({
-    token: z.string().min(10),
     password: newPassword,
     confirmPassword: z.string().min(1, "Repeat your password."),
   })

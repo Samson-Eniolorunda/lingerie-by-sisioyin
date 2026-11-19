@@ -3,5 +3,7 @@ import { fileURLToPath } from "node:url";
 
 export default defineConfig({
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
-  test: { include: ["tests/unit/**/*.test.{ts,tsx}"], environment: "node" },
+  test: { include: ["tests/unit/**/*.test.{ts,tsx}"], environment: "node",
+    env: { LBS_ALLOW_DEMO: "true" },
+  },
 });

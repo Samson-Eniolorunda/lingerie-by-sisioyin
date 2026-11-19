@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function MessagePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const user = await requireStaff("messages.manage", `/admin/messages/${id}`);
-  const message = (await data.admin.messages()).find((m) => m.id === id);
+  const message = await data.admin.message(id);
   if (!message) notFound();
   const thread = [
     {

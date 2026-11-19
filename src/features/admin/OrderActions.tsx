@@ -42,7 +42,11 @@ export function OrderActions({
     <ConfirmButton
       label="Cancel order"
       title="Cancel this order?"
-      message="The stock goes back on sale and the customer will see the order as cancelled. This cannot be undone."
+      message={
+        paymentStatus === "confirmed"
+          ? "The stock goes back on sale and the customer will see the order as cancelled. They have already paid, so a refund will be recorded as owed. This cannot be undone."
+          : "The stock goes back on sale and the customer will see the order as cancelled. This cannot be undone."
+      }
       confirmLabel="Cancel the order"
       disabled={pending}
       onConfirm={() => run(() => setOrderStatusAction(orderNumber, "cancelled"))}
@@ -55,14 +59,14 @@ export function OrderActions({
         <p className="text-base text-muted">
           {paymentStatus === "awaiting_confirmation"
             ? "Check the receipt against the bank, then confirm or reject it."
-            : "The last receipt was rejected. Wait for the customer to send another, or cancel the order."}
+            : "The last receipt was rejected. The customer can send another for 48 hours; after that the order is cancelled automatically, or you can cancel it now."}
         </p>
         <ButtonRow
           secondary={
             <Button
               variant="secondary"
               aria-label="Reject receipt"
-              disabled={pending || paymentStatus === "rejected"}
+              disabled={pending || paymentStatus !== "awaiting_confirmation"}
               onClick={() => run(() => paymentDecisionAction(orderNumber, "rejected"))}
             >
               Reject
@@ -71,7 +75,7 @@ export function OrderActions({
           primary={
             <Button
               aria-label="Confirm payment"
-              disabled={pending}
+              disabled={pending || paymentStatus !== "awaiting_confirmation"}
               onClick={() => run(() => paymentDecisionAction(orderNumber, "confirmed"))}
             >
               Confirm

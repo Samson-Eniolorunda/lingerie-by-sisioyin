@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ReceiptReupload } from "@/features/orders/ReceiptReupload";
 import { CancelOrder } from "@/features/account/CancelOrder";
 import { OrderSummary } from "@/features/orders/OrderSummary";
 import { OrderTimeline } from "@/features/orders/OrderTimeline";
@@ -69,6 +70,18 @@ export default async function OrderDetailPage({
       </section>
 
       <div className="mt-8 flex flex-col gap-3">
+        {order.status === "pending" && order.paymentStatus === "rejected" ? (
+          <ReceiptReupload
+            orderNumber={order.orderNumber}
+            email={order.email}
+            until={order.receiptReuploadUntil}
+          />
+        ) : null}
+        {order.paymentStatus === "refund_owed" ? (
+          <p className="border-l-4 border-primary bg-primary-tint p-3 text-base">
+            You had paid for this order, so we owe you a refund. We will be in touch to arrange it.
+          </p>
+        ) : null}
         {canCancelByCustomer(order, now) ? (
           <CancelOrder
             orderNumber={order.orderNumber}

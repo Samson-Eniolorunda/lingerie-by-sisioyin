@@ -10,6 +10,7 @@ import { STATUS_SHORT } from "@/lib/order-rules";
 import { ORDER_STATUSES, type OrderStatus } from "@/types/account";
 import { requireStaff } from "@/server/auth/session";
 import { data } from "@/server/data";
+import { pageFor, parsePageNumber } from "@/server/paging";
 
 export const metadata: Metadata = { title: "Orders" };
 const PER_PAGE = 10;
@@ -22,11 +23,13 @@ export default async function OrdersPage({
   await requireStaff("orders.view", "/admin/orders");
   const { status, q, page } = await searchParams;
   const current = ORDER_STATUSES.find((s) => s === status) as OrderStatus | undefined;
-  const all = await data.admin.orders();
-  const counts = ORDER_STATUSES.map((s) => [s, all.filter((o) => o.status === s).length] as const);
-  const rows = await data.admin.orders({ status: current, search: q });
-  const pageNumber = Math.max(1, Number.parseInt(page ?? "1", 10) || 1);
-  const shown = rows.slice((pageNumber - 1) * PER_PAGE, pageNumber * PER_PAGE);
+  const pageNumber = parsePageNumber(page);
+  const [byStatus, { items: shown, total }] = await Promise.all([
+    data.admin.orderCounts(),
+    data.admin.orders({ status: current, search: q }, pageFor(pageNumber, PER_PAGE)),
+  ]);
+  const counts = ORDER_STATUSES.map((s) => [s, byStatus[s]] as const);
+  const all = { length: counts.reduce((n, [, count]) => n + count, 0) };
 
   return (
     <>
@@ -86,7 +89,7 @@ export default async function OrdersPage({
         params={{ status: current ?? "", q: q ?? "" }}
         page={pageNumber}
         perPage={PER_PAGE}
-        total={rows.length}
+        total={total}
       />
     </>
   );

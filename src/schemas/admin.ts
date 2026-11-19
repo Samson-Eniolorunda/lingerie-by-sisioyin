@@ -1,6 +1,8 @@
 import "@/lib/zod-config";
 import { z } from "zod";
+import { endOfLagosDay } from "@/lib/dates";
 import { normaliseNigerianPhone } from "@/lib/phone";
+import { ORDER_STATUSES } from "@/types/account";
 
 export const CATEGORIES = ["Lingerie", "Loungewear", "Underwear", "Accessories"] as const;
 export const GENDERS = ["Women", "Men", "Kids", "Unisex"] as const;
@@ -63,7 +65,7 @@ export const promoSchema = z.object({
   expiresAt: z
     .string()
     .refine((v) => v === "" || !Number.isNaN(Date.parse(v)), "Enter a valid date.")
-    .transform((v) => (v === "" ? null : new Date(`${v}T23:59:59.000Z`).toISOString())),
+    .transform((v) => (v === "" ? null : endOfLagosDay(v))),
   usageLimit: z.number().int("Use a whole number.").min(1, "At least 1.").max(1_000_000).nullable(),
 });
 
@@ -102,3 +104,9 @@ export const staffPhoneSchema = z
 
 export type ProductDraftInput = z.infer<typeof productDraftSchema>;
 export type PromoInput = z.input<typeof promoSchema>;
+
+export const staffRoleSchema = z.enum(["super_admin", "editor"]);
+export const customerStatusSchema = z.enum(["active", "suspended", "banned"]);
+export const paymentDecisionSchema = z.enum(["confirmed", "rejected"]);
+export const orderStatusSchema = z.enum(ORDER_STATUSES as [string, ...string[]]);
+export const messageMarkSchema = z.enum(["read", "unread"]);

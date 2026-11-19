@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { addressSchema, fieldErrors, profileSchema } from "@/schemas/auth";
+import { callbackUrl } from "@/server/auth/request";
 import { clearSession, currentUser } from "@/server/auth/session";
 import { data } from "@/server/data";
 
@@ -91,6 +92,10 @@ export async function requestDeletionAction(password: string): Promise<ActionSta
 export async function changePasswordLinkAction(): Promise<{ readonly devLink: string | null }> {
   const user = await currentUser();
   if (!user) return { devLink: null };
-  const { devToken } = await data.auth.requestPasswordReset(user.email, "customer");
-  return { devLink: devToken ? `/reset-password?token=${devToken}` : null };
+  const { devLink } = await data.auth.requestPasswordReset(
+    user.email,
+    "customer",
+    callbackUrl("/reset-password"),
+  );
+  return { devLink };
 }

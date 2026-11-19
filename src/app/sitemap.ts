@@ -6,7 +6,7 @@ const PAGES = ["", "/shop", "/size", "/faq", "/contact", "/privacy", "/terms", "
 
 /** Public, indexable pages and every live product. Account, bag, checkout and admin pages are left out on purpose. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await listProducts();
+  const { items: products } = await listProducts();
   return [
     ...PAGES.map((path) => ({
       url: `${BRAND.siteUrl}${path}`,

@@ -1,6 +1,6 @@
 import { formatNaira } from "@/lib/money";
 import { DELIVERY_STATES } from "@/lib/delivery";
-import type { StoredOrder } from "@/server/mock/orders";
+import type { StoredOrder } from "@/types/orders";
 
 export function OrderSummary({ order }: { readonly order: StoredOrder }) {
   const state = DELIVERY_STATES.find((s) => s.id === order.state)?.label ?? order.state;

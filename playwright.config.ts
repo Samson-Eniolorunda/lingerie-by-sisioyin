@@ -33,6 +33,7 @@ export default defineConfig({
     },
   ],
   webServer: {
+    env: { LBS_ALLOW_DEMO: "true" },
     command: `npx next start -p ${port}`,
     url: `http://localhost:${port}`,
     reuseExistingServer: !process.env.CI,

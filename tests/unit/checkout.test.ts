@@ -24,7 +24,7 @@ describe("phone numbers (12.5)", () => {
 
 describe("order numbers (K-14)", () => {
   it("formats LBS-DDMMYYYY-NNNN", () => {
-    const n = formatOrderNumber(new Date(Date.UTC(2026, 10, 18)), 7);
+    const n = formatOrderNumber(new Date(Date.UTC(2026, 10, 18, 12)), 7);
     expect(n).toBe("LBS-18112026-0007");
     expect(ORDER_NUMBER_PATTERN.test(n)).toBe(true);
   });
@@ -59,6 +59,9 @@ describe("checkout schemas", () => {
       contact: { firstName: "A", lastName: "B", email: "a@b.co", phone: "08012345678" },
       delivery: { address: "12 Allen Avenue", city: "Ikeja", state: "Lagos" },
       lines: [{ id: "x", selectedSize: "S", selectedColor: "", qty: 1 }],
+      quotedTotal: 1000,
+      idempotencyKey: "abcdefgh-1234-5678",
+      receiptPath: "abcdefgh-1234-5678/r.jpg",
     };
     expect(orderInputSchema.safeParse({ ...base, confirmedTransfer: false }).success).toBe(false);
     expect(orderInputSchema.safeParse({ ...base, confirmedTransfer: true }).success).toBe(true);
@@ -66,8 +69,8 @@ describe("checkout schemas", () => {
       orderInputSchema.safeParse({ ...base, lines: [], confirmedTransfer: true }).success,
     ).toBe(false);
   });
-  it("K-10 receipt limit is 5 MB and image or PDF only", () => {
-    expect(receiptProblem({ size: 6 * 1024 * 1024, type: "image/png" })).toMatch(/5 MB/);
+  it("K-10 receipt limit is 4 MB and image or PDF only", () => {
+    expect(receiptProblem({ size: 6 * 1024 * 1024, type: "image/png" })).toMatch(/4 MB/);
     expect(receiptProblem({ size: 1000, type: "text/html" })).toMatch(/photograph/);
     expect(receiptProblem({ size: 1000, type: "application/pdf" })).toBeNull();
   });

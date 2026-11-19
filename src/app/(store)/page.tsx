@@ -1,3 +1,4 @@
+import { jsonLd } from "@/lib/json-ld";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -147,7 +148,7 @@ export default async function HomePage() {
       </section>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(ORGANISATION) }}
+        dangerouslySetInnerHTML={{ __html: jsonLd(ORGANISATION) }}
       />
     </>
   );

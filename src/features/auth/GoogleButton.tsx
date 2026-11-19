@@ -17,7 +17,8 @@ export function GoogleButton({ label }: { readonly label: string }) {
         onClick={() =>
           start(async () => {
             const result = await googleAction();
-            setMessage(result.ok ? undefined : result.message);
+            if (result.ok && result.url) window.location.assign(result.url);
+            else setMessage(result.ok ? undefined : result.message);
           })
         }
       >

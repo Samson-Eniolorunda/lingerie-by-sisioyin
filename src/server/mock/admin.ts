@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { canTransition } from "@/lib/order-rules";
+import { REUPLOAD_HOURS, applyCancellation } from "./orders";
 import { deriveStock } from "@/lib/variants";
 import { isProtectedRole } from "@/lib/permissions";
 import type {
@@ -10,8 +11,9 @@ import type {
   Tally,
 } from "@/server/data/contracts";
 import type { CustomerRecord, OrderStatus, SessionUser } from "@/types/account";
+import { ORDER_STATUSES } from "@/types/account";
+import type { StoredOrder } from "@/types/orders";
 import { getDb, nextId, seededRandom, type Db } from "./db";
-import { restoreStock } from "./stock";
 
 function log(db: Db, actor: SessionUser, action: string, subject: string): void {
   db.activity.unshift({
@@ -22,7 +24,6 @@ function log(db: Db, actor: SessionUser, action: string, subject: string): void 
     action,
     subject,
   });
-  db.activity.length = Math.min(db.activity.length, 200);
 }
 
 function slugify(name: string, taken: readonly string[]): string {
@@ -66,11 +67,30 @@ function applyDraft(
   };
 }
 
+/** One pass over the orders, grouped by account and by email, instead of one pass per customer. */
+function ordersByOwner(db: Db): {
+  byUser: Map<string, StoredOrder[]>;
+  byEmail: Map<string, StoredOrder[]>;
+} {
+  const byUser = new Map<string, StoredOrder[]>();
+  const byEmail = new Map<string, StoredOrder[]>();
+  for (const order of db.orders.values()) {
+    const map = order.userId !== null ? byUser : byEmail;
+    const key = order.userId ?? order.email;
+    map.set(key, [...(map.get(key) ?? []), order]);
+  }
+  return { byUser, byEmail };
+}
+
 function customerRows(db: Db): CustomerRecord[] {
+  const { byUser, byEmail } = ordersByOwner(db);
   return [...db.users.values()]
     .filter((u) => u.role === null && u.profile.status !== "deleted")
     .map((u) => {
-      const orders = [...db.orders.values()].filter((o) => o.email === u.profile.email);
+      const orders = [
+        ...(byUser.get(u.profile.id) ?? []),
+        ...(u.emailVerified ? (byEmail.get(u.profile.email) ?? []) : []),
+      ];
       return {
         id: u.profile.id,
         name: `${u.profile.firstName} ${u.profile.lastName}`.trim(),
@@ -185,8 +205,33 @@ export const mockAdmin: AdminRepository = {
     };
   },
 
-  async products() {
-    return [...getDb().products].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  async products(query, page) {
+    const needle = query.search?.trim().toLowerCase() ?? "";
+    const all = [...getDb().products]
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .filter((p) => (query.trash ? p.deletedAt !== null : p.deletedAt === null))
+      .filter((p) => (query.category ? p.category === query.category : true))
+      .filter((p) =>
+        query.stock === "out"
+          ? p.qty === 0
+          : query.stock === "in"
+            ? p.qty > 0
+            : query.stock === "low"
+              ? p.qty < 10
+              : true,
+      )
+      .filter(
+        (p) =>
+          needle === "" ||
+          [p.name, p.category, p.description].some((f) => f.toLowerCase().includes(needle)),
+      );
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
+  },
+
+  async productCounts() {
+    const all = getDb().products;
+    const trashed = all.filter((p) => p.deletedAt !== null).length;
+    return { live: all.length - trashed, trashed };
   },
 
   async product(id) {
@@ -261,9 +306,9 @@ export const mockAdmin: AdminRepository = {
     return { ok: true, value: { removed } };
   },
 
-  async orders(query = {}) {
+  async orders(query, page) {
     const needle = query.search?.trim().toLowerCase() ?? "";
-    return [...getDb().orders.values()]
+    const all = [...getDb().orders.values()]
       .filter((o) => (query.status ? o.status === query.status : true))
       .filter(
         (o) =>
@@ -271,6 +316,16 @@ export const mockAdmin: AdminRepository = {
           [o.orderNumber, o.customerName, o.email].some((f) => f.toLowerCase().includes(needle)),
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
+  },
+
+  async orderCounts() {
+    const counts = Object.fromEntries(ORDER_STATUSES.map((s) => [s, 0])) as Record<
+      OrderStatus,
+      number
+    >;
+    for (const o of getDb().orders.values()) counts[o.status] += 1;
+    return counts;
   },
 
   async order(orderNumber) {
@@ -286,13 +341,16 @@ export const mockAdmin: AdminRepository = {
         ok: false,
         message: `An order that is ${order.status} cannot be moved to ${status}.`,
       };
-    if (status === "cancelled") restoreStock(db, order);
-    db.orders.set(orderNumber, {
-      ...order,
-      status,
-      paymentStatus: status === "confirmed" ? "confirmed" : order.paymentStatus,
-      updatedAt: new Date().toISOString(),
-    });
+    // Payment is confirmed only through the payment decision, never by moving the status.
+    if (status === "confirmed")
+      return { ok: false, message: "Confirm the payment from the receipt check instead." };
+    const now = new Date();
+    if (status === "cancelled") {
+      if (!applyCancellation(db, order, now))
+        return { ok: false, message: "That order was already cancelled." };
+    } else {
+      db.orders.set(orderNumber, { ...order, status, updatedAt: now.toISOString() });
+    }
     log(db, actor, "order status", `${orderNumber} to ${status}`);
     return { ok: true };
   },
@@ -301,14 +359,32 @@ export const mockAdmin: AdminRepository = {
     const db = getDb();
     const order = db.orders.get(orderNumber);
     if (!order) return { ok: false, message: "That order no longer exists." };
-    if (order.status !== "pending")
-      return { ok: false, message: "Payment can only be checked while an order is pending." };
-    db.orders.set(orderNumber, {
-      ...order,
-      status: decision === "confirmed" ? "confirmed" : "pending",
-      paymentStatus: decision,
-      updatedAt: new Date().toISOString(),
-    });
+    if (order.status !== "pending" || order.paymentStatus !== "awaiting_confirmation")
+      return {
+        ok: false,
+        message: "Payment can only be checked on a pending order that has a receipt waiting.",
+      };
+    const now = new Date();
+    db.orders.set(
+      orderNumber,
+      decision === "confirmed"
+        ? {
+            ...order,
+            status: "confirmed",
+            paymentStatus: "confirmed",
+            receiptReuploadUntil: null,
+            updatedAt: now.toISOString(),
+          }
+        : {
+            ...order,
+            status: "pending",
+            paymentStatus: "rejected",
+            receiptReuploadUntil: new Date(
+              now.getTime() + REUPLOAD_HOURS * 3_600_000,
+            ).toISOString(),
+            updatedAt: now.toISOString(),
+          },
+    );
     log(
       db,
       actor,
@@ -318,12 +394,22 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
-  async customers(search = "") {
+  async customers(search, page) {
     const needle = search.trim().toLowerCase();
-    return customerRows(getDb()).filter(
+    const all = customerRows(getDb()).filter(
       (c) =>
         needle === "" || [c.name, c.email, c.phone].some((f) => f.toLowerCase().includes(needle)),
     );
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
+  },
+
+  async customerStats(since) {
+    const all = customerRows(getDb());
+    return {
+      total: all.length,
+      newSince: all.filter((c) => new Date(c.createdAt).getTime() >= since.getTime()).length,
+      withOrders: all.filter((c) => c.orderCount > 0).length,
+    };
   },
 
   async setCustomerStatus(id, status, actor) {
@@ -369,8 +455,9 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
-  async promos() {
-    return [...getDb().promos].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  async promos(page) {
+    const all = [...getDb().promos].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
   },
 
   async savePromo(input, actor) {
@@ -412,11 +499,37 @@ export const mockAdmin: AdminRepository = {
     return { ok: true };
   },
 
-  async messages() {
-    return [...getDb().messages].sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
+  async messages(query, page) {
+    const needle = query.search?.trim().toLowerCase() ?? "";
+    const all = [...getDb().messages]
+      .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt))
+      .filter((m) => (query.status ? m.status === query.status : true))
+      .filter(
+        (m) =>
+          needle === "" ||
+          [m.name, m.email, m.body, m.orderNumber, m.subject].some((f) =>
+            f.toLowerCase().includes(needle),
+          ),
+      );
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
   },
 
-  async markMessage(id, status) {
+  async messageCounts() {
+    const all = getDb().messages;
+    const count = (status: string) => all.filter((m) => m.status === status).length;
+    return {
+      all: all.length,
+      unread: count("unread"),
+      read: count("read"),
+      replied: count("replied"),
+    };
+  },
+
+  async message(id) {
+    return getDb().messages.find((m) => m.id === id) ?? null;
+  },
+
+  async markMessage(id, status, actor) {
     const db = getDb();
     const index = db.messages.findIndex((m) => m.id === id);
     const message = db.messages[index];
@@ -425,6 +538,12 @@ export const mockAdmin: AdminRepository = {
       ...message,
       status: message.status === "replied" && status === "read" ? "replied" : status,
     };
+    log(
+      db,
+      actor,
+      status === "read" ? "message marked read" : "message marked unread",
+      message.email,
+    );
     return { ok: true };
   },
 
@@ -525,7 +644,13 @@ export const mockAdmin: AdminRepository = {
     return { ok: true, value: { link: `/admin/sign-in?invite=${token}` } };
   },
 
-  async activity() {
-    return getDb().activity;
+  async activity(search, page) {
+    const needle = search.trim().toLowerCase();
+    const all = getDb().activity.filter(
+      (a) =>
+        needle === "" ||
+        [a.actor, a.action, a.subject].some((f) => f.toLowerCase().includes(needle)),
+    );
+    return { items: all.slice(page.offset, page.offset + page.limit), total: all.length };
   },
 };

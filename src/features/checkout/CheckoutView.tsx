@@ -13,9 +13,16 @@ import { DELIVERY_STATES } from "@/lib/delivery";
 import { formatNaira } from "@/lib/money";
 import { computeTotals } from "@/lib/pricing";
 import { readStorage, writeStorage } from "@/lib/storage";
-import { MAX_RECEIPT_BYTES, receiptProblem } from "@/schemas/checkout";
-import { placeOrder } from "@/server/actions/orders";
+import { prepareReceipt } from "@/lib/compress-image";
+import {
+  MAX_RECEIPT_BYTES,
+  MAX_RECEIPT_MB,
+  RECEIPT_ACCEPT,
+  receiptProblem,
+} from "@/lib/receipt-types";
+import { getQuote, placeOrder, type QuoteState } from "@/server/actions/orders";
 import { CopyButton } from "./CopyButton";
+import { uploadReceiptFor } from "./upload-receipt";
 import { resetCheckoutChoices, setCheckoutChoices, useCheckoutChoices } from "./session";
 import {
   EMPTY_VALUES,
@@ -26,6 +33,16 @@ import {
 } from "./validate";
 
 const FORM_KEY = "LBS_CHECKOUT_FORM";
+const KEY_KEY = "LBS_CHECKOUT_ATTEMPT";
+
+/** One key per checkout attempt, kept across reloads until the order is placed, so a retry never places twice. */
+function attemptKey(): string {
+  const saved = readStorage(KEY_KEY);
+  if (saved && /^[A-Za-z0-9-]{16,64}$/.test(saved)) return saved;
+  const fresh = crypto.randomUUID();
+  writeStorage(KEY_KEY, fresh);
+  return fresh;
+}
 type StepId = 0 | 1 | 2;
 
 function loadValues(raw: string | null): CheckoutValues {
@@ -74,6 +91,11 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
   const [receiptError, setReceiptError] = useState<string | undefined>();
   const [confirmed, setConfirmed] = useState(false);
   const [serverError, setServerError] = useState<string | undefined>();
+  const [preparing, setPreparing] = useState(false);
+  const [quoted, setQuoted] = useState<{ key: string; result: QuoteState } | null>(null);
+  const [quoteTick, setQuoteTick] = useState(0);
+  const [idempotencyKey] = useState(attemptKey);
+  const uploaded = useRef<{ file: File; path: string } | null>(null);
   const [pending, startTransition] = useTransition();
   const submitting = useRef(false);
   const form = useRef<HTMLFormElement>(null);
@@ -81,6 +103,49 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
   useEffect(() => {
     writeStorage(FORM_KEY, JSON.stringify(values));
   }, [values]);
+
+  const promoCode = choices.promo?.code;
+  const quoteKey = JSON.stringify([
+    lines.map((l) => [l.id, l.selectedSize, l.selectedColor, l.qty]),
+    values.state,
+    promoCode,
+    quoteTick,
+  ]);
+  const quote: QuoteState | "loading" =
+    quoted && quoted.key === quoteKey ? quoted.result : "loading";
+  useEffect(() => {
+    if (step !== 2 || lines.length === 0) return;
+    let current = true;
+    getQuote({
+      lines: lines.map((l) => ({
+        id: l.id,
+        selectedSize: l.selectedSize,
+        selectedColor: l.selectedColor,
+        qty: l.qty,
+      })),
+      promoCode,
+      state: values.state,
+    })
+      .then((result) => {
+        if (current) setQuoted({ key: quoteKey, result });
+      })
+      .catch(() => {
+        if (current)
+          setQuoted({
+            key: quoteKey,
+            result: {
+              ok: false,
+              message:
+                "We could not work out the amount to transfer. Check your connection and try again.",
+            },
+          });
+      });
+    return () => {
+      current = false;
+    };
+    // The key stands for the bag, state and promo; it is the only thing that should refetch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, quoteKey]);
 
   const totals = useMemo(
     () =>
@@ -124,59 +189,85 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
     setStep((s) => (s === 0 ? 1 : 2));
   }
 
-  function chooseReceipt(file: File | undefined) {
+  async function chooseReceipt(file: File | undefined) {
     if (!file) return;
-    const problem = receiptProblem(file);
+    setReceiptError(undefined);
+    setPreparing(true);
+    const prepared = await prepareReceipt(file, MAX_RECEIPT_BYTES);
+    setPreparing(false);
+    if (!prepared.ok) {
+      setReceipt(null);
+      setReceiptError(prepared.message);
+      return;
+    }
+    const problem = receiptProblem(prepared.file);
     setReceiptError(problem ?? undefined);
-    setReceipt(problem ? null : file);
+    setReceipt(problem ? null : prepared.file);
+    uploaded.current = null;
   }
 
   const missing =
-    receipt === null
-      ? "Attach your payment receipt."
-      : !confirmed
-        ? "Tick the box to confirm you have sent the payment."
-        : null;
+    quote === "loading"
+      ? "Working out the amount to transfer."
+      : !quote.ok
+        ? "The amount could not be worked out."
+        : preparing
+          ? "Getting your receipt ready."
+          : receipt === null
+            ? "Attach your payment receipt."
+            : !confirmed
+              ? "Tick the box to confirm you have sent the payment."
+              : null;
 
   function submit() {
-    if (submitting.current || missing) return;
+    if (submitting.current || missing || quote === "loading" || !quote.ok || !receipt) return;
     submitting.current = true;
     setServerError(undefined);
-    const data = new FormData();
-    data.set(
-      "payload",
-      JSON.stringify({
-        contact: {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          email: values.email,
-          phone: values.phone,
-        },
-        delivery: {
-          address: values.address,
-          city: values.city,
-          state: values.state,
-          landmark: values.landmark || undefined,
-          notes: values.notes || undefined,
-        },
-        lines: lines.map((l) => ({
-          id: l.id,
-          selectedSize: l.selectedSize,
-          selectedColor: l.selectedColor,
-          qty: l.qty,
-        })),
-        promoCode: choices.promo?.code,
-        confirmedTransfer: confirmed,
-      }),
-    );
-    if (receipt) data.set("receipt", receipt);
+    const file = receipt;
+    const quotedTotal = quote.total;
     startTransition(async () => {
       try {
-        const result = await placeOrder(data);
+        let path = uploaded.current?.file === file ? uploaded.current.path : null;
+        if (!path) {
+          const sent = await uploadReceiptFor(idempotencyKey, file);
+          if (!sent.ok) {
+            setServerError(sent.message);
+            return;
+          }
+          path = sent.path;
+          uploaded.current = { file, path };
+        }
+        const result = await placeOrder({
+          contact: {
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            phone: values.phone,
+          },
+          delivery: {
+            address: values.address,
+            city: values.city,
+            state: values.state,
+            landmark: values.landmark || undefined,
+            notes: values.notes || undefined,
+          },
+          lines: lines.map((l) => ({
+            id: l.id,
+            selectedSize: l.selectedSize,
+            selectedColor: l.selectedColor,
+            qty: l.qty,
+          })),
+          promoCode,
+          confirmedTransfer: confirmed,
+          quotedTotal,
+          idempotencyKey,
+          receiptPath: path,
+        });
         if (result.ok) {
           clearCart();
           resetCheckoutChoices();
           setTouched({});
+          writeStorage(KEY_KEY, "");
           writeStorage(
             FORM_KEY,
             JSON.stringify({
@@ -190,10 +281,15 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
           router.push("/confirmation");
           return;
         }
+        if (result.changedTotal !== undefined) {
+          // The amount moved since it was shown: show the new one and ask for a fresh confirmation.
+          setConfirmed(false);
+          setQuoteTick((n) => n + 1);
+        }
         setServerError(result.message);
       } catch {
         setServerError(
-          "We could not place your order. Your bag is unchanged. Check your connection and try again.",
+          "We could not place your order. Your bag is unchanged and nothing was charged. Check your connection and try again.",
         );
       } finally {
         submitting.current = false;
@@ -223,7 +319,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
       ? "Continue to delivery"
       : step === 1
         ? "Continue to payment"
-        : `Place order · ${formatNaira(totals.total)}`;
+        : `Place order · ${formatNaira(quote !== "loading" && quote.ok ? quote.total : totals.total)}`;
   const onPrimary = step === 2 ? submit : next;
   const primaryDisabled = pending || (step === 2 && missing !== null);
 
@@ -488,37 +584,56 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
 
               <ol className="space-y-5 text-base">
                 <li>
-                  <p className="font-medium">
-                    1. Send {formatNaira(totals.total)} from your banking app
-                  </p>
-                  <dl className="mt-2 border border-line bg-surface px-3 py-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <dt className="text-muted">Bank</dt>
-                      <dd>{BANK.bankName}</dd>
+                  {quote === "loading" ? (
+                    <p className="font-medium" role="status">
+                      Working out the amount to transfer…
+                    </p>
+                  ) : !quote.ok ? (
+                    <div role="alert">
+                      <p className="border-l-4 border-error bg-error-bg px-4 py-3 text-base text-error">
+                        {quote.message}
+                      </p>
+                      <div className="mt-3 flex justify-end">
+                        <Button variant="secondary" onClick={() => setQuoteTick((n) => n + 1)}>
+                          Try again
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <dt className="text-muted">Account number</dt>
-                      <dd className="tabular flex items-center">
-                        {BANK.accountNumber}
-                        <CopyButton value={BANK.accountNumber} label="account number" />
-                      </dd>
-                    </div>
-                    <div className="flex items-start justify-between gap-2 py-1">
-                      <dt className="shrink-0 text-muted">Account name</dt>
-                      <dd className="text-right">{BANK.accountName}</dd>
-                    </div>
-                    <div className="flex items-center justify-between gap-2">
-                      <dt className="text-muted">Amount</dt>
-                      <dd className="tabular flex items-center">
-                        {formatNaira(totals.total)}
-                        <CopyButton value={String(totals.total)} label="amount" />
-                      </dd>
-                    </div>
-                  </dl>
-                  <p className="mt-2 text-sm text-subtle">
-                    You can leave this page to pay. Your bag and the details you have entered will
-                    be here when you return.
-                  </p>
+                  ) : (
+                    <>
+                      <p className="font-medium">
+                        1. Send {formatNaira(quote.total)} from your banking app
+                      </p>
+                      <dl className="mt-2 border border-line bg-surface px-3 py-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="text-muted">Bank</dt>
+                          <dd>{BANK.bankName}</dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="text-muted">Account number</dt>
+                          <dd className="tabular flex items-center">
+                            {BANK.accountNumber}
+                            <CopyButton value={BANK.accountNumber} label="account number" />
+                          </dd>
+                        </div>
+                        <div className="flex items-start justify-between gap-2 py-1">
+                          <dt className="shrink-0 text-muted">Account name</dt>
+                          <dd className="text-right">{BANK.accountName}</dd>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <dt className="text-muted">Amount</dt>
+                          <dd className="tabular flex items-center">
+                            {formatNaira(quote.total)}
+                            <CopyButton value={String(quote.total)} label="amount" />
+                          </dd>
+                        </div>
+                      </dl>
+                      <p className="mt-2 text-sm text-subtle">
+                        You can leave this page to pay. Your bag and the details you have entered
+                        will be here when you return.
+                      </p>
+                    </>
+                  )}
                 </li>
                 <li>
                   <p className="font-medium">2. Attach your receipt</p>
@@ -526,10 +641,10 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
                     id="receipt"
                     name="receipt"
                     type="file"
-                    accept="image/*,application/pdf"
+                    accept={RECEIPT_ACCEPT}
                     className="sr-only"
                     aria-describedby="receipt-hint receipt-error"
-                    onChange={(e) => chooseReceipt(e.target.files?.[0])}
+                    onChange={(e) => void chooseReceipt(e.target.files?.[0])}
                   />
                   {receipt ? (
                     <p className="mt-2 flex min-h-12 items-center justify-between gap-2 border border-line bg-surface px-3">
@@ -559,7 +674,8 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
                     </label>
                   )}
                   <p id="receipt-hint" className="mt-1 text-sm text-subtle">
-                    JPG, PNG, WebP or PDF, up to {MAX_RECEIPT_BYTES / 1024 / 1024} MB.
+                    Photographs are shrunk for you. JPG, PNG, WebP or PDF, up to {MAX_RECEIPT_MB}{" "}
+                    MB.
                   </p>
                   <p id="receipt-error" className="text-sm font-medium text-error">
                     {receiptError}
@@ -602,7 +718,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
               <span />
             )}
             <Button type="submit" disabled={primaryDisabled}>
-              {pending ? "Placing order…" : label}
+              {pending ? "Placing order…" : preparing ? "Preparing receipt…" : label}
             </Button>
           </div>
         </div>
@@ -617,7 +733,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
             </Button>
           ) : null}
           <Button className="flex-1" disabled={primaryDisabled} onClick={onPrimary}>
-            {pending ? "Placing order…" : label}
+            {pending ? "Placing order…" : preparing ? "Preparing receipt…" : label}
           </Button>
         </div>
       </StickyActionBar>

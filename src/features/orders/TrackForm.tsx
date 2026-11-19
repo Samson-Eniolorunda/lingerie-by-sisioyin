@@ -6,6 +6,7 @@ import { TextField } from "@/components/ui/Field";
 import { whatsappLink } from "@/config/site";
 import { trackOrder, type TrackState } from "@/server/actions/orders";
 import { timelineStep } from "@/lib/order-rules";
+import { ReceiptReupload } from "./ReceiptReupload";
 import { OrderSummary } from "./OrderSummary";
 import { StatusBadge } from "./StatusBadge";
 import { OrderTimeline } from "./OrderTimeline";
@@ -79,6 +80,13 @@ export function TrackForm({ initialOrder }: { readonly initialOrder: string }) {
               placedAt={result.order.createdAt}
             />
             <OrderSummary order={result.order} />
+            {result.order.status === "pending" && result.order.paymentStatus === "rejected" ? (
+              <ReceiptReupload
+                orderNumber={result.order.orderNumber}
+                email={result.order.email}
+                until={result.order.receiptReuploadUntil}
+              />
+            ) : null}
           </div>
         ) : null}
       </div>

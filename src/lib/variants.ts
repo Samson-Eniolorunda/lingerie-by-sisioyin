@@ -99,3 +99,43 @@ export function rowsFromProduct(product: {
   if (product.variantStock.length > 0) return product.variantStock.map((v) => ({ ...v }));
   return product.sizes.map((s) => ({ size: s.name, color: "", qty: s.qty ?? 0 }));
 }
+
+export type VariantLookup =
+  | { readonly ok: true; readonly available: number; readonly kind: "variant" | "size" | "product" }
+  | { readonly ok: false; readonly reason: "size" | "colour" | "variant" };
+
+/**
+ * The exact variant an order line names, and how many of it are in stock. A product with colours
+ * needs both a size and a colour that exist together; a product sold by size needs a listed size; a
+ * product without sizes is sold as it is. Nothing falls back to the product total, so a line can
+ * never be satisfied by stock that belongs to another variant.
+ */
+export function lookupVariant(
+  product: {
+    readonly qty: number;
+    readonly sizes: readonly SizeEntry[];
+    readonly colours: readonly ColourEntry[];
+    readonly variantStock: readonly VariantStock[];
+    readonly allowColourSelection?: boolean;
+  },
+  size: string,
+  colour: string,
+): VariantLookup {
+  if (product.variantStock.length > 0) {
+    if (size === "") return { ok: false, reason: "size" };
+    if (colour === "") return { ok: false, reason: "colour" };
+    const variant = product.variantStock.find((v) => v.size === size && v.color === colour);
+    return variant
+      ? { ok: true, available: Math.max(0, variant.qty), kind: "variant" }
+      : { ok: false, reason: "variant" };
+  }
+  if (product.allowColourSelection !== false && product.colours.length > 0 && colour === "")
+    return { ok: false, reason: "colour" };
+  if (product.sizes.length > 0) {
+    if (size === "") return { ok: false, reason: "size" };
+    const entry = product.sizes.find((s) => s.name === size);
+    if (!entry) return { ok: false, reason: "variant" };
+    return { ok: true, available: Math.max(0, entry.qty ?? product.qty), kind: "size" };
+  }
+  return { ok: true, available: Math.max(0, product.qty), kind: "product" };
+}

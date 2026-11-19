@@ -1,7 +1,7 @@
 "use server";
 
 import { contactMessageSchema } from "@/schemas/contact";
-import { storeMessage } from "@/server/mock/messages";
+import { data } from "@/server/data";
 
 export type ContactState =
   | { readonly ok: true }
@@ -16,7 +16,8 @@ export async function sendContact(input: unknown): Promise<ContactState> {
     return { ok: false, message: "Please check the highlighted details.", fieldErrors };
   }
   try {
-    storeMessage(parsed.data);
+    const result = await data.contact.submit(parsed.data);
+    if (!result.ok) throw new Error(result.message);
   } catch {
     return {
       ok: false,

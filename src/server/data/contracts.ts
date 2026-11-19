@@ -13,7 +13,10 @@ import type {
   StoreSettings,
 } from "@/types/account";
 import type { Product } from "@/types/domain";
-import type { StoredOrder } from "@/server/mock/orders";
+import type { CatalogueQuery } from "@/types/catalogue";
+import type { ContactMessage } from "@/schemas/contact";
+import type { OrderInput } from "@/schemas/checkout";
+import type { Page, Paged, PlaceOrderResult, QuoteResult, StoredOrder } from "@/types/orders";
 
 /**
  * The data-access interface. The pages and server actions depend only on these contracts. Today the
@@ -25,29 +28,77 @@ export type Result<T = undefined> =
   | ({ readonly ok: true } & (T extends undefined ? object : { readonly value: T }))
   | { readonly ok: false; readonly message: string };
 
+export type Audience = "customer" | "staff";
+
+/**
+ * Authentication is session based, as Supabase is: the repository owns the session. The Supabase
+ * implementation keeps it in the cookies written by `@supabase/ssr`, refreshes it in the proxy
+ * (`refreshSession`) and never hands a token to the actions. A recovery or Google link arrives at
+ * `/auth/callback?code=...`, which calls `exchangeCode`; the password is then changed with
+ * `updatePassword` on that session.
+ */
 export interface AuthRepository {
   signIn(
     email: string,
     password: string,
-    audience: "customer" | "staff",
-  ): Promise<Result<SessionUser & { token: string }>>;
+    audience: Audience,
+    context: { readonly ip: string },
+  ): Promise<Result<SessionUser>>;
   signUp(input: {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
-  }): Promise<Result<SessionUser & { token: string }>>;
-  signInWithGoogle(): Promise<Result>;
+  }): Promise<Result<SessionUser>>;
+  /** The provider address to send the browser to; `redirectTo` is the absolute `/auth/callback` URL. */
+  signInWithGoogle(redirectTo: string): Promise<Result<{ readonly url: string }>>;
+  /** `redirectTo` is the absolute `/auth/callback` URL. `devLink` is only ever set in local development. */
   requestPasswordReset(
     email: string,
-    audience: "customer" | "staff",
-  ): Promise<{ readonly devToken: string | null }>;
-  resetPassword(token: string, password: string): Promise<Result>;
-  userForToken(
-    token: string | undefined,
-    audience: "customer" | "staff",
-  ): Promise<SessionUser | null>;
-  signOut(token: string | undefined): Promise<void>;
+    audience: Audience,
+    redirectTo: string,
+  ): Promise<{ readonly devLink: string | null }>;
+  /** Exchanges the one-time `code` from an email or provider link for a session. */
+  exchangeCode(code: string): Promise<Result>;
+  /** Sets a new password for the current session (a recovery session or a signed-in user). */
+  updatePassword(password: string): Promise<Result>;
+  currentUser(audience: Audience): Promise<SessionUser | null>;
+  /** Called by the proxy on every request so an expiring session is renewed. */
+  refreshSession(): Promise<void>;
+  signOut(audience: Audience): Promise<void>;
+}
+
+export interface OrdersRepository {
+  /** What the customer must transfer, worked out on the server from current prices. */
+  quote(input: {
+    readonly lines: OrderInput["lines"];
+    readonly promoCode?: string | undefined;
+    readonly state: string;
+  }): Promise<QuoteResult>;
+  place(
+    input: OrderInput,
+    context: { readonly userId: string | null; readonly now?: Date },
+  ): Promise<PlaceOrderResult>;
+  byNumber(orderNumber: string): Promise<StoredOrder | null>;
+  /** The guest lookup: the order number and the email together. */
+  lookup(orderNumber: string, email: string): Promise<StoredOrder | null>;
+  /** Replaces a rejected receipt while the re-upload window is open. */
+  attachReceipt(orderNumber: string, receiptPath: string, now?: Date): Promise<Result>;
+  /** Only whether a code is valid and its percentage; never the list of codes. */
+  validatePromo(code: string, now?: Date): Promise<Result<{ code: string; percent: number }>>;
+  /** Cancels pending orders whose rejected receipt was not replaced in time; for the cron. */
+  expireUnpaid(now?: Date): Promise<number>;
+}
+
+export interface CatalogueRepository {
+  list(query: CatalogueQuery, page: Page): Promise<Paged<Product>>;
+  bySlug(slug: string): Promise<Product | null>;
+  byIds(ids: readonly string[]): Promise<readonly Product[]>;
+  newArrivals(limit: number): Promise<readonly Product[]>;
+}
+
+export interface ContactRepository {
+  submit(message: ContactMessage, now?: Date): Promise<Result>;
 }
 
 export interface AccountRepository {
@@ -56,7 +107,11 @@ export interface AccountRepository {
   addresses(userId: string): Promise<readonly Address[]>;
   saveAddress(userId: string, input: AddressInput, id?: string): Promise<Result<Address>>;
   deleteAddress(userId: string, id: string): Promise<Result>;
-  orders(userId: string): Promise<readonly StoredOrder[]>;
+  orders(
+    userId: string,
+    query: { readonly status?: OrderStatus | undefined },
+    page: Page,
+  ): Promise<Paged<StoredOrder>>;
   order(userId: string, orderNumber: string): Promise<StoredOrder | null>;
   cancelOrder(userId: string, orderNumber: string): Promise<Result>;
   requestDeletion(userId: string, password: string): Promise<Result>;
@@ -67,6 +122,31 @@ export interface AccountRepository {
 export interface OrderQuery {
   readonly status?: OrderStatus | undefined;
   readonly search?: string | undefined;
+}
+
+export interface AdminProductQuery {
+  readonly trash?: boolean | undefined;
+  readonly category?: string | undefined;
+  readonly stock?: "in" | "out" | "low" | undefined;
+  readonly search?: string | undefined;
+}
+
+export interface MessageQuery {
+  readonly status?: "unread" | "read" | "replied" | undefined;
+  readonly search?: string | undefined;
+}
+
+export interface MessageCounts {
+  readonly all: number;
+  readonly unread: number;
+  readonly read: number;
+  readonly replied: number;
+}
+
+export interface CustomerStats {
+  readonly total: number;
+  readonly newSince: number;
+  readonly withOrders: number;
 }
 
 export interface ProductDraft {
@@ -130,7 +210,8 @@ export interface DashboardSummary {
 
 export interface AdminRepository {
   summary(): Promise<DashboardSummary>;
-  products(): Promise<readonly AdminProduct[]>;
+  products(query: AdminProductQuery, page: Page): Promise<Paged<AdminProduct>>;
+  productCounts(): Promise<{ readonly live: number; readonly trashed: number }>;
   product(id: string): Promise<AdminProduct | null>;
   createProduct(draft: ProductDraft, actor: SessionUser): Promise<Result<AdminProduct>>;
   updateProduct(id: string, draft: ProductDraft, actor: SessionUser): Promise<Result<AdminProduct>>;
@@ -138,7 +219,8 @@ export interface AdminRepository {
   restoreProduct(id: string, actor: SessionUser): Promise<Result>;
   deleteProductForever(id: string, actor: SessionUser): Promise<Result>;
   emptyTrash(actor: SessionUser): Promise<Result<{ removed: number }>>;
-  orders(query?: OrderQuery): Promise<readonly StoredOrder[]>;
+  orders(query: OrderQuery, page: Page): Promise<Paged<StoredOrder>>;
+  orderCounts(): Promise<Readonly<Record<OrderStatus, number>>>;
   order(orderNumber: string): Promise<StoredOrder | null>;
   setOrderStatus(orderNumber: string, status: OrderStatus, actor: SessionUser): Promise<Result>;
   setPaymentDecision(
@@ -146,7 +228,8 @@ export interface AdminRepository {
     decision: "confirmed" | "rejected",
     actor: SessionUser,
   ): Promise<Result>;
-  customers(search?: string): Promise<readonly CustomerRecord[]>;
+  customers(search: string, page: Page): Promise<Paged<CustomerRecord>>;
+  customerStats(since: Date): Promise<CustomerStats>;
   setCustomerStatus(
     id: string,
     status: "active" | "suspended" | "banned",
@@ -154,15 +237,17 @@ export interface AdminRepository {
   ): Promise<Result>;
   setReturnPrivilege(id: string, allowed: boolean, actor: SessionUser): Promise<Result>;
   deleteCustomer(id: string, actor: SessionUser): Promise<Result>;
-  promos(): Promise<readonly PromoRecord[]>;
+  promos(page: Page): Promise<Paged<PromoRecord>>;
   savePromo(
     input: { code: string; percent: number; expiresAt: string | null; usageLimit: number | null },
     actor: SessionUser,
   ): Promise<Result<PromoRecord>>;
   setPromoActive(id: string, active: boolean, actor: SessionUser): Promise<Result>;
   deletePromo(id: string, actor: SessionUser): Promise<Result>;
-  messages(): Promise<readonly InboxMessage[]>;
-  markMessage(id: string, status: "read" | "unread"): Promise<Result>;
+  messages(query: MessageQuery, page: Page): Promise<Paged<InboxMessage>>;
+  messageCounts(): Promise<MessageCounts>;
+  message(id: string): Promise<InboxMessage | null>;
+  markMessage(id: string, status: "read" | "unread", actor: SessionUser): Promise<Result>;
   replyToMessage(id: string, body: string, actor: SessionUser): Promise<Result>;
   deleteMessage(id: string, actor: SessionUser): Promise<Result>;
   analytics(days: 7 | 30 | 90): Promise<AnalyticsReport>;
@@ -180,10 +265,13 @@ export interface AdminRepository {
     role: Exclude<StaffRole, "owner" | "developer">,
     actor: SessionUser,
   ): Promise<Result<{ link: string }>>;
-  activity(): Promise<readonly ActivityEntry[]>;
+  activity(search: string, page: Page): Promise<Paged<ActivityEntry>>;
 }
 
 export interface DataLayer {
+  readonly catalogue: CatalogueRepository;
+  readonly orders: OrdersRepository;
+  readonly contact: ContactRepository;
   readonly auth: AuthRepository;
   readonly account: AccountRepository;
   readonly admin: AdminRepository;

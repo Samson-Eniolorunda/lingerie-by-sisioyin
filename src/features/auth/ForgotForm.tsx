@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/Button";
 import { TextField } from "@/components/ui/Field";
@@ -32,9 +31,9 @@ export function ForgotForm({
             data-testid="dev-reset-link"
           >
             Development build: no email is sent.{" "}
-            <Link href={done.devLink} className="text-primary underline underline-offset-4">
+            <a href={done.devLink} className="text-primary underline underline-offset-4">
               Open the reset link
-            </Link>
+            </a>
             .
           </p>
         ) : null}

@@ -17,8 +17,11 @@ export default async function OrdersPage({
   const user = await requireCustomer("/dashboard/orders");
   const { status } = await searchParams;
   const active = ORDER_STATUSES.find((s) => s === status) as OrderStatus | undefined;
-  const all = await data.account.orders(user.id);
-  const orders = active ? all.filter((o) => o.status === active) : all;
+  const { items: orders } = await data.account.orders(
+    user.id,
+    { status: active },
+    { limit: 100, offset: 0 },
+  );
   const chips: { href: string; label: string; current: boolean }[] = [
     { href: "/dashboard/orders", label: "All", current: !active },
     ...ORDER_STATUSES.map((s) => ({

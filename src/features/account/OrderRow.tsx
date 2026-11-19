@@ -2,7 +2,7 @@ import Link from "next/link";
 import { StatusBadge } from "@/features/orders/StatusBadge";
 import { formatDate } from "@/lib/dates";
 import { formatNaira } from "@/lib/money";
-import type { StoredOrder } from "@/server/mock/orders";
+import type { StoredOrder } from "@/types/orders";
 
 /** An order is a row, not a card: number and date on the left, total and status on the right, all one tap. */
 export function OrderRow({

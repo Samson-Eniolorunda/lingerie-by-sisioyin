@@ -134,10 +134,8 @@ test("A-06 A-07 forgotten and reset password: single use, then sign in with the 
   await page.getByLabel("Confirm new password").fill("Changed-Pass2!");
   await page.getByRole("button", { name: "Set new password" }).click();
   await expect(page.getByText("Your password has been changed")).toBeVisible();
-  await page.goto(resetLink);
-  await page.getByLabel("New password", { exact: true }).fill("Third-Pass3!");
-  await page.getByLabel("Confirm new password").fill("Third-Pass3!");
-  await page.getByRole("button", { name: "Set new password" }).click();
+  await page.goto(resetLink); // the one-time code was used, so the link leads to a fresh request
+  await expect(page).toHaveURL(/\/forgot-password\?link=expired/);
   await expect(page.getByText("expired or has already been used")).toBeVisible();
   await signInAs(page, { email, password: "Changed-Pass2!" });
   await page.waitForURL("**/dashboard");
