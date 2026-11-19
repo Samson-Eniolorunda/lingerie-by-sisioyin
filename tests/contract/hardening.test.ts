@@ -174,7 +174,8 @@ describe("review fix 5: an edit never overwrites stock that an order has just ta
     expect(now?.priceNgn).toBe(9500); // the details were saved
     expect(now?.variantStock[0]?.qty).toBe(4); // the order's stock was kept
     // With the current version the stock is written.
-    const fresh = (await supabaseAdmin.product(loaded.id))!;
+    const fresh = await supabaseAdmin.product(loaded.id);
+    if (!fresh) throw new Error("product missing");
     const ok = await supabaseAdmin.updateProduct(
       loaded.id,
       {
