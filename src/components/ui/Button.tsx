@@ -69,11 +69,11 @@ export function ButtonRow({
       )}
     >
       {secondary ? (
-        <div className="flex-1 sm:flex-none [&>*]:w-full sm:[&>*]:w-auto">{secondary}</div>
+        <div className="min-w-0 flex-1 sm:flex-none [&>*]:w-full sm:[&>*]:w-auto">{secondary}</div>
       ) : null}
       <div
         className={cn(
-          secondary ? "flex-1 sm:flex-none" : "w-full sm:w-auto",
+          secondary ? "min-w-0 flex-1 sm:flex-none" : "w-full sm:w-auto",
           "[&>*]:w-full sm:[&>*]:w-auto",
         )}
       >

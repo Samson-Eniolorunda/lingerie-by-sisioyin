@@ -81,14 +81,14 @@ export function ConsentBanner({ answered }: { readonly answered: boolean }) {
           secondary={
             <Button
               variant="secondary"
-              className="px-3 whitespace-nowrap"
+              className="px-2! text-sm! whitespace-nowrap"
               onClick={() => answer("essential")}
             >
               Essential only
             </Button>
           }
           primary={
-            <Button className="px-3 whitespace-nowrap" onClick={() => answer("all")}>
+            <Button className="px-2! text-sm! whitespace-nowrap" onClick={() => answer("all")}>
               Accept analytics
             </Button>
           }
