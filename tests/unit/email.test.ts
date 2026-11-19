@@ -121,7 +121,7 @@ describe("e-mail transports", () => {
     const result = await resendTransport(
       "re_key",
       "Shop <orders@lingeriebysisioyin.store>",
-      fetcher as unknown as typeof fetch,
+      fetcher,
     ).send({
       to: "ada@example.com",
       subject: "S",
@@ -130,10 +130,11 @@ describe("e-mail transports", () => {
       replyTo: "support@x.co",
     });
     expect(result).toEqual({ ok: true, id: "re_123" });
-    const [url, init] = fetcher.mock.calls[0] as unknown as [string, RequestInit];
+    const [url = "", init = {}] = fetcher.mock.calls[0] ?? [];
+    const sent: RequestInit = init;
     expect(url).toBe("https://api.resend.com/emails");
-    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer re_key");
-    expect(JSON.parse(init.body as string)).toMatchObject({
+    expect((sent.headers as Record<string, string>).Authorization).toBe("Bearer re_key");
+    expect(JSON.parse(String(sent.body))).toMatchObject({
       from: "Shop <orders@lingeriebysisioyin.store>",
       to: ["ada@example.com"],
       reply_to: "support@x.co",
@@ -143,7 +144,7 @@ describe("e-mail transports", () => {
   it("Resend: reports a refusal or an unreachable service instead of throwing", async () => {
     const refused = vi.fn(async () => new Response("no", { status: 422 }));
     expect(
-      await resendTransport("k", "f", refused as unknown as typeof fetch).send({
+      await resendTransport("k", "f", refused).send({
         to: "a@b.co",
         subject: "",
         html: "",
@@ -155,7 +156,7 @@ describe("e-mail transports", () => {
     });
     expect(
       (
-        await resendTransport("k", "f", down as unknown as typeof fetch).send({
+        await resendTransport("k", "f", down).send({
           to: "a@b.co",
           subject: "",
           html: "",

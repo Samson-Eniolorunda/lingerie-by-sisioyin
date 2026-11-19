@@ -29,6 +29,9 @@ const ROUTES = [
   "/admin/messages",
   "/admin/analytics",
   "/admin/settings",
+  "/admin/settings/payments",
+  "/admin/reviews",
+  "/admin/receipts",
   "/admin/team",
   "/admin/activity",
 ];

@@ -1,5 +1,31 @@
 # Rebuild status
 
+## Session 7 (19 November 2026, scheduled run): go/no-go review fixes and payments
+
+Branch `rebuild/production`. Nothing here has been applied to any real project; every SQL file is still unrun, so the fixes were folded into the baseline files and `0003_payments.sql` is new.
+
+**Part R, go/no-go review fixes (all done).**
+
+1. `place_order` and `quote_order` are no longer executable by `anon` or `authenticated`; only the server (service role) calls them, naming the signed-in customer in `p_user` (honoured only when `is_service()`). A receipt is mandatory, must sit under `<idempotency key>/` and must exist in `storage.objects` (bucket `payment-receipts`); `orders.receipt_path` is unique. `attach_receipt` is server-only with the same checks. A shared rate limit (`rate_limits` table, `rate_limit_hit`) limits `placeOrder` by address and by e-mail.
+2. New payment state `refund_check`: an order cancelled with a receipt on file that staff had not accepted (awaiting or rejected, including the expiry job) is flagged; staff enter what arrived (`resolve_refund_check`), which becomes a refund owed or nothing; `mark_refunded` is now reachable from the admin order page. When `place_order` fails after the transfer, the receipt is recorded in `checkout_failures`; staff see it under **Receipts with no order** (admin menu) with the customer's contact details, close it and may delete settled or abandoned files. `CheckoutView` and `placeOrder` no longer say "nothing was charged".
+3. `OWNER_SETUP.md` no longer tells the owner to run `tests/sql` in the real project (also in `supabase/baseline/README.md` and this file).
+4. `trackOrder`, `createReceiptReupload` and `attachReceipt` are rate-limited by address and e-mail in the shared store; tracking returns a `TrackedOrder` with no phone, street address, name, account, notes, receipt path or key.
+5. `updateProduct` saves stock only if the `stock_version` the form was loaded with is still current (one conditional UPDATE); otherwise the other details are saved and the editor is told to reload the stock.
+6. Auth links: on a Vercel preview they return to the preview's own address (`VERCEL_URL`), elsewhere `NEXT_PUBLIC_SITE_URL` (set per environment); the allow-list in `OWNER_SETUP.md` step 4 is `https://www.lingeriebysisioyin.store/**`, `http://localhost:3000/**` and the preview pattern; a failed code exchange on a sign-up confirmation says "Your address is confirmed, please sign in".
+7. `src/proxy.ts` follows the `@supabase/ssr` pattern: the response is rebuilt from the request inside `setAll`, so refreshed cookies reach the render.
+8. Public writes (visit, contact, reviews, testimonials, uploads, invitations) are rate-limited through the shared store; the raw auth service error is no longer shown; staff with `customers.manage` can no longer edit other staff or the owner (RLS policy); `OWNER_SETUP.md` step 1 names both the new publishable/secret keys and the legacy anon/service_role keys.
+
+**Part P, payments and e-mail (all done).**
+
+1. **Bank details** live in `payment_bank_details` (one row, public read, `settings.manage` write, trigger-written `payment_settings_log` with old and new values), edited at Admin, Settings, Payments from a list of Nigerian banks. `BANK` was removed from `src/config/site.ts`; checkout, the tracking page, e-mails, terms, FAQ and privacy read the stored values (`{{bank.*}}` markers in `src/content`); with none saved they say "Payment details are being updated" and an order cannot be placed.
+2. **Paystack and Flutterwave** are prepared, not integrated: `src/server/payments` has the provider interface, real webhook signature checks (HMAC SHA-512 and the secret hash), `/api/webhooks/paystack` and `/api/webhooks/flutterwave` (503 until configured, 401 on a bad signature, events recorded once), a per-method switch (`payment_methods`; `connected` can only be set by the developer in SQL and a method cannot be switched on before then), gateway order states and service-only `confirm_gateway_payment` and `fail_gateway_payment`. Variable names are in `OWNER_SETUP.md`.
+3. **E-mail** behind `src/server/email`: Resend over HTTP, British English HTML and text templates for order confirmation, payment confirmed, payment rejected, shipped, contact reply and the shop's own new-order note; sent after the response (`after()`), never throws, in-memory outbox in development and tests.
+4. **Open items closed:** staff invitation sign-up (`/admin/sign-in?invite=`), review and testimonial moderation (`/admin/reviews`), orphan receipt clean-up (`/admin/receipts`).
+
+**Gates.** See `PAYMENTS_PROGRESS.md` for the final numbers.
+
+**Still open.** E-mail was tested only with the in-memory transport and a mocked Resend call, never against Resend. The sign-in lock is still per server instance. Reviews, testimonials and the newsletter have no customer-facing form yet (the database and the moderation screens are ready). Direct calls to `record_visit` and `submit_contact_message` with the public key remain possible (they are bounded by column limits, not by the shared limiter). The invitation e-mail is not sent automatically (the link is shown to the owner to pass on).
+
 ## Session 6 (19 November 2026, scheduled run): the Supabase data layer
 
 **What was built.** Every data contract now has a real implementation against `supabase/baseline`, in `src/server/supabase`: catalogue, contact, auth, orders (quote, place, cancel, payment decision, receipt re-upload, expiry), account, admin (products, orders, customers, promos, messages, analytics, staff and invitations, activity log, settings), reviews, testimonials and page visits. Receipts use the private `payment-receipts` bucket with signed uploads and short signed links. `DATA_MODE` is `supabase` when `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are set; `mock` only on a developer's machine or with `LBS_ALLOW_DEMO=true`; otherwise `unconfigured`, and every call is refused with a message naming the missing variables. A production build never serves invented data.
