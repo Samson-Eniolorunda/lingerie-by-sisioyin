@@ -15,8 +15,8 @@ import type { StaffMember } from "@/types/account";
 import { ConfirmButton } from "./ConfirmButton";
 import { useAdminAction } from "./useAdminAction";
 
-/** Small buttons from the table layout up; phones keep the full 48 px height. */
-const COMPACT = "flex-1 sm:min-h-9 sm:flex-none sm:px-3 sm:text-sm";
+/** Small buttons from 1024 px (a mouse); phones and tablets keep 44 px or more. */
+const COMPACT = "flex-1 lg:min-h-9 lg:flex-none lg:px-3 lg:text-sm";
 
 export function TeamManager({
   staff,
