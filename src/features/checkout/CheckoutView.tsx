@@ -22,19 +22,19 @@ import {
   receiptProblem,
 } from "@/lib/receipt-types";
 import { getQuote, placeOrder, type QuoteState } from "@/server/actions/orders";
+import {
+  ATTEMPT_KEY,
+  readSavedForm,
+  saveContactAfterOrder,
+  saveForm,
+  startingValues,
+} from "./saved-form";
 import { CopyButton } from "./CopyButton";
 import { uploadReceiptFor } from "./upload-receipt";
 import { resetCheckoutChoices, setCheckoutChoices, useCheckoutChoices } from "./session";
-import {
-  EMPTY_VALUES,
-  validateContact,
-  validateDelivery,
-  type CheckoutValues,
-  type Errors,
-} from "./validate";
+import { validateContact, validateDelivery, type CheckoutValues, type Errors } from "./validate";
 
-const FORM_KEY = "LBS_CHECKOUT_FORM";
-const KEY_KEY = "LBS_CHECKOUT_ATTEMPT";
+const KEY_KEY = ATTEMPT_KEY;
 
 /** One key per checkout attempt, kept across reloads until the order is placed, so a retry never places twice. */
 function attemptKey(): string {
@@ -46,17 +46,8 @@ function attemptKey(): string {
 }
 type StepId = 0 | 1 | 2;
 
-function loadValues(raw: string | null): CheckoutValues {
-  if (!raw) return EMPTY_VALUES;
-  try {
-    return { ...EMPTY_VALUES, ...(JSON.parse(raw) as Partial<CheckoutValues>) };
-  } catch {
-    return EMPTY_VALUES;
-  }
-}
-
 const noopSubscribe = () => () => {};
-const readSaved = () => readStorage(FORM_KEY);
+const readSaved = readSavedForm;
 
 /** The signed-in customer's details, from their account (null for a guest). */
 export type CheckoutAccount = Pick<
@@ -79,32 +70,21 @@ export function CheckoutView({ account = null }: { readonly account?: CheckoutAc
       </div>
     );
   }
-  return <CheckoutForm initial={parseSaved(saved, choices.state, account)} />;
+  return (
+    <CheckoutForm
+      initial={startingValues(saved, choices.state, account)}
+      signedIn={account !== null}
+    />
+  );
 }
 
-function parseSaved(
-  raw: string | null,
-  stateFromBag: string,
-  account: CheckoutAccount | null,
-): CheckoutValues {
-  const saved = loadValues(raw);
-  if (!account) return { ...saved, state: stateFromBag || saved.state };
-  // The account's details win over anything an earlier guest order left in this browser; the saved
-  // form only fills what the account does not have.
-  const fill = (fromAccount: string, fromBrowser: string) => fromAccount || fromBrowser;
-  return {
-    ...saved,
-    email: account.email,
-    firstName: fill(account.firstName, saved.firstName),
-    lastName: fill(account.lastName, saved.lastName),
-    phone: fill(account.phone, saved.phone),
-    address: fill(account.address, saved.address),
-    city: fill(account.city, saved.city),
-    state: stateFromBag || fill(account.state, saved.state),
-  };
-}
-
-function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
+function CheckoutForm({
+  initial,
+  signedIn,
+}: {
+  readonly initial: CheckoutValues;
+  readonly signedIn: boolean;
+}) {
   const router = useRouter();
   const lines = useCart();
   const choices = useCheckoutChoices();
@@ -125,8 +105,8 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
   const form = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    writeStorage(FORM_KEY, JSON.stringify(values));
-  }, [values]);
+    saveForm(values, signedIn);
+  }, [values, signedIn]);
 
   const promoCode = choices.promo?.code;
   const request = useMemo(
@@ -301,16 +281,7 @@ function CheckoutForm({ initial }: { readonly initial: CheckoutValues }) {
           resetCheckoutChoices();
           setTouched({});
           writeStorage(KEY_KEY, "");
-          writeStorage(
-            FORM_KEY,
-            JSON.stringify({
-              ...EMPTY_VALUES,
-              firstName: values.firstName,
-              lastName: values.lastName,
-              email: values.email,
-              phone: values.phone,
-            }),
-          );
+          saveContactAfterOrder(values, signedIn);
           router.push("/confirmation");
           return;
         }

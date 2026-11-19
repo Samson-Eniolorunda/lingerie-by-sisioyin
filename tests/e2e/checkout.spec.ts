@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { SUPABASE_E2E, productId } from "./helpers";
+import { DEMO_CUSTOMER, SUPABASE_E2E, productId, signInAs } from "./helpers";
 
 const BRIEF = {
   variantId: "fixture-02-M-Black",
@@ -264,4 +264,57 @@ test("W-02 to W-04 wishlist page lists saved items, removes one and shows the em
   await expect(page.getByText("Lace balconette bra")).toBeVisible();
   await page.getByRole("button", { name: /Remove Lace balconette bra from wishlist/ }).click();
   await expect(page.getByText("Nothing saved yet")).toBeVisible();
+});
+
+test("a signed-in customer's details are never saved on the device, and signing out clears the checkout keys", async ({
+  page,
+}) => {
+  test.skip(SUPABASE_E2E, "uses the demo customer of the mock store");
+  await signInAs(page, DEMO_CUSTOMER);
+  await page.waitForURL("**/dashboard");
+  await page.evaluate(
+    (lines) => localStorage.setItem("LBS_CART_V1", JSON.stringify(lines)),
+    [BRIEF],
+  );
+  await page.goto("/checkout");
+  await expect(page.getByLabel("Email")).toHaveValue(DEMO_CUSTOMER.email);
+  await page.getByLabel("First name").fill("Changed");
+  await page.getByLabel("Phone").fill("08099998888");
+  expect(await page.evaluate(() => localStorage.getItem("LBS_CHECKOUT_FORM"))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem("LBS_CHECKOUT_ATTEMPT"))).not.toBeNull();
+
+  // Whatever a guest left behind is neither read nor kept for the account, and sign-out removes it.
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "LBS_CHECKOUT_FORM",
+      JSON.stringify({ firstName: "Guest", address: "1 Guest Road", city: "Lagos" }),
+    ),
+  );
+  await page.goto("/checkout");
+  await expect(page.getByLabel("First name")).not.toHaveValue("Guest");
+  await page.getByLabel("Phone").fill("08011112222");
+  await dismissKeyboard(page);
+  await page
+    .getByRole("button", { name: "Continue to delivery" })
+    .filter({ visible: true })
+    .click();
+  await expect(page.getByLabel("Address")).not.toHaveValue("1 Guest Road");
+
+  await page.goto("/dashboard/settings");
+  await page
+    .getByRole("navigation", { name: "Account" })
+    .getByRole("button", { name: "Sign out" })
+    .click();
+  await page.waitForURL((url) => url.pathname === "/");
+  expect(await page.evaluate(() => localStorage.getItem("LBS_CHECKOUT_FORM"))).toBeNull();
+  expect(await page.evaluate(() => localStorage.getItem("LBS_CHECKOUT_ATTEMPT"))).toBeNull();
+});
+
+test("a guest's checkout details are still remembered on the device", async ({ page }) => {
+  await seedBag(page, [BRIEF]);
+  await page.goto("/checkout");
+  await page.getByLabel("First name").fill("Ada");
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("LBS_CHECKOUT_FORM")))
+    .toContain("Ada");
 });

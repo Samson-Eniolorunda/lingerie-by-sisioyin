@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CATEGORY_LINKS, NAV, SUPPORT_LINKS } from "@/config/site";
 import { Sheet } from "@/components/ui/Sheet";
 import { useAccount } from "@/features/account/useAccount";
+import { clearCheckoutStorage } from "@/features/checkout/saved-form";
 import { signOutAction } from "@/server/actions/auth";
 import { ThemeControl } from "@/features/theme/ThemeControl";
 import { useShell } from "./ShellContext";
@@ -49,7 +50,7 @@ export function MenuSheet() {
                   </Link>
                 </li>
                 <li>
-                  <form action={signOutAction}>
+                  <form action={signOutAction} onSubmit={clearCheckoutStorage}>
                     <button type="submit" className={`${link} w-full text-left`}>
                       Sign out
                     </button>

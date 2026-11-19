@@ -11,6 +11,7 @@ import {
   exportDataAction,
   requestDeletionAction,
 } from "@/server/actions/account";
+import { clearCheckoutStorage } from "@/features/checkout/saved-form";
 import { signOutAction } from "@/server/actions/auth";
 
 const heading = "font-display text-2xl";
@@ -103,7 +104,7 @@ export function SettingsPanel() {
         <h2 id="session" className={heading}>
           Sign out
         </h2>
-        <form action={signOutAction} className="mt-3">
+        <form action={signOutAction} onSubmit={clearCheckoutStorage} className="mt-3">
           <Button type="submit" variant="secondary">
             Sign out
           </Button>

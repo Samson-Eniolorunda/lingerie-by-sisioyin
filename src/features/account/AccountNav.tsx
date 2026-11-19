@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { clearCheckoutStorage } from "@/features/checkout/saved-form";
 import { signOutAction } from "@/server/actions/auth";
 
 const ITEMS = [
@@ -14,7 +15,7 @@ const ITEMS = [
   { href: "/dashboard/settings", label: "Settings" },
 ] as const;
 
-/** A scrolling row of 44 px links on phones, a vertical list from 1024 px. The current page is marked; Sign out ends the list. */
+/** Wrapping rows of 44 px links on phones (every item, Sign out included, is visible without swiping), a vertical list from 1024 px. The current page is marked; Sign out ends the list. */
 export function AccountNav() {
   const pathname = usePathname();
   return (
@@ -22,7 +23,7 @@ export function AccountNav() {
       aria-label="Account"
       className="-mx-4 border-b border-line px-4 lg:mx-0 lg:border-b-0 lg:px-0"
     >
-      <ul className="flex scrollbar-none gap-1 overflow-x-auto lg:flex-col lg:overflow-visible">
+      <ul className="flex flex-wrap gap-x-1 lg:flex-col">
         {ITEMS.map((item) => {
           const current =
             item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
@@ -44,7 +45,7 @@ export function AccountNav() {
           );
         })}
         <li className="shrink-0">
-          <form action={signOutAction}>
+          <form action={signOutAction} onSubmit={clearCheckoutStorage}>
             <button
               type="submit"
               className="flex min-h-11 items-center border-b-2 border-transparent px-3 text-base text-muted hover:text-ink lg:border-b-0 lg:border-l-2"
