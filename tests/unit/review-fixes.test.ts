@@ -85,3 +85,26 @@ describe("review fix 6: links in e-mails return to the deployment that sent them
     expect(callbackUrl("/dashboard", "customer", "confirm")).toContain("&type=confirm");
   });
 });
+
+describe("review fix 2 in the development store: cancelling with an unaccepted receipt opens a refund check", () => {
+  it("flags it, and a confirmed payment owes a refund instead", async () => {
+    const { applyCancellation } = await import("@/server/mock/orders");
+    const { getDb, resetDb } = await import("@/server/mock/db");
+    resetDb();
+    const db = getDb();
+    const waiting = { ...order, orderNumber: "LBS-W", lines: [] };
+    db.orders.set("LBS-W", waiting);
+    expect(applyCancellation(db, waiting, new Date())?.paymentStatus).toBe("refund_check");
+    const paid = { ...order, orderNumber: "LBS-P", lines: [], paymentStatus: "confirmed" as const };
+    db.orders.set("LBS-P", paid);
+    expect(applyCancellation(db, paid, new Date())).toMatchObject({
+      paymentStatus: "refund_owed",
+      refundAmount: 1000,
+    });
+    const noReceipt = { ...order, orderNumber: "LBS-N", lines: [], receiptPath: null };
+    db.orders.set("LBS-N", noReceipt);
+    expect(applyCancellation(db, noReceipt, new Date())?.paymentStatus).toBe(
+      "awaiting_confirmation",
+    );
+  });
+});

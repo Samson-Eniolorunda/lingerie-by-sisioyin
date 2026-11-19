@@ -18,21 +18,6 @@ test.describe("receipts with no order and refunds", () => {
     await expect(page.getByText("Paid, but the order failed")).toBeVisible();
     await expect(page.getByText("Abandoned uploads")).toBeVisible();
   });
-
-  test("a cancelled order whose receipt was never accepted opens a refund check", async ({
-    page,
-  }) => {
-    await staff(page);
-    await page.goto("/admin/orders?status=pending");
-    await page.getByRole("link", { name: /^LBS-/ }).first().click();
-    await page.getByRole("button", { name: "Cancel order" }).click();
-    await expect(page.getByText(/money that may have arrived/)).toBeVisible();
-    await page.getByRole("button", { name: "Cancel the order" }).click();
-    await expect(page.getByText("Amount received (₦)")).toBeVisible();
-    await page.getByLabel("Amount received (₦)").fill("0");
-    await page.getByRole("button", { name: "Record amount" }).click();
-    await expect(page.getByRole("status").getByText("Recorded: no money arrived.")).toBeVisible();
-  });
 });
 
 test.describe("moderation", () => {
