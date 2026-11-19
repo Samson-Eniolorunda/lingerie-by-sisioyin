@@ -301,7 +301,7 @@ prove, because they ran against a stand-in, not against Supabase.
        ```sql
        select order_number, customer_email, status, created_at
          from public.orders
-        where customer_email like '%+lbstest@%'
+        where customer_email ilike '%+lbstest@%'
         order by created_at;
        ```
 
@@ -312,20 +312,21 @@ prove, because they ran against a stand-in, not against Supabase.
 
        ```sql
        begin;
-       -- Give promo codes back the uses the test orders took.
+       -- Give promo codes back the uses the test orders took. Orders you cancelled in step 3 gave
+       -- their use back then, so they are left out here.
        update public.promo_codes p
           set used_count = greatest(0, p.used_count - t.n)
          from (select promo_code, count(*) as n
                  from public.orders
-                where customer_email like '%+lbstest@%' and promo_code is not null
+                where customer_email ilike '%+lbstest@%' and promo_code is not null
+                  and status <> 'cancelled'
                 group by promo_code) t
         where upper(p.code) = upper(t.promo_code);
-       delete from public.checkout_failures where customer_email like '%+lbstest@%';
-       delete from public.receipt_uploads   where customer_email like '%+lbstest@%';
-       delete from public.orders            where customer_email like '%+lbstest@%';
+       delete from public.checkout_failures where customer_email ilike '%+lbstest@%';
+       delete from public.orders            where customer_email ilike '%+lbstest@%';
        delete from public.site_visits
         where ip_address = 'YOUR.IP.ADDRESS' and created_at >= timestamptz '2026-01-01 00:00+00';
-       select (select count(*) from public.orders where customer_email like '%+lbstest@%') as test_orders_left,
+       select (select count(*) from public.orders where customer_email ilike '%+lbstest@%') as test_orders_left,
               (select count(*) from public.orders) as orders_total,
               (select count(*) from public.site_visits
                 where ip_address = 'YOUR.IP.ADDRESS' and created_at >= timestamptz '2026-01-01 00:00+00') as test_visits_left;
@@ -333,7 +334,9 @@ prove, because they ran against a stand-in, not against Supabase.
        ```
 
        `test_orders_left` and `test_visits_left` must both be `0`. If anything looks wrong, run
-       `rollback;` instead of `commit;` and nothing is changed.
+       `rollback;` instead of `commit;` and nothing is changed. The notes of the uploaded receipts
+       (`receipt_uploads`) are deliberately **not** deleted here: until the receipt files themselves
+       are deleted (step 6) they are the only place that shows the `+lbstest` contact details.
 
     5. **Remove the test customer.** In **Authentication, Users**, delete the test customer account
        (the one with the `+lbstest` address). Its profile and addresses go with it. Never delete the
@@ -341,7 +344,17 @@ prove, because they ran against a stand-in, not against Supabase.
     6. **Remove the test receipts.** Open **Admin, Receipts with no order**. The receipts of the
        deleted test orders now appear there, with the `+lbstest` contact details. Press **View
        receipt** on each (a receipt nobody has opened cannot be deleted), then **Delete**. Abandoned
-       uploads need to be a day old before they can be deleted.
+       uploads need to be a day old before they can be deleted. When every test receipt is gone,
+       remove their notes in **SQL editor, New query** (it deletes only notes with the marker whose
+       file no longer exists):
+
+       ```sql
+       delete from public.receipt_uploads u
+        where u.customer_email ilike '%+lbstest@%'
+          and not exists (select 1 from storage.objects o
+                           where o.bucket_id = 'payment-receipts' and o.name = u.receipt_path);
+       ```
+
     7. Check `/admin` and `/admin/analytics`: orders, revenue, customers and visits must read as for a
        brand new shop, and `select count(*) from public.orders;` must say `0`.
 
