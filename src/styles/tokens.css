@@ -3,23 +3,32 @@
  * per theme, then the Tailwind theme that exposes the roles as utilities.
  */
 :root {
-  --ivory: #faf6f0;
+  --ivory: #fffbfc;
   --white: #ffffff;
-  --nude-100: #f3eae0;
-  --nude-200: #e8dbcd;
-  --nude-300: #d8c5b3;
-  --blush: #f1ddd6;
+  --nude-100: #f8f1f3;
+  --nude-200: #ecdfe3;
+  --nude-300: #dccbd1;
+  --blush: #fbe4ec;
   --ink-900: #1c1517;
   --ink-700: #3d3235;
   --ink-600: #5c4f52;
   --ink-500: #766a6c;
   --ink-450: #8e8284;
-  --wine-600: #832a3b;
-  --wine-700: #6b1f2e;
-  --wine-800: #551622;
-  --wine-900: #3f0f18;
-  --wine-100: #f4e4e6;
-  --brass: #8a6a2f;
+  --rose-50: #fdf2f6;
+  --rose-100: #fbe4ec;
+  --rose-200: #f6c6d8;
+  --rose-300: #ee9cbb;
+  --rose-400: #e26f9b;
+  --rose-500: #cf4a7e;
+  --rose-600: #b8336a;
+  --rose-700: #a62b5e;
+  --rose-800: #8a234e;
+  --rose-900: #6a1a3c;
+  --lilac-100: #f1ebfb;
+  --lilac-200: #e2d6f6;
+  --lilac-300: #cdb9ee;
+  --lilac-500: #8b6fc4;
+  --lilac-700: #6b4fa0;
 
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
@@ -46,24 +55,25 @@
   --c-ink-strong: var(--ink-700);
   --c-muted: var(--ink-600);
   --c-subtle: var(--ink-500);
-  --c-primary: var(--wine-700);
-  --c-primary-hover: var(--wine-600);
-  --c-primary-press: var(--wine-800);
-  --c-on-primary: var(--ivory);
-  --c-primary-tint: var(--wine-100);
+  --c-primary: var(--rose-700);
+  --c-primary-hover: var(--rose-600);
+  --c-primary-press: var(--rose-800);
+  --c-on-primary: var(--white);
+  --c-primary-tint: var(--rose-50);
   --c-selected: var(--blush);
-  --c-accent: var(--brass);
+  --c-accent: var(--lilac-700);
+  --c-accent-soft: var(--lilac-100);
   --c-overlay: rgb(28 21 23 / 0.5);
   --c-success: #2f6b4a;
   --c-success-bg: #e6f0ea;
   --c-warning: #8a5a12;
   --c-warning-bg: #f7ecd9;
-  --c-error: #a12a2a;
-  --c-error-bg: #f8e5e3;
+  --c-error: #b42318;
+  --c-error-bg: #fde8e4;
   --c-info: #2f5570;
   --c-info-bg: #e4edf2;
   --c-footer: var(--ink-900);
-  --c-on-footer: var(--ivory);
+  --c-on-footer: var(--white);
 }
 
 :root[data-theme="dark"] {
@@ -78,20 +88,21 @@
   --c-ink-strong: #e6dccf;
   --c-muted: #b9aba9;
   --c-subtle: #a2938f;
-  --c-primary: #e0a3ae;
-  --c-primary-hover: #ebb9c2;
-  --c-primary-press: #cf8c99;
+  --c-primary: #f2a7c3;
+  --c-primary-hover: #f7bfd4;
+  --c-primary-press: #e68db0;
   --c-on-primary: #161012;
-  --c-primary-tint: #35222a;
-  --c-selected: #3a2830;
-  --c-accent: #d4b06a;
+  --c-primary-tint: #35222c;
+  --c-selected: #3d2733;
+  --c-accent: #c9b6f2;
+  --c-accent-soft: #2e2540;
   --c-overlay: rgb(0 0 0 / 0.6);
   --c-success: #7fc79e;
   --c-success-bg: #1d2e25;
   --c-warning: #e0b671;
   --c-warning-bg: #33291a;
-  --c-error: #f0a1a1;
-  --c-error-bg: #3a1f1f;
+  --c-error: #ff9d94;
+  --c-error-bg: #3d1f1c;
   --c-info: #9cc2dc;
   --c-info-bg: #1d2a33;
   --c-footer: #0f0a0c;
@@ -116,6 +127,7 @@
   --color-primary-tint: var(--c-primary-tint);
   --color-selected: var(--c-selected);
   --color-accent: var(--c-accent);
+  --color-accent-soft: var(--c-accent-soft);
   --color-overlay: var(--c-overlay);
   --color-success: var(--c-success);
   --color-success-bg: var(--c-success-bg);

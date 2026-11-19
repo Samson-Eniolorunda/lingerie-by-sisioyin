@@ -7,8 +7,8 @@ const tile = (
   size,
   pad,
 ) => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 512 512">
-<rect width="512" height="512" fill="#6B1F2E"/>
-<text x="256" y="${256 + 74 - pad / 2}" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="${220 - pad}" fill="#FAF6F0">L</text>
+<rect width="512" height="512" fill="#A62B5E"/>
+<text x="256" y="${256 + 74 - pad / 2}" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="${220 - pad}" fill="#FFFFFF">L</text>
 <text x="256" y="${400 - pad / 2}" text-anchor="middle" font-family="Georgia, serif" font-size="${34 - pad / 6}" letter-spacing="6" fill="#E8DBCD">PLACEHOLDER</text>
 </svg>`;
 
@@ -19,8 +19,8 @@ const jobs = [
   ["public/icons/apple-touch-icon.png", 180, 0],
 ];
 const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-<rect width="1200" height="630" fill="#6B1F2E"/>
-<text x="600" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="96" letter-spacing="14" fill="#FAF6F0">LINGERIE</text>
+<rect width="1200" height="630" fill="#A62B5E"/>
+<text x="600" y="300" text-anchor="middle" font-family="Georgia, serif" font-size="96" letter-spacing="14" fill="#FFFFFF">LINGERIE</text>
 <text x="600" y="370" text-anchor="middle" font-family="Georgia, serif" font-style="italic" font-size="44" letter-spacing="8" fill="#E8DBCD">by Sisioyin</text>
 <text x="600" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="26" letter-spacing="6" fill="#E8DBCD">PLACEHOLDER SHARING IMAGE</text>
 </svg>`;

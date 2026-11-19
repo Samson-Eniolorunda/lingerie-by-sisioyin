@@ -45,7 +45,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <p className="bg-tint px-4 py-2 text-center text-xs font-medium tracking-[0.12em] text-ink-strong uppercase">
+      <p className="bg-accent-soft px-4 py-2 text-center text-xs font-medium tracking-[0.12em] text-ink-strong uppercase">
         Delivery to {DELIVERY_STATES.length} states · Free within Lagos
       </p>
 

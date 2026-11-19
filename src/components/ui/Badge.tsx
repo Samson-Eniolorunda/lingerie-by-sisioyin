@@ -9,7 +9,7 @@ const tones: Record<Tone, string> = {
   warning: "bg-warning-bg text-warning",
   error: "bg-error-bg text-error",
   info: "bg-info-bg text-info",
-  new: "bg-transparent text-accent",
+  new: "bg-accent-soft text-accent",
 };
 
 export function Badge({
@@ -23,7 +23,7 @@ export function Badge({
     <span
       className={cn(
         "inline-flex items-center rounded-sm px-2 py-0.5 text-xs font-medium tracking-wide",
-        tone === "new" && "px-0 uppercase",
+        tone === "new" && "w-fit self-start uppercase",
         tones[tone],
       )}
     >

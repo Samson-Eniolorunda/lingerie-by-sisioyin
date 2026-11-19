@@ -26,7 +26,7 @@ const BRAND = "Lingeries by Sisioyin";
 const INK = "#2a2026";
 const MUTED = "#6b5f66";
 const LINE = "#e8dfe3";
-const ACCENT = "#7a2e4d";
+const ACCENT = "#a62b5e";
 
 export function esc(value: string): string {
   return value

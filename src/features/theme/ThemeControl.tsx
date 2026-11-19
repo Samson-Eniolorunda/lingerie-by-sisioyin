@@ -17,7 +17,7 @@ function subscribe(listener: () => void): () => void {
 
 function readPreference(): ThemePreference {
   const value = readStorage(THEME_KEY);
-  return value === "light" || value === "dark" ? value : "system";
+  return value === "dark" || value === "system" ? value : "light";
 }
 
 export function applyTheme(preference: ThemePreference): void {
@@ -27,7 +27,7 @@ export function applyTheme(preference: ThemePreference): void {
   document.documentElement.dataset.theme = dark ? "dark" : "light";
   document
     .querySelector('meta[name="theme-color"]')
-    ?.setAttribute("content", dark ? "#161012" : "#FAF6F0");
+    ?.setAttribute("content", dark ? "#161012" : "#FFFBFC");
 }
 
 const options = [
@@ -36,12 +36,12 @@ const options = [
   { id: "dark", label: "Dark", Icon: Moon },
 ] as const;
 
-/** One theme key (`LBS_THEME`) for the whole site; the live site's value is read unchanged. */
+/** One theme key (`LBS_THEME`) for the whole site; light unless the visitor chose otherwise; the live site's value is read unchanged. */
 export function ThemeControl({ className }: { readonly className?: string }) {
   const preference = useSyncExternalStore(
     subscribe,
     readPreference,
-    () => "system" as ThemePreference,
+    () => "light" as ThemePreference,
   );
 
   const choose = useCallback((next: ThemePreference) => {

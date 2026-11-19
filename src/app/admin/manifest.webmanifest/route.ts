@@ -10,8 +10,8 @@ export function GET(): Response {
       start_url: adminPath("/"),
       scope: adminPath("/"),
       display: "standalone",
-      background_color: "#FAF6F0",
-      theme_color: "#6B1F2E",
+      background_color: "#FFFBFC",
+      theme_color: "#A62B5E",
       icons: [
         { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
         { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },

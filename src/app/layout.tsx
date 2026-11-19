@@ -47,13 +47,18 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   interactiveWidget: "resizes-content",
-  themeColor: "#FAF6F0",
+  themeColor: "#FFFBFC",
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang="en-GB" suppressHydrationWarning className={`${display.variable} ${sans.variable}`}>
+    <html
+      lang="en-GB"
+      data-theme="light"
+      suppressHydrationWarning
+      className={`${display.variable} ${sans.variable}`}
+    >
       <head>
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
