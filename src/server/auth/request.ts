@@ -29,14 +29,16 @@ export function siteOrigin(): string {
 }
 
 /**
- * Whether a host may appear in a link we e-mail: the production domain, this project's own
- * `*.vercel.app` addresses (the deployment, its branch alias, or the project's name as the prefix),
- * or localhost. A forged `Host` header can therefore never point a reset link somewhere else.
+ * Whether a host may appear in a link we e-mail: the production domain (and, in production, the
+ * admin host), this deployment's own address and its branch address (`VERCEL_URL`,
+ * `VERCEL_BRANCH_URL`, which Vercel sets), and localhost while developing. Nothing is guessed from a
+ * project name, so a forged `Host` header can never point a reset link somewhere else.
  */
 export function hostAllowed(host: string): boolean {
   const name = host.toLowerCase().split(":")[0] ?? "";
   if (!name) return false;
-  if (name === "localhost" || name === "127.0.0.1") return true;
+  if (process.env.NODE_ENV !== "production" && (name === "localhost" || name === "127.0.0.1"))
+    return true;
   try {
     if (name === new URL(publicEnv.NEXT_PUBLIC_SITE_URL).hostname.toLowerCase()) return true;
   } catch {
@@ -47,14 +49,7 @@ export function hostAllowed(host: string): boolean {
   if (ADMIN_HOST && name === ADMIN_HOST) return true;
   for (const own of [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL])
     if (own && name === own.toLowerCase()) return true;
-  const slug = process.env.VERCEL_GIT_REPO_SLUG?.toLowerCase();
-  const project = process.env.VERCEL_PROJECT_NAME?.toLowerCase() ?? slug;
-  return Boolean(
-    project &&
-    name.endsWith(".vercel.app") &&
-    name.startsWith(`${project}-`) &&
-    /^[a-z0-9.-]+$/.test(name),
-  );
+  return false;
 }
 
 /**

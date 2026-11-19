@@ -27,16 +27,12 @@ describe("requestOrigin on a preview", () => {
   it("uses an allowed request host and ignores a forged one", async () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     vi.stubEnv("VERCEL_URL", "lbs-abc123-team.vercel.app");
-    vi.stubEnv("VERCEL_GIT_REPO_SLUG", "lingerie-by-sisioyin");
+    vi.stubEnv("VERCEL_BRANCH_URL", "lbs-git-rebuild-production-team.vercel.app");
     const { requestOrigin, callbackUrl } = await import("@/server/auth/request");
-    incoming = new Headers({
-      host: "lingerie-by-sisioyin-git-rebuild-production-team.vercel.app",
-    });
-    expect(await requestOrigin()).toBe(
-      "https://lingerie-by-sisioyin-git-rebuild-production-team.vercel.app",
-    );
+    incoming = new Headers({ host: "lbs-git-rebuild-production-team.vercel.app" });
+    expect(await requestOrigin()).toBe("https://lbs-git-rebuild-production-team.vercel.app");
     expect(await callbackUrl("/reset-password")).toContain(
-      "https://lingerie-by-sisioyin-git-rebuild-production-team.vercel.app/auth/callback",
+      "https://lbs-git-rebuild-production-team.vercel.app/auth/callback",
     );
     incoming = new Headers({ "x-forwarded-host": "evil.example", host: "evil.example" });
     expect(await requestOrigin()).toBe("https://lbs-abc123-team.vercel.app");

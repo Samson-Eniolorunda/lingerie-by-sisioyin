@@ -91,19 +91,23 @@ describe("review fix 6: links in e-mails return to the deployment that sent them
 });
 
 describe("auth links on a preview follow the request's own host, checked against an allow-list", () => {
-  it("accepts the production domain, this project's vercel.app addresses and localhost only", () => {
+  it("accepts the production domain, this deployment's two Vercel addresses and, when developing, localhost", () => {
     vi.stubEnv("VERCEL_URL", "lbs-abc123-team.vercel.app");
+    vi.stubEnv("VERCEL_BRANCH_URL", "lbs-git-rebuild-production-team.vercel.app");
+    vi.stubEnv("VERCEL_PROJECT_NAME", "lingerie-by-sisioyin");
     vi.stubEnv("VERCEL_GIT_REPO_SLUG", "lingerie-by-sisioyin");
     for (const ok of [
       "www.lingeriebysisioyin.store",
       "lbs-abc123-team.vercel.app",
-      "lingerie-by-sisioyin-git-rebuild-production-team.vercel.app",
+      "lbs-git-rebuild-production-team.vercel.app",
       "localhost:3000",
     ])
       expect(hostAllowed(ok), ok).toBe(true);
     for (const bad of [
       "evil.example",
       "someone-elses-project.vercel.app",
+      // A name that merely starts with the project's name is not enough.
+      "lingerie-by-sisioyin-git-evil-team.vercel.app",
       "www.lingeriebysisioyin.store.evil.example",
       "lingerie-by-sisioyin.evil.example",
       "",

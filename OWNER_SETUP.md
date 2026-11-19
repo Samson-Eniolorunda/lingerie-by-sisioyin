@@ -86,9 +86,9 @@ entries in **Redirect URLs** (the `**` makes each one cover every path beneath i
 
 Remove any other entry, in particular a bare `*`. Links in e-mails (confirmation, password reset)
 return to the address of the deployment that sent them: on a Vercel preview they follow the address
-you opened the preview on, provided it is the live domain, this project's own `*.vercel.app` address
-(including the branch address) or localhost (anything else is ignored, so a forged address cannot
-redirect a reset link); on the live site they use `NEXT_PUBLIC_SITE_URL` (step 8). Google sign-in is optional; if wanted,
+you opened the preview on, provided it is the live domain, the preview's own address or its branch
+address (the two addresses Vercel gives each deployment), or localhost on a developer's machine
+(anything else is ignored, so a forged address cannot redirect a reset link); on the live site they use `NEXT_PUBLIC_SITE_URL` (step 8). Google sign-in is optional; if wanted,
 switch it on under Providers.
 
 **Send Supabase's own e-mails (confirmation, password reset) through Resend as well.** Supabase's
