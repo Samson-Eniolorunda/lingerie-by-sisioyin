@@ -314,7 +314,10 @@ test.describe("customers, promos, messages, settings, team", () => {
     await page.getByRole("button", { name: "Invite someone" }).click();
     await page.getByLabel("Email address").fill("new.staff@example.test");
     await page.getByRole("button", { name: "Create invitation" }).click();
+    // The full address, not a relative path, with a Copy button beside it.
     await expect(page.getByTestId("invite-link")).toContainText("/admin/sign-in?invite=");
+    expect(await page.getByTestId("invite-link").textContent()).toMatch(/^http/);
+    await expect(page.getByRole("button", { name: "Copy link" })).toBeVisible();
   });
   test("MA-01 analytics switch between 7, 30 and 90 days and say the figures are samples", async ({
     page,

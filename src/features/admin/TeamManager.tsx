@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button, ButtonRow } from "@/components/ui/Button";
 import { DataTable } from "@/components/ui/DataTable";
 import { SelectField, TextField } from "@/components/ui/Field";
 import { Form } from "@/components/ui/Form";
 import { Sheet } from "@/components/ui/Sheet";
+import { useToast } from "@/components/ui/Toast";
 import { formatDate } from "@/lib/dates";
 import { isProtectedRole, ROLE_LABELS } from "@/lib/permissions";
 import { inviteStaffAction, removeStaffAction, setStaffRoleAction } from "@/server/actions/admin";
 import type { StaffMember } from "@/types/account";
 import { ConfirmButton } from "./ConfirmButton";
 import { useAdminAction } from "./useAdminAction";
+
+/** Small buttons from the table layout up; phones keep the full 48 px height. */
+const COMPACT = "flex-1 sm:min-h-9 sm:flex-none sm:px-3 sm:text-sm";
 
 export function TeamManager({
   staff,
@@ -27,6 +31,24 @@ export function TeamManager({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [link, setLink] = useState<string | null>(null);
   const { run, pending } = useAdminAction();
+  const toast = useToast();
+  const canShare = useSyncExternalStore(
+    () => () => undefined,
+    () => typeof navigator.share === "function",
+    () => false,
+  );
+  // The server returns a path when no admin host is set; show the full address either way.
+  const fullLink = link && link.startsWith("/") ? `${window.location.origin}${link}` : link;
+
+  async function copyLink() {
+    if (!fullLink) return;
+    try {
+      await navigator.clipboard.writeText(fullLink);
+      toast.show("Link copied.", { tone: "success" });
+    } catch {
+      toast.show("Could not copy. Select the link and copy it.", { tone: "error" });
+    }
+  }
 
   return (
     <>
@@ -84,16 +106,18 @@ export function TeamManager({
               if (s.id === selfId) return null;
               const promote = s.role === "editor";
               return (
-                <div className="flex flex-wrap justify-end gap-2">
+                <div className="flex justify-end gap-2 whitespace-nowrap">
                   <ConfirmButton
                     label="Remove"
                     title={`Remove ${s.name || s.email}?`}
                     message="They lose access to the admin at once and are signed out."
                     confirmLabel="Remove access"
+                    className={COMPACT}
                     onConfirm={() => run(() => removeStaffAction(s.id))}
                   />
                   <Button
                     variant="secondary"
+                    className={COMPACT}
                     disabled={pending}
                     onClick={() =>
                       run(() => setStaffRoleAction(s.id, promote ? "super_admin" : "editor"))
@@ -126,9 +150,24 @@ export function TeamManager({
               className="tabular border border-line bg-tint p-3 text-sm break-all"
               data-testid="invite-link"
             >
-              {link}
+              {fullLink}
             </p>
-            <div className="flex justify-end">
+            <div className="flex flex-wrap justify-end gap-2">
+              <Button variant="secondary" onClick={() => void copyLink()}>
+                Copy link
+              </Button>
+              {canShare ? (
+                <Button
+                  variant="secondary"
+                  onClick={() =>
+                    void navigator
+                      .share({ title: "Staff invitation", url: fullLink ?? "" })
+                      .catch(() => undefined)
+                  }
+                >
+                  Share
+                </Button>
+              ) : null}
               <Button onClick={() => setOpen(false)}>Done</Button>
             </div>
           </div>
@@ -139,6 +178,7 @@ export function TeamManager({
             onSubmit={(event) => {
               event.preventDefault();
               run(() => inviteStaffAction({ email, role }), {
+                quiet: true,
                 onDone: (state) => {
                   if (state.ok) {
                     setLink(state.link ?? null);

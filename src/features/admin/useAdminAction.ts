@@ -17,6 +17,8 @@ export function useAdminAction() {
       action: () => Promise<AdminState>,
       options: {
         readonly onDone?: (state: AdminState) => void;
+        /** Skip the success toast when the screen itself shows the result. */
+        readonly quiet?: boolean;
         readonly undo?: { readonly label: string; readonly run: () => Promise<AdminState> };
       } = {},
     ) => {
@@ -24,7 +26,7 @@ export function useAdminAction() {
         const state = await action();
         setLast(state);
         if (state.ok) {
-          if (state.message)
+          if (state.message && !options.quiet)
             toast.show(
               state.message,
               options.undo
