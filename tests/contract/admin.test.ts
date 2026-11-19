@@ -138,12 +138,16 @@ describe("products", () => {
         priceNgn: 15000,
         variants: [{ size: "M", color: "Black", qty: 1 }],
         active: false,
+        stockVersion: product.stockVersion,
       }),
       owner,
     );
     expect(edited.ok && edited.value).toMatchObject({ priceNgn: 15000, qty: 1, active: false });
     expect(await supabaseCatalogue.bySlug(product.slug)).toBeNull(); // hidden
-    expect((await supabaseAdmin.updateProduct(randomUUID(), draft("Ghost"), owner)).ok).toBe(false);
+    expect(
+      (await supabaseAdmin.updateProduct(randomUUID(), draft("Ghost", { stockVersion: 0 }), owner))
+        .ok,
+    ).toBe(false);
 
     expect((await supabaseAdmin.deleteProductForever(product.id, owner)).ok).toBe(false); // not in the trash yet
     expect((await supabaseAdmin.trashProduct(product.id, owner)).ok).toBe(true);

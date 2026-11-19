@@ -97,19 +97,19 @@ them, so changing them there does not change what customers see. The terms and F
 In Vercel, **Project, Settings, Environment Variables**, add each name below for Production (and
 Preview). Mark the secret ones **Sensitive**.
 
-| Name                                                                   | Value                                                                    | Required                            |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------- |
+| Name                                                                   | Value                                                                                                                                                      | Required                            |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
 | `NEXT_PUBLIC_SITE_URL`                                                 | **Production:** `https://www.lingeriebysisioyin.store`. **Preview:** the preview's own address (set it separately for each environment; no trailing slash) | yes                                 |
-| `NEXT_PUBLIC_SUPABASE_URL`                                             | Supabase Project URL (step 1)                                            | yes, when database is connected     |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                        | Supabase `anon` key (step 1)                                             | yes, when database is connected     |
-| `SUPABASE_SERVICE_ROLE_KEY`                                            | Supabase `service_role` key (step 1)                                     | yes, server only                    |
-| `CRON_SECRET`                                                          | a long random string you invent (at least 32 characters)                 | yes                                 |
-| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | from step 5                                                              | for photographs                     |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER`                                          | the shop number in international form, digits only                       | optional                            |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID`                                        | Google Analytics id                                                      | optional (loads only after consent) |
-| `NEXT_PUBLIC_FB_PIXEL_ID`                                              | Meta Pixel id                                                            | optional (loads only after consent) |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                      | Maps key                                                                 | optional                            |
-| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`                                       | reCAPTCHA site key                                                       | optional                            |
+| `NEXT_PUBLIC_SUPABASE_URL`                                             | Supabase Project URL (step 1)                                                                                                                              | yes, when database is connected     |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY`                                        | Supabase `anon` key (step 1)                                                                                                                               | yes, when database is connected     |
+| `SUPABASE_SERVICE_ROLE_KEY`                                            | Supabase `service_role` key (step 1)                                                                                                                       | yes, server only                    |
+| `CRON_SECRET`                                                          | a long random string you invent (at least 32 characters)                                                                                                   | yes                                 |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | from step 5                                                                                                                                                | for photographs                     |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER`                                          | the shop number in international form, digits only                                                                                                         | optional                            |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID`                                        | Google Analytics id                                                                                                                                        | optional (loads only after consent) |
+| `NEXT_PUBLIC_FB_PIXEL_ID`                                              | Meta Pixel id                                                                                                                                              | optional (loads only after consent) |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`                                      | Maps key                                                                                                                                                   | optional                            |
+| `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`                                       | reCAPTCHA site key                                                                                                                                         | optional                            |
 
 Never set `LBS_ALLOW_DEMO` on the live site: it switches on demonstration sign-ins.
 

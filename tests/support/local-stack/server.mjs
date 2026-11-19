@@ -16,7 +16,7 @@ import {
   randomUUID,
 } from "node:crypto";
 import { createServer } from "node:http";
-import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync, existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pg from "pg";
@@ -861,6 +861,26 @@ async function handleStorage(req, res, url, claims) {
       return send(res, 200, req.method === "HEAD" ? undefined : { name: path }, {
         "content-type": "application/json",
       });
+    }
+    // Removing objects (the service role only): the files and their rows in storage.objects.
+    if ((m = route.match(/^\/object\/([^/]+)$/)) && req.method === "DELETE") {
+      if (claims?.role !== "service_role")
+        return send(res, 403, { statusCode: "403", error: "Unauthorized", message: "denied" });
+      const bucket = decodeURIComponent(m[1]);
+      const { prefixes = [] } = json(await readBody(req));
+      for (const path of prefixes) {
+        rmSync(fileOf(bucket, path), { force: true });
+        rmSync(`${fileOf(bucket, path)}.type`, { force: true });
+        await pool.query("DELETE FROM storage.objects WHERE bucket_id = $1 AND name = $2", [
+          bucket,
+          path,
+        ]);
+      }
+      return send(
+        res,
+        200,
+        prefixes.map((name) => ({ name, bucket_id: bucket })),
+      );
     }
     return send(res, 404, { statusCode: "404", error: "not_found", message: "Not found" });
   } catch (error) {
